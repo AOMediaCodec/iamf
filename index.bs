@@ -7,9 +7,194 @@ Editor: Felicia Lim, Google, flim@google.com
 Repository: AOMediaCodec/iac
 Shortname: iac
 URL: https://aomediacodec.github.io/iac/
-Date: 2022-1-11
-Abstract: Immersive Audio Container
+Date: 2022-03-07
+Abstract: This document specifies the storage format for immersive audio (IA) bitstreams in [[!ISOBMFF]] tracks.
 </pre>
 
-# Section 1
-This is an empty spec for editor test
+<pre class="anchors">
+url: https://www.iso.org/standard/68960.html#; spec: ISOBMFF; type: dfn;
+	text: AudioSampleEntry
+
+url: https://www.iso.org/standard/68960.html#; spec: ISOBMFF; type: property;
+	text: iso6
+	text: sgpd
+	text: stsd
+
+url: https://tools.ietf.org/html/rfc6381#; spec: RFC6381; type: property;
+	text: codecs
+
+url: https://aomediacodec.github.io/av1-spec/av1-spec.pdf#page=39; spec: AV1; type: dfn;
+	text: OBU
+
+url: https://aomediacodec.github.io/av1-spec/av1-spec.pdf#page=40; spec: AV1; type: dfn;
+	text: OBU Header
+
+url: https://aomediacodec.github.io/av1-spec/av1-spec.pdf#page=46; spec: AV1; type: dfn;
+	text: Metadata OBU
+
+url: https://aomediacodec.github.io/av1-spec/av1-spec.pdf#page=13; spec: AV1; type: dfn
+	text: Temporal Unit
+
+url: https://aomediacodec.github.io/av1-spec/av1-spec.pdf#page=39; spec: AV1; type: dfn
+	text: Low Overhead Bitstream Format
+
+url: https://aomediacodec.github.io/av1-spec/av1-spec.pdf#page=2; spec: AV1; type: dfn;
+	text: byte_alignment
+	text: obu_has_size_field
+	text: obu_size
+	text: open_bitstream_unit
+</pre>
+
+<pre class='biblio'>
+{
+	"AV1": {
+		"href": "https://aomediacodec.github.io/av1-spec/av1-spec.pdf",
+		"title": "AV1 Bitstream & Decoding Process Specification",
+		"status": "Standard",
+		"publisher": "AOM"
+	},
+	"ISOBMFF": {
+		"title": "Information technology — Coding of audio-visual objects — Part 12: ISO Base Media File Format",
+		"status": "December 2015. International Standard",
+		"publisher": "ISO",
+		"href": "http://standards.iso.org/ittf/PubliclyAvailableStandard/c068960_ISO_IEC_14496-12_2015.zip"
+	},
+	"OPUS-ISOBMFF": {
+		"title": "Encapsulation of Opus in ISO Base Media File Format",
+		"status": "April 2016. International Standard",
+		"publisher": "Xiph",
+		"href": "https://opus-codec.org/docs/opus_in_isobmff.html"
+	},
+	"RFC2119": {
+                        "authors": "S. Bradner",
+		"title": "Key words for use in RFCs to Indicate Requirement Levels",
+		"status": "March 1997. Best Current Practive",
+		"publisher": "IETF",
+		"href": "https://tools.ietf.org/html/rfc2119"
+	},
+            "RFC6381": {
+                        "authors": "R. Gellens;  D. Singer; P. Frojdh",
+		"title": "The 'Codecs' and 'Profiles' Parameters for "Bucket" Media Types",
+		"status": "August 2011. Proposed Standard",
+		"publisher": "IETF",
+		"href": "https://tools.ietf.org/html/rfc6381"
+	},
+	"RFC6716": {
+                        "authors": "JM. Valin; K. Vos; T. Terriberry",
+		"title": "Definition of the Opus Audio Codec",
+		"status": "September 2012. Proposed Standard",
+		"publisher": "IETF",
+		"href": "https://tools.ietf.org/html/rfc6716"
+	},
+	"RFC7845": {
+                        "authors": "T. Terriberry; R. Lee; R. Giles",
+		"title": "Ogg Encapsulation for the Opus Audio Codec",
+		"status": "April 2016. Proposed Standard",
+		"publisher": "IETF",
+		"href": "https://tools.ietf.org/html/rfc7845"
+	},
+	"RFC8486": {
+                        "authors": "J. Skoglund; M. Graczyk",
+		"title": "Ambisonics in an Ogg Opus Container",
+		"status": "October 2018. Proposed Standard",
+		"publisher": "IETF",
+		"href": "https://tools.ietf.org/html/rfc8486"
+	}
+}
+</pre>
+
+# Bitstream features overview # {#bitstream-overview}
+An immbersive audio (IA) bitstream is composed of a sequence of [=OBUs=], grouped into [=Temporal Units=].
+OBUs are made of a 1 or 2 bytes header, identifying in particular the type of OBU, followed by an optional length field and by an optional payload, whose presence and content depend on the OBU type. Depending on its type, an OBU can carry non-timed metadata, timed metadata or coded audio data.
+
+Temporal Units are processed by a decoder in the order given by the bitstream. Each Temporal Unit is associated with a presentation time. 
+
+## New OBUs for IA bitstreams
+This section describes the new type of OBU to identify the coded audio data and new OBU payloads to identify the non-timed metadata and the timed metadata of IA bitstreams.
+
+### Audio_Frame_OBU
+TBA
+
+### Metadata_OBU
+TBA
+
+# Basic Encapsulation Scheme # {#basic-encapsulation}
+This section describes the basic data structures used to signal encapsulation of IA bitstreams in [[!ISOBMFF]] containers.
+
+## General Requirements & Brands ## {#brands}
+A file conformant to this specification satisfies the following:
+- It SHALL conform to the normative requirements of [[!ISOBMFF]]
+- It SHALL have the <dfn value export for="ISOBMFF Brand">aiac(tentative)</dfn> brand among the compatible brands array of the FileTypeBox
+- It SHALL contain at least one track using an [=IASampleEntry=]
+- It SHOULD indicate a structural ISOBMFF brand among the compatible brands array of the FileTypeBox, such as 'iso6'
+- It MAY indicate other brands not specified in this document provided that the associated requirements do not conflict with those given in this specification
+
+Parsers SHALL support the structures required by the <code>'iso6'</code> brand and MAY support structures required by further ISOBMFF structural brands.
+
+## IA Sample Entry ## {#iasampleentry-section}
+
+### Definition ### {#iasampleentry-definition}
+<pre class="def">
+	Sample Entry Type: <dfn value export for="IASampleEntry">aiac (Tentative)</dfn>
+	Container:         Sample Description Box ('stsd')
+	Mandatory:         Yes
+	Quantity:          One or more.
+</pre>
+
+### Description ### {#iasampleentry-description}
+The <dfn>IASampleEntry</dfn> sample entry identifies that the track contains [=IA Samples=], and uses an [=IACodecConfigurationBox=].
+
+### Syntax ### {#iasampleentry-syntax}
+TBA
+
+### Semantics ### {#iasampleentry-semantics}
+TBA
+
+## IA Codec Configuration Box ## {#iacodecconfigurationbox-section}
+This section describes a specific codec configuration box for the codec which is used for the coded audio data of an IA bitstream.
+
+### OPUS Codec Configuration Box ### {#opuscodecconfigurationbox}
+
+#### Definition #### {#opuscodecconfigurationbox-definition}
+<pre class="def">
+	Box Type:  <dfn export>dOps (or opus)</dfn>
+	Container: IA Sample Entry ('aiac')
+	Mandatory: Yes
+	Quantity:  One of more (depending on the signals of IASampleEntry)
+</pre>
+
+#### Description #### {#opuscodecconfigurationbox-description}
+TBA
+
+#### Syntax #### {#opuscodecconfigurationbox-syntax}
+TBA
+
+#### Semantics #### {#opuscodecconfigurationbox-semantics}
+TBA
+
+### MP4A Codec Configuration Box ### {#mp4acodecconfigurationbox}
+
+#### Definition #### {#mp4acodecconfigurationbox-definition}
+<pre class="def">
+	Box Type:  <dfn export>esds (or mp4a)</dfn>
+	Container: IA Sample Entry ('aiac')
+	Mandatory: Yes
+	Quantity:  One of more (depending on the signals of IASampleEntry)
+</pre>
+
+#### Description #### {#mp4acodecconfigurationbox-description}
+TBA
+
+#### Syntax #### {#mp4acodecconfigurationbox-syntax}
+TBA
+
+#### Semantics #### {#mp4acodecconfigurationbox-semantics}
+TBA
+
+## IA Sample Format ## {#sampleformat}
+For tracks using the [=IASampleEntry=], an <dfn>IA Sample</dfn> has the following constraints:
+- the sample data SHALL be a sequence of [=OBUs=] forming a [=Temporal Unit=],
+- each OBU SHALL follow the [=open_bitstream_unit=] [=Low Overhead Bitstream Format=] syntax as specified in [[!AV1]]. Each OBU SHALL have the [=obu_has_size_field=] set to 1 except for the last OBU in the sample, for which [=obu_has_size_field=] MAY be set to 0, in which case it is assumed to fill the remainder of the sample,
+
+# Codecs Parameter String # {#codecsparam}
+DASH and other applications require defined values for the 'Codecs' parameter specified in [[!RFC6381]] for ISO Media tracks. The codecs parameter string for the AOM IA codec is as follows: 
