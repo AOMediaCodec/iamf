@@ -20,6 +20,20 @@ url: https://www.iso.org/standard/68960.html#; spec: ISOBMFF; type: property;
 	text: sgpd
 	text: stsd
 
+url: https://opus-codec.org/docs/opus_in_isobmff.html#; spec: OPUS-ISOBMFF; type: dfn;
+	text: OpusSpecificBox
+
+url: https://opus-codec.org/docs/opus_in_isobmff.html#; spec: OPUS-ISOBMFF; type: property;
+	text: opus
+	text: dOps
+
+url: https://www.iso.org/standard/79110.html#; spec: MP4; type: dfn;
+	text: ESDBox
+
+url: https://www.iso.org/standard/79110.html#; spec: MP4; type: property;
+	text: mp4a
+	text: esds
+
 url: https://tools.ietf.org/html/rfc6381#; spec: RFC6381; type: property;
 	text: codecs
 
@@ -45,53 +59,14 @@ url: https://aomediacodec.github.io/av1-spec/av1-spec.pdf#page=2; spec: AV1; typ
 	text: open_bitstream_unit
 </pre>
 
-<pre class='biblio'>
+<pre class='biblio' >
 {
-	"AV1": {
-		"href": "https://aomediacodec.github.io/av1-spec/av1-spec.pdf",
-		"title": "AV1 Bitstream & Decoding Process Specification",
-		"status": "Standard",
-		"publisher": "AOM"
-	},
-	"ISOBMFF": {
-		"title": "Information technology — Coding of audio-visual objects — Part 12: ISO Base Media File Format",
-		"status": "December 2015. International Standard",
-		"publisher": "ISO",
-		"href": "http://standards.iso.org/ittf/PubliclyAvailableStandard/c068960_ISO_IEC_14496-12_2015.zip"
-	},
 	"OPUS-ISOBMFF": {
+		"href": "https://opus-codec.org/docs/opus_in_isobmff.html",
+		"id": "OPUS-ISOBMFF",
 		"title": "Encapsulation of Opus in ISO Base Media File Format",
-		"status": "April 2016. International Standard",
-		"publisher": "Xiph",
-		"href": "https://opus-codec.org/docs/opus_in_isobmff.html"
-	},
-	"RFC2119": {
-		"authors": "S. Bradner",
-		"title": "Key words for use in RFCs to Indicate Requirement Levels",
-		"status": "March 1997. Best Current Practive",
-		"publisher": "IETF",
-		"href": "https://tools.ietf.org/html/rfc2119"
-	},
-	"RFC6716": {
-		"authors": "JM. Valin; K. Vos; T. Terriberry",
-		"title": "Definition of the Opus Audio Codec",
-		"status": "September 2012. Proposed Standard",
-		"publisher": "IETF",
-		"href": "https://tools.ietf.org/html/rfc6716"
-	},
-	"RFC7845": {
-		"authors": "T. Terriberry; R. Lee; R. Giles",
-		"title": "Ogg Encapsulation for the Opus Audio Codec",
-		"status": "April 2016. Proposed Standard",
-		"publisher": "IETF",
-		"href": "https://tools.ietf.org/html/rfc7845"
-	},
-	"RFC8486": {
-		"authors": "J. Skoglund; M. Graczyk",
-		"title": "Ambisonics in an Ogg Opus Container",
-		"status": "October 2018. Proposed Standard",
-		"publisher": "IETF",
-		"href": "https://tools.ietf.org/html/rfc8486"
+		"status": "Best Practice",
+		"publisher": "opus-codec"
 	}
 }
 </pre>
@@ -147,10 +122,11 @@ TBA
 This section describes a specific codec configuration box for the codec which is used for the coded audio data of an IA bitstream.
 
 ### OPUS Codec Configuration Box ### {#opuscodecconfigurationbox}
+This is [=OpusSpecificBox=] ('dOps') for 'opus' which is specified in [[!OPUS-ISOBMFF]]. 
 
 #### Definition #### {#opuscodecconfigurationbox-definition}
 <pre class="def">
-	Box Type:  <dfn export>dOps (or opus)</dfn>
+	Box Type:  <dfn export>dOps</dfn>
 	Container: IA Sample Entry ('aiac')
 	Mandatory: Yes
 	Quantity:  One of more (depending on the signals of IASampleEntry)
@@ -166,10 +142,11 @@ TBA
 TBA
 
 ### MP4A Codec Configuration Box ### {#mp4acodecconfigurationbox}
+This is [=ESDBox=] ('esds') for 'mp4a' which is specified in [[!MP4]]. 
 
 #### Definition #### {#mp4acodecconfigurationbox-definition}
 <pre class="def">
-	Box Type:  <dfn export>esds (or mp4a)</dfn>
+	Box Type:  <dfn export>esds</dfn>
 	Container: IA Sample Entry ('aiac')
 	Mandatory: Yes
 	Quantity:  One of more (depending on the signals of IASampleEntry)
@@ -189,5 +166,14 @@ For tracks using the [=IASampleEntry=], an <dfn>IA Sample</dfn> has the followin
 - the sample data SHALL be a sequence of [=OBUs=] forming a [=Temporal Unit=],
 - each OBU SHALL follow the [=open_bitstream_unit=] [=Low Overhead Bitstream Format=] syntax as specified in [[!AV1]]. Each OBU SHALL have the [=obu_has_size_field=] set to 1 except for the last OBU in the sample, for which [=obu_has_size_field=] MAY be set to 0, in which case it is assumed to fill the remainder of the sample,
 
-# Codecs Parameter String # {#codecsparam}
+## IA Roll Recovery sample group entry ## {#rollrecoverysamplegroupentry}
 TBA
+
+## IA Metadata sample group entry ## {#metadatasamplegroupentry}
+TBA
+
+# Common Encryption # {#CommonEncryption}
+TBA
+
+# Codecs Parameter String # {#codecsparam}
+DASH and other applications require defined values for the 'Codecs' parameter specified in [[!RFC6381]] for ISO Media tracks. The codecs parameter string for the AOM IA codec is as follows: 
