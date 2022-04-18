@@ -11,7 +11,6 @@ Date: 2022-04-18
 Abstract: This document specifies the storage format for immersive audio (IA) bitstreams in [[!ISOBMFF]] tracks.
 </pre>
 
-
 <pre class="anchors">
 url: https://www.iso.org/standard/68960.html#; spec: ISOBMFF; type: dfn;
 	text: AudioSampleEntry
@@ -25,18 +24,18 @@ url: https://www.iso.org/standard/68960.html#; spec: ISOBMFF; type: property;
 	text: stsd
 	text: sbgp
 
-url: https://www.iso.org/standard/76383.html#; spec: AAC; type: dfn;
+url: https://www.iso.org/standard/76383.html#; spec: ISO/IEC 14496-3; type: dfn;
 	text: raw_data_block()
 	text: ADTS
 	text: channelConfiguration
 
-url: https://www.iso.org/standard/76383.html#; spec: AAC; type: dfn;
+url: https://www.iso.org/standard/76383.html#; spec: ISO/IEC 14496-3; type: dfn;
 	text: AAC-LC
 
-url: https://opus-codec.org/docs/opus_in_isobmff.html#; spec: opus_in_isobmff; type: dfn;
+url: https://opus-codec.org/docs/opus_in_isobmff.html#; spec: Encapsulation of Opus in ISO Base Media File Format; type: dfn;
 	text: OpusSpecificBox
 
-url: https://opus-codec.org/docs/opus_in_isobmff.html#; spec: opus_in_isobmff; type: property;
+url: https://opus-codec.org/docs/opus_in_isobmff.html#; spec: Encapsulation of Opus in ISO Base Media File Format; type: property;
 	text: opus
 	text: dOps
 
@@ -61,51 +60,16 @@ url: https://aomediacodec.github.io/av1-spec/av1-spec.pdf#page=39; spec: AV1; ty
 	text: OBU
 	text: Temporal Unit
 
-url: https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf; spec: BS.1770-4; type: dfn;
-	text: LKFS	
+url: https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf; spec: ITU-R BS.1770-4; type: dfn;
+	text: LKFS
+	
+url: https://en.wikipedia.org/wiki/Q_(number_format); spec: Q (number format); type: dfn;
+	text: 
 
 </pre>
 
-<pre class='biblio' >
-{
-	"RFC8486": {
-		"href": "https://datatracker.ietf.org/doc/html/rfc8486",
-		"id": "RFC8486",
-		"title": "Ambisonics in an Ogg Opus Container",
-		"status": "Best Current Practice",
-		"publisher": "IETF"
-	}
-	"RFC7845": {
-		"href": "https://datatracker.ietf.org/doc/html/rfc7845",
-		"id": "RFC7845",
-		"title": "Ogg Encapsulation for the Opus Audio Codec",
-		"status": "Best Current Practice",
-		"publisher": "IETF"
-	}
-	"RFC6716": {
-		"href": "https://datatracker.ietf.org/doc/html/rfc6716",
-		"id": "RFC6716",
-		"title": "Definition of the Opus Audio Codec",
-		"status": "Best Current Practice",
-		"publisher": "IETF"
-	}
-	"BS.1770-4": {
-		"href": "https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf",
-		"id": "BS.1770-4",
-		"title": "Algorithms to measure audio programme loudness and true-peak audio level",
-		"status": "Standard",
-		"publisher": "ITU-R"
-	}
-	"Q7.8": {
-		"href": "https://en.wikipedia.org/wiki/Q_(number_format)",
-		"id": "Q7.8",
-		"title": "Q (number format)",
-		"status": "Best Current Practice",
-		"publisher": "Wikipedia"
-	}
-}
-</pre>
 
+ 
 
 # Introduction # {#introduciton}
 
@@ -199,7 +163,7 @@ NOTE: {esds} means a subset of [=ESDBox=] which is necessarily required for deco
 
 NOTE: {esds} needs to be defined. 
 
-Substream format SHALL be [=raw_data_block()=] of [[!AAC]] which contains only one single frame of mono or stereo channels.
+Substream format SHALL be [=raw_data_block()=] of [[!ISO/IEC 14496-3]] which contains only one single frame of mono or stereo channels.
  
 ## OBU Syntax
 
@@ -316,7 +280,7 @@ The reserved OBU allows the extension of this specification with additional OBU 
 
 <dfn>codec_id</dfn> is a ‘four-character code’ (4CC) to identify the codec which has been used to generate Substream. It shall be the same as the [=boxtype=] of its AduioSampleEntry if exist. It shall be '[=opus=]' for IAC-OPUS and '[=mp4a=]' for IAC-AAC-LC.
 
-<dfn>decoder_config</dfn> is a set of decoding parameters to decode Substream for a given <dfn>codec_id</dfn>. It shall be the set of decoding parameters which conventional mono or stereo file parsers feed to the conventional mono or stereo decoder. It shall be [=ID Header=] with [=ChannelMappingFamily=] = 0 of [[!RFC7845]] for IAC-OPUS and {esds} for IAC-AAC-LC.
+<dfn>decoder_config</dfn> is a set of decoding parameters to decode Substream for a given codec_id. It shall be the set of decoding parameters which conventional mono or stereo file parsers feed to the conventional mono or stereo decoder. It shall be [=ID Header=] with [=ChannelMappingFamily=] = 0 of [[!RFC7845]] for IAC-OPUS and {esds} for IAC-AAC-LC.
 
 <dfn>IA Static Meta OBU semantics</dfn>
 
@@ -331,7 +295,7 @@ greater is incompatible.
 - 2: The first ChannelGroup of each IA_Frame is for Ambisonics with Demixing_Matrix
 - 3: Reserved
 
-NOTE: In the case of <dfn>ambisonics_mode</dfn> = 1 or 2, the channel audio if present is regarded as non-diegetic channels.
+NOTE: In the case of ambisonics_mode = 1 or 2, the channel audio if present is regarded as non-diegetic channels.
 
 <dfn>channel_audio_layer</dfn> shall indicate the number of ChannelGroups for channel audio in each IA_Frame. To indicate that IA bitstream includes no channel audio, it shall be set to zero. Its maximum number shall be limited to 6.
 
@@ -349,21 +313,21 @@ NOTE: In the case of <dfn>ambisonics_mode</dfn> = 1 or 2, the channel audio if p
 
 <left><img src="Loudspeaker Layout.png"></left>
 
-<dfn>output_gain_is_present_flag</dfn> shall indicate if <dfn>output_gain</dfn> information fields for the ChannelGroup presents . 
-- 0: No <dfn>output_gain</dfn> information fields for the ChannelGroup present.
-- 1: <dfn>output_gain</dfn> information fields for the ChannelGroup present. In this case, <dfn>output_gain_flags</dfn> and <dfn>output_gain</dfn> fields present.
+<dfn>output_gain_is_present_flag</dfn> shall indicate if output_gain information fields for the ChannelGroup presents . 
+- 0: No output_gain information fields for the ChannelGroup present.
+- 1: output_gain information fields for the ChannelGroup present. In this case, output_gain_flags and output_gain fields present.
 
-<dfn>recon_gain_is_present_flag</dfn> shall indicate if <dfn>recon_gain</dfn> information fields for the ChannelGroup presents in Recon_Gain_Info_OBU . 
-- 0: No <dfn>recon_gain</dfn> information fields for the ChannelGroup present in Recon_Gain_Info_OBU.
-- 1: <dfn>recon_gain</dfn> information fields for the ChannelGroup present in Recon_Gain_Info_OBU. In this case, <dfn>recon_gain_flags</dfn> and <dfn>recon_gain</dfn> fields present.
+<dfn>recon_gain_is_present_flag</dfn> shall indicate if recon_gain information fields for the ChannelGroup presents in Recon_Gain_Info_OBU . 
+- 0: No recon_gain information fields for the ChannelGroup present in Recon_Gain_Info_OBU.
+- 1: recon_gain information fields for the ChannelGroup present in Recon_Gain_Info_OBU. In this case, recon_gain_flags and recon_gain fields present.
 
-<dfn>loudness</dfn> shall indicate the loudness value of the downmixed channels, for the channel layout which is indicated by <dfn>loudspeaker_layout</dfn>, from the original channel audio. It shall be stored in fixed-point value with 8 fractional bits (i.e. [[!Q7.8]]) and shall be [=LKFS=] based on [[!BS.1770-4]], so it shall be to represent zero or negative value.
+<dfn>loudness</dfn> shall indicate the loudness value of the downmixed channels, for the channel layout which is indicated by loudspeaker_layout, from the original channel audio. It shall be stored in fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q (number format)]]) and shall be [=LKFS=] based on [[!ITU-R BS.1770-4]], so it shall be to represent zero or negative value.
 
 <dfn>output_gain_flags</dfn> shall indicate the channels which output_gian is applied to. 
 
 <left><img src="Output_Gain_Flags.png"></left>
 
-<dfn>output_gain</dfn> shall indicate the gain value to be applied to the mixed channels which are indicated by <dfn>output_gain_flags</dfn>. It is 20*log10 of the factor by which to scale the mixed channels. It is stored in a 16-bit, signed, two’s complement fixed-point value with 8 fractional bits (i.e. [[!Q7.8]]). Where, each mixed channel is generated by downmixing two or more input channels.
+<dfn>output_gain</dfn> shall indicate the gain value to be applied to the mixed channels which are indicated by output_gain_flags. It is 20*log10 of the factor by which to scale the mixed channels. It is stored in a 16-bit, signed, two’s complement fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q (number format)]]). Where, each mixed channel is generated by downmixing two or more input channels.
 
 <dfn>Temporal delimiter OBU semantics</dfn>
 
@@ -387,25 +351,25 @@ It shall indicate the start of [=Temporal Unit=].
 <center><b>Figure 8. </b>IA Downmix Mechanism</center>  
 
 
-<dfn>Substream Boundary Info OBU semantics</dfn> /* for option1 */
+<dfn>Substream Boundary Info OBU semantics</dfn> {# for option1}
 
 <dfn>substream_size</dfn> shall indicates the size of Substream (in bytes). The fields present as many as the number of Substreams in IA_Coded_Data minus 1. So, the field for the last Substream shall not be present. 
 
 <dfn>Recon Gain Info OBU semantics</dfn>
 
-<dfn>recon_gain_flalgs</dfn> shall indicates the channels which recon_gain is applied to.
+<dfn>recon_gain_flags</dfn> shall indicates the channels which recon_gain is applied to.
 
 <left><img src="Recon_Gain_Flags.png"></left>
 
 <dfn>recon_gain</dfn> shall indicates the gain value to be applied to the channel, which is indicated by <dfn>recon_gain_flalgs</dfn>, after decoding of the following IA_Coded_Data.
 
-<dfn>IA Coded Data OBU semantics</dfn> /* for option1 */
+<dfn>IA Coded Data OBU semantics</dfn> {# for option1}
 
-There shall be ChannelGroups as many as <dfn>channel_audio_layer</dfn> if <dfn>ambisonics_mode</dfn> = 0. Otherwise, <dfn>channel_audio_layer</dfn> plus 1.
-Each ChannelGroup shall have Substreams as many as <dfn>substream_count</dfn>. Each Substream shall be an raw coded data for mono or stereo channels by using the codec which is indicated by <dfn>codec_id</dfn> field of Codec_Specific_Info_OBU. Substream format shall be [=opus packet=] of [[!RFC6716]] for IAC-OPUS and [=raw_data_block()=] of [[!AAC]] for IAC-AAC-LC.
+There shall be ChannelGroups as many as channel_audio_layer if ambisonics_mode = 0. Otherwise, channel_audio_layer plus 1.
+Each ChannelGroup shall have Substreams as many as substream_count. Each Substream shall be an raw coded data for mono or stereo channels by using the codec which is indicated by codec_id field of Codec_Specific_Info_OBU. Substream format shall be [=opus packet=] of [[!RFC6716]] for IAC-OPUS and [=raw_data_block()=] of [[!ISO/IEC 14496-3]] for IAC-AAC-LC.
 
-<dfn>Substream OBU semantics</dfn> /* for option2 */
-Substream shall be an raw coded data for mono or stereo channels by using the codec which is indicated by <dfn>codec_id</dfn> field of Codec_Specific_Info_OBU. Substream format shall be [=opus packet=] of [[!RFC6716]] for IAC-OPUS and [=raw_data_block()=] of [[!AAC]] for IAC-AAC-LC.
+<dfn>Substream OBU semantics</dfn> {# for option2}
+Substream shall be an raw coded data for mono or stereo channels by using the codec which is indicated by codec_id field of Codec_Specific_Info_OBU. Substream format shall be [=opus packet=] of [[!RFC6716]] for IAC-OPUS and [=raw_data_block()=] of [[!ISO/IEC 14496-3]] for IAC-AAC-LC.
 
 # Basic Encapsulation Scheme # {#basic-encapsulation}
 
@@ -471,20 +435,20 @@ No optional boxes of AudioSampleEntry shall present.
 
 Both [=channelcount=] and [=samplerate=] fields of AudioSampleEntry shall be ignored.
 
-<dfn>version</dfn> and <dfn>channel_audio_layer_mode</dfn> shall be the same as the ones in IA_Static_Meta_OBU.
+version and channel_audio_layer shall be the same as the ones in IA_Static_Meta_OBU.
 
-<dfn>ambisonics_mode</dfn> and <dfn>channel_audio_layer_mode</dfn> shall be the same as the ones in IA_Static_Meta_OBU.
+ambisonics_mode and channel_audio_layer shall be the same as the ones in IA_Static_Meta_OBU.
 
-<dfn>ambisonics_channel_count</dfn> shall be the same as <dfn>output_channel_count</dfn> in IA_Static_Meta_OBU. When <dfn>ambisonics_mode</dfn> set to 0, this field shall be ignored.
+<dfn>ambisonics_channel_count</dfn> shall be the same as output_channel_count in IA_Static_Meta_OBU. When ambisonics_mode set to 0, this field shall be ignored.
 
-<dfn>loudspeaker_layout</dfn> shall be the same as the one in IA_Static_Meta_OBU.
+loudspeaker_layout shall be the same as the one in IA_Static_Meta_OBU.
 
 ## Codec Specific Box ## {#codecspecificbox-section}
 
-This section describes a codec specific box for the decoding parameters, which is defined by <dfn>codec_id</dfn> of Codec_Specific_Info_OBU, to decode one single Substream of IA bitstream. <dfn>aiac</dfn> shall contain only one single codec specific box regardless of the number of Substreams in IA_Coded_Data. So, the codec specific box is applied to allo of Substreams in sample data.
+This section describes a codec specific box for the decoding parameters, which is defined by codec_id of Codec_Specific_Info_OBU, to decode one single Substream of IA bitstream. <dfn>aiac</dfn> shall contain only one single codec specific box regardless of the number of Substreams in IA_Coded_Data. So, the codec specific box is applied to allo of Substreams in sample data.
 
 ### OPUS Specific Box ### {#opusspecificbox}
-This is [=OpusSpecificBox=] ('[=dOps=]') for [=opus=] audiosampleentry which is specified in [[!opus_in_isobmff]]. 
+This is [=OpusSpecificBox=] ('[=dOps=]') for [=opus=] audiosampleentry which is specified in [[!Encapsulation of Opus in ISO Base Media File Format]]. 
 
 #### Definition #### {#opuscodecconfigurationbox-definition}
 
@@ -515,13 +479,13 @@ class OpusSpecificBox extends Box('dOps') {
 
 #### Semantics #### {#opuscodecconfigurationbox-semantics}
 
-<dfn>Version</dfn>, <dfn>PreSkip</dfn> and <dfn>InputSampleRate</dfn> shall be the same as the ones in [[!opus_in_isobmff]].
+Version, PreSkip and InputSampleRate shall be the same as the ones in [[!Encapsulation of Opus in ISO Base Media File Format]].
 
-<dfn>OutputChannelCount</dfn> is set to 2. OutputChannelCount can be ignored because the real value can be determined from the IA_Static_Meta_OBU and from the [=opus packet=] header.
+OutputChannelCount is set to 2. OutputChannelCount can be ignored because the real value can be determined from the IA_Static_Meta_OBU and from the [=opus packet=] header.
 
-In case of <dfn>channel_audio_layer</dfn> > 0, this field shall be set to 0.
+In case of channel_audio_layer > 0, this field shall be set to 0.
 
-<dfn>ChannelMappingFamily</dfn> shall be set to 0.
+ChannelMappingFamily shall be set to 0.
 
 ### MP4A Specific Box ### {#mp4aspecificbox}
 This is [=ESDBox=] ('esds') for 'mp4a' which is specified in [[!MP4]]. 
@@ -561,13 +525,13 @@ NOTE: We agree to create a generic sample group where the payload is exactly the
 ### Demixing Info Sample Group
 
 During encapsulation process, Demixing_Info_OBUs shall or should or can be discarded from IA bistream. A new sample group for Demixing_Info_OBUs is defined by using [=sgpd=] and [sbgp] boxes with following requirements:
-- [=grouping_type=] SHALL be set to 'dmpm'. /* demixing prameter mode */
+- [=grouping_type=] SHALL be set to 'dmpm'. {# demixing prameter mode}
 - Each [=SampleGroupDescriptionEntry=] SHALL be Demixing_Info_OBU with OBU syntax.   
 
 ### IA Static Meta Sample Group
 
 During encapsulation process, IA_Static_Meta_OBUs are discarded from IA bistream. A new sample group for IA_Static_Meta_OBUs is defined by using [=sgpd=] and [sbgp] boxes with following requirements:
-- [=grouping_type=] SHALL be set to 'iasm'. /* IA Static Meta */
+- [=grouping_type=] SHALL be set to 'iasm'. {# IA Static Meta}
 - [=SampleGroupDescriptionEntry=] SHALL be IA_Static_Meta_OBU with OBU syntax. 
 
 
@@ -576,17 +540,17 @@ TBA
 
 # Codecs Parameter String # {#codecsparam}
 DASH and other applications require defined values for the 'Codecs' parameter specified in [[!RFC6381]] for ISO Media tracks. The codecs parameter string for the AOM IA codec shall be:
-- For IAC-OPUS: <b>aiac.'IAC-specific-needs'.Opus</b>
-- For IAC-AAC-LC: <b>aiac.'IAC-specific-needs'.mp4a.40.2</b>
+- For IAC-OPUS: <dfn>aiac.'IAC-specific-needs'.Opus</dfn>
+- For IAC-AAC-LC: <dfn>aiac.'IAC-specific-needs'.mp4a.40.2</dfn>
 
-<b>IAC-specific-needs</b> SHALL be <b>AA.L[[!CC]]*</b> as follows:
+<b>IAC-specific-needs</b> SHALL be <b>AA.L(CC)*</b> as follows:
 - The first <b>A</b> SHALL be one digit and represent the mode of Ambisonics
 - The second <b>A</b> SHALL be one or two digit and represent the order of Ambisonics.
 - <b>L</b> SHALL be one digit and represent <b>channel_audio_layer</b> of the channel audio.
-- The first <b>C</b> of <b>[[!CC]]</b> SHALL be one digit and represent the number of surround channels.
-- The second <b>C</b> of <b>[[!CC]]</b> SHALL be one digit and represent the number of top channels.
-- <b>*</b> SHALL represent that <b>[[!CC]]</b> comes L times.
-- The ith <b>[[!CC]]</b> SHALL represent for the ith layer of the channel audio, where i = 1, 2, ..., L.
+- The first <b>C</b> of <b>(CC)</b> SHALL be one digit and represent the number of surround channels.
+- The second <b>C</b> of <b>(CC)</b> SHALL be one digit and represent the number of top channels.
+- <b>*</b> SHALL represent that <b>(CC)</b> comes L times.
+- The ith <b>(CC)</b> SHALL represent for the ith layer of the channel audio, where i = 1, 2, ..., L.
 
 
 NOTE: We agree with the slides from April 11, with the following:
