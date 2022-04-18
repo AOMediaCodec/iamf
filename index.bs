@@ -292,7 +292,7 @@ It shall indicate the start of [=Temporal Unit=].
 <center><b>Figure 8. </b>IA Downmix Mechanism</center>  
 
 
-<dfn>Substream Boundary Info OBU semantics</dfn> {# for option1}
+<dfn>Substream Boundary Info OBU semantics</dfn> /* for option1 */
 
 <dfn>substream_size</dfn> shall indicates the size of Substream (in bytes). The fields present as many as the number of Substreams in IA_Coded_Data minus 1. So, the field for the last Substream shall not be present. 
 
@@ -304,12 +304,12 @@ It shall indicate the start of [=Temporal Unit=].
 
 <dfn>recon_gain</dfn> shall indicates the gain value to be applied to the channel, which is indicated by <dfn>recon_gain_flalgs</dfn>, after decoding of the following IA_Coded_Data.
 
-<dfn>IA Coded Data OBU semantics</dfn> {# for option1}
+<dfn>IA Coded Data OBU semantics</dfn> /* for option1 */
 
 There shall be ChannelGroups as many as <dfn>channel_audio_layer</dfn> if <dfn>ambisonics_mode</dfn> = 0. Otherwise, <dfn>channel_audio_layer</dfn> plus 1.
 Each ChannelGroup shall have Substreams as many as <dfn>substream_count</dfn>. Each Substream shall be an raw coded data for mono or stereo channels by using the codec which is indicated by <dfn>codec_id</dfn> field of Codec_Specific_Info_OBU. Substream format shall be [=opus packet=] of [[!RFC6716]] for IAC-OPUS and [=raw_data_block()=] of [[!AAC]] for IAC-AAC-LC.
 
-<dfn>Substream OBU semantics</dfn> {# for option2}
+<dfn>Substream OBU semantics</dfn> /* for option2 */
 Substream shall be an raw coded data for mono or stereo channels by using the codec which is indicated by <dfn>codec_id</dfn> field of Codec_Specific_Info_OBU. Substream format shall be [=opus packet=] of [[!RFC6716]] for IAC-OPUS and [=raw_data_block()=] of [[!AAC]] for IAC-AAC-LC.
 
 # Basic Encapsulation Scheme # {#basic-encapsulation}
@@ -466,13 +466,13 @@ NOTE: We agree to create a generic sample group where the payload is exactly the
 ### Demixing Info Sample Group
 
 During encapsulation process, Demixing_Info_OBUs shall or should or can be discarded from IA bistream. A new sample group for Demixing_Info_OBUs is defined by using [=sgpd=] and [sbgp] boxes with following requirements:
-- [=grouping_type=] SHALL be set to 'dmpm'. {# demixing prameter mode}
+- [=grouping_type=] SHALL be set to 'dmpm'. /* demixing prameter mode */
 - Each [=SampleGroupDescriptionEntry=] SHALL be Demixing_Info_OBU with OBU syntax.   
 
 ### IA Static Meta Sample Group
 
 During encapsulation process, IA_Static_Meta_OBUs are discarded from IA bistream. A new sample group for IA_Static_Meta_OBUs is defined by using [=sgpd=] and [sbgp] boxes with following requirements:
-- [=grouping_type=] SHALL be set to 'iasm'. {# IA Static Meta}
+- [=grouping_type=] SHALL be set to 'iasm'. /* IA Static Meta */
 - [=SampleGroupDescriptionEntry=] SHALL be IA_Static_Meta_OBU with OBU syntax. 
 
 
@@ -481,17 +481,17 @@ TBA
 
 # Codecs Parameter String # {#codecsparam}
 DASH and other applications require defined values for the 'Codecs' parameter specified in [[!RFC6381]] for ISO Media tracks. The codecs parameter string for the AOM IA codec shall be:
-- For IAC-OPUS: <dfn>aiac.'IAC-specific-needs'.Opus</dfn>
-- For IAC-AAC-LC: <dfn>aiac.'IAC-specific-needs'.mp4a.40.2</dfn>
+- For IAC-OPUS: <b>aiac.'IAC-specific-needs'.Opus</b>
+- For IAC-AAC-LC: <b>aiac.'IAC-specific-needs'.mp4a.40.2</b>
 
-<dfn>IAC-specific-needs</dfn> SHALL be <dfn>AA.L[CC]*</dfn> as follows:
-- The first <dfn>A</dfn> SHALL be one digit and represent the mode of Ambisonics
-- The second <dfn>A</dfn> SHALL be one or two digit and represent the order of Ambisonics.
-- <dfn>L</dfn> SHALL be one digit and represent <dfn>channel_audio_layer</dfn> of the channel audio.
-- The first <dfn>C</dfn> of <dfn>[CC]</dfn> SHALL be one digit and represent the number of surround channels.
-- The second <dfn>C</dfn> of <dfn>[CC]</dfn> SHALL be one digit and represent the number of top channels.
-- <dfn>*</dfn> SHALL represent that <dfn>[CC]</dfn> comes L times.
-- The ith <dfn>[CC]</dfn> SHALL represent for the ith layer of the channel audio, where i = 1, 2, ..., L.
+<b>IAC-specific-needs</b> SHALL be <b>AA.L[[!CC]]*</b> as follows:
+- The first <b>A</b> SHALL be one digit and represent the mode of Ambisonics
+- The second <b>A</b> SHALL be one or two digit and represent the order of Ambisonics.
+- <b>L</b> SHALL be one digit and represent <b>channel_audio_layer</b> of the channel audio.
+- The first <b>C</b> of <b>[[!CC]]</b> SHALL be one digit and represent the number of surround channels.
+- The second <b>C</b> of <b>[[!CC]]</b> SHALL be one digit and represent the number of top channels.
+- <b>*</b> SHALL represent that <b>[[!CC]]</b> comes L times.
+- The ith <b>[[!CC]]</b> SHALL represent for the ith layer of the channel audio, where i = 1, 2, ..., L.
 
 
 NOTE: We agree with the slides from April 11, with the following:
