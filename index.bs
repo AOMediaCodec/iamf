@@ -405,12 +405,12 @@ A file conformant to this specification satisfies the following:
 Parsers SHALL support the structures required by the <code>'iso6'</code> brand and MAY support structures required by further ISOBMFF structural brands.
 
 During encapsulation process, OBUs of IA bistream are encapsulated into [[!ISOBMFF]] as follows:
-- Codec_Specific_Info (without OBU syntax) is converted to CodecSpecificBox which is stored in sample entry.
-- IA_Static_Meta (with OBU syntax) is moved to a new sample group having [=grouping_type=], 'iatm'.
-- Some fields, related to MIME codecs parameter, of IA_Static_Meta are copied in sample entry.
-- Temporal_Delimitor_OBUs are discarded from [=Temporal Units=].
-- Demixing_Info_OBUs (with OBU syntax) are moved to a new sample group with [=grouping_type=], 'dmpm'.
-- Remainded OBUs of [=Temporal Units=] are stored as sample data without gap among OBUs.
+- CodecSpecificBox, which is defined from Codec_Specific_Info in IA bitstream, SHALL be stored in sample entry.
+- IA_Static_Meta (with OBU syntax) SHALL be stored as a new sample group having [=grouping_type=], 'iatm'.
+- Some fields of IA_Static_Meta, related to MIME codecs parameter, SHALL be copied in sample entry.
+- Temporal_Delimitor_OBUs SHALL be discarded from [=Temporal Units=].
+- Demixing_Info_OBUs (with OBU syntax) SHALL (or MAY) be stored as a new sample group having [=grouping_type=], 'dmpm'.
+- Remainded OBUs of [=Temporal Units=] SHALL be stored as sample data without gap among OBUs.
 
 ## IA Sample Entry ## {#iasampleentry-section}
 
