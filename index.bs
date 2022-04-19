@@ -32,10 +32,13 @@ url: https://www.iso.org/standard/76383.html#; spec: ISO/IEC 14496-3; type: dfn;
 url: https://www.iso.org/standard/76383.html#; spec: ISO/IEC 14496-3; type: dfn;
 	text: AAC-LC
 
-url: https://opus-codec.org/docs/opus_in_isobmff.html#; spec: Encapsulation of Opus in ISO Base Media File Format; type: dfn;
+url: https://opus-codec.org/docs/opus_in_isobmff.html#; spec: OPUS-IN-ISOBMFF; type: dfn;
 	text: OpusSpecificBox
+	text: OutputChannelCount
+	text: OutputGain
+	text: ChannelMappingFamily
 
-url: https://opus-codec.org/docs/opus_in_isobmff.html#; spec: Encapsulation of Opus in ISO Base Media File Format; type: property;
+url: https://opus-codec.org/docs/opus_in_isobmff.html#; spec: OPUS-IN-ISOBMFF; type: property;
 	text: opus
 	text: dOps
 
@@ -60,7 +63,7 @@ url: https://aomediacodec.github.io/av1-spec/av1-spec.pdf#page=39; spec: AV1; ty
 	text: OBU
 	text: Temporal Unit
 
-url: https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf; spec: ITU-R BS.1770-4; type: dfn;
+url: https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#; spec: ITU1770-4; type: dfn;
 	text: LKFS
 	
 url: https://en.wikipedia.org/wiki/Q_(number_format); spec: Q (number format); type: dfn;
@@ -68,7 +71,22 @@ url: https://en.wikipedia.org/wiki/Q_(number_format); spec: Q (number format); t
 
 </pre>
 
-
+<pre class='biblio'>
+{
+	"OPUS-IN-ISOBMFF": {
+		"title": "Encapsulation of Opus in ISO Base Media File Format",
+		"status": "Best Practice",
+		"publisher": "IETF",
+		"href": "https://opus-codec.org/docs/opus_in_isobmff.html"
+	},
+	"ITU1770-4": {
+		"title": "Algorithms to measure audio programme loudness and true-peak audio level",
+		"status": "Standard",
+		"publisher": "ITU",
+		"href": "https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf"
+	}
+}
+</pre>
  
 
 # Introduction # {#introduciton}
@@ -321,7 +339,7 @@ NOTE: In the case of ambisonics_mode = 1 or 2, the channel audio if present is r
 - 0: No recon_gain information fields for the ChannelGroup present in Recon_Gain_Info_OBU.
 - 1: recon_gain information fields for the ChannelGroup present in Recon_Gain_Info_OBU. In this case, recon_gain_flags and recon_gain fields present.
 
-<dfn>loudness</dfn> shall indicate the loudness value of the downmixed channels, for the channel layout which is indicated by loudspeaker_layout, from the original channel audio. It shall be stored in fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q (number format)]]) and shall be [=LKFS=] based on [[!ITU-R BS.1770-4]], so it shall be to represent zero or negative value.
+<dfn>loudness</dfn> shall indicate the loudness value of the downmixed channels, for the channel layout which is indicated by loudspeaker_layout, from the original channel audio. It shall be stored in fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q (number format)]]) and shall be [=LKFS=] based on [[!ITU1770-4]], so it shall be to represent zero or negative value.
 
 <dfn>output_gain_flags</dfn> shall indicate the channels which output_gian is applied to. 
 
@@ -448,7 +466,8 @@ loudspeaker_layout shall be the same as the one in IA_Static_Meta_OBU.
 This section describes a codec specific box for the decoding parameters, which is defined by codec_id of Codec_Specific_Info_OBU, to decode one single Substream of IA bitstream. <dfn>aiac</dfn> shall contain only one single codec specific box regardless of the number of Substreams in IA_Coded_Data. So, the codec specific box is applied to allo of Substreams in sample data.
 
 ### OPUS Specific Box ### {#opusspecificbox}
-This is [=OpusSpecificBox=] ('[=dOps=]') for [=opus=] audiosampleentry which is specified in [[!Encapsulation of Opus in ISO Base Media File Format]]. 
+
+This SHALL be [=OpusSpecificBox=] ('dOps') for 'opus' audiosampleentry which is specified in [[!OPUS-IN-ISOBMFF]]. 
 
 #### Definition #### {#opuscodecconfigurationbox-definition}
 
@@ -466,26 +485,14 @@ This box is for one single Substream.
 
 #### Syntax #### {#opuscodecconfigurationbox-syntax}
 
-```
-class OpusSpecificBox extends Box('dOps') {
-  unsigned int (8) Version;
-  unsigned int (8) OutputChannelCount;
-  unsigned int (16) PreSkip;
-  unsigned int (16) InputSampleRate;
-  signed int (16) OutputGain;
-  unsigned int (8) ChannelMappingFamily;
-}
-```
+It shall be the same as 'dOps' box for 'opus' with that [=ChannelMappingFamily=] SHALL be set to 0.
 
 #### Semantics #### {#opuscodecconfigurationbox-semantics}
 
-Version, PreSkip and InputSampleRate shall be the same as the ones in [[!Encapsulation of Opus in ISO Base Media File Format]].
-
-OutputChannelCount is set to 2. OutputChannelCount can be ignored because the real value can be determined from the IA_Static_Meta_OBU and from the [=opus packet=] header.
-
-In case of channel_audio_layer > 0, this field shall be set to 0.
-
-ChannelMappingFamily shall be set to 0.
+It shall be the same as the semantics except followings:
+- [=OutputChannelCount=] SHOULD be set to 2. [=OutputChannelCount=] can be ignored because the real value can be determined from the IA_Static_Meta_OBU and from the [=opus packet=] header.
+- In case of channel_audio_layer > 0, [=OutputGain=] SHALL be set to 0.
+- [=ChannelMappingFamily=] SHALL be set to 0.
 
 ### MP4A Specific Box ### {#mp4aspecificbox}
 This is [=ESDBox=] ('esds') for 'mp4a' which is specified in [[!MP4]]. 
@@ -504,11 +511,12 @@ This box is for one single Substream.
 
 #### Syntax #### {#mp4aspecificbox-syntax}
 
-It shall be the same as [=esds=] box for AAC-LC.
+It shall be the same as 'esds' box for AAC-LC.
 
 #### Semantics #### {#mp4aspecificbox-semantics}
 
-[=channelConfigruation=] field is set to 2. The real value can be implied from the IA_Static_Meta_OBU.
+It shall be the same as the semantics except followings:
+- [=channelConfiguration=] field SHOULD be set to 2. The real value can be implied from the IA_Static_Meta_OBU.
 
 ## IA Sample Format ## {#sampleformat}
 
