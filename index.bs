@@ -143,7 +143,7 @@ Figure 5 shows the configuration of IA bitstream (before packing [=OBUs=]).
 <center><img src="Configuration of IA Bitstream.png"></center>
 <center><b>Figure 5. </b>Configuration of IA Bitstream (before packing OBUs)</center> 
 
-For IAC, each IA bitstream is packed by OBUs so that it is composed of a sequence of OBUs, Non-timed Metadata and followed by grouped into [=Temporal Units=]. Where, each Temporal Unit SHALL start Temproal_Delimitor_OBU and SHALL consist of OBUs for only one single IA_Frame. And, the order of Substreams in each Temporal Unit SHALL be maintained in the same order as in IA_Coded_Data.
+For IAC, each IA bitstream is packed by OBUs so that it is composed of a sequence of OBUs, Non-timed Metadata and followed by grouped into [=Temporal Units=]. Where, each Temporal Unit shall start Temproal_Delimitor_OBU and shall consist of OBUs for only one single IA_Frame. And, the order of Substreams in each Temporal Unit shall be maintained in the same order as in IA_Coded_Data.
 
 NOTE: OBU_IA_Stream_Indicator is only placed at the front of the first IA bitstream (i.e. at the front of IA sequence) to be feeded to OBU parsers.
 
@@ -167,38 +167,38 @@ NOTE: When one of option1 and option2 is selected, the other will be removed.
 
 This section defines codec specific information for Codec_Specific_Info and Substream.
 
-- Codec_Specific_Info is composed of Codec_ID and Decder_Config. Codec_ID SHALL indicate the codec which has been used to generate Substreams within IA bitstream and Decder_Config SHALL indicate the decoding parameters which are applied to all of Substreams within IA bitstream. 
+- Codec_Specific_Info is composed of Codec_ID and Decder_Config. Codec_ID shall indicate the codec which has been used to generate Substreams within IA bitstream and Decder_Config shall indicate the decoding parameters which are applied to all of Substreams within IA bitstream.
 
-For legacy codecs, Decder_Config SHALL be exactly the same information as the conventional file parser feeds to the codec decoders for decoding of mono or stereo bitstream. For future codecs, Decder_Config SHALL include all of decoding parameters which are required to decode Substreams. 
+For legacy codecs, Decder_Config shall be exactly the same information as the conventional file parser feeds to the codec decoders for decoding of mono or stereo bitstream. For future codecs, Decder_Config shall include all of decoding parameters which are required to decode Substreams.
 
-- Substream is a raw coded stream for mono or stereo channels. Substream format SHALL be exactly the same as the sample format (before packing OBU) for mono or stereo audio file which consists of only one single coded stream by the Codec_ID. 
+- Substream is a raw coded stream for mono or stereo channels. Substream format shall be exactly the same as the sample format (before packing OBU) for mono or stereo audio file which consists of only one single coded stream by the Codec_ID.
  
 ### IAC-OPUS Specific
 
-Decoder_Config for IAC-OPUS SHALL be [=ID Header=] with [=ChannelMappingFamily=] = 0 of [[!RFC7845]] as follows:
+Decoder_Config for IAC-OPUS shall be [=ID Header=] with [=ChannelMappingFamily=] = 0 of [[!RFC7845]] as follows:
 
-Substream format SHALL be [=opus packet=] of [[!RFC6716]] which contains only one single frame of mono or stereo channels.
+Substream format shall be [=opus packet=] of [[!RFC6716]] which contains only one single frame of mono or stereo channels.
 
 ### IAC-AAC-LC Specific
 
-Decoder_Config for IAC-AAC-LC SHALL be {esds} which is a subset of [=ESDBox=] as follows:
+Decoder_Config for IAC-AAC-LC shall be {esds} which is a subset of [=ESDBox=] as follows:
 
 NOTE: {esds} means a subset of [=ESDBox=] which is necessarily required for decoding.
 
 NOTE: {esds} needs to be defined. 
 
-Substream format SHALL be [=raw_data_block()=] of [[!AAC]] which contains only one single frame of mono or stereo channels.
+Substream format shall be [=raw_data_block()=] of [[!AAC]] which contains only one single frame of mono or stereo channels.
  
 ## OPEN Bitstream Unit (OBU) Syntax and Semantics
 
 This section specifies the syntax elements and the meaning of the syntax elements read in the OBU syntax and semantics structures by assuming IAC decoder receives IA bitstream starting with IA Stream Indicator OBU as input. Where, IAC decoder consists of IAC-OBU parer, Substream decoders and Post-Processor.
-- SeenIABitstream initially SHALL be set to 0.
-- SeenIABitstream SHALL be set to 1 after receiving IA Stream Indicator OBU.
-- If SeenIABitstream is set to 1, then following OBUs SHALL be given to the IAC decoder. Otherwise, the OBU will be dropped.
+- SeenIABitstream initially shall be set to 0.
+- SeenIABitstream shall be set to 1 after receiving IA Stream Indicator OBU.
+- If SeenIABitstream is set to 1, then following OBUs shall be given to the IAC decoder. Otherwise, the OBU will be dropped.
 
 <dfn>drop_obu( )</dfn> is a function call that indicates when IAC decoder should ignore an OBU because it is not assumed as IA bitstream.
 
-After SeenIABitstream sets to 1, IA bitstream SHALL be presented to IAC-OBU parser. After parsing Codec_Specific_Info_OBU and IA_Static_Meta_OBU, IAC-OBU parser prepares Substream decoders as many as the number of Substreams and reconstruts each coded stream, from IA_Coded_Data_OBU (or Substream_OBUs), to be feeded to each Substream decoder. At the same time, IAC-OBU parser feeds IA_Static_Meta_OBU and Recon_Gain_Info_OBU to Post-Processor.
+After SeenIABitstream sets to 1, IA bitstream shall be presented to IAC-OBU parser. After parsing Codec_Specific_Info_OBU and IA_Static_Meta_OBU, IAC-OBU parser prepares Substream decoders as many as the number of Substreams and reconstruts each coded stream, from IA_Coded_Data_OBU (or Substream_OBUs), to be feeded to each Substream decoder. At the same time, IAC-OBU parser feeds IA_Static_Meta_OBU and Recon_Gain_Info_OBU to Post-Processor.
 
 <center><img src="Hypothetical IAC Decoder Model.png"></center>
 <center><b>Figure 7. </b>Hypothetical IAC Decoder Model</center>  
@@ -210,33 +210,33 @@ After SeenIABitstream sets to 1, IA bitstream SHALL be presented to IAC-OBU pars
 
 ```
 class obu_bitstream_unit(sz) {
-	if (SeenIABitstream) {
-		obu_header();
-		if (obu_has_size_field)
-			unsigned int (leb128()) obu_size;
-		else
-			obu_size = sz - 1;
-		if (obu_type == 1)
-			cpdec_specific_info();
-		if (obu_type == 2)
-			ia_static_meta();
-		if (obu_type == 4)
-			demixing_info();
-		if (obu_type == 5)
-			substream_boundary_info();
-		if (obu_type == 6)
-			recon_gain_info();
-		if (obu_type == 7)
-			ia_coded_data() or substream();
-		byte_alignment():
-	}
-	else {
-		obu_header();
-		if (obu_type != 0)
-			drop_obu();
-		else
-			ia_stream_indicator_obu();
-	}
+  if (SeenIABitstream) {
+    obu_header();
+    if (obu_has_size_field)
+      unsigned int (leb128()) obu_size;
+    else
+      obu_size = sz - 1;
+    if (obu_type == 1)
+      cpdec_specific_info();
+    if (obu_type == 2)
+      ia_static_meta();
+    if (obu_type == 4)
+      demixing_info();
+    if (obu_type == 5)
+      substream_boundary_info();
+    if (obu_type == 6)
+      recon_gain_info();
+    if (obu_type == 7)
+      ia_coded_data() or substream();
+    byte_alignment():
+  }
+  else {
+    obu_header();
+    if (obu_type != 0)
+      drop_obu();
+    else
+      ia_stream_indicator_obu();
+  }
 }
 ```
 
@@ -246,7 +246,7 @@ When SeenIABitstream is set to 1, an ordered series of OBUs is presented to the 
 
 If the syntax element obu_has_size_field (in the OBU header) is equal to 1, then the variable sz will be unused and does not have to be provided.
 
-<dfn>obu_size</dfn> contains the size in bytes of the OBU not including the bytes within obu_header or the obu_size syntax element.
+<dfn>obu_size</dfn> shall indicate the size in bytes of the OBU not including the bytes within obu_header or the obu_size syntax element.
 
 OBU data starts on the first (most significant) bit and ends on the last bit of the given bytes. The payload of an OBU lies between the first bit of the given bytes and the last bit before the first zero bit of byte alingment. 
 
@@ -257,11 +257,11 @@ OBU data starts on the first (most significant) bit and ends on the last bit of 
 
 ```
 class obu_header() {
-	unsigned int (1) obu_forbidden_bit;
-	unsigned int (4) obu_type;
-	unsigned int (1) obu_reserved_1bit;
-	unsigned int (1) obu_has_size_field;
-	unsigned int (1) obu_reserved_1bit;
+  unsigned int (1) obu_forbidden_bit;
+  unsigned int (4) obu_type;
+  unsigned int (1) obu_reserved_1bit;
+  unsigned int (1) obu_has_size_field;
+  unsigned int (1) obu_reserved_1bit;
 }
 ```
 
@@ -269,9 +269,9 @@ class obu_header() {
 
 OBUs are structured with a header and a payload. The header identifies the type of the payload using the obu_type header parameter.
 
-<dfn>obu_forbidden_bit</dfn> SHALL be set to 0.
+<dfn>obu_forbidden_bit</dfn> shall be set to 0.
 
-<dfn>obu_type</dfn> specifies the type of data structure contained in the OBU payload.
+<dfn>obu_type</dfn> shall specify the type of data structure contained in the OBU payload.
 
 <pre class = "def">
 obu_type: Name of obu_type
@@ -287,9 +287,9 @@ obu_type: Name of obu_type
 </pre>
 
 
-Reserved units are for future use and SHALL be ignored by IAC-OBU parser.
+Reserved units are for future use and shall be ignored by IAC-OBU parser.
 
-<dfn>obu_reserved_1bit</dfn> SHALL be set to 0. The value is ignored by a IAC-OBU parser.
+<dfn>obu_reserved_1bit</dfn> shall be set to 0. The value is ignored by a IAC-OBU parser.
 
 <dfn>obu_has_size_field</dfn> equal to 1 indicates that the obu_size syntax element will be present. obu_has_size_field equal to 0 indicates tha the obu_size syntax element will not be present. 
 
@@ -300,14 +300,14 @@ Reserved units are for future use and SHALL be ignored by IAC-OBU parser.
 
 ```
 class byte_aligment() {
-	while (get_position() & 7)
-		unsigned int (1) zero_bit;
+  while (get_position() & 7)
+    unsigned int (1) zero_bit;
 }
 ```
 
 <b>Semantics</b>
 
-<dfn>zero_bit</dfn> SHALL be equal to 0 and is inserted into the bitstream to align the bit position to a multiple of 8 bits.
+<dfn>zero_bit</dfn> shall be equal to 0 and is inserted into the bitstream to align the bit position to a multiple of 8 bits.
 
 
 ### Reserved OBU Syntax and Semantics
@@ -321,7 +321,7 @@ The reserved OBU allows the extension of this specification with additional OBU 
 
 ```
 class ia_stream_indicator_obu() {
-	SeenIABitstream = 1;
+  SeenIABitstream = 1;
 }
 ```
 
@@ -338,8 +338,8 @@ NOTE: The IA Stream Indicator OBU has an empty payload.
 
 ```
 class codec_specific_info_obu() {
-	unsigned int (32) codec_id;
-	decoder_config(codec_id);
+  unsigned int (32) codec_id;
+  decoder_config(codec_id);
 }
 ```
 
@@ -347,7 +347,7 @@ class codec_specific_info_obu() {
 
 <dfn>codec_id</dfn> is a ‘four-character code’ (4CC) to identify the codec which has been used to generate Substream. It shall be the same as the [=boxtype=] of its AduioSampleEntry if exist. It shall be '[=opus=]' for IAC-OPUS and '[=mp4a=]' for IAC-AAC-LC.
 
-<dfn>decoder_config</dfn> is a set of decoding parameters to decode Substream for a given codec_id. It SHALL be the set of decoding parameters which conventional mono or stereo file parsers feed to the conventional mono or stereo decoder. It SHALL be [=ID Header=] with [=ChannelMappingFamily=] = 0 of [[!RFC7845]] for IAC-OPUS and {esds} for IAC-AAC-LC.
+<dfn>decoder_config</dfn> is a set of decoding parameters to decode Substream for a given codec_id. It shall be the set of decoding parameters which conventional mono or stereo file parsers feed to the conventional mono or stereo decoder. It shall be [=ID Header=] with [=ChannelMappingFamily=] = 0 of [[!RFC7845]] for IAC-OPUS and {esds} for IAC-AAC-LC.
 
 
 ### IA Static Meta OBU Syntax and Semantics
@@ -358,19 +358,19 @@ NOTE: We agree to with a fixed set of layouts in this version, and possibly have
 
 ```
 class ia_static_meta_obu() {
-	unsigned int (8) version;
-	unsigned int (2) ambisonics_mode;
-	unsigned int (3) channel_audio_layer;
-	if (ambisonics_mode == 1 or 2)
-		ambix_layer_config(ambisonics_mode);
-	for (i=1; i<= channel_audio_layer; i++)
-		channel_audio_layer_config(i);
+  unsigned int (8) version;
+  unsigned int (2) ambisonics_mode;
+  unsigned int (3) channel_audio_layer;
+  if (ambisonics_mode == 1 or 2)
+    ambix_layer_config(ambisonics_mode);
+  for (i=1; i<= channel_audio_layer; i++)
+    channel_audio_layer_config(i);
 }
 ```
 
 <b>Semantics</b>
 
-<dfn>version</dfn> shall indicate the version of IA bitstream. It shall be set to 0 for this version of the specification. Implementations SHOULD treat IA bitstream where the MSB four bits of the version number match that of a recognized specification as backwards compatible with that specification. That is, the version number can be split into "major" and "minor" version sub-fields, with changes to the minor sub-field (in the LSB four bits) signaling compatible changes. For example, an implementation of this specification SHOULD accept any stream with a version number of ’15’ or less, and SHOULD assume any stream with a version number ’16’ or
+<dfn>version</dfn> shall indicate the version of IA bitstream. It shall be set to 0 for this version of the specification. Implementations should treat IA bitstream where the MSB four bits of the version number match that of a recognized specification as backwards compatible with that specification. That is, the version number can be split into "major" and "minor" version sub-fields, with changes to the minor sub-field (in the LSB four bits) signaling compatible changes. For example, an implementation of this specification should accept any stream with a version number of ’15’ or less, and should assume any stream with a version number ’16’ or
 greater is incompatible.
 
 <dfn>ambisonics_mode</dfn> shall indicate if IA bitstream include Ambiosnics and which type if includes.
@@ -390,27 +390,27 @@ NOTE: In the case of ambisonics_mode = 1 or 2, the channel audio if present is r
 
 ```
 class ambix_layer_config(mode) {
-	unsigned int (8) output_channel_count (C);
-	unsigned int (8) substream_count (N);
-	unsigned int (8) coupled_substream_count (M);
-	if (mode == 1)
-		unsigned int (8*C) channel_mapping;
-	else if (mode == 2)
-		unsigned int (18*(N+M)*C) demixing_matrix;
+  unsigned int (8) output_channel_count (C);
+  unsigned int (8) substream_count (N);
+  unsigned int (8) coupled_substream_count (M);
+  if (mode == 1)
+    unsigned int (8*C) channel_mapping;
+  else if (mode == 2)
+    unsigned int (18*(N+M)*C) demixing_matrix;
 }
 ```
 
 <b>Semantics</b>
 
-<dfn>output_channel_count</dfn> SHALL be the same as [=channel count=] in [[!RFC8486]. 
+<dfn>output_channel_count</dfn> shall be the same as [=channel count=] in [[!RFC8486].
 
-<dfn>substream_count</dfn> SHALLll indicate the number of Substreams composing of ChannelGroup. 
+<dfn>substream_count</dfn> shall indicate the number of Substreams composing of ChannelGroup.
 
-<dfn>coupled_substream_count</dfn> SHALL indicate the number of coupled Substreams among Substreams composing of ChannelGroup. 
+<dfn>coupled_substream_count</dfn> shall indicate the number of coupled Substreams among Substreams composing of ChannelGroup.
 
-<dfn>channel_mapping</dfn> SHALL be the same as the one for [=ChannelMappingFamily=] = 2 in [[!RFC8486]]. 
+<dfn>channel_mapping</dfn> shall be the same as the one for [=ChannelMappingFamily=] = 2 in [[!RFC8486]].
 
-<dfn>demixing_matrix</dfn> SHALL be the same as the one for [=ChannelMappingFamily=] = 3 in [[!RFC8486]]. 
+<dfn>demixing_matrix</dfn> shall be the same as the one for [=ChannelMappingFamily=] = 3 in [[!RFC8486]].
 
 
 ### Channel Audio Layer Config Syntax and Semantics
@@ -419,39 +419,38 @@ class ambix_layer_config(mode) {
 
 ```
 class channel_audio_layer_config(i) {
-	unsigned int (4) loudspeaker_layout(i);
-	unsigned int (1) output_gain_is_presetn_flag(i);
-	unsigned int (1) recon_gain_is_presetn_flag(i);
-	unsigned int (8) substream_count(i);
-	unsigned int (8) coupled_substream_count(i);
-	signed int (16) loudness(i);
-	if (output_gain_is_presetn_flag(i) == 1)
-		unsigned int (6) output_gain_flag(i);
-		signed int (16) output_gain(i);
+  unsigned int (4) loudspeaker_layout(i);
+  unsigned int (1) output_gain_is_presetn_flag(i);
+  unsigned int (1) recon_gain_is_presetn_flag(i);
+  unsigned int (8) substream_count(i);
+  unsigned int (8) coupled_substream_count(i);
+  signed int (16) loudness(i);
+  if (output_gain_is_presetn_flag(i) == 1) {
+    unsigned int (6) output_gain_flag(i);
+    signed int (16) output_gain(i);
+  }
 }
 ```
 
 <b>Semantics</b>
 
-<dfn>loudspeaker_layout</dfn> SHALL indicate the channel layout for the channels to be reconstructed from the precedent ChannelGroups and the current ChannelGroup among ChannelGroups for channel audio in IA_Frame.
+<dfn>loudspeaker_layout</dfn> shall indicate the channel layout for the channels to be reconstructed from the precedent ChannelGroups and the current ChannelGroup among ChannelGroups for channel audio in IA_Frame.
 
 <left><img src="Loudspeaker Layout.png"></left>
 
-<dfn>output_gain_is_present_flag</dfn> SHALL indicate if output_gain information fields for the ChannelGroup presents . 
+<dfn>output_gain_is_present_flag</dfn> shall indicate if output_gain information fields for the ChannelGroup presents .
 - 0: No output_gain information fields for the ChannelGroup present.
 - 1: output_gain information fields for the ChannelGroup present. In this case, output_gain_flags and output_gain fields present.
 
-<dfn>recon_gain_is_present_flag</dfn> SHALL indicate if recon_gain information fields for the ChannelGroup presents in Recon_Gain_Info_OBU . 
+<dfn>recon_gain_is_present_flag</dfn> shall indicate if recon_gain information fields for the ChannelGroup presents in Recon_Gain_Info_OBU .
 - 0: No recon_gain information fields for the ChannelGroup present in Recon_Gain_Info_OBU.
 - 1: recon_gain information fields for the ChannelGroup present in Recon_Gain_Info_OBU. In this case, recon_gain_flags and recon_gain fields present.
 
-<<<<<<< HEAD
+
 <dfn>loudness</dfn> shall indicate the loudness value of the downmixed channels, for the channel layout which is indicated by loudspeaker_layout, from the original channel audio. It shall be stored in fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]) and shall be [=LKFS=] based on [[!ITU1770-4]], so it shall be to represent zero or negative value.
-=======
-<dfn>loudness</dfn> SHALL indicate the loudness value of the downmixed channels, for the channel layout which is indicated by loudspeaker_layout, from the original channel audio. It shall be stored in fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q (number format)]]) and shall be [=LKFS=] based on [[!ITU1770-4]], so it shall be to represent zero or negative value.
 
+<dfn>output_gain_flags</dfn> shall indicate the channels which output_gian is applied to. If a bit set to 1, output_gain shall be applied to the channel. Otherwise, output_gain shall not be applied to the channel.
 
-<dfn>output_gain_flags</dfn> SHALL indicate the channels which output_gian is applied to. If a bit set to 1, output_gain SHALL be applied to the channel. Otherwise, output_gain SHALL not be applied to the channel.
 
 <pre class = "def">
 Bit position : Channel Name
@@ -464,7 +463,7 @@ Bit position : Channel Name
       
 </pre>
 
-<dfn>output_gain</dfn> SHALL indicate the gain value to be applied to the mixed channels which are indicated by output_gain_flags. It is 20*log10 of the factor by which to scale the mixed channels. It is stored in a 16-bit, signed, two’s complement fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]). Where, each mixed channel is generated by downmixing two or more input channels.
+<dfn>output_gain</dfn> shall indicate the gain value to be applied to the mixed channels which are indicated by output_gain_flags. It is 20*log10 of the factor by which to scale the mixed channels. It is stored in a 16-bit, signed, two’s complement fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]). Where, each mixed channel is generated by downmixing two or more input channels.
 
 
 ### Temporal Delimitor OBU Syntax and Semantics
@@ -480,7 +479,7 @@ NOTE: The temporal delimitor has an empty payload.
 
 <b>Semantics</b>
 
-It SHALL indicate the start of [=Temporal Unit=].
+It shall indicate the start of [=Temporal Unit=].
 
 
 ### Demixing Info OBU Syntax and Semantics
@@ -489,14 +488,14 @@ It SHALL indicate the start of [=Temporal Unit=].
 
 ```
 class demixing_info_obu() {
-	unsigned int (3) dmixp_mode;
-	unsigned int (5) reserved;
+  unsigned int (3) dmixp_mode;
+  unsigned int (5) reserved;
 }
 ```
 
 <b>Semantics</b>
 
-<dfn>dmixp_mode</dfn> SHALL indicate a mode of pre-defined combinations of five demix parameters for the following IA_Coded_Data. 
+<dfn>dmixp_mode</dfn> shall indicate a mode of pre-defined combinations of five demix parameters for the following IA_Coded_Data.
 - 0: mode1, (alpha, beta, gamma, delta, w_idx_offset) = (1, 1, 0.707, 0.707, -1)
 - 1: mode2, (alpha, beta, gamma, delta, w_idx_offset) = (0.707, 0.707, 0.707, 0.707, -1)
 - 2: mode3, (alpha, beta, gamma, delta, w_idx_offset) = (1, 0.866, 0.866, 0.866, -1)
@@ -520,14 +519,14 @@ NOTE: It will be removed when option2 is selected.
 
 ```
 class substream_boundary_info_obu() {
-	for (i=0; i< total # of substreams - 1; i++)
-		unsigned int (leb128()) substream_size;
+  for (i=0; i< total # of substreams - 1; i++)
+    unsigned int (leb128()) substream_size;
 }
 ```
 
 <b>Semantics</b>
 
-<dfn>substream_size</dfn> SHALL indicates the size of Substream (in bytes). The fields present as many as the number of Substreams in IA_Coded_Data minus 1. So, the field for the last Substream shall not be present. 
+<dfn>substream_size</dfn> shall indicates the size of Substream (in bytes). The fields present as many as the number of Substreams in IA_Coded_Data minus 1. So, the field for the last Substream shall not be present.
 
 
 ### Recon Gain Info OBU Syntax and Semantics
@@ -536,12 +535,12 @@ class substream_boundary_info_obu() {
 
 ```
 class recon_gain_info_obu() {
-	for (i=0; i< channel_audio_layer; i++) {
-		if (recon_gain_is_present_flag(i) == 1) {
-			unsigned int(leb128()) recon_gain_flags(i);
-			for (j=0; j< n(i); j++) {}
-				if (recon_gain_flag(i)(j) == 1)
-					ussigned int (8) recon_gain;
+  for (i=0; i< channel_audio_layer; i++) {
+    if (recon_gain_is_present_flag(i) == 1) {
+      unsigned int(leb128()) recon_gain_flags(i);
+      for (j=0; j< n(i); j++) {
+        if (recon_gain_flag(i)(j) == 1)
+          ussigned int (8) recon_gain;
 			}
 		}
 	}
@@ -550,11 +549,11 @@ class recon_gain_info_obu() {
 
 <b>Semantics</b>
 
-<dfn>recon_gain_flags</dfn> SHALL indicates the channels which recon_gain is applied to.
+<dfn>recon_gain_flags</dfn> shall indicates the channels which recon_gain is applied to.
 
 <left><img src="Recon_Gain_Flags.png"></left>
 
-<dfn>recon_gain</dfn> SHALL indicates the gain value to be applied to the channel, which is indicated by <dfn>recon_gain_flalgs</dfn>, after decoding of the following IA_Coded_Data.
+<dfn>recon_gain</dfn> shall indicates the gain value to be applied to the channel, which is indicated by <dfn>recon_gain_flalgs</dfn>, after decoding of the following IA_Coded_Data.
 
 
 <<<<<<< HEAD
@@ -572,15 +571,15 @@ NOTE: It will be removed when option2 is selected.
 
 ```
 class ia_coded_data_obu() {
-	for (i=0; i< total # of substreams; i++)
-		substream();
+  for (i=0; i< total # of substreams; i++)
+    substream();
 }
 ```
 
 <b>Semantics</b>
 
-There SHALL be ChannelGroups as many as channel_audio_layer if ambisonics_mode = 0. Otherwise, channel_audio_layer plus 1.
-Each ChannelGroup SHALL have Substreams as many as substream_count. Each Substream SHALL be an raw coded data for mono or stereo channels by using the codec which is indicated by codec_id field of Codec_Specific_Info_OBU. Substream format shall be [=opus packet=] of [[!RFC6716]] for IAC-OPUS and [=raw_data_block()=] of [[!ISO/IEC 14496-3]] for IAC-AAC-LC.
+There shall be ChannelGroups as many as channel_audio_layer if ambisonics_mode = 0. Otherwise, channel_audio_layer plus 1.
+Each ChannelGroup shall have Substreams as many as substream_count. Each Substream shall be an raw coded data for mono or stereo channels by using the codec which is indicated by codec_id field of Codec_Specific_Info_OBU. Substream format shall be [=opus packet=] of [[!RFC6716]] for IAC-OPUS and [=raw_data_block()=] of [[!ISO/IEC 14496-3]] for IAC-AAC-LC.
 
 
 ### Substream OBU Syntax and Semantics
@@ -591,13 +590,13 @@ NOTE: It will be removed when option1 is selected.
 
 ```
 class substream_obu() {
-	substream();
+  substream();
 }
 ```
 
 <b>Semantics</b>
 
-Substream SHALL be an raw coded data for mono or stereo channels by using the codec which is indicated by codec_id field of Codec_Specific_Info_OBU. Substream format shall be [=opus packet=] of [[!RFC6716]] for IAC-OPUS and [=raw_data_block()=] of [[!ISO/IEC 14496-3]] for IAC-AAC-LC.
+Substream shall be an raw coded data for mono or stereo channels by using the codec which is indicated by codec_id field of Codec_Specific_Info_OBU. Substream format shall be [=opus packet=] of [[!RFC6716]] for IAC-OPUS and [=raw_data_block()=] of [[!ISO/IEC 14496-3]] for IAC-AAC-LC.
 
 
 >>>>>>> 85b4931 (to resolve igthub issue#36-37)
@@ -609,13 +608,13 @@ This section describes the basic data structures used to signal encapsulation of
 ## General Requirements & Brands ## {#brands}
 
 A file conformant to this specification satisfies the following:
-- It SHALL conform to the normative requirements of [[!ISOBMFF]]
-- It SHALL have the <dfn value export for="ISOBMFF Brand">aiac</dfn> brand among the compatible brands array of the FileTypeBox
-- It SHALL contain at least one track using an [=IASampleEntry=]
+- It shall conform to the normative requirements of [[!ISOBMFF]]
+- It shall have the <dfn value export for="ISOBMFF Brand">aiac</dfn> brand among the compatible brands array of the FileTypeBox
+- It shall contain at least one track using an [=IASampleEntry=]
 - It SHOULD indicate a structural ISOBMFF brand among the compatible brands array of the FileTypeBox, such as 'iso6'
 - It MAY indicate other brands not specified in this specification provided that the associated requirements do not conflict with those given in this specification
 
-Parsers SHALL support the structures required by the <code>'iso6'</code> brand and MAY support structures required by further ISOBMFF structural brands.
+Parsers shall support the structures required by the <code>'iso6'</code> brand and MAY support structures required by further ISOBMFF structural brands.
 
 During encapsulation process, OBUs of IA bistream are encapsulated into [[!ISOBMFF]] as follows:
 - Codec_Specific_Info (without OBU syntax) is converted to CodecSpecificBox which is stored in sample entry.
@@ -660,7 +659,7 @@ class IASampleEntry extends AudioSampleEntry('aiac') {
 }
 ```
 
-No optional boxes of AudioSampleEntry shall present. 
+No optional boxes of AudioSampleEntry shall present.
 
 ### Semantics ### {#iasampleentry-semantics}
 
@@ -698,7 +697,7 @@ This box is for one single Substream.
 
 #### Syntax #### {#opuscodecconfigurationbox-syntax}
 
-It shall be the same as 'dOps' box for 'opus' with that [=ChannelMappingFamily=] SHALL be set to 0.
+It shall be the same as 'dOps' box for 'opus' with that [=ChannelMappingFamily=] shall be set to 0.
 
 #### Semantics #### {#opuscodecconfigurationbox-semantics}
 
@@ -734,10 +733,10 @@ It shall be the same as the semantics except followings:
 ## IA Sample Format ## {#sampleformat}
 
 For tracks using the [=IASampleEntry=], an <dfn>IA Sample</dfn> has the following constraints:
-- The sample data SHALL be a sequence of [=OBUs=] forming a [=Temporal Unit=].
-- Temporal_Delimitor_OBU SHALL not be present. It SHALL be discarded when [=Temporal Unit=] is stored as sample data.
+- The sample data shall be a sequence of [=OBUs=] forming a [=Temporal Unit=].
+- Temporal_Delimitor_OBU shall not be present. It shall be discarded when [=Temporal Unit=] is stored as sample data.
 - OBUs for Timed Metadata (if present) come first and followed by OBU(s) for IA_Coded_Data.
-- Each OBU SHALL follow OBU syntax as specified in this specificaiton. 
+- Each OBU shall follow OBU syntax as specified in this specificaiton.
 
 ## IA Sample Group
 
@@ -746,14 +745,14 @@ NOTE: We agree to create a generic sample group where the payload is exactly the
 ### Demixing Info Sample Group
 
 During encapsulation process, Demixing_Info_OBUs shall or should or can be discarded from IA bistream. A new sample group for Demixing_Info_OBUs is defined by using [=sgpd=] and [sbgp] boxes with following requirements:
-- [=grouping_type=] SHALL be set to 'dmpm'. {# demixing prameter mode}
-- Each [=SampleGroupDescriptionEntry=] SHALL be Demixing_Info_OBU with OBU syntax.   
+- [=grouping_type=] shall be set to 'dmpm'. {# demixing prameter mode}
+- Each [=SampleGroupDescriptionEntry=] shall be Demixing_Info_OBU with OBU syntax.
 
 ### IA Static Meta Sample Group
 
 During encapsulation process, IA_Static_Meta_OBUs are discarded from IA bistream. A new sample group for IA_Static_Meta_OBUs is defined by using [=sgpd=] and [sbgp] boxes with following requirements:
-- [=grouping_type=] SHALL be set to 'iasm'. {# IA Static Meta}
-- [=SampleGroupDescriptionEntry=] SHALL be IA_Static_Meta_OBU with OBU syntax. 
+- [=grouping_type=] shall be set to 'iasm'. {# IA Static Meta}
+- [=SampleGroupDescriptionEntry=] shall be IA_Static_Meta_OBU with OBU syntax.
 
 
 ## Common Encryption ## {#CommonEncryption}
@@ -764,14 +763,14 @@ DASH and other applications require defined values for the 'Codecs' parameter sp
 - For IAC-OPUS: <dfn>aiac.'IAC-specific-needs'.Opus</dfn>
 - For IAC-AAC-LC: <dfn>aiac.'IAC-specific-needs'.mp4a.40.2</dfn>
 
-<b>IAC-specific-needs</b> SHALL be <b>AA.L(CC)*</b> as follows:
-- The first <b>A</b> SHALL be one digit and represent the mode of Ambisonics
-- The second <b>A</b> SHALL be one or two digit and represent the order of Ambisonics.
-- <b>L</b> SHALL be one digit and represent <b>channel_audio_layer</b> of the channel audio.
-- The first <b>C</b> of <b>(CC)</b> SHALL be one digit and represent the number of surround channels.
-- The second <b>C</b> of <b>(CC)</b> SHALL be one digit and represent the number of top channels.
-- <b>*</b> SHALL represent that <b>(CC)</b> comes L times.
-- The ith <b>(CC)</b> SHALL represent for the ith layer of the channel audio, where i = 1, 2, ..., L.
+<b>IAC-specific-needs</b> shall be <b>AA.L(CC)*</b> as follows:
+- The first <b>A</b> shall be one digit and represent the mode of Ambisonics
+- The second <b>A</b> shall be one or two digit and represent the order of Ambisonics.
+- <b>L</b> shall be one digit and represent <b>channel_audio_layer</b> of the channel audio.
+- The first <b>C</b> of <b>(CC)</b> shall be one digit and represent the number of surround channels.
+- The second <b>C</b> of <b>(CC)</b> shall be one digit and represent the number of top channels.
+- <b>*</b> shall represent that <b>(CC)</b> comes L times.
+- The ith <b>(CC)</b> shall represent for the ith layer of the channel audio, where i = 1, 2, ..., L.
 
 
 NOTE: We agree with the slides from April 11, with the following:
