@@ -100,22 +100,23 @@ Figure 1 shows an conceptual IAC architecture.
 <center><img src="Conceptual IAC Architecture.png"></center>
 <center><b>Figure 1. </b>Conceptual IAC Architecture</center>
 
+For a given 3D audio such as Ambisonics and/or multichannel audio, 
+- Pre-Processor generates Pre-Processed Audio and Codec Agnostic Metadata for immersive audio (IA).
+- Audio Codec Enc generates Codec-Dependent Bitstream, which consists of the coded streams, coded from Pre-Processed Audio. 
+- File Packager generates IAC File by encapsulating IA bitstream, which consists of Codec-Dependent Bitstream and Codec Agnostic Metadata, into [[!ISOBMFF]] tracks.
+- File Parser reconstructs IA bitstream by decapsulating IAC File.
+- Audio Codec Dec outputs a decoded Pre-Processed Audio after decoding of Codec-Dependent Bitstream.
+- Post-Processor outputs Immersive 3D Audio by using the decoded Pre-Processed Audio and Codec Agnostic Metadata. 
+
 IA bitstream is an codec-agnostic audio bitstream format to deliver three dimensional sound fields that can be used for multichannel sound playback and immersive experience and conceptually it consists of codec-dependent bitstream(s) and codec-agnostic metadata. And, it is designed to be able to reuse conventional mono or stereo encoding and decoding mechanisam as the codec-dependent bitstream consists of one or more coded streams. Where, each coded stream is an coded data for mono or stereo channels.
 
-Figure 2 shows conventional mono or stereo encoding and decoding model.
-
-<center><img src="Conventional Mono or Stereo Encoding & Decoding Model.png"></center>
-<center><b>Figure 2. </b>Conventional Mono or Stereo Encoding and Decoding Model</center>
-
-Figure 3 shows IAC encoding model.
-
-<center><img src="IAC Encoding Model.png"></center>
-<center><b>Figure 3. </b>IAC Encoding Model</center> 
-
-Figure 4 shows IAC decoding model.
-
-<center><img src="IAC Decoding Model.png"></center>
-<center><b>Figure 4. </b>IAC Decoding Model</center> 
+This specification is formulated as follows:
+- <b>Section 1 Introduction</b> describes a conceptual IAC architecture (Informative section).
+- <b>Section 2 Immersive Audio Bitstream Definition</b> specifies the definition of IA bitstream (Normative section).
+- <b>Section 3 Basic Encapsulation Scheme</b> specifies the way to encapsulate IA bitstream into [[!ISOBMFF]] tracks (Normative section).
+- <b>Section 4 IAC Decapsulation Process</b> provides a way to decapsulate IAC file back into IA bitstream (Informative section).
+- <b>Section 5 IA Encoding Process</b> provides a guideline for Pre-Processor to generate Pre-Processed Audio and Codec Agnostic Metadata and IAC encoding model based on the conventional more or stereo encoding model (Informative section).
+- <b>Section 6 IA Decoding Process</b> provides IAC decoding model based on the conventional more or stereo decoding model and a guideline for Post-Processor to generate Immersive 3D Audio (Informative section).
 
 
 # Bitstream features overview # {#bitstream-overview}
