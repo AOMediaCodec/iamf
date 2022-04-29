@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version fb1e763a4, updated Tue Mar 1 13:13:50 2022 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iac/" rel="canonical">
-  <meta content="0e45bbbb698f96e8b1a0f7febbbb4380abcd99a4" name="document-revision">
+  <meta content="83c53f7472ff64036aa06d5b8a5ec0e36778f91a" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -2050,16 +2050,37 @@ dfn > a.self-link::before      { content: "#"; }
    <p>Figure 1 shows an conceptual IAC architecture.</p>
    <center><img height="216" src="Conceptual IAC Architecture.png" width="800"></center>
    <center><b>Figure 1. </b>Conceptual IAC Architecture</center>
+   <p>For a given 3D audio such as Ambisonics and/or multichannel audio,</p>
+   <ul>
+    <li data-md>
+     <p>Pre-Processor generates Pre-Processed Audio and Codec Agnostic Metadata for immersive audio (IA).</p>
+    <li data-md>
+     <p>Audio Codec Enc generates Codec-Dependent Bitstream, which consists of the coded streams, coded from Pre-Processed Audio.</p>
+    <li data-md>
+     <p>File Packager generates IAC File by encapsulating IA bitstream, which consists of Codec-Dependent Bitstream and Codec Agnostic Metadata, into <a data-link-type="biblio" href="#biblio-isobmff">[ISOBMFF]</a> tracks.</p>
+    <li data-md>
+     <p>File Parser reconstructs IA bitstream by decapsulating IAC File.</p>
+    <li data-md>
+     <p>Audio Codec Dec outputs a decoded Pre-Processed Audio after decoding of Codec-Dependent Bitstream.</p>
+    <li data-md>
+     <p>Post-Processor outputs Immersive 3D Audio by using the decoded Pre-Processed Audio and Codec Agnostic Metadata.</p>
+   </ul>
    <p>IA bitstream is an codec-agnostic audio bitstream format to deliver three dimensional sound fields that can be used for multichannel sound playback and immersive experience and conceptually it consists of codec-dependent bitstream(s) and codec-agnostic metadata. And, it is designed to be able to reuse conventional mono or stereo encoding and decoding mechanisam as the codec-dependent bitstream consists of one or more coded streams. Where, each coded stream is an coded data for mono or stereo channels.</p>
-   <p>Figure 2 shows conventional mono or stereo encoding and decoding model.</p>
-   <center><img src="Conventional Mono or Stereo Encoding &amp; Decoding Model.png"></center>
-   <center><b>Figure 2. </b>Conventional Mono or Stereo Encoding and Decoding Model</center>
-   <p>Figure 3 shows IAC encoding model.</p>
-   <center><img src="IAC Encoding Model.png"></center>
-   <center><b>Figure 3. </b>IAC Encoding Model</center>
-   <p>Figure 4 shows IAC decoding model.</p>
-   <center><img src="IAC Decoding Model.png"></center>
-   <center><b>Figure 4. </b>IAC Decoding Model</center>
+   <p>This specification is formulated as follows:</p>
+   <ul>
+    <li data-md>
+     <p><b>Section 1 Introduction</b> describes a conceptual IAC architecture (Informative section).</p>
+    <li data-md>
+     <p><b>Section 2 Immersive Audio Bitstream Definition</b> specifies the definition of IA bitstream (Normative section).</p>
+    <li data-md>
+     <p><b>Section 3 Basic Encapsulation Scheme</b> specifies the way to encapsulate IA bitstream into <a data-link-type="biblio" href="#biblio-isobmff">[ISOBMFF]</a> tracks (Normative section).</p>
+    <li data-md>
+     <p><b>Section 4 IAC Decapsulation Process</b> provides a way to decapsulate IAC file back into IA bitstream (Informative section).</p>
+    <li data-md>
+     <p><b>Section 5 IA Encoding Process</b> provides a guideline for Pre-Processor to generate Pre-Processed Audio and Codec Agnostic Metadata and IAC encoding model based on the conventional more or stereo encoding model (Informative section).</p>
+    <li data-md>
+     <p><b>Section 6 IA Decoding Process</b> provides IAC decoding model based on the conventional more or stereo decoding model and a guideline for Post-Processor to generate Immersive 3D Audio (Informative section).</p>
+   </ul>
    <h2 class="heading settled" data-level="2" id="immersive-audio-bitstream-definition"><span class="secno">2. </span><span class="content">Immersive Audio Bitstream Definition</span><a class="self-link" href="#immersive-audio-bitstream-definition"></a></h2>
    <p>An immersive audio (IA) sequence is composed of a sequence of IA bitstreams.</p>
    <p>Each IA bitstream is a self-decodable and composed of Non-timed Metadata and followed by a sequence of IA Frames, and the structure of the IA Frame is defined by the Non-timed Metadata:</p>
