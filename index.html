@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version fb1e763a4, updated Tue Mar 1 13:13:50 2022 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iac/" rel="canonical">
-  <meta content="88bb89bb57ecb85376ea8100066628a944070475" name="document-revision">
+  <meta content="b18a7c00a8ef460610f47b125d7d9cd5fffd2066" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -1977,8 +1977,25 @@ dfn > a.self-link::before      { content: "#"; }
         <li><a href="#iac-opus-specific"><span class="secno">2.1.1</span> <span class="content">IAC-OPUS Specific</span></a>
         <li><a href="#iac-aac-lc-specific"><span class="secno">2.1.2</span> <span class="content">IAC-AAC-LC Specific</span></a>
        </ol>
-      <li><a href="#obu-syntax"><span class="secno">2.2</span> <span class="content">OBU Syntax</span></a>
-      <li><a href="#obu-semantics"><span class="secno">2.3</span> <span class="content">OBU Semantics</span></a>
+      <li>
+       <a href="#open-bitstream-unit-obu-syntax-and-semantics"><span class="secno">2.2</span> <span class="content">OPEN Bitstream Unit (OBU) Syntax and Semantics</span></a>
+       <ol class="toc">
+        <li><a href="#general-obu-syntax-and-semantics"><span class="secno">2.2.1</span> <span class="content">General OBU Syntax and Semantics</span></a>
+        <li><a href="#obu-header-syntax-and-semantics"><span class="secno">2.2.2</span> <span class="content">OBU Header Syntax and Semantics</span></a>
+        <li><a href="#byte-alignment-syntax-and-semantics"><span class="secno">2.2.3</span> <span class="content">Byte Alignment Syntax and Semantics</span></a>
+        <li><a href="#reserved-obu-syntax-and-semantics"><span class="secno">2.2.4</span> <span class="content">Reserved OBU Syntax and Semantics</span></a>
+        <li><a href="#ia-stream-indicator-obu-syntax-and-semantics"><span class="secno">2.2.5</span> <span class="content">IA Stream Indicator OBU Syntax and Semantics</span></a>
+        <li><a href="#codec-specific-info-syntax-and-semantics"><span class="secno">2.2.6</span> <span class="content">Codec Specific Info Syntax and Semantics</span></a>
+        <li><a href="#ia-static-meta-obu-syntax-and-semantics"><span class="secno">2.2.7</span> <span class="content">IA Static Meta OBU Syntax and Semantics</span></a>
+        <li><a href="#ambisonics-layer-config-syntax-and-semantics"><span class="secno">2.2.8</span> <span class="content">Ambisonics Layer Config Syntax and Semantics</span></a>
+        <li><a href="#channel-audio-layer-config-syntax-and-semantics"><span class="secno">2.2.9</span> <span class="content">Channel Audio Layer Config Syntax and Semantics</span></a>
+        <li><a href="#temporal-delimitor-obu-syntax-and-semantics"><span class="secno">2.2.10</span> <span class="content">Temporal Delimitor OBU Syntax and Semantics</span></a>
+        <li><a href="#demixing-info-obu-syntax-and-semantics"><span class="secno">2.2.11</span> <span class="content">Demixing Info OBU Syntax and Semantics</span></a>
+        <li><a href="#substream-boundary-info-obu-syntax-and-semantics"><span class="secno">2.2.12</span> <span class="content">Substream Boundary Info OBU Syntax and Semantics</span></a>
+        <li><a href="#recon-gain-info-obu-syntax-and-semantics"><span class="secno">2.2.13</span> <span class="content">Recon Gain Info OBU Syntax and Semantics</span></a>
+        <li><a href="#ia-coded-data-obu-syntax-and-semantics"><span class="secno">2.2.14</span> <span class="content">IA Coded Data OBU Syntax and Semantics</span></a>
+        <li><a href="#substream-obu-syntax-and-semantics"><span class="secno">2.2.15</span> <span class="content">Substream OBU Syntax and Semantics</span></a>
+       </ol>
      </ol>
     <li>
      <a href="#basic-encapsulation"><span class="secno">3</span> <span class="content">Basic Encapsulation Scheme</span></a>
@@ -2105,7 +2122,7 @@ dfn > a.self-link::before      { content: "#"; }
    <p>Figure 5 shows the configuration of IA bitstream (before packing <a data-link-type="dfn">OBUs</a>).</p>
    <center><img height="272" src="Configuration of IA Bitstream.png" width="800"></center>
    <center><b>Figure 5. </b>Configuration of IA Bitstream (before packing OBUs)</center>
-   <p>For IAC, each IA bitstream is packed by OBUs so that it is composed of a sequence of OBUs, Non-timed Metadata and followed by grouped into <a data-link-type="dfn">Temporal Units</a>. Where, each Temporal Unit SHALL start Temproal_Delimitor_OBU and SHALL consist of OBUs for only one single IA_Frame. And, the order of Substreams in each Temporal Unit SHALL be maintained in the same order as in IA_Coded_Data.</p>
+   <p>For IAC, each IA bitstream is packed by OBUs so that it is composed of a sequence of OBUs, Non-timed Metadata and followed by grouped into <a data-link-type="dfn">Temporal Units</a>. Where, each Temporal Unit shall start Temproal_Delimitor_OBU and shall consist of OBUs for only one single IA_Frame. And, the order of Substreams in each Temporal Unit shall be maintained in the same order as in IA_Coded_Data.</p>
    <p class="note" role="note"><span>NOTE:</span> OBU_IA_Stream_Indicator is only placed at the front of the first IA bitstream (i.e. at the front of IA sequence) to be feeded to OBU parsers.</p>
    <p>OBUs are made of a 1 byte header, identifying in particular the type of OBU, followed by an optional length field and by an optional payload, whose presence and content depend on the OBU type. Depending on its type, an OBU can carry Codec_Specific_Info, IA_Static_Meta, Demixing_Info, Substream_Boundary_Info, Recon_Gain_Info or IA_Coded_Data for option1 (or Substream for option2).</p>
    <p>Figure 6-1 shows a configuration of IA bitstream (after packing OBUs) for option1.</p>
@@ -2120,96 +2137,145 @@ dfn > a.self-link::before      { content: "#"; }
    <p>This section defines codec specific information for Codec_Specific_Info and Substream.</p>
    <ul>
     <li data-md>
-     <p>Codec_Specific_Info is composed of Codec_ID and Decder_Config. Codec_ID SHALL indicate the codec which has been used to generate Substreams within IA bitstream and Decder_Config SHALL indicate the decoding parameters which are applied to all of Substreams within IA bitstream.</p>
+     <p>Codec_Specific_Info is composed of Codec_ID and Decder_Config. Codec_ID shall indicate the codec which has been used to generate Substreams within IA bitstream and Decder_Config shall indicate the decoding parameters which are applied to all of Substreams within IA bitstream.</p>
    </ul>
-   <p>For legacy codecs, Decder_Config SHALL be exactly the same information as the conventional file parser feeds to the codec decoders for decoding of mono or stereo bitstream. For future codecs, Decder_Config SHALL include all of decoding parameters which are required to decode Substreams.</p>
+   <p>For legacy codecs, Decder_Config shall be exactly the same information as the conventional file parser feeds to the codec decoders for decoding of mono or stereo bitstream. For future codecs, Decder_Config shall include all of decoding parameters which are required to decode Substreams.</p>
    <ul>
     <li data-md>
-     <p>Substream is a raw coded stream for mono or stereo channels. Substream format SHALL be exactly the same as the sample format (before packing OBU) for mono or stereo audio file which consists of only one single coded stream by the Codec_ID.</p>
+     <p>Substream is a raw coded stream for mono or stereo channels. Substream format shall be exactly the same as the sample format (before packing OBU) for mono or stereo audio file which consists of only one single coded stream by the Codec_ID.</p>
    </ul>
    <h4 class="heading settled" data-level="2.1.1" id="iac-opus-specific"><span class="secno">2.1.1. </span><span class="content">IAC-OPUS Specific</span><a class="self-link" href="#iac-opus-specific"></a></h4>
-   <p>Decoder_Config for IAC-OPUS SHALL be <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="termref-for-">ID Header</a> with <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-①">ChannelMappingFamily</a> = 0 of <a data-link-type="biblio" href="#biblio-rfc7845">[RFC7845]</a> as follows:</p>
-   <p>Substream format SHALL be <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6716#" id="termref-for-②">opus packet</a> of <a data-link-type="biblio" href="#biblio-rfc6716">[RFC6716]</a> which contains only one single frame of mono or stereo channels.</p>
+   <p>Decoder_Config for IAC-OPUS shall be <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="termref-for-">ID Header</a> with <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-①">ChannelMappingFamily</a> = 0 of <a data-link-type="biblio" href="#biblio-rfc7845">[RFC7845]</a> as follows:</p>
+   <p>Substream format shall be <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6716#" id="termref-for-②">opus packet</a> of <a data-link-type="biblio" href="#biblio-rfc6716">[RFC6716]</a> which contains only one single frame of mono or stereo channels.</p>
    <h4 class="heading settled" data-level="2.1.2" id="iac-aac-lc-specific"><span class="secno">2.1.2. </span><span class="content">IAC-AAC-LC Specific</span><a class="self-link" href="#iac-aac-lc-specific"></a></h4>
-   <p>Decoder_Config for IAC-AAC-LC SHALL be {esds} which is a subset of <a data-link-type="dfn" href="https://www.iso.org/standard/79110.html#" id="termref-for-③">ESDBox</a> as follows:</p>
+   <p>Decoder_Config for IAC-AAC-LC shall be {esds} which is a subset of <a data-link-type="dfn" href="https://www.iso.org/standard/79110.html#" id="termref-for-③">ESDBox</a> as follows:</p>
    <p class="note" role="note"><span>NOTE:</span> {esds} means a subset of <a data-link-type="dfn" href="https://www.iso.org/standard/79110.html#" id="termref-for-④">ESDBox</a> which is necessarily required for decoding.</p>
    <p class="note" role="note"><span>NOTE:</span> {esds} needs to be defined.</p>
-   <p>Substream format SHALL be <a data-link-type="dfn" href="https://www.iso.org/standard/43345.html#" id="termref-for-⑤">raw_data_block()</a> of <a data-link-type="biblio" href="#biblio-aac">[AAC]</a> which contains only one single frame of mono or stereo channels.</p>
-   <h3 class="heading settled" data-level="2.2" id="obu-syntax"><span class="secno">2.2. </span><span class="content">OBU Syntax</span><a class="self-link" href="#obu-syntax"></a></h3>
-   <p>This specification defines a low-overhead bitstream format as a sequence of the OBU syntactical elements defined in this section.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="general-obu-syntax">General OBU syntax<a class="self-link" href="#general-obu-syntax"></a></dfn></p>
-   <left><img src="General OBU Syntax.png"></left>
-   <p><dfn data-dfn-type="dfn" data-noexport id="obu-header-syntax">OBU header syntax<a class="self-link" href="#obu-header-syntax"></a></dfn></p>
-   <left><img src="OBU header syntax.png"></left>
-   <p><dfn data-dfn-type="dfn" data-noexport id="byte-alignment-syntax">Byte alignment syntax<a class="self-link" href="#byte-alignment-syntax"></a></dfn></p>
-   <left><img src="Byte alignment syntax.png"></left>
-   <p><dfn data-dfn-type="dfn" data-noexport id="ia-stream-indicator-obu-syntax">IA Stream Indicator OBU syntax<a class="self-link" href="#ia-stream-indicator-obu-syntax"></a></dfn></p>
-   <left><img src="IA Stream Indicator OBU syntax.png"></left>
-   <p class="note" role="note"><span>NOTE:</span> The IA Stream Indicator OBU has an empty payload.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="codec-specific-info-obu-syntax">Codec Specific Info OBU syntax<a class="self-link" href="#codec-specific-info-obu-syntax"></a></dfn></p>
-   <left><img src="Codec Specific Info OBU syntax.png"></left>
-   <p><dfn data-dfn-type="dfn" data-noexport id="ia-static-meta-obu-syntax">IA Static Meta OBU syntax<a class="self-link" href="#ia-static-meta-obu-syntax"></a></dfn></p>
-   <left><img src="IA Static Meta OBU syntax.png"></left>
-   <p class="note" role="note"><span>NOTE:</span> "substream_size_is_present_flag" is removed as it needs to provide boundary information of Substreams regardless of whether Substream is self-delimiting or not so that IAC parsers (or OBU parsers) can perform Substream-based decapsulation for opiton1 as well.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="ambisonics-layer-config-syntax">Ambisonics Layer Config syntax<a class="self-link" href="#ambisonics-layer-config-syntax"></a></dfn></p>
-   <left><img src="Ambisonics Layer Config syntax.png"></left>
-   <p><dfn data-dfn-type="dfn" data-noexport id="channel-audio-layer-config-syntax">Channel Audio Layer Config syntax<a class="self-link" href="#channel-audio-layer-config-syntax"></a></dfn></p>
-   <left><img src="Channel Audio Layer Config syntax.png"></left>
-   <p><dfn data-dfn-type="dfn" data-noexport id="temporal-delimitor-obu-syntax">Temporal Delimitor OBU syntax<a class="self-link" href="#temporal-delimitor-obu-syntax"></a></dfn></p>
-   <left><img src="Temporal Delimitor OBU syntax.png"></left>
-   <p class="note" role="note"><span>NOTE:</span> The temporal delimitor has an empty payload.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="demixing-info-obu-syntax">Demixing Info OBU syntax<a class="self-link" href="#demixing-info-obu-syntax"></a></dfn></p>
-   <left><img src="Demixing Info OBU syntax.png"></left>
-   <p><dfn data-dfn-type="dfn" data-noexport id="substream-boundary-info-obu-syntax">Substream Boundary Info OBU syntax<a class="self-link" href="#substream-boundary-info-obu-syntax"></a></dfn></p>
-   <left><img src="Substream Boundary Info OBU syntax.png"></left>
-   <p class="note" role="note"><span>NOTE:</span> It will be removed when option2 is selected.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="recon-gain-info-obu-syntax">Recon Gain Info OBU syntax<a class="self-link" href="#recon-gain-info-obu-syntax"></a></dfn></p>
-   <left><img src="Recon Gain Info OBU syntax.png"></left>
-   <p><dfn data-dfn-type="dfn" data-noexport id="ia-coded-data-obu-syntax">IA Coded Data OBU syntax<a class="self-link" href="#ia-coded-data-obu-syntax"></a></dfn></p>
-   <left><img src="IA Coded Data OBU syntax.png"></left>
-   <p class="note" role="note"><span>NOTE:</span> It will be removed when option2 is selected.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="substream-obu-syntax">Substream OBU syntax<a class="self-link" href="#substream-obu-syntax"></a></dfn></p>
-   <left><img src="Substream OBU syntax.png"></left>
-   <p class="note" role="note"><span>NOTE:</span> It will be removed when option1 is selected.</p>
-   <h3 class="heading settled" data-level="2.3" id="obu-semantics"><span class="secno">2.3. </span><span class="content">OBU Semantics</span><a class="self-link" href="#obu-semantics"></a></h3>
-   <p>This section specifies the meaning of the syntax elements read in the OBU syntax structures by assuming IAC decoder receives IA bitstream starting with IA Stream Indicator OBU as input. Where, IAC decoder consists of IAC-OBU parer, Substream decoders and Post-Processor.</p>
+   <p>Substream format shall be <a data-link-type="dfn" href="https://www.iso.org/standard/43345.html#" id="termref-for-⑤">raw_data_block()</a> of <a data-link-type="biblio" href="#biblio-aac">[AAC]</a> which contains only one single frame of mono or stereo channels.</p>
+   <h3 class="heading settled" data-level="2.2" id="open-bitstream-unit-obu-syntax-and-semantics"><span class="secno">2.2. </span><span class="content">OPEN Bitstream Unit (OBU) Syntax and Semantics</span><a class="self-link" href="#open-bitstream-unit-obu-syntax-and-semantics"></a></h3>
+   <p>This section specifies the syntax elements and the meaning of the syntax elements read in the OBU syntax and semantics structures by assuming IAC decoder receives IA bitstream starting with IA Stream Indicator OBU as input. Where, IAC decoder consists of IAC-OBU parer, Substream decoders and Post-Processor.</p>
    <ul>
     <li data-md>
-     <p>SeenIABitstream initially SHALL be set to 0.</p>
+     <p>SeenIABitstream initially shall be set to 0.</p>
     <li data-md>
-     <p>SeenIABitstream SHALL be set to 1 after receiving IA Stream Indicator OBU.</p>
+     <p>SeenIABitstream shall be set to 1 after receiving IA Stream Indicator OBU.</p>
     <li data-md>
-     <p>If SeenIABitstream is set to 1, then following OBUs are given to the IAC decoder. Otherwise, the OBU will be dropped.</p>
+     <p>If SeenIABitstream is set to 1, then following OBUs shall be given to the IAC decoder. Otherwise, the OBU will be dropped.</p>
    </ul>
    <p><dfn data-dfn-type="dfn" data-noexport id="drop_obu">drop_obu( )<a class="self-link" href="#drop_obu"></a></dfn> is a function call that indicates when IAC decoder should ignore an OBU because it is not assumed as IA bitstream.</p>
-   <p>After SeenIABitstream sets to 1, IA bitstream is presented to IAC-OBU parser. After parsing Codec_Specific_Info_OBU and IA_Static_Meta_OBU, IAC-OBU parser prepares Substream decoders as many as the number of Substreams and reconstruts each coded stream, from IA_Coded_Data_OBU (or Substream_OBUs), to be feeded to each Substream decoder. At the same time, IAC-OBU parser feeds IA_Static_Meta_OBU and Recon_Gain_Info_OBU to Post-Processor.</p>
+   <p>After SeenIABitstream sets to 1, IA bitstream shall be presented to IAC-OBU parser. After parsing Codec_Specific_Info_OBU and IA_Static_Meta_OBU, IAC-OBU parser prepares Substream decoders as many as the number of Substreams and reconstruts each coded stream, from IA_Coded_Data_OBU (or Substream_OBUs), to be feeded to each Substream decoder. At the same time, IAC-OBU parser feeds IA_Static_Meta_OBU and Recon_Gain_Info_OBU to Post-Processor.</p>
    <center><img src="Hypothetical IAC Decoder Model.png"></center>
    <center><b>Figure 7. </b>Hypothetical IAC Decoder Model</center>
-   <p><dfn data-dfn-type="dfn" data-noexport id="general-obu-semantics">General OBU semantics<a class="self-link" href="#general-obu-semantics"></a></dfn></p>
+   <h4 class="heading settled" data-level="2.2.1" id="general-obu-syntax-and-semantics"><span class="secno">2.2.1. </span><span class="content">General OBU Syntax and Semantics</span><a class="self-link" href="#general-obu-syntax-and-semantics"></a></h4>
+   <p><b>Syntax</b></p>
+<pre>class obu_bitstream_unit(sz) {
+  if (SeenIABitstream) {
+    obu_header();
+    if (obu_has_size_field)
+      unsigned int (leb128()) obu_size;
+    else
+      obu_size = sz - 1;
+    if (obu_type == 1)
+      cpdec_specific_info();
+    if (obu_type == 2)
+      ia_static_meta();
+    if (obu_type == 4)
+      demixing_info();
+    if (obu_type == 5)
+      substream_boundary_info();
+    if (obu_type == 6)
+      recon_gain_info();
+    if (obu_type == 7)
+      ia_coded_data() or substream();
+    byte_alignment():
+  }
+  else {
+    obu_header();
+    if (obu_type != 0)
+      drop_obu();
+    else
+      ia_stream_indicator_obu();
+  }
+}
+</pre>
+   <p><b>Semantics</b></p>
    <p>When SeenIABitstream is set to 1, an ordered series of OBUs is presented to the decoding process. Each OBU is given to the decoding process as a string of bytes along with a variable sz that identifies the total number of bytes in the OBU.</p>
    <p>If the syntax element obu_has_size_field (in the OBU header) is equal to 1, then the variable sz will be unused and does not have to be provided.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="obu_size">obu_size<a class="self-link" href="#obu_size"></a></dfn> contains the size in bytes of the OBU not including the bytes within obu_header or the obu_size syntax element.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="obu_size">obu_size<a class="self-link" href="#obu_size"></a></dfn> shall indicate the size in bytes of the OBU not including the bytes within obu_header or the obu_size syntax element.</p>
    <p>OBU data starts on the first (most significant) bit and ends on the last bit of the given bytes. The payload of an OBU lies between the first bit of the given bytes and the last bit before the first zero bit of byte alingment.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="obu-header-semantics">OBU header semantics<a class="self-link" href="#obu-header-semantics"></a></dfn></p>
+   <h4 class="heading settled" data-level="2.2.2" id="obu-header-syntax-and-semantics"><span class="secno">2.2.2. </span><span class="content">OBU Header Syntax and Semantics</span><a class="self-link" href="#obu-header-syntax-and-semantics"></a></h4>
+   <p><b>Syntax</b></p>
+<pre>class obu_header() {
+  unsigned int (1) obu_forbidden_bit;
+  unsigned int (4) obu_type;
+  unsigned int (1) obu_reserved_1bit;
+  unsigned int (1) obu_has_size_field;
+  unsigned int (1) obu_reserved_1bit;
+}
+</pre>
+   <p><b>Semantics</b></p>
    <p>OBUs are structured with a header and a payload. The header identifies the type of the payload using the obu_type header parameter.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="obu_forbidden_bit">obu_forbidden_bit<a class="self-link" href="#obu_forbidden_bit"></a></dfn> must be set to 0.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="obu_type">obu_type<a class="self-link" href="#obu_type"></a></dfn> specifies the type of data structure contained in the OBU payload:</p>
-   <left><img src="obu_type.png"></left>
+   <p><dfn data-dfn-type="dfn" data-noexport id="obu_forbidden_bit">obu_forbidden_bit<a class="self-link" href="#obu_forbidden_bit"></a></dfn> shall be set to 0.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="obu_type">obu_type<a class="self-link" href="#obu_type"></a></dfn> shall specify the type of data structure contained in the OBU payload.</p>
+<pre class="def">obu_type: Name of obu_type
+   0    : OBU_IA_Stream_Indicator
+   1    : OBU_Codec_Specific_Info
+   2    : OBU_IA_Static_Meta
+   3    : OBU_Temporal_Delimitor
+   4    : OBU_Demixing_Info
+   5    : OBU_Substream_Boundary_Info
+   6    : OBU_Recon_Gain_Info
+   7    : OBU_IA_Coded_Data or OBU_Substream
+  8~15  : Reserved
+</pre>
    <p>Reserved units are for future use and shall be ignored by IAC-OBU parser.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="obu_reserved_1bit">obu_reserved_1bit<a class="self-link" href="#obu_reserved_1bit"></a></dfn> must be set to 0. The value is ignored by a IAC-OBU parser.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="obu_reserved_1bit">obu_reserved_1bit<a class="self-link" href="#obu_reserved_1bit"></a></dfn> shall be set to 0. The value is ignored by a IAC-OBU parser.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="obu_has_size_field">obu_has_size_field<a class="self-link" href="#obu_has_size_field"></a></dfn> equal to 1 indicates that the obu_size syntax element will be present. obu_has_size_field equal to 0 indicates tha the obu_size syntax element will not be present.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="byte-alignment-semantics">Byte alignment semantics<a class="self-link" href="#byte-alignment-semantics"></a></dfn></p>
+   <h4 class="heading settled" data-level="2.2.3" id="byte-alignment-syntax-and-semantics"><span class="secno">2.2.3. </span><span class="content">Byte Alignment Syntax and Semantics</span><a class="self-link" href="#byte-alignment-syntax-and-semantics"></a></h4>
+   <p><b>Syntax</b></p>
+<pre>class byte_aligment() {
+  while (get_position() &amp; 7)
+    unsigned int (1) zero_bit;
+}
+</pre>
+   <p><b>Semantics</b></p>
    <p><dfn data-dfn-type="dfn" data-noexport id="zero_bit">zero_bit<a class="self-link" href="#zero_bit"></a></dfn> shall be equal to 0 and is inserted into the bitstream to align the bit position to a multiple of 8 bits.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="reserved-obu-semantics">Reserved OBU semantics<a class="self-link" href="#reserved-obu-semantics"></a></dfn></p>
+   <h4 class="heading settled" data-level="2.2.4" id="reserved-obu-syntax-and-semantics"><span class="secno">2.2.4. </span><span class="content">Reserved OBU Syntax and Semantics</span><a class="self-link" href="#reserved-obu-syntax-and-semantics"></a></h4>
    <p>The reserved OBU allows the extension of this specification with additional OBU types in a way that allows older IAC-OBU parser to ignore them.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="ia-stream-indicator-obu-semantics">IA Stream Indicator OBU semantics<a class="self-link" href="#ia-stream-indicator-obu-semantics"></a></dfn></p>
+   <h4 class="heading settled" data-level="2.2.5" id="ia-stream-indicator-obu-syntax-and-semantics"><span class="secno">2.2.5. </span><span class="content">IA Stream Indicator OBU Syntax and Semantics</span><a class="self-link" href="#ia-stream-indicator-obu-syntax-and-semantics"></a></h4>
+   <p><b>Syntax</b></p>
+<pre>class ia_stream_indicator_obu() {
+  SeenIABitstream = 1;
+}
+</pre>
+   <p class="note" role="note"><span>NOTE:</span> The IA Stream Indicator OBU has an empty payload.</p>
+   <p><b>Semantics</b></p>
    <p><dfn data-dfn-type="dfn" data-noexport id="seeniabitstream">SeenIABitstream<a class="self-link" href="#seeniabitstream"></a></dfn> is to indicater whether a series of OBUs for IA bitstream will follow or not. It is initialized to zero.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="codec-specific-info-obu-semantics">Codec Specific Info OBU semantics<a class="self-link" href="#codec-specific-info-obu-semantics"></a></dfn></p>
+   <h4 class="heading settled" data-level="2.2.6" id="codec-specific-info-syntax-and-semantics"><span class="secno">2.2.6. </span><span class="content">Codec Specific Info Syntax and Semantics</span><a class="self-link" href="#codec-specific-info-syntax-and-semantics"></a></h4>
+   <p><b>Syntax</b></p>
+<pre>class codec_specific_info_obu() {
+  unsigned int (32) codec_id;
+  decoder_config(codec_id);
+}
+</pre>
+   <p><b>Semantics</b></p>
    <p><dfn data-dfn-type="dfn" data-noexport id="codec_id">codec_id<a class="self-link" href="#codec_id"></a></dfn> is a ‘four-character code’ (4CC) to identify the codec which has been used to generate Substream. It shall be the same as the <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑥">boxtype</a> of its AduioSampleEntry if exist. It shall be '<a data-link-type="dfn">opus</a>' for IAC-OPUS and '<a data-link-type="dfn">mp4a</a>' for IAC-AAC-LC.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="decoder_config">decoder_config<a class="self-link" href="#decoder_config"></a></dfn> is a set of decoding parameters to decode Substream for a given codec_id. It shall be the set of decoding parameters which conventional mono or stereo file parsers feed to the conventional mono or stereo decoder. It shall be <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="termref-for-⑦">ID Header</a> with <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-⑧">ChannelMappingFamily</a> = 0 of <a data-link-type="biblio" href="#biblio-rfc7845">[RFC7845]</a> for IAC-OPUS and {esds} for IAC-AAC-LC.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="ia-static-meta-obu-semantics">IA Static Meta OBU semantics<a class="self-link" href="#ia-static-meta-obu-semantics"></a></dfn></p>
+   <h4 class="heading settled" data-level="2.2.7" id="ia-static-meta-obu-syntax-and-semantics"><span class="secno">2.2.7. </span><span class="content">IA Static Meta OBU Syntax and Semantics</span><a class="self-link" href="#ia-static-meta-obu-syntax-and-semantics"></a></h4>
    <p class="note" role="note"><span>NOTE:</span> We agree to with a fixed set of layouts in this version, and possibly have a future version number for different layouts.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="version">version<a class="self-link" href="#version"></a></dfn> shall indicate the version of IA bitstream. It shall be set to 0 for this version of the specification. Implementations SHOULD treat IA bitstream where the MSB four bits of the version number match that of a recognized specification as backwards compatible with that specification. That is, the version number can be split into "major" and "minor" version sub-fields, with changes to the minor sub-field (in the LSB four bits) signaling compatible changes. For example, an implementation of this specification SHOULD accept any stream with a version number of ’15’ or less, and SHOULD assume any stream with a version number ’16’ or
+   <p><b>Syntax</b></p>
+<pre>class ia_static_meta_obu() {
+  unsigned int (8) version;
+  unsigned int (2) ambisonics_mode;
+  unsigned int (3) channel_audio_layer;
+  if (ambisonics_mode == 1 or 2)
+    ambix_layer_config(ambisonics_mode);
+  for (i=1; i&lt;= channel_audio_layer; i++)
+    channel_audio_layer_config(i);
+}
+</pre>
+   <p><b>Semantics</b></p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="version">version<a class="self-link" href="#version"></a></dfn> shall indicate the version of IA bitstream. It shall be set to 0 for this version of the specification. Implementations should treat IA bitstream where the MSB four bits of the version number match that of a recognized specification as backwards compatible with that specification. That is, the version number can be split into "major" and "minor" version sub-fields, with changes to the minor sub-field (in the LSB four bits) signaling compatible changes. For example, an implementation of this specification should accept any stream with a version number of ’15’ or less, and should assume any stream with a version number ’16’ or
 greater is incompatible.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="ambisonics_mode">ambisonics_mode<a class="self-link" href="#ambisonics_mode"></a></dfn> shall indicate if IA bitstream include Ambiosnics and which type if includes.</p>
    <ul>
@@ -2224,11 +2290,40 @@ greater is incompatible.</p>
    </ul>
    <p class="note" role="note"><span>NOTE:</span> In the case of ambisonics_mode = 1 or 2, the channel audio if present is regarded as non-diegetic channels.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="channel_audio_layer">channel_audio_layer<a class="self-link" href="#channel_audio_layer"></a></dfn> shall indicate the number of ChannelGroups for channel audio in each IA_Frame. To indicate that IA bitstream includes no channel audio, it shall be set to zero. Its maximum number shall be limited to 6.</p>
+   <h4 class="heading settled" data-level="2.2.8" id="ambisonics-layer-config-syntax-and-semantics"><span class="secno">2.2.8. </span><span class="content">Ambisonics Layer Config Syntax and Semantics</span><a class="self-link" href="#ambisonics-layer-config-syntax-and-semantics"></a></h4>
+   <p><b>Syntax</b></p>
+<pre>class ambix_layer_config(mode) {
+  unsigned int (8) output_channel_count (C);
+  unsigned int (8) substream_count (N);
+  unsigned int (8) coupled_substream_count (M);
+  if (mode == 1)
+    unsigned int (8*C) channel_mapping;
+  else if (mode == 2)
+    unsigned int (18*(N+M)*C) demixing_matrix;
+}
+</pre>
+   <p><b>Semantics</b></p>
    <p><dfn data-dfn-type="dfn" data-noexport id="output_channel_count">output_channel_count<a class="self-link" href="#output_channel_count"></a></dfn> shall be the same as <a data-link-type="dfn">channel count</a> in [[!RFC8486].</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="substream_count">substream_count<a class="self-link" href="#substream_count"></a></dfn> shall indicate the number of Substreams composing of ChannelGroup.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="coupled_substream_count">coupled_substream_count<a class="self-link" href="#coupled_substream_count"></a></dfn> shall indicate the number of coupled Substreams among Substreams composing of ChannelGroup.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="channel_mapping">channel_mapping<a class="self-link" href="#channel_mapping"></a></dfn> shall be the same as the one for <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-⑨">ChannelMappingFamily</a> = 2 in <a data-link-type="biblio" href="#biblio-rfc8486">[RFC8486]</a>.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="demixing_matrix">demixing_matrix<a class="self-link" href="#demixing_matrix"></a></dfn> shall be the same as the one for <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-①⓪">ChannelMappingFamily</a> = 3 in <a data-link-type="biblio" href="#biblio-rfc8486">[RFC8486]</a>.</p>
+   <h4 class="heading settled" data-level="2.2.9" id="channel-audio-layer-config-syntax-and-semantics"><span class="secno">2.2.9. </span><span class="content">Channel Audio Layer Config Syntax and Semantics</span><a class="self-link" href="#channel-audio-layer-config-syntax-and-semantics"></a></h4>
+   <p><b>Syntax</b></p>
+<pre>class channel_audio_layer_config(i) {
+  unsigned int (4) loudspeaker_layout(i);
+  unsigned int (1) output_gain_is_presetn_flag(i);
+  unsigned int (1) recon_gain_is_presetn_flag(i);
+  unsigned int (8) substream_count(i);
+  unsigned int (8) coupled_substream_count(i);
+  signed int (16) loudness(i);
+  if (output_gain_is_presetn_flag(i) == 1) {
+    unsigned int (6) output_gain_flag(i);
+    signed int (16) output_gain(i);
+  }
+}
+</pre>
+   <p><b>Semantics</b></p>
    <p><dfn data-dfn-type="dfn" data-noexport id="loudspeaker_layout">loudspeaker_layout<a class="self-link" href="#loudspeaker_layout"></a></dfn> shall indicate the channel layout for the channels to be reconstructed from the precedent ChannelGroups and the current ChannelGroup among ChannelGroups for channel audio in IA_Frame.</p>
    <left><img src="Loudspeaker Layout.png"></left>
    <p><dfn data-dfn-type="dfn" data-noexport id="output_gain_is_present_flag">output_gain_is_present_flag<a class="self-link" href="#output_gain_is_present_flag"></a></dfn> shall indicate if output_gain information fields for the ChannelGroup presents .</p>
@@ -2246,12 +2341,33 @@ greater is incompatible.</p>
      <p>1: recon_gain information fields for the ChannelGroup present in Recon_Gain_Info_OBU. In this case, recon_gain_flags and recon_gain fields present.</p>
    </ul>
    <p><dfn data-dfn-type="dfn" data-noexport id="loudness">loudness<a class="self-link" href="#loudness"></a></dfn> shall indicate the loudness value of the downmixed channels, for the channel layout which is indicated by loudspeaker_layout, from the original channel audio. It shall be stored in fixed-point value with 8 fractional bits (i.e. Q7.8 in <a data-link-type="biblio" href="#biblio-q-format">[Q-Format]</a>) and shall be <a data-link-type="dfn" href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#" id="termref-for-①①">LKFS</a> based on <a data-link-type="biblio" href="#biblio-itu1770-4">[ITU1770-4]</a>, so it shall be to represent zero or negative value.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="output_gain_flags">output_gain_flags<a class="self-link" href="#output_gain_flags"></a></dfn> shall indicate the channels which output_gian is applied to.</p>
-   <left><img src="Output_Gain_Flags.png"></left>
+   <p><dfn data-dfn-type="dfn" data-noexport id="output_gain_flags">output_gain_flags<a class="self-link" href="#output_gain_flags"></a></dfn> shall indicate the channels which output_gian is applied to. If a bit set to 1, output_gain shall be applied to the channel. Otherwise, output_gain shall not be applied to the channel.</p>
+<pre class="def">Bit position : Channel Name
+    b5(MSB)  : Left channel (L1, L2, L3)
+      b4     : Right channel (R2, R3)
+      b3     : Left Surround channel (Ls5)
+      b2     : Right Surround channel (Rs5)
+      b1     : Left Top Front channel (Ltf)
+      b0     : Rigth Top Front channel (Rtf)
+      
+</pre>
    <p><dfn data-dfn-type="dfn" data-noexport id="output_gain">output_gain<a class="self-link" href="#output_gain"></a></dfn> shall indicate the gain value to be applied to the mixed channels which are indicated by output_gain_flags. It is 20*log10 of the factor by which to scale the mixed channels. It is stored in a 16-bit, signed, two’s complement fixed-point value with 8 fractional bits (i.e. Q7.8 in <a data-link-type="biblio" href="#biblio-q-format">[Q-Format]</a>). Where, each mixed channel is generated by downmixing two or more input channels.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="temporal-delimiter-obu-semantics">Temporal delimiter OBU semantics<a class="self-link" href="#temporal-delimiter-obu-semantics"></a></dfn></p>
+   <h4 class="heading settled" data-level="2.2.10" id="temporal-delimitor-obu-syntax-and-semantics"><span class="secno">2.2.10. </span><span class="content">Temporal Delimitor OBU Syntax and Semantics</span><a class="self-link" href="#temporal-delimitor-obu-syntax-and-semantics"></a></h4>
+   <p><b>Syntax</b></p>
+<pre>class temporal_delimitor_obu() {
+}
+</pre>
+   <p class="note" role="note"><span>NOTE:</span> The temporal delimitor has an empty payload.</p>
+   <p><b>Semantics</b></p>
    <p>It shall indicate the start of <a data-link-type="dfn">Temporal Unit</a>.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="demixing-info-obu-semantics">Demixing Info OBU semantics<a class="self-link" href="#demixing-info-obu-semantics"></a></dfn></p>
+   <h4 class="heading settled" data-level="2.2.11" id="demixing-info-obu-syntax-and-semantics"><span class="secno">2.2.11. </span><span class="content">Demixing Info OBU Syntax and Semantics</span><a class="self-link" href="#demixing-info-obu-syntax-and-semantics"></a></h4>
+   <p><b>Syntax</b></p>
+<pre>class demixing_info_obu() {
+  unsigned int (3) dmixp_mode;
+  unsigned int (5) reserved;
+}
+</pre>
+   <p><b>Semantics</b></p>
    <p><dfn data-dfn-type="dfn" data-noexport id="dmixp_mode">dmixp_mode<a class="self-link" href="#dmixp_mode"></a></dfn> shall indicate a mode of pre-defined combinations of five demix parameters for the following IA_Coded_Data.</p>
    <ul>
     <li data-md>
@@ -2274,46 +2390,104 @@ greater is incompatible.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="alpha">alpha<a class="self-link" href="#alpha"></a></dfn> and <dfn data-dfn-type="dfn" data-noexport id="beta">beta<a class="self-link" href="#beta"></a></dfn> are gain values used for S7to5 down-mixer, <dfn data-dfn-type="dfn" data-noexport id="gamma">gamma<a class="self-link" href="#gamma"></a></dfn> for T4to2 down-mixer, <dfn data-dfn-type="dfn" data-noexport id="delta">delta<a class="self-link" href="#delta"></a></dfn> for S5to3 down-mixer and <dfn data-dfn-type="dfn" data-noexport id="w_idx_offset">w_idx_offset<a class="self-link" href="#w_idx_offset"></a></dfn> is the offset to generate a gain value <dfn data-dfn-type="dfn" data-noexport id="w">w<a class="self-link" href="#w"></a></dfn> used for T2toTF2 down-mixer.</p>
    <center><img src="IA Downmix Mechanism.png"></center>
    <center><b>Figure 8. </b>IA Downmix Mechanism</center>
-   <p><dfn data-dfn-type="dfn" data-noexport id="substream-boundary-info-obu-semantics">Substream Boundary Info OBU semantics<a class="self-link" href="#substream-boundary-info-obu-semantics"></a></dfn> {# for option1}</p>
+   <h4 class="heading settled" data-level="2.2.12" id="substream-boundary-info-obu-syntax-and-semantics"><span class="secno">2.2.12. </span><span class="content">Substream Boundary Info OBU Syntax and Semantics</span><a class="self-link" href="#substream-boundary-info-obu-syntax-and-semantics"></a></h4>
+   <p class="note" role="note"><span>NOTE:</span> It will be removed when option2 is selected.</p>
+   <p><b>Syntax</b></p>
+<pre>class substream_boundary_info_obu() {
+  for (i=0; i&lt; total # of substreams - 1; i++)
+    unsigned int (leb128()) substream_size;
+}
+</pre>
+   <p><b>Semantics</b></p>
    <p><dfn data-dfn-type="dfn" data-noexport id="substream_size">substream_size<a class="self-link" href="#substream_size"></a></dfn> shall indicates the size of Substream (in bytes). The fields present as many as the number of Substreams in IA_Coded_Data minus 1. So, the field for the last Substream shall not be present.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="recon-gain-info-obu-semantics">Recon Gain Info OBU semantics<a class="self-link" href="#recon-gain-info-obu-semantics"></a></dfn></p>
+   <h4 class="heading settled" data-level="2.2.13" id="recon-gain-info-obu-syntax-and-semantics"><span class="secno">2.2.13. </span><span class="content">Recon Gain Info OBU Syntax and Semantics</span><a class="self-link" href="#recon-gain-info-obu-syntax-and-semantics"></a></h4>
+   <p><b>Syntax</b></p>
+<pre>class recon_gain_info_obu() {
+  for (i=0; i&lt; channel_audio_layer; i++) {
+    if (recon_gain_is_present_flag(i) == 1) {
+      unsigned int(leb128()) recon_gain_flags(i);
+      for (j=0; j&lt; n(i); j++) {
+        if (recon_gain_flag(i)(j) == 1)
+          ussigned int (8) recon_gain;
+			}
+		}
+	}
+}
+</pre>
+   <p><b>Semantics</b></p>
    <p><dfn data-dfn-type="dfn" data-noexport id="recon_gain_flags">recon_gain_flags<a class="self-link" href="#recon_gain_flags"></a></dfn> shall indicates the channels which recon_gain is applied to.</p>
    <left><img src="Recon_Gain_Flags.png"></left>
    <p><dfn data-dfn-type="dfn" data-noexport id="recon_gain">recon_gain<a class="self-link" href="#recon_gain"></a></dfn> shall indicates the gain value to be applied to the channel, which is indicated by <dfn data-dfn-type="dfn" data-noexport id="recon_gain_flalgs">recon_gain_flalgs<a class="self-link" href="#recon_gain_flalgs"></a></dfn>, after decoding of the following IA_Coded_Data.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="ia-coded-data-obu-semantics">IA Coded Data OBU semantics<a class="self-link" href="#ia-coded-data-obu-semantics"></a></dfn> {# for option1}</p>
-   <p>There shall be ChannelGroups as many as channel_audio_layer if ambisonics_mode = 0. Otherwise, channel_audio_layer plus 1.
+   <p>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+There shall be ChannelGroups as many as channel_audio_layer if ambisonics_mode = 0. Otherwise, channel_audio_layer plus 1.
 Each ChannelGroup shall have Substreams as many as substream_count. Each Substream shall be an raw coded data for mono or stereo channels by using the codec which is indicated by codec_id field of Codec_Specific_Info_OBU. Substream format shall be <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6716#" id="termref-for-①②">opus packet</a> of <a data-link-type="biblio" href="#biblio-rfc6716">[RFC6716]</a> for IAC-OPUS and <a data-link-type="dfn" href="https://www.iso.org/standard/43345.html#" id="termref-for-①③">raw_data_block()</a> of <a data-link-type="biblio" href="#biblio-aac">[AAC]</a> for IAC-AAC-LC.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="substream-obu-semantics">Substream OBU semantics<a class="self-link" href="#substream-obu-semantics"></a></dfn> {# for option2}
 Substream shall be an raw coded data for mono or stereo channels by using the codec which is indicated by codec_id field of Codec_Specific_Info_OBU. Substream format shall be <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6716#" id="termref-for-①④">opus packet</a> of <a data-link-type="biblio" href="#biblio-rfc6716">[RFC6716]</a> for IAC-OPUS and <a data-link-type="dfn" href="https://www.iso.org/standard/43345.html#" id="termref-for-①⑤">raw_data_block()</a> of <a data-link-type="biblio" href="#biblio-aac">[AAC]</a> for IAC-AAC-LC.</p>
+    ======= 
+   <h4 class="heading settled" data-level="2.2.14" id="ia-coded-data-obu-syntax-and-semantics"><span class="secno">2.2.14. </span><span class="content">IA Coded Data OBU Syntax and Semantics</span><a class="self-link" href="#ia-coded-data-obu-syntax-and-semantics"></a></h4>
+   <p class="note" role="note"><span>NOTE:</span> It will be removed when option2 is selected.</p>
+   <p><b>Syntax</b></p>
+<pre>class ia_coded_data_obu() {
+  for (i=0; i&lt; total # of substreams; i++)
+    substream();
+}
+</pre>
+   <p><b>Semantics</b></p>
+   <p>There shall be ChannelGroups as many as channel_audio_layer if ambisonics_mode = 0. Otherwise, channel_audio_layer plus 1.
+Each ChannelGroup shall have Substreams as many as substream_count. Each Substream shall be an raw coded data for mono or stereo channels by using the codec which is indicated by codec_id field of Codec_Specific_Info_OBU. Substream format shall be <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6716#" id="termref-for-①⑥">opus packet</a> of <a data-link-type="biblio" href="#biblio-rfc6716">[RFC6716]</a> for IAC-OPUS and <a data-link-type="dfn" href="https://www.iso.org/standard/43345.html#" id="termref-for-①⑦">raw_data_block()</a> of [[!ISO/IEC 14496-3]] for IAC-AAC-LC.</p>
+   <h4 class="heading settled" data-level="2.2.15" id="substream-obu-syntax-and-semantics"><span class="secno">2.2.15. </span><span class="content">Substream OBU Syntax and Semantics</span><a class="self-link" href="#substream-obu-syntax-and-semantics"></a></h4>
+   <p class="note" role="note"><span>NOTE:</span> It will be removed when option1 is selected.</p>
+   <p><b>Syntax</b></p>
+<pre>class substream_obu() {
+  substream();
+}
+</pre>
+   <p><b>Semantics</b></p>
+   <p>Substream shall be an raw coded data for mono or stereo channels by using the codec which is indicated by codec_id field of Codec_Specific_Info_OBU. Substream format shall be <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6716#" id="termref-for-①⑧">opus packet</a> of <a data-link-type="biblio" href="#biblio-rfc6716">[RFC6716]</a> for IAC-OPUS and <a data-link-type="dfn" href="https://www.iso.org/standard/43345.html#" id="termref-for-①⑨">raw_data_block()</a> of [[!ISO/IEC 14496-3]] for IAC-AAC-LC.</p>
+   <blockquote>
+    <blockquote>
+     <blockquote>
+      <blockquote>
+       <blockquote>
+        <blockquote>
+         <blockquote>
+          <p>85b4931 (to resolve igthub issue#36-37)</p>
+         </blockquote>
+        </blockquote>
+       </blockquote>
+      </blockquote>
+     </blockquote>
+    </blockquote>
+   </blockquote>
    <h2 class="heading settled" data-level="3" id="basic-encapsulation"><span class="secno">3. </span><span class="content">Basic Encapsulation Scheme</span><a class="self-link" href="#basic-encapsulation"></a></h2>
    <p>This section describes the basic data structures used to signal encapsulation of IA bitstreams in <a data-link-type="biblio" href="#biblio-isobmff">[ISOBMFF]</a> containers.</p>
    <h3 class="heading settled" data-level="3.1" id="brands"><span class="secno">3.1. </span><span class="content">General Requirements &amp; Brands</span><a class="self-link" href="#brands"></a></h3>
    <p>A file conformant to this specification satisfies the following:</p>
    <ul>
     <li data-md>
-     <p>It SHALL conform to the normative requirements of <a data-link-type="biblio" href="#biblio-isobmff">[ISOBMFF]</a></p>
+     <p>It shall conform to the normative requirements of <a data-link-type="biblio" href="#biblio-isobmff">[ISOBMFF]</a></p>
     <li data-md>
-     <p>It SHALL have the <dfn class="css" data-dfn-for="ISOBMFF Brand" data-dfn-type="value" data-export id="valdef-isobmff-brand-aiac">aiac<a class="self-link" href="#valdef-isobmff-brand-aiac"></a></dfn> brand among the compatible brands array of the FileTypeBox</p>
+     <p>It shall have the <dfn class="css" data-dfn-for="ISOBMFF Brand" data-dfn-type="value" data-export id="valdef-isobmff-brand-aiac">aiac<a class="self-link" href="#valdef-isobmff-brand-aiac"></a></dfn> brand among the compatible brands array of the FileTypeBox</p>
     <li data-md>
-     <p>It SHALL contain at least one track using an <a data-link-type="dfn" href="#iasampleentry" id="ref-for-iasampleentry">IASampleEntry</a></p>
+     <p>It shall contain at least one track using an <a data-link-type="dfn" href="#iasampleentry" id="ref-for-iasampleentry">IASampleEntry</a></p>
     <li data-md>
-     <p>It SHOULD indicate a structural ISOBMFF brand among the compatible brands array of the FileTypeBox, such as <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-①⑥">iso6</a></p>
+     <p>It SHOULD indicate a structural ISOBMFF brand among the compatible brands array of the FileTypeBox, such as <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-②⓪">iso6</a></p>
     <li data-md>
      <p>It MAY indicate other brands not specified in this specification provided that the associated requirements do not conflict with those given in this specification</p>
    </ul>
-   <p>Parsers SHALL support the structures required by the <code><a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-①⑦">iso6</a></code> brand and MAY support structures required by further ISOBMFF structural brands.</p>
+   <p>Parsers shall support the structures required by the <code><a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-②①">iso6</a></code> brand and MAY support structures required by further ISOBMFF structural brands.</p>
    <p>During encapsulation process, OBUs of IA bistream are encapsulated into <a data-link-type="biblio" href="#biblio-isobmff">[ISOBMFF]</a> as follows:</p>
    <ul>
     <li data-md>
      <p>CodecSpecificBox, which is defined from Codec_Specific_Info in IA bitstream, shall be stored in sample entry.</p>
     <li data-md>
-     <p>IA_Static_Meta (with OBU syntax) shall be stored as a new sample group having <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-①⑧">grouping_type</a>, <a class="property css" data-link-type="property">iatm</a>.</p>
+     <p>IA_Static_Meta (with OBU syntax) shall be stored as a new sample group having <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-②②">grouping_type</a>, <a class="property css" data-link-type="property">iatm</a>.</p>
     <li data-md>
      <p>Some fields of IA_Static_Meta, related to MIME codecs parameter, shall be copied in sample entry.</p>
     <li data-md>
      <p>Temporal_Delimitor_OBUs shall be discarded from <a data-link-type="dfn">Temporal Units</a>.</p>
     <li data-md>
-     <p>Demixing_Info_OBUs (with OBU syntax) may be stored as a new sample group having <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-①⑨">grouping_type</a>, <a class="property css" data-link-type="property">dmpm</a>.</p>
+     <p>Demixing_Info_OBUs (with OBU syntax) may be stored as a new sample group having <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-②③">grouping_type</a>, <a class="property css" data-link-type="property">dmpm</a>.</p>
     <li data-md>
      <p>Remainded OBUs of <a data-link-type="dfn">Temporal Units</a> shall be stored as sample data without gap among OBUs.</p>
    </ul>
@@ -2352,7 +2526,7 @@ Quantity:          One or more.
    <h3 class="heading settled" data-level="3.3" id="codecspecificbox-section"><span class="secno">3.3. </span><span class="content">Codec Specific Box</span><a class="self-link" href="#codecspecificbox-section"></a></h3>
    <p>This section describes a codec specific box for the decoding parameters, which is defined by codec_id of Codec_Specific_Info_OBU, to decode one single Substream of IA bitstream. <dfn data-dfn-type="dfn" data-noexport id="aiac">aiac<a class="self-link" href="#aiac"></a></dfn> shall contain only one single codec specific box regardless of the number of Substreams in IA_Coded_Data. So, the codec specific box is applied to allo of Substreams in sample data.</p>
    <h4 class="heading settled" data-level="3.3.1" id="opusspecificbox"><span class="secno">3.3.1. </span><span class="content">OPUS Specific Box</span><a class="self-link" href="#opusspecificbox"></a></h4>
-   <p>This shal be <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②⓪">OpusSpecificBox</a> (<a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②①">dOps</a>) for <a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②②">opus</a> audiosampleentry which is specified in <a data-link-type="biblio" href="#biblio-opus-in-isobmff">[OPUS-IN-ISOBMFF]</a>.</p>
+   <p>This shal be <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②④">OpusSpecificBox</a> (<a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②⑤">dOps</a>) for <a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②⑥">opus</a> audiosampleentry which is specified in <a data-link-type="biblio" href="#biblio-opus-in-isobmff">[OPUS-IN-ISOBMFF]</a>.</p>
    <h5 class="heading settled" data-level="3.3.1.1" id="opuscodecconfigurationbox-definition"><span class="secno">3.3.1.1. </span><span class="content">Definition</span><a class="self-link" href="#opuscodecconfigurationbox-definition"></a></h5>
 <pre class="def">Box Type:  <dfn data-dfn-type="dfn" data-export id="dops">dOps<a class="self-link" href="#dops"></a></dfn>
 Container: IA Sample Entry ('aiac')
@@ -2362,19 +2536,19 @@ Quantity:  One
    <h5 class="heading settled" data-level="3.3.1.2" id="opuscodecconfigurationbox-description"><span class="secno">3.3.1.2. </span><span class="content">Description</span><a class="self-link" href="#opuscodecconfigurationbox-description"></a></h5>
    <p>This box is for one single Substream.</p>
    <h5 class="heading settled" data-level="3.3.1.3" id="opuscodecconfigurationbox-syntax"><span class="secno">3.3.1.3. </span><span class="content">Syntax</span><a class="self-link" href="#opuscodecconfigurationbox-syntax"></a></h5>
-   <p>It shall be the same as <a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②③">dOps</a> box for <a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②④">opus</a> with that <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②⑤">ChannelMappingFamily</a> SHALL be set to 0.</p>
+   <p>It shall be the same as <a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②⑦">dOps</a> box for <a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②⑧">opus</a> with that <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②⑨">ChannelMappingFamily</a> shall be set to 0.</p>
    <h5 class="heading settled" data-level="3.3.1.4" id="opuscodecconfigurationbox-semantics"><span class="secno">3.3.1.4. </span><span class="content">Semantics</span><a class="self-link" href="#opuscodecconfigurationbox-semantics"></a></h5>
    <p>It shall be the same as the semantics except followings:</p>
    <ul>
     <li data-md>
-     <p><a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②⑥">OutputChannelCount</a> should be set to 2. <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②⑦">OutputChannelCount</a> can be ignored because the real value can be determined from the IA_Static_Meta_OBU and from the <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6716#" id="termref-for-②⑧">opus packet</a> header.</p>
+     <p><a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-③⓪">OutputChannelCount</a> should be set to 2. <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-③①">OutputChannelCount</a> can be ignored because the real value can be determined from the IA_Static_Meta_OBU and from the <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6716#" id="termref-for-③②">opus packet</a> header.</p>
     <li data-md>
-     <p>In case of channel_audio_layer > 0, <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②⑨">OutputGain</a> shall be set to 0.</p>
+     <p>In case of channel_audio_layer > 0, <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-③③">OutputGain</a> shall be set to 0.</p>
     <li data-md>
-     <p><a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-③⓪">ChannelMappingFamily</a> shall be set to 0.</p>
+     <p><a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-③④">ChannelMappingFamily</a> shall be set to 0.</p>
    </ul>
    <h4 class="heading settled" data-level="3.3.2" id="mp4aspecificbox"><span class="secno">3.3.2. </span><span class="content">MP4A Specific Box</span><a class="self-link" href="#mp4aspecificbox"></a></h4>
-    This is <a data-link-type="dfn" href="https://www.iso.org/standard/79110.html#" id="termref-for-③①">ESDBox</a> (<a class="property css" data-link-type="property" href="https://www.iso.org/standard/79110.html#" id="termref-for-③②">esds</a>) for <a class="property css" data-link-type="property" href="https://www.iso.org/standard/79110.html#" id="termref-for-③③">mp4a</a> which is specified in <a data-link-type="biblio" href="#biblio-mp4">[MP4]</a>. 
+    This is <a data-link-type="dfn" href="https://www.iso.org/standard/79110.html#" id="termref-for-③⑤">ESDBox</a> (<a class="property css" data-link-type="property" href="https://www.iso.org/standard/79110.html#" id="termref-for-③⑥">esds</a>) for <a class="property css" data-link-type="property" href="https://www.iso.org/standard/79110.html#" id="termref-for-③⑦">mp4a</a> which is specified in <a data-link-type="biblio" href="#biblio-mp4">[MP4]</a>. 
    <h5 class="heading settled" data-level="3.3.2.1" id="mp4aspecificbox-definition"><span class="secno">3.3.2.1. </span><span class="content">Definition</span><a class="self-link" href="#mp4aspecificbox-definition"></a></h5>
 <pre class="def">Box Type:  <dfn data-dfn-type="dfn" data-export id="esds">esds<a class="self-link" href="#esds"></a></dfn>
 Container: IA Sample Entry ('aiac')
@@ -2384,24 +2558,24 @@ Quantity:  One of more
    <h5 class="heading settled" data-level="3.3.2.2" id="mp4aspecificbox-description"><span class="secno">3.3.2.2. </span><span class="content">Description</span><a class="self-link" href="#mp4aspecificbox-description"></a></h5>
    <p>This box is for one single Substream.</p>
    <h5 class="heading settled" data-level="3.3.2.3" id="mp4aspecificbox-syntax"><span class="secno">3.3.2.3. </span><span class="content">Syntax</span><a class="self-link" href="#mp4aspecificbox-syntax"></a></h5>
-   <p>It shall be the same as <a class="property css" data-link-type="property" href="https://www.iso.org/standard/79110.html#" id="termref-for-③④">esds</a> box for <a data-link-type="dfn" href="https://www.iso.org/standard/43345.html#" id="termref-for-③⑤">Low Complexity Profile</a> of <a data-link-type="biblio" href="#biblio-aac">[AAC]</a> (AAC-LC).</p>
+   <p>It shall be the same as <a class="property css" data-link-type="property" href="https://www.iso.org/standard/79110.html#" id="termref-for-③⑧">esds</a> box for <a data-link-type="dfn" href="https://www.iso.org/standard/43345.html#" id="termref-for-③⑨">Low Complexity Profile</a> of <a data-link-type="biblio" href="#biblio-aac">[AAC]</a> (AAC-LC).</p>
    <h5 class="heading settled" data-level="3.3.2.4" id="mp4aspecificbox-semantics"><span class="secno">3.3.2.4. </span><span class="content">Semantics</span><a class="self-link" href="#mp4aspecificbox-semantics"></a></h5>
    <p>It shall be the same as the semantics except followings:</p>
    <ul>
     <li data-md>
-     <p><a data-link-type="dfn" href="https://www.iso.org/standard/43345.html#" id="termref-for-③⑥">channelConfiguration</a> field should be set to 2. The real value can be implied from the IA_Static_Meta_OBU.</p>
+     <p><a data-link-type="dfn" href="https://www.iso.org/standard/43345.html#" id="termref-for-④⓪">channelConfiguration</a> field should be set to 2. The real value can be implied from the IA_Static_Meta_OBU.</p>
    </ul>
    <h3 class="heading settled" data-level="3.4" id="sampleformat"><span class="secno">3.4. </span><span class="content">IA Sample Format</span><a class="self-link" href="#sampleformat"></a></h3>
    <p>For tracks using the <a data-link-type="dfn" href="#iasampleentry" id="ref-for-iasampleentry①">IASampleEntry</a>, an <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="ia-sample">IA Sample</dfn> has the following constraints:</p>
    <ul>
     <li data-md>
-     <p>The sample data SHALL be a sequence of <a data-link-type="dfn">OBUs</a> forming a <a data-link-type="dfn">Temporal Unit</a>.</p>
+     <p>The sample data shall be a sequence of <a data-link-type="dfn">OBUs</a> forming a <a data-link-type="dfn">Temporal Unit</a>.</p>
     <li data-md>
-     <p>Temporal_Delimitor_OBU SHALL not be present. It SHALL be discarded when <a data-link-type="dfn">Temporal Unit</a> is stored as sample data.</p>
+     <p>Temporal_Delimitor_OBU shall not be present. It shall be discarded when <a data-link-type="dfn">Temporal Unit</a> is stored as sample data.</p>
     <li data-md>
      <p>OBUs for Timed Metadata (if present) come first and followed by OBU(s) for IA_Coded_Data.</p>
     <li data-md>
-     <p>Each OBU SHALL follow OBU syntax as specified in this specificaiton.</p>
+     <p>Each OBU shall follow OBU syntax as specified in this specificaiton.</p>
    </ul>
    <h3 class="heading settled" data-level="3.5" id="ia-sample-group"><span class="secno">3.5. </span><span class="content">IA Sample Group</span><a class="self-link" href="#ia-sample-group"></a></h3>
    <p class="note" role="note"><span>NOTE:</span> We agree to create a generic sample group where the payload is exactly the OBU content (with header and length). This is to be used for demixing OBU and possibly others in the future. We still need to discuss if sample groups shall or should or can be used, possibly based on the OBU type.</p>
@@ -2409,44 +2583,44 @@ Quantity:  One of more
    <p>During encapsulation process, Demixing_Info_OBUs shall or should or can be discarded from IA bistream. A new sample group for Demixing_Info_OBUs is defined by using <a data-link-type="dfn">sgpd</a> and [sbgp] boxes with following requirements:</p>
    <ul>
     <li data-md>
-     <p><a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-③⑦">grouping_type</a> SHALL be set to <a class="property css" data-link-type="property">dmpm</a>. {# demixing prameter mode}</p>
+     <p><a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-④①">grouping_type</a> shall be set to <a class="property css" data-link-type="property">dmpm</a>. {# demixing prameter mode}</p>
     <li data-md>
-     <p>Each <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-③⑧">SampleGroupDescriptionEntry</a> SHALL be Demixing_Info_OBU with OBU syntax.</p>
+     <p>Each <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-④②">SampleGroupDescriptionEntry</a> shall be Demixing_Info_OBU with OBU syntax.</p>
    </ul>
    <h4 class="heading settled" data-level="3.5.2" id="ia-static-meta-sample-group"><span class="secno">3.5.2. </span><span class="content">IA Static Meta Sample Group</span><a class="self-link" href="#ia-static-meta-sample-group"></a></h4>
    <p>During encapsulation process, IA_Static_Meta_OBUs are discarded from IA bistream. A new sample group for IA_Static_Meta_OBUs is defined by using <a data-link-type="dfn">sgpd</a> and [sbgp] boxes with following requirements:</p>
    <ul>
     <li data-md>
-     <p><a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-③⑨">grouping_type</a> SHALL be set to <a class="property css" data-link-type="property">iasm</a>. {# IA Static Meta}</p>
+     <p><a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-④③">grouping_type</a> shall be set to <a class="property css" data-link-type="property">iasm</a>. {# IA Static Meta}</p>
     <li data-md>
-     <p><a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-④⓪">SampleGroupDescriptionEntry</a> SHALL be IA_Static_Meta_OBU with OBU syntax.</p>
+     <p><a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-④④">SampleGroupDescriptionEntry</a> shall be IA_Static_Meta_OBU with OBU syntax.</p>
    </ul>
    <h3 class="heading settled" data-level="3.6" id="CommonEncryption"><span class="secno">3.6. </span><span class="content">Common Encryption</span><a class="self-link" href="#CommonEncryption"></a></h3>
     TBA 
    <h3 class="heading settled" data-level="3.7" id="codecsparam"><span class="secno">3.7. </span><span class="content">Codecs Parameter String</span><a class="self-link" href="#codecsparam"></a></h3>
-    DASH and other applications require defined values for the <a class="property css" data-link-type="property" href="https://tools.ietf.org/html/rfc6381#" id="termref-for-④①">Codecs</a> parameter specified in <a data-link-type="biblio" href="#biblio-rfc6381">[RFC6381]</a> for ISO Media tracks. The codecs parameter string for the AOM IA codec shall be: 
+    DASH and other applications require defined values for the <a class="property css" data-link-type="property" href="https://tools.ietf.org/html/rfc6381#" id="termref-for-④⑤">Codecs</a> parameter specified in <a data-link-type="biblio" href="#biblio-rfc6381">[RFC6381]</a> for ISO Media tracks. The codecs parameter string for the AOM IA codec shall be: 
    <ul>
     <li data-md>
      <p>For IAC-OPUS: <dfn data-dfn-type="dfn" data-noexport id="aiaciac-specific-needsopus">aiac.<a class="property css" data-link-type="property">IAC-specific-needs</a>.Opus<a class="self-link" href="#aiaciac-specific-needsopus"></a></dfn></p>
     <li data-md>
      <p>For IAC-AAC-LC: <dfn data-dfn-type="dfn" data-noexport id="aiaciac-specific-needsmp4a402">aiac.<a class="property css" data-link-type="property">IAC-specific-needs</a>.mp4a.40.2<a class="self-link" href="#aiaciac-specific-needsmp4a402"></a></dfn></p>
    </ul>
-   <p><b>IAC-specific-needs</b> SHALL be <b>AA.L(CC)*</b> as follows:</p>
+   <p><b>IAC-specific-needs</b> shall be <b>AA.L(CC)*</b> as follows:</p>
    <ul>
     <li data-md>
-     <p>The first <b>A</b> SHALL be one digit and represent the mode of Ambisonics</p>
+     <p>The first <b>A</b> shall be one digit and represent the mode of Ambisonics</p>
     <li data-md>
-     <p>The second <b>A</b> SHALL be one or two digit and represent the order of Ambisonics.</p>
+     <p>The second <b>A</b> shall be one or two digit and represent the order of Ambisonics.</p>
     <li data-md>
-     <p><b>L</b> SHALL be one digit and represent <b>channel_audio_layer</b> of the channel audio.</p>
+     <p><b>L</b> shall be one digit and represent <b>channel_audio_layer</b> of the channel audio.</p>
     <li data-md>
-     <p>The first <b>C</b> of <b>(CC)</b> SHALL be one digit and represent the number of surround channels.</p>
+     <p>The first <b>C</b> of <b>(CC)</b> shall be one digit and represent the number of surround channels.</p>
     <li data-md>
-     <p>The second <b>C</b> of <b>(CC)</b> SHALL be one digit and represent the number of top channels.</p>
+     <p>The second <b>C</b> of <b>(CC)</b> shall be one digit and represent the number of top channels.</p>
     <li data-md>
-     <p><b>*</b> SHALL represent that <b>(CC)</b> comes L times.</p>
+     <p><b>*</b> shall represent that <b>(CC)</b> comes L times.</p>
     <li data-md>
-     <p>The ith <b>(CC)</b> SHALL represent for the ith layer of the channel audio, where i = 1, 2, ..., L.</p>
+     <p>The ith <b>(CC)</b> shall represent for the ith layer of the channel audio, where i = 1, 2, ..., L.</p>
    </ul>
    <p class="note" role="note"><span>NOTE:</span> We agree with the slides from April 11, with the following:</p>
    <ul>
@@ -2626,79 +2800,55 @@ Quantity:  One of more
     </ul>
    <li><a href="#aiaciac-specific-needsmp4a402">aiac.IAC-specific-needs.mp4a.40.2</a><span>, in § 3.7</span>
    <li><a href="#aiaciac-specific-needsopus">aiac.IAC-specific-needs.Opus</a><span>, in § 3.7</span>
-   <li><a href="#alpha">alpha</a><span>, in § 2.3</span>
+   <li><a href="#alpha">alpha</a><span>, in § 2.2.11</span>
    <li><a href="#ambisonics_channel_count">ambisonics_channel_count</a><span>, in § 3.2.4</span>
-   <li><a href="#ambisonics-layer-config-syntax">Ambisonics Layer Config syntax</a><span>, in § 2.2</span>
-   <li><a href="#ambisonics_mode">ambisonics_mode</a><span>, in § 2.3</span>
-   <li><a href="#beta">beta</a><span>, in § 2.3</span>
-   <li><a href="#byte-alignment-semantics">Byte alignment semantics</a><span>, in § 2.3</span>
-   <li><a href="#byte-alignment-syntax">Byte alignment syntax</a><span>, in § 2.2</span>
-   <li><a href="#channel_audio_layer">channel_audio_layer</a><span>, in § 2.3</span>
-   <li><a href="#channel-audio-layer-config-syntax">Channel Audio Layer Config syntax</a><span>, in § 2.2</span>
-   <li><a href="#channel_mapping">channel_mapping</a><span>, in § 2.3</span>
-   <li><a href="#codec_id">codec_id</a><span>, in § 2.3</span>
-   <li><a href="#codec-specific-info-obu-semantics">Codec Specific Info OBU semantics</a><span>, in § 2.3</span>
-   <li><a href="#codec-specific-info-obu-syntax">Codec Specific Info OBU syntax</a><span>, in § 2.2</span>
-   <li><a href="#coupled_substream_count">coupled_substream_count</a><span>, in § 2.3</span>
-   <li><a href="#decoder_config">decoder_config</a><span>, in § 2.3</span>
-   <li><a href="#delta">delta</a><span>, in § 2.3</span>
-   <li><a href="#demixing-info-obu-semantics">Demixing Info OBU semantics</a><span>, in § 2.3</span>
-   <li><a href="#demixing-info-obu-syntax">Demixing Info OBU syntax</a><span>, in § 2.2</span>
-   <li><a href="#demixing_matrix">demixing_matrix</a><span>, in § 2.3</span>
-   <li><a href="#dmixp_mode">dmixp_mode</a><span>, in § 2.3</span>
+   <li><a href="#ambisonics_mode">ambisonics_mode</a><span>, in § 2.2.7</span>
+   <li><a href="#beta">beta</a><span>, in § 2.2.11</span>
+   <li><a href="#channel_audio_layer">channel_audio_layer</a><span>, in § 2.2.7</span>
+   <li><a href="#channel_mapping">channel_mapping</a><span>, in § 2.2.8</span>
+   <li><a href="#codec_id">codec_id</a><span>, in § 2.2.6</span>
+   <li><a href="#coupled_substream_count">coupled_substream_count</a><span>, in § 2.2.8</span>
+   <li><a href="#decoder_config">decoder_config</a><span>, in § 2.2.6</span>
+   <li><a href="#delta">delta</a><span>, in § 2.2.11</span>
+   <li><a href="#demixing_matrix">demixing_matrix</a><span>, in § 2.2.8</span>
+   <li><a href="#dmixp_mode">dmixp_mode</a><span>, in § 2.2.11</span>
    <li><a href="#dops">dOps</a><span>, in § 3.3.1.1</span>
-   <li><a href="#drop_obu">drop_obu( )</a><span>, in § 2.3</span>
+   <li><a href="#drop_obu">drop_obu( )</a><span>, in § 2.2</span>
    <li><a href="#esds">esds</a><span>, in § 3.3.2.1</span>
-   <li><a href="#gamma">gamma</a><span>, in § 2.3</span>
-   <li><a href="#general-obu-semantics">General OBU semantics</a><span>, in § 2.3</span>
-   <li><a href="#general-obu-syntax">General OBU syntax</a><span>, in § 2.2</span>
-   <li><a href="#ia-coded-data-obu-semantics">IA Coded Data OBU semantics</a><span>, in § 2.3</span>
-   <li><a href="#ia-coded-data-obu-syntax">IA Coded Data OBU syntax</a><span>, in § 2.2</span>
+   <li><a href="#gamma">gamma</a><span>, in § 2.2.11</span>
    <li><a href="#ia-sample">IA Sample</a><span>, in § 3.4</span>
    <li><a href="#iasampleentry">IASampleEntry</a><span>, in § 3.2.2</span>
-   <li><a href="#ia-static-meta-obu-semantics">IA Static Meta OBU semantics</a><span>, in § 2.3</span>
-   <li><a href="#ia-static-meta-obu-syntax">IA Static Meta OBU syntax</a><span>, in § 2.2</span>
-   <li><a href="#ia-stream-indicator-obu-semantics">IA Stream Indicator OBU semantics</a><span>, in § 2.3</span>
-   <li><a href="#ia-stream-indicator-obu-syntax">IA Stream Indicator OBU syntax</a><span>, in § 2.2</span>
-   <li><a href="#loudness">loudness</a><span>, in § 2.3</span>
-   <li><a href="#loudspeaker_layout">loudspeaker_layout</a><span>, in § 2.3</span>
-   <li><a href="#obu_forbidden_bit">obu_forbidden_bit</a><span>, in § 2.3</span>
-   <li><a href="#obu_has_size_field">obu_has_size_field</a><span>, in § 2.3</span>
-   <li><a href="#obu-header-semantics">OBU header semantics</a><span>, in § 2.3</span>
-   <li><a href="#obu-header-syntax">OBU header syntax</a><span>, in § 2.2</span>
-   <li><a href="#obu_reserved_1bit">obu_reserved_1bit</a><span>, in § 2.3</span>
-   <li><a href="#obu_size">obu_size</a><span>, in § 2.3</span>
-   <li><a href="#obu_type">obu_type</a><span>, in § 2.3</span>
-   <li><a href="#output_channel_count">output_channel_count</a><span>, in § 2.3</span>
-   <li><a href="#output_gain">output_gain</a><span>, in § 2.3</span>
-   <li><a href="#output_gain_flags">output_gain_flags</a><span>, in § 2.3</span>
-   <li><a href="#output_gain_is_present_flag">output_gain_is_present_flag</a><span>, in § 2.3</span>
-   <li><a href="#recon_gain">recon_gain</a><span>, in § 2.3</span>
-   <li><a href="#recon_gain_flags">recon_gain_flags</a><span>, in § 2.3</span>
-   <li><a href="#recon_gain_flalgs">recon_gain_flalgs</a><span>, in § 2.3</span>
-   <li><a href="#recon-gain-info-obu-semantics">Recon Gain Info OBU semantics</a><span>, in § 2.3</span>
-   <li><a href="#recon-gain-info-obu-syntax">Recon Gain Info OBU syntax</a><span>, in § 2.2</span>
-   <li><a href="#recon_gain_is_present_flag">recon_gain_is_present_flag</a><span>, in § 2.3</span>
-   <li><a href="#reserved-obu-semantics">Reserved OBU semantics</a><span>, in § 2.3</span>
-   <li><a href="#seeniabitstream">SeenIABitstream</a><span>, in § 2.3</span>
-   <li><a href="#substream-boundary-info-obu-semantics">Substream Boundary Info OBU semantics</a><span>, in § 2.3</span>
-   <li><a href="#substream-boundary-info-obu-syntax">Substream Boundary Info OBU syntax</a><span>, in § 2.2</span>
-   <li><a href="#substream_count">substream_count</a><span>, in § 2.3</span>
-   <li><a href="#substream-obu-semantics">Substream OBU semantics</a><span>, in § 2.3</span>
-   <li><a href="#substream-obu-syntax">Substream OBU syntax</a><span>, in § 2.2</span>
-   <li><a href="#substream_size">substream_size</a><span>, in § 2.3</span>
-   <li><a href="#temporal-delimiter-obu-semantics">Temporal delimiter OBU semantics</a><span>, in § 2.3</span>
-   <li><a href="#temporal-delimitor-obu-syntax">Temporal Delimitor OBU syntax</a><span>, in § 2.2</span>
-   <li><a href="#version">version</a><span>, in § 2.3</span>
-   <li><a href="#w">w</a><span>, in § 2.3</span>
-   <li><a href="#w_idx_offset">w_idx_offset</a><span>, in § 2.3</span>
-   <li><a href="#zero_bit">zero_bit</a><span>, in § 2.3</span>
+   <li><a href="#loudness">loudness</a><span>, in § 2.2.9</span>
+   <li><a href="#loudspeaker_layout">loudspeaker_layout</a><span>, in § 2.2.9</span>
+   <li><a href="#obu_forbidden_bit">obu_forbidden_bit</a><span>, in § 2.2.2</span>
+   <li><a href="#obu_has_size_field">obu_has_size_field</a><span>, in § 2.2.2</span>
+   <li><a href="#obu_reserved_1bit">obu_reserved_1bit</a><span>, in § 2.2.2</span>
+   <li><a href="#obu_size">obu_size</a><span>, in § 2.2.1</span>
+   <li><a href="#obu_type">obu_type</a><span>, in § 2.2.2</span>
+   <li><a href="#output_channel_count">output_channel_count</a><span>, in § 2.2.8</span>
+   <li><a href="#output_gain">output_gain</a><span>, in § 2.2.9</span>
+   <li><a href="#output_gain_flags">output_gain_flags</a><span>, in § 2.2.9</span>
+   <li><a href="#output_gain_is_present_flag">output_gain_is_present_flag</a><span>, in § 2.2.9</span>
+   <li><a href="#recon_gain">recon_gain</a><span>, in § 2.2.13</span>
+   <li><a href="#recon_gain_flags">recon_gain_flags</a><span>, in § 2.2.13</span>
+   <li><a href="#recon_gain_flalgs">recon_gain_flalgs</a><span>, in § 2.2.13</span>
+   <li><a href="#recon_gain_is_present_flag">recon_gain_is_present_flag</a><span>, in § 2.2.9</span>
+   <li><a href="#seeniabitstream">SeenIABitstream</a><span>, in § 2.2.5</span>
+   <li><a href="#substream_count">substream_count</a><span>, in § 2.2.8</span>
+   <li><a href="#substream-obu-semantics">Substream OBU semantics</a><span>, in § 2.2.13</span>
+   <li><a href="#substream_size">substream_size</a><span>, in § 2.2.12</span>
+   <li><a href="#version">version</a><span>, in § 2.2.7</span>
+   <li><a href="#w">w</a><span>, in § 2.2.11</span>
+   <li><a href="#w_idx_offset">w_idx_offset</a><span>, in § 2.2.11</span>
+   <li><a href="#zero_bit">zero_bit</a><span>, in § 2.2.3</span>
   </ul>
   <aside class="dfn-panel" data-for="term-for-">
    <a href="https://www.iso.org/standard/43345.html#">https://www.iso.org/standard/43345.html#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#termref-for-">2.1.2. IAC-AAC-LC Specific</a>
-    <li><a href="#termref-for-">2.3. OBU Semantics</a> <a href="#termref-for-">(2)</a>
+    <li><a href="#termref-for-">2.2.13. Recon Gain Info OBU Syntax and Semantics</a> <a href="#termref-for-">(2)</a>
+    <li><a href="#termref-for-">2.2.14. IA Coded Data OBU Syntax and Semantics</a>
+    <li><a href="#termref-for-">2.2.15. Substream OBU Syntax and Semantics</a>
     <li><a href="#termref-for-">3.3.2.3. Syntax</a>
     <li><a href="#termref-for-">3.3.2.4. Semantics</a>
    </ul>
@@ -2707,7 +2857,9 @@ Quantity:  One of more
    <a href="https://www.iso.org/standard/43345.html#">https://www.iso.org/standard/43345.html#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#termref-for-">2.1.2. IAC-AAC-LC Specific</a>
-    <li><a href="#termref-for-">2.3. OBU Semantics</a> <a href="#termref-for-">(2)</a>
+    <li><a href="#termref-for-">2.2.13. Recon Gain Info OBU Syntax and Semantics</a> <a href="#termref-for-">(2)</a>
+    <li><a href="#termref-for-">2.2.14. IA Coded Data OBU Syntax and Semantics</a>
+    <li><a href="#termref-for-">2.2.15. Substream OBU Syntax and Semantics</a>
     <li><a href="#termref-for-">3.3.2.3. Syntax</a>
     <li><a href="#termref-for-">3.3.2.4. Semantics</a>
    </ul>
@@ -2716,7 +2868,9 @@ Quantity:  One of more
    <a href="https://www.iso.org/standard/43345.html#">https://www.iso.org/standard/43345.html#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#termref-for-">2.1.2. IAC-AAC-LC Specific</a>
-    <li><a href="#termref-for-">2.3. OBU Semantics</a> <a href="#termref-for-">(2)</a>
+    <li><a href="#termref-for-">2.2.13. Recon Gain Info OBU Syntax and Semantics</a> <a href="#termref-for-">(2)</a>
+    <li><a href="#termref-for-">2.2.14. IA Coded Data OBU Syntax and Semantics</a>
+    <li><a href="#termref-for-">2.2.15. Substream OBU Syntax and Semantics</a>
     <li><a href="#termref-for-">3.3.2.3. Syntax</a>
     <li><a href="#termref-for-">3.3.2.4. Semantics</a>
    </ul>
@@ -2724,7 +2878,7 @@ Quantity:  One of more
   <aside class="dfn-panel" data-for="term-for-">
    <a href="https://www.iso.org/standard/68960.html#">https://www.iso.org/standard/68960.html#</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#termref-for-">2.3. OBU Semantics</a>
+    <li><a href="#termref-for-">2.2.6. Codec Specific Info Syntax and Semantics</a>
     <li><a href="#termref-for-">3.1. General Requirements &amp; Brands</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
     <li><a href="#termref-for-">3.5.1. Demixing Info Sample Group</a> <a href="#termref-for-">(2)</a>
     <li><a href="#termref-for-">3.5.2. IA Static Meta Sample Group</a> <a href="#termref-for-">(2)</a>
@@ -2733,7 +2887,7 @@ Quantity:  One of more
   <aside class="dfn-panel" data-for="term-for-">
    <a href="https://www.iso.org/standard/68960.html#">https://www.iso.org/standard/68960.html#</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#termref-for-">2.3. OBU Semantics</a>
+    <li><a href="#termref-for-">2.2.6. Codec Specific Info Syntax and Semantics</a>
     <li><a href="#termref-for-">3.1. General Requirements &amp; Brands</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
     <li><a href="#termref-for-">3.5.1. Demixing Info Sample Group</a> <a href="#termref-for-">(2)</a>
     <li><a href="#termref-for-">3.5.2. IA Static Meta Sample Group</a> <a href="#termref-for-">(2)</a>
@@ -2742,7 +2896,7 @@ Quantity:  One of more
   <aside class="dfn-panel" data-for="term-for-">
    <a href="https://www.iso.org/standard/68960.html#">https://www.iso.org/standard/68960.html#</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#termref-for-">2.3. OBU Semantics</a>
+    <li><a href="#termref-for-">2.2.6. Codec Specific Info Syntax and Semantics</a>
     <li><a href="#termref-for-">3.1. General Requirements &amp; Brands</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
     <li><a href="#termref-for-">3.5.1. Demixing Info Sample Group</a> <a href="#termref-for-">(2)</a>
     <li><a href="#termref-for-">3.5.2. IA Static Meta Sample Group</a> <a href="#termref-for-">(2)</a>
@@ -2751,7 +2905,7 @@ Quantity:  One of more
   <aside class="dfn-panel" data-for="term-for-">
    <a href="https://www.iso.org/standard/68960.html#">https://www.iso.org/standard/68960.html#</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#termref-for-">2.3. OBU Semantics</a>
+    <li><a href="#termref-for-">2.2.6. Codec Specific Info Syntax and Semantics</a>
     <li><a href="#termref-for-">3.1. General Requirements &amp; Brands</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
     <li><a href="#termref-for-">3.5.1. Demixing Info Sample Group</a> <a href="#termref-for-">(2)</a>
     <li><a href="#termref-for-">3.5.2. IA Static Meta Sample Group</a> <a href="#termref-for-">(2)</a>
@@ -2760,7 +2914,7 @@ Quantity:  One of more
   <aside class="dfn-panel" data-for="term-for-">
    <a href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#">https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#termref-for-">2.3. OBU Semantics</a>
+    <li><a href="#termref-for-">2.2.9. Channel Audio Layer Config Syntax and Semantics</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
@@ -2791,7 +2945,8 @@ Quantity:  One of more
    <a href="https://opus-codec.org/docs/opus_in_isobmff.html#">https://opus-codec.org/docs/opus_in_isobmff.html#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#termref-for-">2.1.1. IAC-OPUS Specific</a>
-    <li><a href="#termref-for-">2.3. OBU Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
+    <li><a href="#termref-for-">2.2.6. Codec Specific Info Syntax and Semantics</a>
+    <li><a href="#termref-for-">2.2.8. Ambisonics Layer Config Syntax and Semantics</a> <a href="#termref-for-">(2)</a>
     <li><a href="#termref-for-">3.3.1. OPUS Specific Box</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.3. Syntax</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.4. Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
@@ -2801,7 +2956,8 @@ Quantity:  One of more
    <a href="https://opus-codec.org/docs/opus_in_isobmff.html#">https://opus-codec.org/docs/opus_in_isobmff.html#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#termref-for-">2.1.1. IAC-OPUS Specific</a>
-    <li><a href="#termref-for-">2.3. OBU Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
+    <li><a href="#termref-for-">2.2.6. Codec Specific Info Syntax and Semantics</a>
+    <li><a href="#termref-for-">2.2.8. Ambisonics Layer Config Syntax and Semantics</a> <a href="#termref-for-">(2)</a>
     <li><a href="#termref-for-">3.3.1. OPUS Specific Box</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.3. Syntax</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.4. Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
@@ -2811,7 +2967,8 @@ Quantity:  One of more
    <a href="https://opus-codec.org/docs/opus_in_isobmff.html#">https://opus-codec.org/docs/opus_in_isobmff.html#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#termref-for-">2.1.1. IAC-OPUS Specific</a>
-    <li><a href="#termref-for-">2.3. OBU Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
+    <li><a href="#termref-for-">2.2.6. Codec Specific Info Syntax and Semantics</a>
+    <li><a href="#termref-for-">2.2.8. Ambisonics Layer Config Syntax and Semantics</a> <a href="#termref-for-">(2)</a>
     <li><a href="#termref-for-">3.3.1. OPUS Specific Box</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.3. Syntax</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.4. Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
@@ -2821,7 +2978,8 @@ Quantity:  One of more
    <a href="https://opus-codec.org/docs/opus_in_isobmff.html#">https://opus-codec.org/docs/opus_in_isobmff.html#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#termref-for-">2.1.1. IAC-OPUS Specific</a>
-    <li><a href="#termref-for-">2.3. OBU Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
+    <li><a href="#termref-for-">2.2.6. Codec Specific Info Syntax and Semantics</a>
+    <li><a href="#termref-for-">2.2.8. Ambisonics Layer Config Syntax and Semantics</a> <a href="#termref-for-">(2)</a>
     <li><a href="#termref-for-">3.3.1. OPUS Specific Box</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.3. Syntax</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.4. Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
@@ -2831,7 +2989,8 @@ Quantity:  One of more
    <a href="https://opus-codec.org/docs/opus_in_isobmff.html#">https://opus-codec.org/docs/opus_in_isobmff.html#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#termref-for-">2.1.1. IAC-OPUS Specific</a>
-    <li><a href="#termref-for-">2.3. OBU Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
+    <li><a href="#termref-for-">2.2.6. Codec Specific Info Syntax and Semantics</a>
+    <li><a href="#termref-for-">2.2.8. Ambisonics Layer Config Syntax and Semantics</a> <a href="#termref-for-">(2)</a>
     <li><a href="#termref-for-">3.3.1. OPUS Specific Box</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.3. Syntax</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.4. Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
@@ -2841,7 +3000,8 @@ Quantity:  One of more
    <a href="https://opus-codec.org/docs/opus_in_isobmff.html#">https://opus-codec.org/docs/opus_in_isobmff.html#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#termref-for-">2.1.1. IAC-OPUS Specific</a>
-    <li><a href="#termref-for-">2.3. OBU Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
+    <li><a href="#termref-for-">2.2.6. Codec Specific Info Syntax and Semantics</a>
+    <li><a href="#termref-for-">2.2.8. Ambisonics Layer Config Syntax and Semantics</a> <a href="#termref-for-">(2)</a>
     <li><a href="#termref-for-">3.3.1. OPUS Specific Box</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.3. Syntax</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.4. Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
@@ -2857,7 +3017,9 @@ Quantity:  One of more
    <a href="https://tools.ietf.org/html/rfc6716#">https://tools.ietf.org/html/rfc6716#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#termref-for-">2.1.1. IAC-OPUS Specific</a>
-    <li><a href="#termref-for-">2.3. OBU Semantics</a> <a href="#termref-for-">(2)</a>
+    <li><a href="#termref-for-">2.2.13. Recon Gain Info OBU Syntax and Semantics</a> <a href="#termref-for-">(2)</a>
+    <li><a href="#termref-for-">2.2.14. IA Coded Data OBU Syntax and Semantics</a>
+    <li><a href="#termref-for-">2.2.15. Substream OBU Syntax and Semantics</a>
     <li><a href="#termref-for-">3.3.1.4. Semantics</a>
    </ul>
   </aside>
@@ -2865,7 +3027,7 @@ Quantity:  One of more
    <a href="https://tools.ietf.org/html/rfc7845#">https://tools.ietf.org/html/rfc7845#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#termref-for-">2.1.1. IAC-OPUS Specific</a>
-    <li><a href="#termref-for-">2.3. OBU Semantics</a>
+    <li><a href="#termref-for-">2.2.6. Codec Specific Info Syntax and Semantics</a>
    </ul>
   </aside>
   <h3 class="no-num no-ref heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
