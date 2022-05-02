@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version fb1e763a4, updated Tue Mar 1 13:13:50 2022 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iac/" rel="canonical">
-  <meta content="83c53f7472ff64036aa06d5b8a5ec0e36778f91a" name="document-revision">
+  <meta content="88bb89bb57ecb85376ea8100066628a944070475" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -2305,17 +2305,17 @@ Substream shall be an raw coded data for mono or stereo channels by using the co
    <p>During encapsulation process, OBUs of IA bistream are encapsulated into <a data-link-type="biblio" href="#biblio-isobmff">[ISOBMFF]</a> as follows:</p>
    <ul>
     <li data-md>
-     <p>Codec_Specific_Info (without OBU syntax) is converted to CodecSpecificBox which is stored in sample entry.</p>
+     <p>CodecSpecificBox, which is defined from Codec_Specific_Info in IA bitstream, shall be stored in sample entry.</p>
     <li data-md>
-     <p>IA_Static_Meta (with OBU syntax) is moved to a new sample group having <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-①⑧">grouping_type</a>, <a class="property css" data-link-type="property">iatm</a>.</p>
+     <p>IA_Static_Meta (with OBU syntax) shall be stored as a new sample group having <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-①⑧">grouping_type</a>, <a class="property css" data-link-type="property">iatm</a>.</p>
     <li data-md>
-     <p>Some fields, related to MIME codecs parameter, of IA_Static_Meta are copied in sample entry.</p>
+     <p>Some fields of IA_Static_Meta, related to MIME codecs parameter, shall be copied in sample entry.</p>
     <li data-md>
-     <p>Temporal_Delimitor_OBUs are discarded from <a data-link-type="dfn">Temporal Units</a>.</p>
+     <p>Temporal_Delimitor_OBUs shall be discarded from <a data-link-type="dfn">Temporal Units</a>.</p>
     <li data-md>
-     <p>Demixing_Info_OBUs (with OBU syntax) are moved to a new sample group with <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-①⑨">grouping_type</a>, <a class="property css" data-link-type="property">dmpm</a>.</p>
+     <p>Demixing_Info_OBUs (with OBU syntax) may be stored as a new sample group having <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-①⑨">grouping_type</a>, <a class="property css" data-link-type="property">dmpm</a>.</p>
     <li data-md>
-     <p>Remainded OBUs of <a data-link-type="dfn">Temporal Units</a> are stored as sample data without gap among OBUs.</p>
+     <p>Remainded OBUs of <a data-link-type="dfn">Temporal Units</a> shall be stored as sample data without gap among OBUs.</p>
    </ul>
    <h3 class="heading settled" data-level="3.2" id="iasampleentry-section"><span class="secno">3.2. </span><span class="content">IA Sample Entry</span><a class="self-link" href="#iasampleentry-section"></a></h3>
    <p class="note" role="note"><span>NOTE:</span> As discussed, we have an agreement to specify that only codec specific info is stored (no loop, no override). We might reconsider if new use cases are brought forward.
