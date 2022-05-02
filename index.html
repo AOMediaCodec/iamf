@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version fb1e763a4, updated Tue Mar 1 13:13:50 2022 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iac/" rel="canonical">
-  <meta content="b18a7c00a8ef460610f47b125d7d9cd5fffd2066" name="document-revision">
+  <meta content="ea4c57350374038cb212d4c4cdec4bacbf9210fd" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -2065,7 +2065,7 @@ dfn > a.self-link::before      { content: "#"; }
    <p>Immersive audio container (IAC) is the storage format for immersive audio (IA) bitstreams in <a data-link-type="biblio" href="#biblio-isobmff">[ISOBMFF]</a> tracks.</p>
    <p>IAC is aimed to cover a wide range of applications for both surround sound and 3D audio, which is becoming more prevalent and accessible. These applications include internet audio streaming, multicasting/broadcasting services, file download, gaming, communication and extended-reality XR. The IAC format should help to provide an immersive 3D audio experience on a wide-range of devices from big screen to home entertainment, e.g. headsets, mobile phones, tablets, TVs, sound bars and home theater systems.</p>
    <p>Figure 1 shows an conceptual IAC architecture.</p>
-   <center><img height="216" src="Conceptual IAC Architecture.png" width="800"></center>
+   <center><img height="216" src="images/Conceptual IAC Architecture.png" width="800"></center>
    <center><b>Figure 1. </b>Conceptual IAC Architecture</center>
    <p>For a given 3D audio such as Ambisonics and/or multichannel audio,</p>
    <ul>
@@ -2120,16 +2120,16 @@ dfn > a.self-link::before      { content: "#"; }
      <p>Substream is a byte aligned raw coded stream for single channel or two channels.</p>
    </ul>
    <p>Figure 5 shows the configuration of IA bitstream (before packing <a data-link-type="dfn">OBUs</a>).</p>
-   <center><img height="272" src="Configuration of IA Bitstream.png" width="800"></center>
+   <center><img height="272" src="images/Configuration of IA Bitstream.png" width="800"></center>
    <center><b>Figure 5. </b>Configuration of IA Bitstream (before packing OBUs)</center>
    <p>For IAC, each IA bitstream is packed by OBUs so that it is composed of a sequence of OBUs, Non-timed Metadata and followed by grouped into <a data-link-type="dfn">Temporal Units</a>. Where, each Temporal Unit shall start Temproal_Delimitor_OBU and shall consist of OBUs for only one single IA_Frame. And, the order of Substreams in each Temporal Unit shall be maintained in the same order as in IA_Coded_Data.</p>
    <p class="note" role="note"><span>NOTE:</span> OBU_IA_Stream_Indicator is only placed at the front of the first IA bitstream (i.e. at the front of IA sequence) to be feeded to OBU parsers.</p>
    <p>OBUs are made of a 1 byte header, identifying in particular the type of OBU, followed by an optional length field and by an optional payload, whose presence and content depend on the OBU type. Depending on its type, an OBU can carry Codec_Specific_Info, IA_Static_Meta, Demixing_Info, Substream_Boundary_Info, Recon_Gain_Info or IA_Coded_Data for option1 (or Substream for option2).</p>
    <p>Figure 6-1 shows a configuration of IA bitstream (after packing OBUs) for option1.</p>
-   <center><img height="184" src="Configuration of IA Bitstream_OBU_IA_Coded_Data.png" width="800"></center>
+   <center><img height="184" src="images/Configuration of IA Bitstream_OBU_IA_Coded_Data.png" width="800"></center>
    <center><b>Figure 6-1. </b>Option1: Configuration of IA Bitstream (after packing OBUs)</center>
    <p>Figure 6-2 shows a configuration of IA bitstream (after packing OBUs) for option2.</p>
-   <center><img height="185" src="Configuration of IA Bitstream_OBU_Substream.png" width="800"></center>
+   <center><img height="185" src="images/Configuration of IA Bitstream_OBU_Substream.png" width="800"></center>
    <center><b>Figure 6-2. </b>Option2: Configuration of IA Bitstream (after packing OBUs)</center>
    <p class="note" role="note"><span>NOTE:</span> All OBUs composing of IA bitstream except Codec_Specific_Info_OBU and Substream_OBU is codec-agnostic. <a data-link-type="dfn">OBU Syntax</a> and <a data-link-type="dfn">OBU Semantics</a> sections in this specification define its syntax and semantics for all information comprosing of IA bitstream except Codec_Specific_Info and Substream. Syntax and semantics for Codec_Specific_Info and Substream are defined by a given codec.</p>
    <p class="note" role="note"><span>NOTE:</span> When one of option1 and option2 is selected, the other will be removed.</p>
@@ -2164,7 +2164,7 @@ dfn > a.self-link::before      { content: "#"; }
    </ul>
    <p><dfn data-dfn-type="dfn" data-noexport id="drop_obu">drop_obu( )<a class="self-link" href="#drop_obu"></a></dfn> is a function call that indicates when IAC decoder should ignore an OBU because it is not assumed as IA bitstream.</p>
    <p>After SeenIABitstream sets to 1, IA bitstream shall be presented to IAC-OBU parser. After parsing Codec_Specific_Info_OBU and IA_Static_Meta_OBU, IAC-OBU parser prepares Substream decoders as many as the number of Substreams and reconstruts each coded stream, from IA_Coded_Data_OBU (or Substream_OBUs), to be feeded to each Substream decoder. At the same time, IAC-OBU parser feeds IA_Static_Meta_OBU and Recon_Gain_Info_OBU to Post-Processor.</p>
-   <center><img src="Hypothetical IAC Decoder Model.png"></center>
+   <center><img src="images/Hypothetical IAC Decoder Model.png"></center>
    <center><b>Figure 7. </b>Hypothetical IAC Decoder Model</center>
    <h4 class="heading settled" data-level="2.2.1" id="general-obu-syntax-and-semantics"><span class="secno">2.2.1. </span><span class="content">General OBU Syntax and Semantics</span><a class="self-link" href="#general-obu-syntax-and-semantics"></a></h4>
    <p><b>Syntax</b></p>
@@ -2325,7 +2325,7 @@ greater is incompatible.</p>
 </pre>
    <p><b>Semantics</b></p>
    <p><dfn data-dfn-type="dfn" data-noexport id="loudspeaker_layout">loudspeaker_layout<a class="self-link" href="#loudspeaker_layout"></a></dfn> shall indicate the channel layout for the channels to be reconstructed from the precedent ChannelGroups and the current ChannelGroup among ChannelGroups for channel audio in IA_Frame.</p>
-   <left><img src="Loudspeaker Layout.png"></left>
+   <left><img src="images/Loudspeaker Layout.png"></left>
    <p><dfn data-dfn-type="dfn" data-noexport id="output_gain_is_present_flag">output_gain_is_present_flag<a class="self-link" href="#output_gain_is_present_flag"></a></dfn> shall indicate if output_gain information fields for the ChannelGroup presents .</p>
    <ul>
     <li data-md>
@@ -2388,7 +2388,7 @@ greater is incompatible.</p>
      <p>7: reserved</p>
    </ul>
    <p><dfn data-dfn-type="dfn" data-noexport id="alpha">alpha<a class="self-link" href="#alpha"></a></dfn> and <dfn data-dfn-type="dfn" data-noexport id="beta">beta<a class="self-link" href="#beta"></a></dfn> are gain values used for S7to5 down-mixer, <dfn data-dfn-type="dfn" data-noexport id="gamma">gamma<a class="self-link" href="#gamma"></a></dfn> for T4to2 down-mixer, <dfn data-dfn-type="dfn" data-noexport id="delta">delta<a class="self-link" href="#delta"></a></dfn> for S5to3 down-mixer and <dfn data-dfn-type="dfn" data-noexport id="w_idx_offset">w_idx_offset<a class="self-link" href="#w_idx_offset"></a></dfn> is the offset to generate a gain value <dfn data-dfn-type="dfn" data-noexport id="w">w<a class="self-link" href="#w"></a></dfn> used for T2toTF2 down-mixer.</p>
-   <center><img src="IA Downmix Mechanism.png"></center>
+   <center><img src="images/IA Downmix Mechanism.png"></center>
    <center><b>Figure 8. </b>IA Downmix Mechanism</center>
    <h4 class="heading settled" data-level="2.2.12" id="substream-boundary-info-obu-syntax-and-semantics"><span class="secno">2.2.12. </span><span class="content">Substream Boundary Info OBU Syntax and Semantics</span><a class="self-link" href="#substream-boundary-info-obu-syntax-and-semantics"></a></h4>
    <p class="note" role="note"><span>NOTE:</span> It will be removed when option2 is selected.</p>
@@ -2416,7 +2416,7 @@ greater is incompatible.</p>
 </pre>
    <p><b>Semantics</b></p>
    <p><dfn data-dfn-type="dfn" data-noexport id="recon_gain_flags">recon_gain_flags<a class="self-link" href="#recon_gain_flags"></a></dfn> shall indicates the channels which recon_gain is applied to.</p>
-   <left><img src="Recon_Gain_Flags.png"></left>
+   <left><img src="images/Recon_Gain_Flags.png"></left>
    <p><dfn data-dfn-type="dfn" data-noexport id="recon_gain">recon_gain<a class="self-link" href="#recon_gain"></a></dfn> shall indicates the gain value to be applied to the channel, which is indicated by <dfn data-dfn-type="dfn" data-noexport id="recon_gain_flalgs">recon_gain_flalgs<a class="self-link" href="#recon_gain_flalgs"></a></dfn>, after decoding of the following IA_Coded_Data.</p>
    <p>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
 There shall be ChannelGroups as many as channel_audio_layer if ambisonics_mode = 0. Otherwise, channel_audio_layer plus 1.
