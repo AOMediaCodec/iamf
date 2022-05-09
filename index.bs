@@ -40,6 +40,22 @@ url: https://opus-codec.org/docs/opus_in_isobmff.html#; spec: OPUS-IN-ISOBMFF; t
 	text: opus
 	text: dOps
 
+url: https://www.iso.org/standard/55688.html#; spec: MP4-Systems; type: dfn;
+	text: objectTypeIndication
+	text: streamType
+	text: upstream
+	text: decSpecificInfo()
+	text: DecoderConfigDescriptor()
+
+url: https://www.iso.org/standard/76383.html#; spec: MP4-Audio; type: dfn;
+	text: AudioSpecificConfig()
+	text: audioObjectType
+	text: channelConfiguration
+	text: GASpecificConfig()
+	text: frameLengthFlag
+	text: dependsOnCoreCoder
+	text: extensionFlag
+
 url: https://www.iso.org/standard/79110.html#; spec: MP4; type: dfn;
 	text: ESDBox
 
@@ -53,6 +69,8 @@ url: https://tools.ietf.org/html/rfc6381#; spec: RFC6381; type: property;
 url: https://tools.ietf.org/html/rfc7845#; spec: RFC7845; type: dfn;
 	text: ID Header
 	text: ChannelMappingFamily
+	text: Channel Count
+	text: Output Gain
 
 url: https://tools.ietf.org/html/rfc6716#; spec: RFC6716; type: dfn;
 	text: opus packet
@@ -73,6 +91,18 @@ url: https://en.wikipedia.org/wiki/Q_(number_format); spec: Q-Format; type: dfn;
 		"publisher": "ISO/IEC",
 		"href": "https://www.iso.org/standard/43345.html"
 	},
+	"MP4-Audio": {
+		"title": "Information technology — Coding of audio-visual objects — Part 3: Audio",
+		"status": "Standard",
+		"publisher": "ISO/IEC",
+		"href": "https://www.iso.org/standard/76383.html"
+	},		
+	"MP4-Systems": {
+		"title": "Information technology — Coding of audio-visual objects — Part 1: Systems",
+		"status": "Standard",
+		"publisher": "ISO/IEC",
+		"href": "https://www.iso.org/standard/55688.html"
+	},	
 	"OPUS-IN-ISOBMFF": {
 		"title": "Encapsulation of Opus in ISO Base Media File Format",
 		"status": "Best Practice",
@@ -164,29 +194,39 @@ NOTE: All OBUs composing of IA bitstream except Codec_Specific_Info_OBU and Subs
 
 NOTE: When one of option1 and option2 is selected, the other will be removed.
 
-## Codec Specific
+## Codec Specific ## {#codec-specific}
 
 This section defines codec specific information for Codec_Specific_Info and Substream.
 
-- Codec_Specific_Info is composed of Codec_ID and Decder_Config. Codec_ID shall indicate the codec which has been used to generate Substreams within IA bitstream and Decder_Config shall indicate the decoding parameters which are applied to all of Substreams within IA bitstream.
+- <dfn export>Codec_Specific_Info</dfn> is composed of [=Codec_ID=] and [=Decoder_Config=]. Codec_ID shall indicate the codec which has been used to generate Substreams within IA bitstream and Decder_Config shall indicate the decoding parameters which are applied to all of Substreams within IA bitstream.
 
 For legacy codecs, Decder_Config shall be exactly the same information as the conventional file parser feeds to the codec decoders for decoding of mono or stereo bitstream. For future codecs, Decder_Config shall include all of decoding parameters which are required to decode Substreams.
 
 - Substream is a raw coded stream for mono or stereo channels. Substream format shall be exactly the same as the sample format (before packing OBU) for mono or stereo audio file which consists of only one single coded stream by the Codec_ID.
  
-### IAC-OPUS Specific
+### IAC-OPUS Specific ### {#iac-opus-specific}
 
-Decoder_Config for IAC-OPUS shall be [=ID Header=] with [=ChannelMappingFamily=] = 0 of [[!RFC7845]] as follows:
+[=Codec_Specific_Info=] for IAC-OPUS shall conform to [=ID Header=] with [=ChannelMappingFamily=] = 0 of [[!RFC7845]] with following constraints:
+- [=Channel Count=] should be set to 2.
+- [=Output Gain=] shall not be used. In other words, it shall be set to 0dB.
 
 Substream format shall be [=opus packet=] of [[!RFC6716]] which contains only one single frame of mono or stereo channels.
 
-### IAC-AAC-LC Specific
+### IAC-AAC-LC Specific ### {#iac-aac-lc-specific}
 
-Decoder_Config for IAC-AAC-LC shall be {esds} which is a subset of [=ESDBox=] as follows:
+[=Codec_ID=] shall be 'mp4a'.
 
-NOTE: {esds} means a subset of [=ESDBox=] which is necessarily required for decoding.
-
-NOTE: {esds} needs to be defined. 
+[=Decoder_Config=] for IAC-AAC-LC shall be [=DecoderConfigDescriptor()=] of [[!MP4-Systems]], which is a subset of [=ESDBox=] for [[!MP4-Audio]], with following constraints:
+- [=objectTypeIndication=] = 0x40
+- [=streamType=] = 0x05 (Audio Stream)
+- [=upstream=] = 0
+- [=decSpecificInfo()=]: The syntax and values shall conform to [=AudioSpecificConfig()=] of [[!MP4-Audio]] with following constraints:
+	- [=audioObjectType=] = 2
+	- [=channelConfiguration=] should be set to 2.
+	- [=GASpecificConfig()=]: The syntax and values shall conform to [=GASpecificConfig()=] of [[!MP4-Audio]] with following constraints:
+		- [=frameLengthFlag=] = 0 (1024 lines IMDCT)
+		- [=dependsOnCoreCoder=] = 0
+		- [=extensionFlag=] = 0
 
 Substream format shall be [=raw_data_block()=] of [[!AAC]] which contains only one single frame of mono or stereo channels.
  
@@ -333,7 +373,7 @@ NOTE: The IA Stream Indicator OBU has an empty payload.
 <dfn>SeenIABitstream</dfn> is to indicater whether a series of OBUs for IA bitstream will follow or not. It is initialized to zero.
 
 
-### Codec Specific Info Syntax and Semantics
+### Codec Specific Info OBU Syntax and Semantics
 
 <b>Syntax</b>
 
@@ -346,10 +386,11 @@ class codec_specific_info_obu() {
 
 <b>Semantics</b>
 
-<dfn>codec_id</dfn> is a ‘four-character code’ (4CC) to identify the codec which has been used to generate Substream. It shall be the same as the [=boxtype=] of its AduioSampleEntry if exist. It shall be '[=opus=]' for IAC-OPUS and '[=mp4a=]' for IAC-AAC-LC.
+<dfn>codec_id</dfn> is a ‘four-character code’ (4CC) to identify the codec which has been used to generate Substream. It shall be the same as the [=boxtype=] of its AduioSampleEntry if exist. It shall be 'opus' for IAC-OPUS and 'mp4a' for IAC-AAC-LC.
 
-<dfn>decoder_config</dfn> is a set of decoding parameters to decode Substream for a given codec_id. It shall be the set of decoding parameters which conventional mono or stereo file parsers feed to the conventional mono or stereo decoder. It shall be [=ID Header=] with [=ChannelMappingFamily=] = 0 of [[!RFC7845]] for IAC-OPUS and {esds} for IAC-AAC-LC.
+<dfn>decoder_config</dfn> is a set of decoding parameters to decode Substream for a given codec_id. It shall be the set of decoding parameters which the conventional mono or stereo decoders need to decoder the Substream. 
 
+<dfn>codec_specific_info_obu</dfn> for IAC-OPUS shall conform to [=Codec_Specific_Info=] of [[#iac-opus-specific]] and codec_specific_info for IAC-AAC-LC shall conform to [=Codec_Specific_Info=] of [[#iac-aac-lc-specific]].
 
 ### IA Static Meta OBU Syntax and Semantics
 
