@@ -155,7 +155,7 @@ This specification is formulated as follows:
 - <b>Section 6 IA Decoding Process</b> provides IAC decoding model based on the conventional more or stereo decoding model and a guideline for Post-Processor to generate Immersive 3D Audio (Informative section).
 
 
-# Immersive Audio Bitstream Definition 
+# Immersive Audio Bitstream Definition # {#iabitstream-definition}
 
 An immersive audio (IA) sequence is composed of a sequence of IA bitstreams.
 
@@ -654,7 +654,7 @@ During encapsulation process, OBUs of IA bistream are encapsulated into [[!ISOBM
 - IA_Static_Meta (with OBU syntax) shall be stored as a new sample group having [=grouping_type=], 'iatm'.
 - Some fields of IA_Static_Meta, related to MIME codecs parameter, shall be copied in sample entry.
 - Temporal_Delimitor_OBUs shall be discarded from [=Temporal Units=].
-- Demixing_Info_OBUs (with OBU syntax) may be stored as a new sample group having [=grouping_type=], 'dmpm'.
+- Demixing_Info_OBUs (with OBU syntax) may be stored as a new sample group having [=grouping_type=], 'admi'.
 - Remainded OBUs of [=Temporal Units=] shall be stored as sample data without gap among OBUs.
 
 ## IA Sample Entry ## {#iasampleentry-section}
@@ -778,13 +778,13 @@ NOTE: We agree to create a generic sample group where the payload is exactly the
 ### Demixing Info Sample Group
 
 During encapsulation process, Demixing_Info_OBUs shall or should or can be discarded from IA bistream. A new sample group for Demixing_Info_OBUs is defined by using [=sgpd=] and [sbgp] boxes with following requirements:
-- [=grouping_type=] shall be set to 'dmpm'. {# demixing prameter mode}
+- [=grouping_type=] shall be set to 'admi'.
 - Each [=SampleGroupDescriptionEntry=] shall be Demixing_Info_OBU with OBU syntax.
 
 ### IA Static Meta Sample Group
 
 During encapsulation process, IA_Static_Meta_OBUs are discarded from IA bistream. A new sample group for IA_Static_Meta_OBUs is defined by using [=sgpd=] and [sbgp] boxes with following requirements:
-- [=grouping_type=] shall be set to 'iasm'. {# IA Static Meta}
+- [=grouping_type=] shall be set to 'iasm'.
 - [=SampleGroupDescriptionEntry=] shall be IA_Static_Meta_OBU with OBU syntax.
 
 
@@ -812,8 +812,37 @@ NOTE: We agree with the slides from April 11, with the following:
 - signaling of the layers as intended by the author
 - We need to discuss if have variable length codecs parameter is a problem or not.
 
-# Informative Annex: Decapsulation Scheme
-TBA
+# Informative Annex: IAC Decapsulation Guideline # {#iacdecapsulation}
+
+This section provides a guideline for IAC parser to reconstruct IA bitstreams (i.e., IA sequence) from IAC file.
+
+When IAC parser feeds the reconstructed IA bitstreams to IAC-OBU parser, IA_Stream_Indicator_OBU is placed at the front of the first IA bistream to let IAC-OBU parser know OBUs for IA bistreams are coming.
+
+Figure 9 shows the mirroring process of the encapsulation scheme of IA bitstream specified in [[#basic-encapsulation]].
+
+<center><img src="images/IAC Decapsulation Guideline.png"></center>
+<center><b>Figure 9. </b>IAC Decapsulation Guideline</center> 
+
+During decapsulation process, IAC file is decapsulated into IA bitstreams which conform to [[#iabitstream-definition]] as follows:
+- Step1: Reconstruction of Non-timed Metadata (Codec_Specific_OBU and followed by IA_Static_Meta_OBU) for the ith IA bitstream
+	- [Step1-1] Codec_Specific_Info_OBU: generate Codec_Specific_Info from CodecSpecificBox of 'aiac' sample entry, and packetize it by OBU with obu_type = OBU_Codec_Sepcific_info.
+	- [Step1-2] IA_Static_Meta_OBU: take the ith SampleGroupDescriptionEntry as it is in SampleGroup with grouping_type, 'iasm'.
+	- [Step1-3] Place Codec_Specific_Info_OBU at the front of IA_Static_Meta_OBU without gap to reconstruct Non-timed Metadata.
+	- [Step1-4] Figure out the offset (i1) and number (im) of Samples, which the ith SampleGroupDescriptionEntry is applied to, from the SampleGroup.
+- Step2: Reconstructing of the jth Temporal Unit of the ith IA Bitstream (j = i1, i2, …, im) 
+	- [Step2-1] Prepare Temporal_Delimitor_OBU with obu_type = OBU_Temporal_Delimitor.
+	- [Step2-2] If there is the SampleGroup with grouping_type, 'admi', then place the Demixing_Info_OBU at the front of jth Sample without gap. Otherwise, take jth Sample as it is.
+		- Demixing_Info_OBU: take the SampleGroupDescriptionEntry as it is, from SampleGrouop with grouping_type, 'admi', mapped to jth Sample.
+	- [Step2-3] Place Temporal_Delimitor_OBU at the front of the result of Step2-2 without gap to reconstruct the jth Temporal Unit.
+- Step3: Place Non-Timed Metadata and followed by Temporal Units in order (j = i1, i2, …, im) without gap to reconstruct the ith IA bitstream.
+
+Codec_Specific_Info_OBU for IAC-OPUS is generated as follows:
+- The syntax and values conform to [=ID Header=] of [[!RFC7845]] with following constraints.
+	- [=OutputChannelCount=], [=PreSkip=], [=InputSampleRate=], [=OutputGain=] and [=ChannelMappingFamily=] are copied from [=dOps=] box.
+	
+Codec_Specific_Info_OBU for IAC-AAC-LC is generated as follows:
+- [=Codec_ID=]: 'mp4a'
+- [=Decoder_Config=] is copied from [=DecoderConfigDescriptor()=] of [=esds=] box.
 
 # Informative Annex: IA Encoding Process 
 TBA
