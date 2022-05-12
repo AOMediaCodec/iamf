@@ -178,21 +178,14 @@ For IAC, each IA bitstream is packed by OBUs so that it is composed of a sequenc
 
 NOTE: OBU_IA_Stream_Indicator is only placed at the front of the first IA bitstream (i.e. at the front of IA sequence) to be feeded to OBU parsers.
 
-OBUs are made of a 1 byte header, identifying in particular the type of OBU, followed by an optional length field and by an optional payload, whose presence and content depend on the OBU type. Depending on its type, an OBU can carry Codec_Specific_Info, IA_Static_Meta, Demixing_Info, Substream_Boundary_Info, Recon_Gain_Info or IA_Coded_Data for option1 (or Substream for option2).
+OBUs are made of a 1 byte header, identifying in particular the type of OBU, followed by an optional length field and by an optional payload, whose presence and content depend on the OBU type. Depending on its type, an OBU can carry Codec_Specific_Info, IA_Static_Meta, Demixing_Info, Recon_Gain_Info or Substream.
 
-Figure 6-1 shows a configuration of IA bitstream (after packing OBUs) for option1.
-
-<center><img src="images/Configuration of IA Bitstream_OBU_IA_Coded_Data.png"></center>
-<center><b>Figure 6-1. </b>Option1: Configuration of IA Bitstream (after packing OBUs)</center> 
-
-Figure 6-2 shows a configuration of IA bitstream (after packing OBUs) for option2.
+Figure 6 shows a configuration of IA bitstream (after packing OBUs).
 
 <center><img src="images/Configuration of IA Bitstream_OBU_Substream.png"></center>
-<center><b>Figure 6-2. </b>Option2: Configuration of IA Bitstream (after packing OBUs)</center>  
+<center><b>Figure 6. </b>Configuration of IA Bitstream (after packing OBUs)</center>  
 
 NOTE: All OBUs composing of IA bitstream except Codec_Specific_Info_OBU and Substream_OBU is codec-agnostic. [=OBU Syntax=] and [=OBU Semantics=] sections in this specification define its syntax and semantics for all information comprosing of IA bitstream except Codec_Specific_Info and Substream. Syntax and semantics for Codec_Specific_Info and Substream are defined by a given codec.
-
-NOTE: When one of option1 and option2 is selected, the other will be removed.
 
 ## Codec Specific ## {#codec-specific}
 
@@ -239,7 +232,7 @@ This section specifies the syntax elements and the meaning of the syntax element
 
 <dfn>drop_obu( )</dfn> is a function call that indicates when IAC decoder should ignore an OBU because it is not assumed as IA bitstream.
 
-After SeenIABitstream sets to 1, IA bitstream shall be presented to IAC-OBU parser. After parsing Codec_Specific_Info_OBU and IA_Static_Meta_OBU, IAC-OBU parser prepares Substream decoders as many as the number of Substreams and reconstruts each coded stream, from IA_Coded_Data_OBU (or Substream_OBUs), to be feeded to each Substream decoder. At the same time, IAC-OBU parser feeds IA_Static_Meta_OBU and Recon_Gain_Info_OBU to Post-Processor.
+After SeenIABitstream sets to 1, IA bitstream shall be presented to IAC-OBU parser. After parsing Codec_Specific_Info_OBU and IA_Static_Meta_OBU, IAC-OBU parser prepares Substream decoders as many as the number of Substreams and reconstruts each coded stream, from Substream_OBUs, to be feeded to each Substream decoder. At the same time, IAC-OBU parser feeds IA_Static_Meta_OBU and Recon_Gain_Info_OBU to Post-Processor.
 
 <center><img src="images/Hypothetical IAC Decoder Model.png"></center>
 <center><b>Figure 7. </b>Hypothetical IAC Decoder Model</center>  
@@ -264,11 +257,9 @@ class obu_bitstream_unit(sz) {
     if (obu_type == 4)
       demixing_info();
     if (obu_type == 5)
-      substream_boundary_info();
-    if (obu_type == 6)
       recon_gain_info();
-    if (obu_type == 7)
-      ia_coded_data() or substream();
+    if (obu_type == 6)
+      substream();
     byte_alignment():
   }
   else {
@@ -321,10 +312,9 @@ obu_type: Name of obu_type
    2    : OBU_IA_Static_Meta
    3    : OBU_Temporal_Delimitor
    4    : OBU_Demixing_Info
-   5    : OBU_Substream_Boundary_Info
-   6    : OBU_Recon_Gain_Info
-   7    : OBU_IA_Coded_Data or OBU_Substream
-  8~15  : Reserved
+   5    : OBU_Recon_Gain_Info
+   6    : OBU_Substream
+  7~15  : Reserved
 </pre>
 
 
@@ -553,24 +543,6 @@ class demixing_info_obu() {
 <center><b>Figure 8. </b>IA Downmix Mechanism</center>  
 
 
-### Substream Boundary Info OBU Syntax and Semantics
-
-NOTE: It will be removed when option2 is selected.
-
-<b>Syntax</b>
-
-```
-class substream_boundary_info_obu() {
-  for (i=0; i< total # of substreams - 1; i++)
-    unsigned int (leb128()) substream_size;
-}
-```
-
-<b>Semantics</b>
-
-<dfn>substream_size</dfn> shall indicates the size of Substream (in bytes). The fields present as many as the number of Substreams in IA_Coded_Data minus 1. So, the field for the last Substream shall not be present.
-
-
 ### Recon Gain Info OBU Syntax and Semantics
 
 <b>Syntax</b>
@@ -598,28 +570,7 @@ class recon_gain_info_obu() {
 <dfn>recon_gain</dfn> shall indicates the gain value to be applied to the channel, which is indicated by <dfn>recon_gain_flalgs</dfn>, after decoding of the following IA_Coded_Data.
 
 
-### IA Coded Data OBU Syntax and Semantics
-
-NOTE: It will be removed when option2 is selected.
-
-<b>Syntax</b>
-
-```
-class ia_coded_data_obu() {
-  for (i=0; i< total # of substreams; i++)
-    substream();
-}
-```
-
-<b>Semantics</b>
-
-There shall be ChannelGroups as many as channel_audio_layer if ambisonics_mode = 0. Otherwise, channel_audio_layer plus 1.
-Each ChannelGroup shall have Substreams as many as substream_count. Each Substream shall be an raw coded data for mono or stereo channels by using the codec which is indicated by codec_id field of Codec_Specific_Info_OBU. Substream format shall be [=opus packet=] of [[!RFC6716]] for IAC-OPUS and [=raw_data_block()=] of [[!AAC]] for IAC-AAC-LC.
-
-
 ### Substream OBU Syntax and Semantics
-
-NOTE: It will be removed when option1 is selected.
 
 <b>Syntax</b>
 
@@ -633,6 +584,8 @@ class substream_obu() {
 
 Substream shall be an raw coded data for mono or stereo channels by using the codec which is indicated by codec_id field of Codec_Specific_Info_OBU. Substream format shall be [=opus packet=] of [[!RFC6716]] for IAC-OPUS and [=raw_data_block()=] of [[!AAC]] for IAC-AAC-LC.
 
+There shall be ChannelGroups as many as channel_audio_layer if ambisonics_mode = 0. Otherwise, channel_audio_layer plus 1.
+Each ChannelGroup shall have Substreams as many as [=substream_count=]. 
 
 # Basic Encapsulation Scheme # {#basic-encapsulation}
 
