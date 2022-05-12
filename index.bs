@@ -50,6 +50,9 @@ url: https://www.iso.org/standard/79110.html#; spec: MP4; type: property;
 url: https://tools.ietf.org/html/rfc6381#; spec: RFC6381; type: property;
 	text: codecs
 
+url: https://tools.ietf.org/html/rfc8486#; spec: RFC8486; type: dfn;
+	text: channel count
+
 url: https://tools.ietf.org/html/rfc7845#; spec: RFC7845; type: dfn;
 	text: ID Header
 	text: ChannelMappingFamily
@@ -67,6 +70,12 @@ url: https://en.wikipedia.org/wiki/Q_(number_format); spec: Q-Format; type: dfn;
 
 <pre class='biblio'>
 {
+	"AI-CAD-Mixing": {
+		"title": "AI 3D immersive audio codec based on content-adaptive dynamic down-mixing and up-mixing framework",
+		"status": "Paper",
+		"publisher": "AES",
+		"href": "https://www.aes.org/e-lib/browse.cfm?elib=21489"
+	},
 	"AAC": {
 		"title": "Information technology — Generic coding of moving pictures and associated audio information — Part 7: Advanced Audio Coding (AAC)",
 		"status": "Standard",
@@ -125,7 +134,7 @@ This specification is formulated as follows:
 - <b>Section 6 IA Decoding Process</b> provides IAC decoding model based on the conventional more or stereo decoding model and a guideline for Post-Processor to generate Immersive 3D Audio (Informative section).
 
 
-# Immersive Audio Bitstream Definition 
+# Immersive Audio Bitstream Definition # {#iabitstream-definition}
 
 An immersive audio (IA) sequence is composed of a sequence of IA bitstreams.
 
@@ -351,7 +360,7 @@ class codec_specific_info_obu() {
 <dfn>decoder_config</dfn> is a set of decoding parameters to decode Substream for a given codec_id. It shall be the set of decoding parameters which conventional mono or stereo file parsers feed to the conventional mono or stereo decoder. It shall be [=ID Header=] with [=ChannelMappingFamily=] = 0 of [[!RFC7845]] for IAC-OPUS and {esds} for IAC-AAC-LC.
 
 
-### IA Static Meta OBU Syntax and Semantics
+### IA Static Meta OBU Syntax and Semantics ### {#iastaticmeta-obu}
 
 NOTE: We agree to with a fixed set of layouts in this version, and possibly have a future version number for different layouts.
 
@@ -414,7 +423,7 @@ class ambix_layer_config(mode) {
 <dfn>demixing_matrix</dfn> shall be the same as the one for [=ChannelMappingFamily=] = 3 in [[!RFC8486]].
 
 
-### Channel Audio Layer Config Syntax and Semantics
+### Channel Audio Layer Config Syntax and Semantics ### {#channelaudiolayerconfig}
 
 <b>Syntax</b>
 
@@ -783,10 +792,279 @@ NOTE: We agree with the slides from April 11, with the following:
 # Informative Annex: Decapsulation Scheme
 TBA
 
-# Informative Annex: IA Encoding Process 
-TBA
 
-# Informative Annex: IA Decoding Process
+# Informative Annex: IA Encoding Guideline # {#iaencoding}
+
+This section provides a guideline for IA encoding for a given input audio format.
+
+## Input Audio Format ## {#iaencoding-inputaudioformat}
+
+Recommended input audo format for IA encoding is as follows:
+- Ambiosnics format: It conforms to [=ChannelMappingFamily=] = 2 or 3 of [[RFC8486]].
+- Channel Audio format: It conforms to[=loudspeaker_layout=] specified in [[#channelaudiolayerconfig]].
+- Ambisonics + Channel Audio format: In this case, Channel Audio is regarded as Non-diegetic.
+- Input Smapling Rate: 48000hz
+- Bitdepth: 16 bits or 24 bits
+	- 16 bits are recommended for IAC-OPUS.
+- Input file format: .wav file (Linear PCM, simply called as PCM)
+
+## IA Encoder ## {#iaencoding-iaencoder}
+
+For a given input audio and user inputs, IA encoder outputs [=IA bitstream=] which conforms to [[#iabitstream-definition]].
+
+Input audio is one of followings:
+- Ambisonics format
+- Channel Audio format
+- Ambisonics + Channel Audio format
+
+User inputs are:
+- Ambisonics mode to indicate if [=ChannelMappingFamily=] = 2 or 3 of [[RFC8486]].
+- List of channel layouts to be supported for scalable channel audio: it conforms to [=loudspeaker_layout=].
+
+IA encoder is composed of Pre-processor, Codec encoder and OBU packetizer as depicted in Figure 10.
+- Pre-processor outputs one or more [=ChannelGroups=], [=IA_Static_Meta=] and [=Timed Metadata=] if needed based on the input audio and user inputs.
+	- It outputs one single ChannelGroup for Ambisonics.
+	- It outputs one or more ChannelGroups for Channel audio.
+- Codec encoder generates one or more [=Substreams=] from each ChannelGroup and outputs the Substream(s) with one single Decoder_Config().
+	- Mono or stereo coding is only allowed.
+		- Ambisonics format: each channel is coded as mono mode
+		- Channel Audio format: each pair of coupled channels in the same ChannelGroup is coded as stereo mode to generate one single Substream and each of non-coupled channels in the same ChannelGroup is coded as mono mode to generate one single Substream.
+			- Coupled channels: L/R, Ls/Rs, Lss/Rss, Lrs/Rrs, Ltf/Rtf, Ltb/Rtb
+			- Non-coupled channels: C, LFE, L
+- OBU packetizer generates [=Non-timed Metadata=] and [=Temporal Unit=] for each frame, and outputs [=IA bitstream=].
+	- Non-timed Metadata generator generates OBUs for [=Codec_Specific_Info=] and [=IA_Static_Meta=].
+	- Temporal Unit generator generates [=Temporal Unit=] for each frame from [=Timed Metadata=] if present and [=Substreams=].
+
+<center><img src="images/IA Encoder Configuration.png"></center>
+<center><b>Figure 10. </b>IA Encoder Configuration</center>
+
+The order of Substreams in each ChannelGroup is as follows:
+- In ChannelGroup for Ambisonics: The order conforms to [[RFC8486]].
+- In ChannelGroup for Channel audio: The order conforms to following rules:
+	- [=Coupled Substream(s)=] comes first and followed by [=non-coupled Substream(s)=].
+	- Coupled Substream(s) for surround channels comes first and followed by one(s) for top channels.
+	- Coupled Substream(s) for front channels comes first and followed by one(s) for side, rear and back channels.
+	- Coupled Substream(s) for side channels comes first and followed by one(s) for rear channels.
+	- Center channel comes first and followed by LFE and followed by the other one.
+
+
+### IA Encoder for Ambisonics format ### {#iaencoding-iaencoder-ambisonics}
+
+For Ambisonics format:
+- Pre-processor outputs one ChannelGroup and IA_Static_Meta and it is only composed of Meta Generator.
+	- Meta generator generates IA_Static_Meta based on Ambisonics mode and the number of channels for Ambisonics.
+		- [=Ambisonics_Mode=] is set to 1 for [=ChannelMappingFamily=] = 2 of [[RFC8486]] or 2 for [=ChannelMappingFamily=] = 3 of [[RFC8486]].
+		- [=Channel_Audio_Layer=] is set to 0.  
+		- Ambisonics Layer Config() is set to as follows:
+			- [=output_channel_count=], [=substream_count=] and [=coupled_substream_count=] are set to the number of channels for Ambisonics.
+			- [=channel_mapping=] for [=Ambisonics_Mode=] = 1 or [=demixing_matrix=] for [=Ambisonics_Mode=] = 2 is assigned to according to the order of Substreams in ChannelGroup.
+- Codec Enc. outputs Substreams as many as the number of channels for Ambisoncis by coding each channel in a mono mode.
+- [=Temporal Unit=] is composed of [=Temporal_Delimitor_OBU=] and followded by OBUs for [=Substreams=]. 
+	- The order of Substreams in ChanngelGroup is aligned with [=channel_mapping=] for [=Ambisonics_Mode=] = 1 or [=demixing_matrix=] for [=Ambisonics_Mode=] = 2.
+
+### IA Encoder for Channel Audio format ### {#iaencoding-iaencoder-channelaudio}
+
+For Channel Audio format:
+- Pre-processor outputs one or more [=ChannelGroups=], [=IA_Static_Meta=] and [=Timed Metadata=]. It is composed of Down-mix parameter generator, Down-mixer, Loudness, ChannelGroup generator, Attenation and Meta generator.
+	- For non-scalable channel audio (i.e. [=Channel_Audio_Layer=] = 1): 
+		- Timed Metadata may not need to be generated. But Demixing_Info of Timed Metadata may be generated by implementers who assume it to be used for dynamic downmixing in a decoder side. 
+		- Down-mix parameter generator, Down-mixer, ChannelGroup generator and Attenuation modules are not needed. 
+	- Down-mix parameter generator generates 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k)) by analyzing input Channel Audio
+	- Down-mixer generates down-mixed audios according to the list of channel layouts and the down-mix parameters.
+	- Loudness module outputs the loudness level ([=LKFS=]) of each down-mixed audio based on [[ITU1770-4]].
+	- ChannelGroup generator transforms the input Channel Audio to ChannelGroups for audio scalability by using transformation matrix.
+		- Transformation matrix is generated based on down-mix parameters and the list of channel layouts.
+	- Attenuation module applies a gain to prevent clipping of mixed channels.
+	- Meta generator generates IA_Static_Meta, and Timed Metadata for each frame.
+		- IA_Static_Meta is set to as follows:
+			- [=Ambisonics_Mode=] is set to 0.
+			- [=Channel_Audio_Layer=] is set to the number of channel layouts.  
+			- Channel_Audio Layer Config() is set to as follows:
+				- [=loudspeaker_layout=] is set to the ith list of channel layouts for the ith ChannelGroup.
+				- [=output_gain_is_present_flag=] is set to 1 for the ith ChannelGroup if attenuation is applied to the mixed channels of the ith ChannelGroup. Otherwise it is set to 0 for the ith ChannelGroup.
+				- [=recon_gain_is_present_flag=] is set to 1 for the ith ChannelGroup if the preceding ChannelGroups has one or more mixed channels from the down-mixed audio for the ith channel layout. Otherwise, it is set to 0 for the ith ChannelGroup.
+				- [=substream_count=] is set to the nubmer of Substreams composing of the ith ChannelGroup.
+				- [=coupled_substream_count=] is set to the nubmer of coupled Substreams among the Substreams composing of the ith ChannelGroup.
+				- [=loudness=] is set to the loudness ([=LKFS=]) of the down-mixed audio for the ith channel layout for the ith ChannelGroup.
+				- Each bit of [=output_gain_flags=] is set to 1 for the ith ChannelGroup if attenuation is applied to the relevant channel of the ith ChannelGroup. Otherwies it is set to 0 for the ith ChannelGroup. 
+				- [=output_gain=] is set to the inverse number of the gain which is applied to the channels which are indicated by output_gain_flags.
+		- Timed Metadata is composed of [=Demixing_Info=] and [=Recon_Gain_Info=].
+			- [=dmixp_mode=] of Demixing_Info for the kth frame is set to indicate (α(k), β(k), γ(k), δ(k)) and w_idx_offset(k). Where w_idx_offset(k) = 1 or -1. 
+			- [=recon_gain_flags=] of Recon_Gain_Info are set to indicate the de-mixed channels, which need to apply [=recon_gain=] among the output channels after demixing for ith channel layout.
+			- [=recon_gain=] is set to the gain value to be applied to the channel which is indicated by recon_gain_flags for the ith ChannelGroup.		
+- [=Temporal Unit=] is composed of [=Temporal_Delimitor_OBU=], followed by OBUs for [=Timed Metadata=] and followed by OBUs for [=Substreams=]. 
+	- ChannelGroups in Temporal Unit are placed in order. In other words, ChannelGroup for the first channel layout comes first, followed by ChannelGroup for the second channel layout, followed by ChannelGroup for the third channel layout and so on.  
+			
+Figure 11-1 shows IA encoding flowchart for Channel Audio Format.
+- For a given Channel Audio and a given list of channel layouts for scalability, PCMs for Channel Audio are passed to CG Generation moddule.
+- CG Generation module generates the transformed audio according to CG generation rule based on the list of CLs and the down-mix parameters.
+	- The transformed audio is structured as ChannelGroups.
+- Non-mixed channels of the transformed audio (i.e., the original channels of the input channel audio) are directly input to Codec encoder, but the mixed channels may be input first to Attenuation module and then to Codec encoder. 
+- The Attenuation module reduces all sample values of the mixed channels in the same CG at a uniform rate (Output_Gain).
+	- A range of 0dB to -6dB is recommended for the attenuation. (i.e. a range of 0dB to 6dB for Output_Gain)
+- Codec Enc. generates the coded Substreams from PCMs and passes Substreams and one single Decoder_Config() to OBU Packetizer.
+- OBU packetizer generates [=Non-timed Metadata=] which consists of [=Codec_Specific_Info_OBU=] and [=IA_Static_Meta_OBU=].
+	- Codec_Specific_Info_OBU is generated based on [=Decoder_Config()=].
+	- IA_Static_Meta_OBU is generated based on [=Ambix_Layer_Config()=] and [=Channel_Audio_Layer_Config()=].
+- OBU packetizer generates [=Temporal Unit=] for each frame.
+	- OBU Packetizer generates [=Timed Metadata=], which consists of [=Demixing_Info_OBU=] and [=Recon_Gain_Info_OBU=], for each frame.
+	- OBU Packetizer generates [=Substream_OBUs=] for each frame.
+- OBU Packetizer outputs [=IA Bitstream=] which is composed of OBUs for Non-timed Metadata and followed by OBUs for Temporal Units.
+
+<center><img src="images/IA Encoding Flowchart for Channel Audio Format.png"></center>
+<center><b>Figure 11-1. </b>IA Encoding Flowchart for Channel Audio Format</center>
+
+Following sections, [[#iaencoding-iaencoder-channelaudio-downmixparameter]], [[#iaencoding-iaencoder-channelaudio-downmixmechanism]], [[#iaencoding-iaencoder-channelaudio-channellayoutgenerationrule]], [[#iaencoding-iaencoder-channelaudio-recongaingeneration]] and [[#iaencoding-iaencoder-channelaudio-channelgroupgenerationrule]] are not needed for non-scalable channel audio (i.e., when [=Channel_Audio_Layer=] of [=IA_Static_Meta=] is set to 1).
+
+#### Down-mix parameter and Loudness #### {#iaencoding-iaencoder-channelaudio-downmixparameter}
+
+This section describes how to generate down-mix parameters and loudness level for a given channel audio and a given list of channel layouts for scalability.
+
+Figure 11-2 shows a block diagram for down-mix parameter and loudness module including down-mixer.
+
+<center><img src="images/Down-mix Parameter and Loudness.png"></center>
+<center><b>Figure 11-2. </b>IA Down-mix Parameter and Loudness</center>
+
+For a given Channel Audio (e.g. 7.1.4ch) and a given list of channel layouts based on the Channel Audio, 
+- Down-mix parameter generator generates 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k)) by analyzing input Channel Audio, by refering [[AI-CAD-Mixing]]. Where, k is a frame index.
+	- It is composed of Audio Scene Classification module and Height Energy Quantification module as depicted in Figure 11-2.
+	- Audio Scene Classification module generates 4 parameters (α(k), β(k), γ(k), δ(k)) by classifying audio scenes of input channel audio in three modes.
+		- Default scene: Neither Dialog nor Effect
+		- Dialog scene: Center-channel oriented and clear dialog/voice sounds
+		- Effect scene: Directional and spatially moving sounds.
+	- Height Energy Quantification module generates a surround to height mixing parameter (w(k)) which is decided according to the relative energy difference between the top and surround channels of input channel audio.
+		- If the energy of top channels is bigger than that of surround ones, then w_idx_offset(k) is set to 1. Otherwise, it is set to -1. And, w(k) is calculated based on w_idx_offset(k) and conforms to [[#iadecoding]].
+- Down-mixer generates down-mixed audios from input Channel Audio according to the list of channel layouts and the down-mix parameters, and outputs down-mixed audio for each channel layout to Loudness module.
+	- It is not depicted in Figure 11-2 but Down-mixer further generates [=Dmixp_Mode=] and [=Recon_Gains=] for each frame to be passed to OBU packetizer.
+- Loudness module measures the loudness level ([=LKFS=]) of each down-mixed audio based on [[ITU1770-4]], and passes them to OBU packetizer.
+
+#### Down-mix Mechanism #### {#iaencoding-iaencoder-channelaudio-downmixmechanism}
+
+This section describes the down-mixing mechanism for IA.
+
+For a given Channel Audio which conforms to [[=loudspeaker_layout]], teh surround and top channels (if any) are separately down-mixed and especially step by step until to get a target channels.
+
+Therefore, a down-mixer based on the down-mix mechanisam for IA is a combination of following surround down-mixer(s) and top down-mixer(s) as depicted in Figure 11-3
+- Surround Down-mixers: S7to5 enc., S5to3 enc., S3to2 enc., S2to1 enc.
+
+```
+	S7to5 enc.: Ls5 = α(k) x Lss7 + β(k) x Lrs7 and Rs5 = α(k) x Rss7 + β(k) x Rrs7.
+	S5to3 enc.: L3 = L5 + δ(k) x Ls5 and R3 = R5 + δ(k) x Rs5
+	S3to2 enc.: L2 = L3 + 0.707 x C and R2 = R3 + 0.707 x C
+	S2to1 enc.: Mono = 0.5 x (L2 + R2)
+```
+
+- Top Down-mixers: T4to2 enc., T2toTF2 enc.
+
+```
+	T4to2 enc.: Ltf2 = Ltf4 + γ(k) x Ltb4  and Rtf2 = Rtf4 + γ(k) x Rtb4.
+	T2toTF2 enc.: Ltf3 = Ltf2 + w(k) x δ(k) x Ls5 and Rtf3 = Rtf2 + w(k) x δ(k) x Rs5. 
+```
+
+Figure 11-3 shows the down-mix mechanism.
+
+<center><img src="images/Down-mix Mechanism.png"></center>
+<center><b>Figure 11-3. </b>IA Down-mix Mechanism</center>
+
+```
+For example, to get down-mixed 3.1.2ch from 7.1.4ch: 
+- S3 of 3.1.2ch is generated by using S7to5 and S5to3 encs.
+- TF2 of 3.1.2ch is generated by using T4to2 and T2toTF2 encs.
+```
+
+#### Channel Layout Generation Rule #### {#iaencoding-iaencoder-channelaudio-channellayoutgenerationrule}
+
+This section describes the generation rule for channel layouts.
+
+For a given channel layout (CL #n) of input Channel Audio, any list of CLs ({CL #i: i = 1, 2, ..., n}) for a scalable channel audio comforms with following rules:
+- Si ≤ Si+1 and Wi ≤ Wi+1 and Ti ≤ Ti+1 except Si = Si+1 and Wi = Wi+1 and Ti = Ti+1 for i = n-1, n-2, …, 1. Where ith Channel Layout CL #i = Si.Wi.Ti.
+- CL #i is one of [=loudspeaker_layouts=] supported in this specification.
+
+Down-mix paths, which conform to the above rule, are only allowed as depicted in Figure 11-4.
+
+<center><img src="images/Down-mix Path.png"></center>
+<center><b>Figure 11-4. </b>IA Down-mix Path</center>
+
+#### Recon Gain Generation #### {#iaencoding-iaencoder-channelaudio-recongaingeneration}
+
+This section describes how to generate [=Recon_Gain=].
+
+Recon_Gain needs to be applied to de-mixed channels. For this, IA encoder needs to deliver it to IA decoders.
+
+Let's define followings:
+- Level Ok is the signal power for the frame #k of a channel of the down-mixed audio for CL #i.
+- Level Mk is the signal power for the frame #k of the relevant mixed channel of the down-mixed audio for CL #i-1.
+- Level Dk is the signal power for the frame #k of the de-mixed channel for CL #i (after demixing).
+
+If 10*log10(level Ok / maxL^2) is less than the first threshold value (e.g. -80dB), Recon_Gain (k, i)  = 0. Where, maxL = 32767 for 16bits.
+
+If 10*log10(level Ok / level Mk ) is less than the second threshold value (e.g. -6dB), Recon_Gain (k, i) is set to the value which makes level Ok = Recon_Gain (k, i)^2 x level Dk. Otherwise, Recon_Gain (k, i) = 1. Actual value to be delivered is floor(255*Recon_Gain).
+
+```
+For example, if we assume CL #i = 7.1.4ch and CL #i-1 = 5.1.2ch, then de-mixed channels are D_Lrs7, D_Rrs7, D_Ltb4 and D_Rtb4.
+- D_Lrs7 and D_Rrs7 are de-mixed from Ls5 and Rs5 in the (i-1)th ChanngelGroup by using Lss7 and Rss7 in the ith ChannelGroup and its relevant demixing parameters (i.e., α(k) and β(k)) , respectively.
+- D_Ltb4 and D_Rtb4 are de-mixed from Ltf2 and Rtf2 in the (i-1)th ChanngelGroup by using Ltf4 and Rtf4 in the ith ChannelGroup and its relevant demixing parameter (i.e., γ(k)), respectively.
+
+Recon_Gain for D_Lrs7:
+- Level Ok is the signal power for the frame #k of Lrs7 in the ith ChanngGroup.
+- Level Mk is the signal power for the frame #k of Ls5 in the (i-1)th ChannelGroup.
+- Level Dk is the signal power for the frame #k of D_Lrs7.
+Recon_Gain for D_Rrs7:
+- Level Ok is the signal power for the frame #k of Rrs7 in the ith ChanngGroup.
+- Level Mk is the signal power for the frame #k of Rs5 in the (i-1)th ChannelGroup.
+- Level Dk is the signal power for the frame #k of D_Rrs7.
+Recon_Gain for D_Ltb4:
+- Level Ok is the signal power for the frame #k of Ltf4 in the ith ChanngGroup.
+- Level Mk is the signal power for the frame #k of Ltf2 in the (i-1)th ChannelGroup.
+- Level Dk is the signal power for the frame #k of D_Ltb4.
+Recon_Gain for D_Rtb4:
+- Level Ok is the signal power for the frame #k of Rtf4 in the ith ChanngGroup.
+- Level Mk is the signal power for the frame #k of Rtf2 in the (i-1)th ChannelGroup.
+- Level Dk is the signal power for the frame #k of D_Rtb4.
+```
+
+#### ChannelGroup Generation Rule #### {#iaencoding-iaencoder-channelaudio-channelgroupgenerationrule}
+
+This section describes the generation rule for ChannelGroup.
+
+For a given Channel Audio and the list of CLs ({CL #i: i = 1, 2, ..., n}), CG Generation module outputs the transformed audio (i.e. ChannelGroups) which conforms to following rules:
+- It consists of C number of channels and is structured to n number of CGs, where C is the number of channels for the Channel Audio.
+- CG #1 (as called BCG): This CG is the down-mixed audio itself for CL #1 generated from the Channel Audio. It contains C1 number of channels.
+- CG #i (as called DCG, i = 2, 3, …, n): This CG contains (Ci – Ci-1) number of channels. (Ci – Ci-1) channel(s) consists of as follows:
+	- (Si – Si-1) surround channel(s) if Si > Si-1 . When S_set = { x | Si-1 < x ≤ Si and x is an integer},
+		- If 2 is an element of S_set, the L2 channel is contained in this CG #i.
+		- If 3 is an element of S_set, the Center channel is contained in this CG #i.
+		- If 5 is an element of S_set, the L5 and R5 channels are contained in this CG #i.
+		- If 7 is an element of S_set, the L7 and R7 channels are contained in this CG #i.
+	- The LFE channel if Wi > Wi-1 .
+	- (Ti – Ti-1) top channels if Ti > Ti-1 .
+		- If Ti-1 = 0, the top channels of the down-mixed audio for CL #i are contained in this CG #i.
+		- If Ti-1 = 2, the Ltf and Rtf channels of the down-mixed audio for CL #i are contained in this CG #i.
+
+Figure 15 shows one example of transformation matrix with 4 CGs (2ch/3.1.2ch/5.1.2ch/7.1.4ch).
+
+<center><img src="images/Example of Transformation Matrix with 4 CGs.png"></center>
+<center><b>Figure 11-5. </b>Example of Transformation Matrix with 4 CGs</center>
+
+### IA Encoder for Ambisonics and Channel Audio format ### {#iaencoding-iaencoder-ambisoncis-channelaudio}
+
+For Ambisonics and Channel Audio format:
+- One single [=ChannelGroup=] for Ambisonics is generated in the same way with [[#iaencoding-iaencoder-ambisonics]].
+- One or more ChannelGroups and [=Timed Metadata=] for Channel Audio are generated in the same way with [[#iaencoding-iaencoder-ambisonics]].
+- [=IA_Static_Meta=] is set to as follows:
+	- [=Ambiosonics_Mode=] is set to according to Ambisonics mode in the same way with [[#iaencoding-iaencoder-ambisonics]].
+	- [=Channel_Audio_Layer=] is set in the same way with [[#iaencoding-iaencoder-channelaudio]].
+	- [=ambix_layer_config()=] is set in the same way with [[#iaencoding-iaencoder-ambisonics]].
+	- [=channel_audio_layer_config()=] is set in the same way with [[#iaencoding-iaencoder-channelaudio]].
+- [=Temporal Unit=] is composed of [=Temporal_Delimiter_OBU=], followed by OBUs for [=Timed Metadata=] and followed by OBUs for [=Substreams=].
+	- OBUs for Substreams composing of ChannelGroup for Ambisonics comes first and followed by OBUs for Substreams composing of ChannelGroups for Channel Audio. 
+
+Figure 12 shows IA encoding flowchart for Ambisonics and Channel Audio format with non-scalable channel audio.
+
+<center><img src="images/IA Encoding Flowchart for Ambisonics and Channel Audio Format.png"></center>
+<center><b>Figure 12. </b>IA Encoding Flowchart for Ambisonics and Channel Audio Format</center>
+
+# Informative Annex: IA Decoding Process #  {#iadecoding}
 TBA
 
 ## Downmix Matrix
