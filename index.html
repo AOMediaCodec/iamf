@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version fb1e763a4, updated Tue Mar 1 13:13:50 2022 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iac/" rel="canonical">
-  <meta content="0ef52fec2434ad7a6f4c208c2c0f94ca3c4e6610" name="document-revision">
+  <meta content="ea7fc2c44dde5c58b14a7641220220e70f6dc5c3" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -1986,9 +1986,9 @@ dfn > a.self-link::before      { content: "#"; }
         <li><a href="#reserved-obu-syntax-and-semantics"><span class="secno">2.2.4</span> <span class="content">Reserved OBU Syntax and Semantics</span></a>
         <li><a href="#ia-stream-indicator-obu-syntax-and-semantics"><span class="secno">2.2.5</span> <span class="content">IA Stream Indicator OBU Syntax and Semantics</span></a>
         <li><a href="#codec-specific-info-obu-syntax-and-semantics"><span class="secno">2.2.6</span> <span class="content">Codec Specific Info OBU Syntax and Semantics</span></a>
-        <li><a href="#ia-static-meta-obu-syntax-and-semantics"><span class="secno">2.2.7</span> <span class="content">IA Static Meta OBU Syntax and Semantics</span></a>
+        <li><a href="#iastaticmeta-obu"><span class="secno">2.2.7</span> <span class="content">IA Static Meta OBU Syntax and Semantics</span></a>
         <li><a href="#ambisonics-layer-config-syntax-and-semantics"><span class="secno">2.2.8</span> <span class="content">Ambisonics Layer Config Syntax and Semantics</span></a>
-        <li><a href="#channel-audio-layer-config-syntax-and-semantics"><span class="secno">2.2.9</span> <span class="content">Channel Audio Layer Config Syntax and Semantics</span></a>
+        <li><a href="#channelaudiolayerconfig"><span class="secno">2.2.9</span> <span class="content">Channel Audio Layer Config Syntax and Semantics</span></a>
         <li><a href="#temporal-delimitor-obu-syntax-and-semantics"><span class="secno">2.2.10</span> <span class="content">Temporal Delimitor OBU Syntax and Semantics</span></a>
         <li><a href="#demixing-info-obu-syntax-and-semantics"><span class="secno">2.2.11</span> <span class="content">Demixing Info OBU Syntax and Semantics</span></a>
         <li><a href="#recon-gain-info-obu-syntax-and-semantics"><span class="secno">2.2.12</span> <span class="content">Recon Gain Info OBU Syntax and Semantics</span></a>
@@ -2038,9 +2038,28 @@ dfn > a.self-link::before      { content: "#"; }
       <li><a href="#codecsparam"><span class="secno">3.7</span> <span class="content">Codecs Parameter String</span></a>
      </ol>
     <li><a href="#iacdecapsulation"><span class="secno">4</span> <span class="content">Informative Annex: IAC Decapsulation Guideline</span></a>
-    <li><a href="#informative-annex-ia-encoding-process"><span class="secno">5</span> <span class="content">Informative Annex: IA Encoding Process</span></a>
     <li>
-     <a href="#informative-annex-ia-decoding-process"><span class="secno">6</span> <span class="content">Informative Annex: IA Decoding Process</span></a>
+     <a href="#iaencoding"><span class="secno">5</span> <span class="content">Informative Annex: IA Encoding Guideline</span></a>
+     <ol class="toc">
+      <li><a href="#iaencoding-inputaudioformat"><span class="secno">5.1</span> <span class="content">Input Audio Format</span></a>
+      <li>
+       <a href="#iaencoding-iaencoder"><span class="secno">5.2</span> <span class="content">IA Encoder</span></a>
+       <ol class="toc">
+        <li><a href="#iaencoding-iaencoder-ambisonics"><span class="secno">5.2.1</span> <span class="content">IA Encoder for Ambisonics format</span></a>
+        <li>
+         <a href="#iaencoding-iaencoder-channelaudio"><span class="secno">5.2.2</span> <span class="content">IA Encoder for Channel Audio format</span></a>
+         <ol class="toc">
+          <li><a href="#iaencoding-iaencoder-channelaudio-downmixparameter"><span class="secno">5.2.2.1</span> <span class="content">Down-mix parameter and Loudness</span></a>
+          <li><a href="#iaencoding-iaencoder-channelaudio-downmixmechanism"><span class="secno">5.2.2.2</span> <span class="content">Down-mix Mechanism</span></a>
+          <li><a href="#iaencoding-iaencoder-channelaudio-channellayoutgenerationrule"><span class="secno">5.2.2.3</span> <span class="content">Channel Layout Generation Rule</span></a>
+          <li><a href="#iaencoding-iaencoder-channelaudio-recongaingeneration"><span class="secno">5.2.2.4</span> <span class="content">Recon Gain Generation</span></a>
+          <li><a href="#iaencoding-iaencoder-channelaudio-channelgroupgenerationrule"><span class="secno">5.2.2.5</span> <span class="content">ChannelGroup Generation Rule</span></a>
+         </ol>
+        <li><a href="#iaencoding-iaencoder-ambisoncis-channelaudio"><span class="secno">5.2.3</span> <span class="content">IA Encoder for Ambisonics and Channel Audio format</span></a>
+       </ol>
+     </ol>
+    <li>
+     <a href="#iadecoding"><span class="secno">6</span> <span class="content">Informative Annex: IA Decoding Process</span></a>
      <ol class="toc">
       <li><a href="#downmix-matrix"><span class="secno">6.1</span> <span class="content">Downmix Matrix</span></a>
      </ol>
@@ -2055,6 +2074,7 @@ dfn > a.self-link::before      { content: "#"; }
      <a href="#references"><span class="secno"></span> <span class="content">References</span></a>
      <ol class="toc">
       <li><a href="#normative"><span class="secno"></span> <span class="content">Normative References</span></a>
+      <li><a href="#informative"><span class="secno"></span> <span class="content">Informative References</span></a>
      </ol>
    </ol>
   </nav>
@@ -2142,7 +2162,7 @@ dfn > a.self-link::before      { content: "#"; }
    <p><a data-link-type="dfn" href="#codec_specific_info" id="ref-for-codec_specific_info">Codec_Specific_Info</a> for IAC-OPUS shall conform to <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="termref-for-">ID Header</a> with <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-①">ChannelMappingFamily</a> = 0 of <a data-link-type="biblio" href="#biblio-rfc7845">[RFC7845]</a> with following constraints:</p>
    <ul>
     <li data-md>
-     <p><a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="termref-for-②">Channel Count</a> should be set to 2.</p>
+     <p><a data-link-type="dfn" href="https://tools.ietf.org/html/rfc8486#" id="termref-for-②">Channel Count</a> should be set to 2.</p>
     <li data-md>
      <p><a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="termref-for-③">Output Gain</a> shall not be used. In other words, it shall be set to 0dB.</p>
    </ul>
@@ -2283,8 +2303,8 @@ dfn > a.self-link::before      { content: "#"; }
    <p><b>Semantics</b></p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="codec_id">codec_id</dfn> is a ‘four-character code’ (4CC) to identify the codec which has been used to generate Substream. It shall be the same as the <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-②①">boxtype</a> of its AduioSampleEntry if exist. It shall be <a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②②">opus</a> for IAC-OPUS and <a class="property css" data-link-type="property" href="https://www.iso.org/standard/79110.html#" id="termref-for-②③">mp4a</a> for IAC-AAC-LC.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="decoder_config">decoder_config</dfn> is a set of decoding parameters to decode Substream for a given codec_id. It shall be the set of decoding parameters which the conventional mono or stereo decoders need to decoder the Substream.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="codec_specific_info_obu">codec_specific_info_obu<a class="self-link" href="#codec_specific_info_obu"></a></dfn> for IAC-OPUS shall conform to <a data-link-type="dfn" href="#codec_specific_info" id="ref-for-codec_specific_info①">Codec_Specific_Info</a> of <a href="#iac-opus-specific">§ 2.1.1 IAC-OPUS Specific</a> and codec_specific_info for IAC-AAC-LC shall conform to <a data-link-type="dfn" href="#codec_specific_info" id="ref-for-codec_specific_info②">Codec_Specific_Info</a> of <a href="#iac-aac-lc-specific">§ 2.1.2 IAC-AAC-LC Specific</a>.</p>
-   <h4 class="heading settled" data-level="2.2.7" id="ia-static-meta-obu-syntax-and-semantics"><span class="secno">2.2.7. </span><span class="content">IA Static Meta OBU Syntax and Semantics</span><a class="self-link" href="#ia-static-meta-obu-syntax-and-semantics"></a></h4>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="codec_specific_info_obu">codec_specific_info_obu</dfn> for IAC-OPUS shall conform to <a data-link-type="dfn" href="#codec_specific_info" id="ref-for-codec_specific_info①">Codec_Specific_Info</a> of <a href="#iac-opus-specific">§ 2.1.1 IAC-OPUS Specific</a> and codec_specific_info for IAC-AAC-LC shall conform to <a data-link-type="dfn" href="#codec_specific_info" id="ref-for-codec_specific_info②">Codec_Specific_Info</a> of <a href="#iac-aac-lc-specific">§ 2.1.2 IAC-AAC-LC Specific</a>.</p>
+   <h4 class="heading settled" data-level="2.2.7" id="iastaticmeta-obu"><span class="secno">2.2.7. </span><span class="content">IA Static Meta OBU Syntax and Semantics</span><a class="self-link" href="#iastaticmeta-obu"></a></h4>
    <p class="note" role="note"><span>NOTE:</span> We agree to with a fixed set of layouts in this version, and possibly have a future version number for different layouts.</p>
    <p><b>Syntax</b></p>
 <pre>class ia_static_meta_obu() {
@@ -2300,7 +2320,7 @@ dfn > a.self-link::before      { content: "#"; }
    <p><b>Semantics</b></p>
    <p><dfn data-dfn-type="dfn" data-noexport id="version">version<a class="self-link" href="#version"></a></dfn> shall indicate the version of IA bitstream. It shall be set to 0 for this version of the specification. Implementations should treat IA bitstream where the MSB four bits of the version number match that of a recognized specification as backwards compatible with that specification. That is, the version number can be split into "major" and "minor" version sub-fields, with changes to the minor sub-field (in the LSB four bits) signaling compatible changes. For example, an implementation of this specification should accept any stream with a version number of ’15’ or less, and should assume any stream with a version number ’16’ or
 greater is incompatible.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="ambisonics_mode">ambisonics_mode<a class="self-link" href="#ambisonics_mode"></a></dfn> shall indicate if IA bitstream include Ambiosnics and which type if includes.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="ambisonics_mode">ambisonics_mode</dfn> shall indicate if IA bitstream include Ambiosnics and which type if includes.</p>
    <ul>
     <li data-md>
      <p>0: IA bitstream includes no Ambisonics.</p>
@@ -2312,7 +2332,7 @@ greater is incompatible.</p>
      <p>3: Reserved</p>
    </ul>
    <p class="note" role="note"><span>NOTE:</span> In the case of ambisonics_mode = 1 or 2, the channel audio if present is regarded as non-diegetic channels.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="channel_audio_layer">channel_audio_layer<a class="self-link" href="#channel_audio_layer"></a></dfn> shall indicate the number of ChannelGroups for channel audio in each IA_Frame. To indicate that IA bitstream includes no channel audio, it shall be set to zero. Its maximum number shall be limited to 6.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="channel_audio_layer">channel_audio_layer</dfn> shall indicate the number of ChannelGroups for channel audio in each IA_Frame. To indicate that IA bitstream includes no channel audio, it shall be set to zero. Its maximum number shall be limited to 6.</p>
    <h4 class="heading settled" data-level="2.2.8" id="ambisonics-layer-config-syntax-and-semantics"><span class="secno">2.2.8. </span><span class="content">Ambisonics Layer Config Syntax and Semantics</span><a class="self-link" href="#ambisonics-layer-config-syntax-and-semantics"></a></h4>
    <p><b>Syntax</b></p>
 <pre>class ambix_layer_config(mode) {
@@ -2326,12 +2346,12 @@ greater is incompatible.</p>
 }
 </pre>
    <p><b>Semantics</b></p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="output_channel_count">output_channel_count<a class="self-link" href="#output_channel_count"></a></dfn> shall be the same as <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="termref-for-②④">channel count</a> in [[!RFC8486].</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="output_channel_count">output_channel_count</dfn> shall be the same as <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc8486#" id="termref-for-②④">channel count</a> in [[!RFC8486].</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="substream_count">substream_count</dfn> shall indicate the number of Substreams composing of ChannelGroup.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="coupled_substream_count">coupled_substream_count<a class="self-link" href="#coupled_substream_count"></a></dfn> shall indicate the number of coupled Substreams among Substreams composing of ChannelGroup.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="channel_mapping">channel_mapping<a class="self-link" href="#channel_mapping"></a></dfn> shall be the same as the one for <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②⑤">ChannelMappingFamily</a> = 2 in <a data-link-type="biblio" href="#biblio-rfc8486">[RFC8486]</a>.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="demixing_matrix">demixing_matrix<a class="self-link" href="#demixing_matrix"></a></dfn> shall be the same as the one for <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②⑥">ChannelMappingFamily</a> = 3 in <a data-link-type="biblio" href="#biblio-rfc8486">[RFC8486]</a>.</p>
-   <h4 class="heading settled" data-level="2.2.9" id="channel-audio-layer-config-syntax-and-semantics"><span class="secno">2.2.9. </span><span class="content">Channel Audio Layer Config Syntax and Semantics</span><a class="self-link" href="#channel-audio-layer-config-syntax-and-semantics"></a></h4>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="coupled_substream_count">coupled_substream_count</dfn> shall indicate the number of coupled Substreams among Substreams composing of ChannelGroup.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="channel_mapping">channel_mapping</dfn> shall be the same as the one for <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②⑤">ChannelMappingFamily</a> = 2 in <a data-link-type="biblio" href="#biblio-rfc8486">[RFC8486]</a>.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="demixing_matrix">demixing_matrix</dfn> shall be the same as the one for <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②⑥">ChannelMappingFamily</a> = 3 in <a data-link-type="biblio" href="#biblio-rfc8486">[RFC8486]</a>.</p>
+   <h4 class="heading settled" data-level="2.2.9" id="channelaudiolayerconfig"><span class="secno">2.2.9. </span><span class="content">Channel Audio Layer Config Syntax and Semantics</span><a class="self-link" href="#channelaudiolayerconfig"></a></h4>
    <p><b>Syntax</b></p>
 <pre>class channel_audio_layer_config(i) {
   unsigned int (4) loudspeaker_layout(i);
@@ -2347,24 +2367,24 @@ greater is incompatible.</p>
 }
 </pre>
    <p><b>Semantics</b></p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="loudspeaker_layout">loudspeaker_layout<a class="self-link" href="#loudspeaker_layout"></a></dfn> shall indicate the channel layout for the channels to be reconstructed from the precedent ChannelGroups and the current ChannelGroup among ChannelGroups for channel audio in IA_Frame.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="loudspeaker_layout">loudspeaker_layout</dfn> shall indicate the channel layout for the channels to be reconstructed from the precedent ChannelGroups and the current ChannelGroup among ChannelGroups for channel audio in IA_Frame.</p>
    <left><img src="images/Loudspeaker Layout.png"></left>
-   <p><dfn data-dfn-type="dfn" data-noexport id="output_gain_is_present_flag">output_gain_is_present_flag<a class="self-link" href="#output_gain_is_present_flag"></a></dfn> shall indicate if output_gain information fields for the ChannelGroup presents .</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="output_gain_is_present_flag">output_gain_is_present_flag</dfn> shall indicate if output_gain information fields for the ChannelGroup presents .</p>
    <ul>
     <li data-md>
      <p>0: No output_gain information fields for the ChannelGroup present.</p>
     <li data-md>
      <p>1: output_gain information fields for the ChannelGroup present. In this case, output_gain_flags and output_gain fields present.</p>
    </ul>
-   <p><dfn data-dfn-type="dfn" data-noexport id="recon_gain_is_present_flag">recon_gain_is_present_flag<a class="self-link" href="#recon_gain_is_present_flag"></a></dfn> shall indicate if recon_gain information fields for the ChannelGroup presents in Recon_Gain_Info_OBU .</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="recon_gain_is_present_flag">recon_gain_is_present_flag</dfn> shall indicate if recon_gain information fields for the ChannelGroup presents in Recon_Gain_Info_OBU .</p>
    <ul>
     <li data-md>
      <p>0: No recon_gain information fields for the ChannelGroup present in Recon_Gain_Info_OBU.</p>
     <li data-md>
      <p>1: recon_gain information fields for the ChannelGroup present in Recon_Gain_Info_OBU. In this case, recon_gain_flags and recon_gain fields present.</p>
    </ul>
-   <p><dfn data-dfn-type="dfn" data-noexport id="loudness">loudness<a class="self-link" href="#loudness"></a></dfn> shall indicate the loudness value of the downmixed channels, for the channel layout which is indicated by loudspeaker_layout, from the original channel audio. It shall be stored in fixed-point value with 8 fractional bits (i.e. Q7.8 in <a data-link-type="biblio" href="#biblio-q-format">[Q-Format]</a>) and shall be <a data-link-type="dfn" href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#" id="termref-for-②⑦">LKFS</a> based on <a data-link-type="biblio" href="#biblio-itu1770-4">[ITU1770-4]</a>, so it shall be to represent zero or negative value.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="output_gain_flags">output_gain_flags<a class="self-link" href="#output_gain_flags"></a></dfn> shall indicate the channels which output_gian is applied to. If a bit set to 1, output_gain shall be applied to the channel. Otherwise, output_gain shall not be applied to the channel.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="loudness">loudness</dfn> shall indicate the loudness value of the downmixed channels, for the channel layout which is indicated by loudspeaker_layout, from the original channel audio. It shall be stored in fixed-point value with 8 fractional bits (i.e. Q7.8 in <a data-link-type="biblio" href="#biblio-q-format">[Q-Format]</a>) and shall be <a data-link-type="dfn" href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#" id="termref-for-②⑦">LKFS</a> based on <a data-link-type="biblio" href="#biblio-itu1770-4">[ITU1770-4]</a>, so it shall be to represent zero or negative value.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="output_gain_flags">output_gain_flags</dfn> shall indicate the channels which output_gian is applied to. If a bit set to 1, output_gain shall be applied to the channel. Otherwise, output_gain shall not be applied to the channel.</p>
 <pre class="def">Bit position : Channel Name
     b5(MSB)  : Left channel (L1, L2, L3)
       b4     : Right channel (R2, R3)
@@ -2374,7 +2394,7 @@ greater is incompatible.</p>
       b0     : Rigth Top Front channel (Rtf)
       
 </pre>
-   <p><dfn data-dfn-type="dfn" data-noexport id="output_gain">output_gain<a class="self-link" href="#output_gain"></a></dfn> shall indicate the gain value to be applied to the mixed channels which are indicated by output_gain_flags. It is 20*log10 of the factor by which to scale the mixed channels. It is stored in a 16-bit, signed, two’s complement fixed-point value with 8 fractional bits (i.e. Q7.8 in <a data-link-type="biblio" href="#biblio-q-format">[Q-Format]</a>). Where, each mixed channel is generated by downmixing two or more input channels.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="output_gain">output_gain</dfn> shall indicate the gain value to be applied to the mixed channels which are indicated by output_gain_flags. It is 20*log10 of the factor by which to scale the mixed channels. It is stored in a 16-bit, signed, two’s complement fixed-point value with 8 fractional bits (i.e. Q7.8 in <a data-link-type="biblio" href="#biblio-q-format">[Q-Format]</a>). Where, each mixed channel is generated by downmixing two or more input channels.</p>
    <h4 class="heading settled" data-level="2.2.10" id="temporal-delimitor-obu-syntax-and-semantics"><span class="secno">2.2.10. </span><span class="content">Temporal Delimitor OBU Syntax and Semantics</span><a class="self-link" href="#temporal-delimitor-obu-syntax-and-semantics"></a></h4>
    <p><b>Syntax</b></p>
 <pre>class temporal_delimitor_obu() {
@@ -2391,7 +2411,7 @@ greater is incompatible.</p>
 }
 </pre>
    <p><b>Semantics</b></p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="dmixp_mode">dmixp_mode<a class="self-link" href="#dmixp_mode"></a></dfn> shall indicate a mode of pre-defined combinations of five demix parameters for the following IA_Coded_Data.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="dmixp_mode">dmixp_mode</dfn> shall indicate a mode of pre-defined combinations of five demix parameters for the following IA_Coded_Data.</p>
    <ul>
     <li data-md>
      <p>0: mode1, (alpha, beta, gamma, delta, w_idx_offset) = (1, 1, 0.707, 0.707, -1)</p>
@@ -2428,9 +2448,9 @@ greater is incompatible.</p>
 }
 </pre>
    <p><b>Semantics</b></p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="recon_gain_flags">recon_gain_flags<a class="self-link" href="#recon_gain_flags"></a></dfn> shall indicates the channels which recon_gain is applied to.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="recon_gain_flags">recon_gain_flags</dfn> shall indicates the channels which recon_gain is applied to.</p>
    <left><img src="images/Recon_Gain_Flags.png"></left>
-   <p><dfn data-dfn-type="dfn" data-noexport id="recon_gain">recon_gain<a class="self-link" href="#recon_gain"></a></dfn> shall indicates the gain value to be applied to the channel, which is indicated by <dfn data-dfn-type="dfn" data-noexport id="recon_gain_flalgs">recon_gain_flalgs<a class="self-link" href="#recon_gain_flalgs"></a></dfn>, after decoding of the following IA_Coded_Data.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="recon_gain">recon_gain</dfn> shall indicates the gain value to be applied to the channel, which is indicated by <dfn data-dfn-type="dfn" data-noexport id="recon_gain_flalgs">recon_gain_flalgs<a class="self-link" href="#recon_gain_flalgs"></a></dfn>, after decoding of the following IA_Coded_Data.</p>
    <h4 class="heading settled" data-level="2.2.13" id="substream-obu-syntax-and-semantics"><span class="secno">2.2.13. </span><span class="content">Substream OBU Syntax and Semantics</span><a class="self-link" href="#substream-obu-syntax-and-semantics"></a></h4>
    <p><b>Syntax</b></p>
 <pre>class substream_obu() {
@@ -2668,9 +2688,436 @@ Quantity:  One of more
     <li data-md>
      <p><a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config②">Decoder_Config</a> is copied from <a data-link-type="dfn" href="https://www.iso.org/standard/55688.html#" id="termref-for-⑥①">DecoderConfigDescriptor()</a> of <a data-link-type="dfn" href="#esds" id="ref-for-esds">esds</a> box.</p>
    </ul>
-   <h2 class="heading settled" data-level="5" id="informative-annex-ia-encoding-process"><span class="secno">5. </span><span class="content">Informative Annex: IA Encoding Process</span><a class="self-link" href="#informative-annex-ia-encoding-process"></a></h2>
-    TBA 
-   <h2 class="heading settled" data-level="6" id="informative-annex-ia-decoding-process"><span class="secno">6. </span><span class="content">Informative Annex: IA Decoding Process</span><a class="self-link" href="#informative-annex-ia-decoding-process"></a></h2>
+   <h2 class="heading settled" data-level="5" id="iaencoding"><span class="secno">5. </span><span class="content">Informative Annex: IA Encoding Guideline</span><a class="self-link" href="#iaencoding"></a></h2>
+   <p>This section provides a guideline for IA encoding for a given input audio format.</p>
+   <h3 class="heading settled" data-level="5.1" id="iaencoding-inputaudioformat"><span class="secno">5.1. </span><span class="content">Input Audio Format</span><a class="self-link" href="#iaencoding-inputaudioformat"></a></h3>
+   <p>Recommended input audo format for IA encoding is as follows:</p>
+   <ul>
+    <li data-md>
+     <p>Ambiosnics format: It conforms to <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-⑥②">ChannelMappingFamily</a> = 2 or 3 of <a data-link-type="biblio" href="#biblio-rfc8486">[RFC8486]</a>.</p>
+    <li data-md>
+     <p>Channel Audio format: It conforms to<a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout">loudspeaker_layout</a> specified in <a href="#channelaudiolayerconfig">§ 2.2.9 Channel Audio Layer Config Syntax and Semantics</a>.</p>
+    <li data-md>
+     <p>Ambisonics + Channel Audio format: In this case, Channel Audio is regarded as Non-diegetic.</p>
+    <li data-md>
+     <p>Input Smapling Rate: 48000hz</p>
+    <li data-md>
+     <p>Bitdepth: 16 bits or 24 bits</p>
+     <ul>
+      <li data-md>
+       <p>16 bits are recommended for IAC-OPUS.</p>
+     </ul>
+    <li data-md>
+     <p>Input file format: .wav file (Linear PCM, simply called as PCM)</p>
+   </ul>
+   <h3 class="heading settled" data-level="5.2" id="iaencoding-iaencoder"><span class="secno">5.2. </span><span class="content">IA Encoder</span><a class="self-link" href="#iaencoding-iaencoder"></a></h3>
+   <p>For a given input audio and user inputs, IA encoder outputs <a data-link-type="dfn">IA bitstream</a> which conforms to <a href="#iabitstream-definition">§ 2 Immersive Audio Bitstream Definition</a>.</p>
+   <p>Input audio is one of followings:</p>
+   <ul>
+    <li data-md>
+     <p>Ambisonics format</p>
+    <li data-md>
+     <p>Channel Audio format</p>
+    <li data-md>
+     <p>Ambisonics + Channel Audio format</p>
+   </ul>
+   <p>User inputs are:</p>
+   <ul>
+    <li data-md>
+     <p>Ambisonics mode to indicate if <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-⑥③">ChannelMappingFamily</a> = 2 or 3 of <a data-link-type="biblio" href="#biblio-rfc8486">[RFC8486]</a>.</p>
+    <li data-md>
+     <p>List of channel layouts to be supported for scalable channel audio: it conforms to <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout①">loudspeaker_layout</a>.</p>
+   </ul>
+   <p>IA encoder is composed of Pre-processor, Codec encoder and OBU packetizer as depicted in Figure 10.</p>
+   <ul>
+    <li data-md>
+     <p>Pre-processor outputs one or more <a data-link-type="dfn">ChannelGroups</a>, <a data-link-type="dfn">IA_Static_Meta</a> and <a data-link-type="dfn">Timed Metadata</a> if needed based on the input audio and user inputs.</p>
+     <ul>
+      <li data-md>
+       <p>It outputs one single ChannelGroup for Ambisonics.</p>
+      <li data-md>
+       <p>It outputs one or more ChannelGroups for Channel audio.</p>
+     </ul>
+    <li data-md>
+     <p>Codec encoder generates one or more <a data-link-type="dfn">Substreams</a> from each ChannelGroup and outputs the Substream(s) with one single Decoder_Config().</p>
+     <ul>
+      <li data-md>
+       <p>Mono or stereo coding is only allowed.</p>
+       <ul>
+        <li data-md>
+         <p>Ambisonics format: each channel is coded as mono mode</p>
+        <li data-md>
+         <p>Channel Audio format: each pair of coupled channels in the same ChannelGroup is coded as stereo mode to generate one single Substream and each of non-coupled channels in the same ChannelGroup is coded as mono mode to generate one single Substream.</p>
+         <ul>
+          <li data-md>
+           <p>Coupled channels: L/R, Ls/Rs, Lss/Rss, Lrs/Rrs, Ltf/Rtf, Ltb/Rtb</p>
+          <li data-md>
+           <p>Non-coupled channels: C, LFE, L</p>
+         </ul>
+       </ul>
+     </ul>
+    <li data-md>
+     <p>OBU packetizer generates <a data-link-type="dfn">Non-timed Metadata</a> and <a data-link-type="dfn">Temporal Unit</a> for each frame, and outputs <a data-link-type="dfn">IA bitstream</a>.</p>
+     <ul>
+      <li data-md>
+       <p>Non-timed Metadata generator generates OBUs for <a data-link-type="dfn" href="#codec_specific_info" id="ref-for-codec_specific_info③">Codec_Specific_Info</a> and <a data-link-type="dfn">IA_Static_Meta</a>.</p>
+      <li data-md>
+       <p>Temporal Unit generator generates <a data-link-type="dfn">Temporal Unit</a> for each frame from <a data-link-type="dfn">Timed Metadata</a> if present and <a data-link-type="dfn">Substreams</a>.</p>
+     </ul>
+   </ul>
+   <center><img height="272" src="images/IA Encoder Configuration.png" width="800"></center>
+   <center><b>Figure 10. </b>IA Encoder Configuration</center>
+   <p>The order of Substreams in each ChannelGroup is as follows:</p>
+   <ul>
+    <li data-md>
+     <p>In ChannelGroup for Ambisonics: The order conforms to <a data-link-type="biblio" href="#biblio-rfc8486">[RFC8486]</a>.</p>
+    <li data-md>
+     <p>In ChannelGroup for Channel audio: The order conforms to following rules:</p>
+     <ul>
+      <li data-md>
+       <p><a data-link-type="dfn">Coupled Substream(s)</a> comes first and followed by <a data-link-type="dfn">non-coupled Substream(s)</a>.</p>
+      <li data-md>
+       <p>Coupled Substream(s) for surround channels comes first and followed by one(s) for top channels.</p>
+      <li data-md>
+       <p>Coupled Substream(s) for front channels comes first and followed by one(s) for side, rear and back channels.</p>
+      <li data-md>
+       <p>Coupled Substream(s) for side channels comes first and followed by one(s) for rear channels.</p>
+      <li data-md>
+       <p>Center channel comes first and followed by LFE and followed by the other one.</p>
+     </ul>
+   </ul>
+   <h4 class="heading settled" data-level="5.2.1" id="iaencoding-iaencoder-ambisonics"><span class="secno">5.2.1. </span><span class="content">IA Encoder for Ambisonics format</span><a class="self-link" href="#iaencoding-iaencoder-ambisonics"></a></h4>
+   <p>For Ambisonics format:</p>
+   <ul>
+    <li data-md>
+     <p>Pre-processor outputs one ChannelGroup and IA_Static_Meta and it is only composed of Meta Generator.</p>
+     <ul>
+      <li data-md>
+       <p>Meta generator generates IA_Static_Meta based on Ambisonics mode and the number of channels for Ambisonics.</p>
+       <ul>
+        <li data-md>
+         <p><a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode">Ambisonics_Mode</a> is set to 1 for <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-⑥④">ChannelMappingFamily</a> = 2 of <a data-link-type="biblio" href="#biblio-rfc8486">[RFC8486]</a> or 2 for <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-⑥⑤">ChannelMappingFamily</a> = 3 of <a data-link-type="biblio" href="#biblio-rfc8486">[RFC8486]</a>.</p>
+        <li data-md>
+         <p><a data-link-type="dfn" href="#channel_audio_layer" id="ref-for-channel_audio_layer">Channel_Audio_Layer</a> is set to 0.</p>
+        <li data-md>
+         <p>Ambisonics Layer Config() is set to as follows:</p>
+         <ul>
+          <li data-md>
+           <p><a data-link-type="dfn" href="#output_channel_count" id="ref-for-output_channel_count">output_channel_count</a>, <a data-link-type="dfn" href="#substream_count" id="ref-for-substream_count①">substream_count</a> and <a data-link-type="dfn" href="#coupled_substream_count" id="ref-for-coupled_substream_count">coupled_substream_count</a> are set to the number of channels for Ambisonics.</p>
+          <li data-md>
+           <p><a data-link-type="dfn" href="#channel_mapping" id="ref-for-channel_mapping">channel_mapping</a> for <a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode①">Ambisonics_Mode</a> = 1 or <a data-link-type="dfn" href="#demixing_matrix" id="ref-for-demixing_matrix">demixing_matrix</a> for <a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode②">Ambisonics_Mode</a> = 2 is assigned to according to the order of Substreams in ChannelGroup.</p>
+         </ul>
+       </ul>
+     </ul>
+    <li data-md>
+     <p>Codec Enc. outputs Substreams as many as the number of channels for Ambisoncis by coding each channel in a mono mode.</p>
+    <li data-md>
+     <p><a data-link-type="dfn">Temporal Unit</a> is composed of <a data-link-type="dfn">Temporal_Delimitor_OBU</a> and followded by OBUs for <a data-link-type="dfn">Substreams</a>.</p>
+     <ul>
+      <li data-md>
+       <p>The order of Substreams in ChanngelGroup is aligned with <a data-link-type="dfn" href="#channel_mapping" id="ref-for-channel_mapping①">channel_mapping</a> for <a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode③">Ambisonics_Mode</a> = 1 or <a data-link-type="dfn" href="#demixing_matrix" id="ref-for-demixing_matrix①">demixing_matrix</a> for <a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode④">Ambisonics_Mode</a> = 2.</p>
+     </ul>
+   </ul>
+   <h4 class="heading settled" data-level="5.2.2" id="iaencoding-iaencoder-channelaudio"><span class="secno">5.2.2. </span><span class="content">IA Encoder for Channel Audio format</span><a class="self-link" href="#iaencoding-iaencoder-channelaudio"></a></h4>
+   <p>For Channel Audio format:</p>
+   <ul>
+    <li data-md>
+     <p>Pre-processor outputs one or more <a data-link-type="dfn">ChannelGroups</a>, <a data-link-type="dfn">IA_Static_Meta</a> and <a data-link-type="dfn">Timed Metadata</a>. It is composed of Down-mix parameter generator, Down-mixer, Loudness, ChannelGroup generator, Attenation and Meta generator.</p>
+     <ul>
+      <li data-md>
+       <p>For non-scalable channel audio (i.e. <a data-link-type="dfn" href="#channel_audio_layer" id="ref-for-channel_audio_layer①">Channel_Audio_Layer</a> = 1):</p>
+       <ul>
+        <li data-md>
+         <p>Timed Metadata may not need to be generated. But Demixing_Info of Timed Metadata may be generated by implementers who assume it to be used for dynamic downmixing in a decoder side.</p>
+        <li data-md>
+         <p>Down-mix parameter generator, Down-mixer, ChannelGroup generator and Attenuation modules are not needed.</p>
+       </ul>
+      <li data-md>
+       <p>Down-mix parameter generator generates 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k)) by analyzing input Channel Audio</p>
+      <li data-md>
+       <p>Down-mixer generates down-mixed audios according to the list of channel layouts and the down-mix parameters.</p>
+      <li data-md>
+       <p>Loudness module outputs the loudness level (<a data-link-type="dfn" href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#" id="termref-for-⑥⑥">LKFS</a>) of each down-mixed audio based on <a data-link-type="biblio" href="#biblio-itu1770-4">[ITU1770-4]</a>.</p>
+      <li data-md>
+       <p>ChannelGroup generator transforms the input Channel Audio to ChannelGroups for audio scalability by using transformation matrix.</p>
+       <ul>
+        <li data-md>
+         <p>Transformation matrix is generated based on down-mix parameters and the list of channel layouts.</p>
+       </ul>
+      <li data-md>
+       <p>Attenuation module applies a gain to prevent clipping of mixed channels.</p>
+      <li data-md>
+       <p>Meta generator generates IA_Static_Meta, and Timed Metadata for each frame.</p>
+       <ul>
+        <li data-md>
+         <p>IA_Static_Meta is set to as follows:</p>
+         <ul>
+          <li data-md>
+           <p><a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode⑤">Ambisonics_Mode</a> is set to 0.</p>
+          <li data-md>
+           <p><a data-link-type="dfn" href="#channel_audio_layer" id="ref-for-channel_audio_layer②">Channel_Audio_Layer</a> is set to the number of channel layouts.</p>
+          <li data-md>
+           <p>Channel_Audio Layer Config() is set to as follows:</p>
+           <ul>
+            <li data-md>
+             <p><a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout②">loudspeaker_layout</a> is set to the ith list of channel layouts for the ith ChannelGroup.</p>
+            <li data-md>
+             <p><a data-link-type="dfn" href="#output_gain_is_present_flag" id="ref-for-output_gain_is_present_flag">output_gain_is_present_flag</a> is set to 1 for the ith ChannelGroup if attenuation is applied to the mixed channels of the ith ChannelGroup. Otherwise it is set to 0 for the ith ChannelGroup.</p>
+            <li data-md>
+             <p><a data-link-type="dfn" href="#recon_gain_is_present_flag" id="ref-for-recon_gain_is_present_flag">recon_gain_is_present_flag</a> is set to 1 for the ith ChannelGroup if the preceding ChannelGroups has one or more mixed channels from the down-mixed audio for the ith channel layout. Otherwise, it is set to 0 for the ith ChannelGroup.</p>
+            <li data-md>
+             <p><a data-link-type="dfn" href="#substream_count" id="ref-for-substream_count②">substream_count</a> is set to the nubmer of Substreams composing of the ith ChannelGroup.</p>
+            <li data-md>
+             <p><a data-link-type="dfn" href="#coupled_substream_count" id="ref-for-coupled_substream_count①">coupled_substream_count</a> is set to the nubmer of coupled Substreams among the Substreams composing of the ith ChannelGroup.</p>
+            <li data-md>
+             <p><a data-link-type="dfn" href="#loudness" id="ref-for-loudness">loudness</a> is set to the loudness (<a data-link-type="dfn" href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#" id="termref-for-⑥⑦">LKFS</a>) of the down-mixed audio for the ith channel layout for the ith ChannelGroup.</p>
+            <li data-md>
+             <p>Each bit of <a data-link-type="dfn" href="#output_gain_flags" id="ref-for-output_gain_flags">output_gain_flags</a> is set to 1 for the ith ChannelGroup if attenuation is applied to the relevant channel of the ith ChannelGroup. Otherwies it is set to 0 for the ith ChannelGroup.</p>
+            <li data-md>
+             <p><a data-link-type="dfn" href="#output_gain" id="ref-for-output_gain">output_gain</a> is set to the inverse number of the gain which is applied to the channels which are indicated by output_gain_flags.</p>
+           </ul>
+         </ul>
+        <li data-md>
+         <p>Timed Metadata is composed of <a data-link-type="dfn">Demixing_Info</a> and <a data-link-type="dfn">Recon_Gain_Info</a>.</p>
+         <ul>
+          <li data-md>
+           <p><a data-link-type="dfn" href="#dmixp_mode" id="ref-for-dmixp_mode">dmixp_mode</a> of Demixing_Info for the kth frame is set to indicate (α(k), β(k), γ(k), δ(k)) and w_idx_offset(k). Where w_idx_offset(k) = 1 or -1.</p>
+          <li data-md>
+           <p><a data-link-type="dfn" href="#recon_gain_flags" id="ref-for-recon_gain_flags">recon_gain_flags</a> of Recon_Gain_Info are set to indicate the de-mixed channels, which need to apply <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain">recon_gain</a> among the output channels after demixing for ith channel layout.</p>
+          <li data-md>
+           <p><a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain①">recon_gain</a> is set to the gain value to be applied to the channel which is indicated by recon_gain_flags for the ith ChannelGroup.</p>
+         </ul>
+       </ul>
+     </ul>
+    <li data-md>
+     <p><a data-link-type="dfn">Temporal Unit</a> is composed of <a data-link-type="dfn">Temporal_Delimitor_OBU</a>, followed by OBUs for <a data-link-type="dfn">Timed Metadata</a> and followed by OBUs for <a data-link-type="dfn">Substreams</a>.</p>
+     <ul>
+      <li data-md>
+       <p>ChannelGroups in Temporal Unit are placed in order. In other words, ChannelGroup for the first channel layout comes first, followed by ChannelGroup for the second channel layout, followed by ChannelGroup for the third channel layout and so on.</p>
+     </ul>
+   </ul>
+   <p>Figure 11-1 shows IA encoding flowchart for Channel Audio Format.</p>
+   <ul>
+    <li data-md>
+     <p>For a given Channel Audio and a given list of channel layouts for scalability, PCMs for Channel Audio are passed to CG Generation moddule.</p>
+    <li data-md>
+     <p>CG Generation module generates the transformed audio according to CG generation rule based on the list of CLs and the down-mix parameters.</p>
+     <ul>
+      <li data-md>
+       <p>The transformed audio is structured as ChannelGroups.</p>
+     </ul>
+    <li data-md>
+     <p>Non-mixed channels of the transformed audio (i.e., the original channels of the input channel audio) are directly input to Codec encoder, but the mixed channels may be input first to Attenuation module and then to Codec encoder.</p>
+    <li data-md>
+     <p>The Attenuation module reduces all sample values of the mixed channels in the same CG at a uniform rate (Output_Gain).</p>
+     <ul>
+      <li data-md>
+       <p>A range of 0dB to -6dB is recommended for the attenuation. (i.e. a range of 0dB to 6dB for Output_Gain)</p>
+     </ul>
+    <li data-md>
+     <p>Codec Enc. generates the coded Substreams from PCMs and passes Substreams and one single Decoder_Config() to OBU Packetizer.</p>
+    <li data-md>
+     <p>OBU packetizer generates <a data-link-type="dfn">Non-timed Metadata</a> which consists of <a data-link-type="dfn" href="#codec_specific_info_obu" id="ref-for-codec_specific_info_obu">Codec_Specific_Info_OBU</a> and <a data-link-type="dfn">IA_Static_Meta_OBU</a>.</p>
+     <ul>
+      <li data-md>
+       <p>Codec_Specific_Info_OBU is generated based on <a data-link-type="dfn">Decoder_Config()</a>.</p>
+      <li data-md>
+       <p>IA_Static_Meta_OBU is generated based on <a data-link-type="dfn">Ambix_Layer_Config()</a> and <a data-link-type="dfn">Channel_Audio_Layer_Config()</a>.</p>
+     </ul>
+    <li data-md>
+     <p>OBU packetizer generates <a data-link-type="dfn">Temporal Unit</a> for each frame.</p>
+     <ul>
+      <li data-md>
+       <p>OBU Packetizer generates <a data-link-type="dfn">Timed Metadata</a>, which consists of <a data-link-type="dfn">Demixing_Info_OBU</a> and <a data-link-type="dfn">Recon_Gain_Info_OBU</a>, for each frame.</p>
+      <li data-md>
+       <p>OBU Packetizer generates <a data-link-type="dfn">Substream_OBUs</a> for each frame.</p>
+     </ul>
+    <li data-md>
+     <p>OBU Packetizer outputs <a data-link-type="dfn">IA Bitstream</a> which is composed of OBUs for Non-timed Metadata and followed by OBUs for Temporal Units.</p>
+   </ul>
+   <center><img height="551" src="images/IA Encoding Flowchart for Channel Audio Format.png" width="800"></center>
+   <center><b>Figure 11-1. </b>IA Encoding Flowchart for Channel Audio Format</center>
+   <p>Following sections, <a href="#iaencoding-iaencoder-channelaudio-downmixparameter">§ 5.2.2.1 Down-mix parameter and Loudness</a>, <a href="#iaencoding-iaencoder-channelaudio-downmixmechanism">§ 5.2.2.2 Down-mix Mechanism</a>, <a href="#iaencoding-iaencoder-channelaudio-channellayoutgenerationrule">§ 5.2.2.3 Channel Layout Generation Rule</a>, <a href="#iaencoding-iaencoder-channelaudio-recongaingeneration">§ 5.2.2.4 Recon Gain Generation</a> and <a href="#iaencoding-iaencoder-channelaudio-channelgroupgenerationrule">§ 5.2.2.5 ChannelGroup Generation Rule</a> are not needed for non-scalable channel audio (i.e., when <a data-link-type="dfn" href="#channel_audio_layer" id="ref-for-channel_audio_layer③">Channel_Audio_Layer</a> of <a data-link-type="dfn">IA_Static_Meta</a> is set to 1).</p>
+   <h5 class="heading settled" data-level="5.2.2.1" id="iaencoding-iaencoder-channelaudio-downmixparameter"><span class="secno">5.2.2.1. </span><span class="content">Down-mix parameter and Loudness</span><a class="self-link" href="#iaencoding-iaencoder-channelaudio-downmixparameter"></a></h5>
+   <p>This section describes how to generate down-mix parameters and loudness level for a given channel audio and a given list of channel layouts for scalability.</p>
+   <p>Figure 11-2 shows a block diagram for down-mix parameter and loudness module including down-mixer.</p>
+   <center><img height="387" src="images/Down-mix Parameter and Loudness.png" width="800"></center>
+   <center><b>Figure 11-2. </b>IA Down-mix Parameter and Loudness</center>
+   <p>For a given Channel Audio (e.g. 7.1.4ch) and a given list of channel layouts based on the Channel Audio,</p>
+   <ul>
+    <li data-md>
+     <p>Down-mix parameter generator generates 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k)) by analyzing input Channel Audio, by refering <a data-link-type="biblio" href="#biblio-ai-cad-mixing">[AI-CAD-Mixing]</a>. Where, k is a frame index.</p>
+     <ul>
+      <li data-md>
+       <p>It is composed of Audio Scene Classification module and Height Energy Quantification module as depicted in Figure 11-2.</p>
+      <li data-md>
+       <p>Audio Scene Classification module generates 4 parameters (α(k), β(k), γ(k), δ(k)) by classifying audio scenes of input channel audio in three modes.</p>
+       <ul>
+        <li data-md>
+         <p>Default scene: Neither Dialog nor Effect</p>
+        <li data-md>
+         <p>Dialog scene: Center-channel oriented and clear dialog/voice sounds</p>
+        <li data-md>
+         <p>Effect scene: Directional and spatially moving sounds.</p>
+       </ul>
+      <li data-md>
+       <p>Height Energy Quantification module generates a surround to height mixing parameter (w(k)) which is decided according to the relative energy difference between the top and surround channels of input channel audio.</p>
+       <ul>
+        <li data-md>
+         <p>If the energy of top channels is bigger than that of surround ones, then w_idx_offset(k) is set to 1. Otherwise, it is set to -1. And, w(k) is calculated based on w_idx_offset(k) and conforms to <a href="#iadecoding">§ 6 Informative Annex: IA Decoding Process</a>.</p>
+       </ul>
+     </ul>
+    <li data-md>
+     <p>Down-mixer generates down-mixed audios from input Channel Audio according to the list of channel layouts and the down-mix parameters, and outputs down-mixed audio for each channel layout to Loudness module.</p>
+     <ul>
+      <li data-md>
+       <p>It is not depicted in Figure 11-2 but Down-mixer further generates <a data-link-type="dfn" href="#dmixp_mode" id="ref-for-dmixp_mode①">Dmixp_Mode</a> and <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain②">Recon_Gains</a> for each frame to be passed to OBU packetizer.</p>
+     </ul>
+    <li data-md>
+     <p>Loudness module measures the loudness level (<a data-link-type="dfn" href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#" id="termref-for-⑥⑧">LKFS</a>) of each down-mixed audio based on <a data-link-type="biblio" href="#biblio-itu1770-4">[ITU1770-4]</a>, and passes them to OBU packetizer.</p>
+   </ul>
+   <h5 class="heading settled" data-level="5.2.2.2" id="iaencoding-iaencoder-channelaudio-downmixmechanism"><span class="secno">5.2.2.2. </span><span class="content">Down-mix Mechanism</span><a class="self-link" href="#iaencoding-iaencoder-channelaudio-downmixmechanism"></a></h5>
+   <p>This section describes the down-mixing mechanism for IA.</p>
+   <p>For a given Channel Audio which conforms to [[=loudspeaker_layout]], teh surround and top channels (if any) are separately down-mixed and especially step by step until to get a target channels.</p>
+   <p>Therefore, a down-mixer based on the down-mix mechanisam for IA is a combination of following surround down-mixer(s) and top down-mixer(s) as depicted in Figure 11-3</p>
+   <ul>
+    <li data-md>
+     <p>Surround Down-mixers: S7to5 enc., S5to3 enc., S3to2 enc., S2to1 enc.</p>
+   </ul>
+<pre>S7to5 enc.: Ls5 = α(k) x Lss7 + β(k) x Lrs7 and Rs5 = α(k) x Rss7 + β(k) x Rrs7.
+S5to3 enc.: L3 = L5 + δ(k) x Ls5 and R3 = R5 + δ(k) x Rs5
+S3to2 enc.: L2 = L3 + 0.707 x C and R2 = R3 + 0.707 x C
+S2to1 enc.: Mono = 0.5 x (L2 + R2)
+</pre>
+   <ul>
+    <li data-md>
+     <p>Top Down-mixers: T4to2 enc., T2toTF2 enc.</p>
+   </ul>
+<pre>T4to2 enc.: Ltf2 = Ltf4 + γ(k) x Ltb4  and Rtf2 = Rtf4 + γ(k) x Rtb4.
+T2toTF2 enc.: Ltf3 = Ltf2 + w(k) x δ(k) x Ls5 and Rtf3 = Rtf2 + w(k) x δ(k) x Rs5. 
+</pre>
+   <p>Figure 11-3 shows the down-mix mechanism.</p>
+   <center><img height="373" src="images/Down-mix Mechanism.png" width="800"></center>
+   <center><b>Figure 11-3. </b>IA Down-mix Mechanism</center>
+<pre>For example, to get down-mixed 3.1.2ch from 7.1.4ch: 
+- S3 of 3.1.2ch is generated by using S7to5 and S5to3 encs.
+- TF2 of 3.1.2ch is generated by using T4to2 and T2toTF2 encs.
+</pre>
+   <h5 class="heading settled" data-level="5.2.2.3" id="iaencoding-iaencoder-channelaudio-channellayoutgenerationrule"><span class="secno">5.2.2.3. </span><span class="content">Channel Layout Generation Rule</span><a class="self-link" href="#iaencoding-iaencoder-channelaudio-channellayoutgenerationrule"></a></h5>
+   <p>This section describes the generation rule for channel layouts.</p>
+   <p>For a given channel layout (CL #n) of input Channel Audio, any list of CLs ({CL #i: i = 1, 2, ..., n}) for a scalable channel audio comforms with following rules:</p>
+   <ul>
+    <li data-md>
+     <p>Si ≤ Si+1 and Wi ≤ Wi+1 and Ti ≤ Ti+1 except Si = Si+1 and Wi = Wi+1 and Ti = Ti+1 for i = n-1, n-2, …, 1. Where ith Channel Layout CL #i = Si.Wi.Ti.</p>
+    <li data-md>
+     <p>CL #i is one of <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout③">loudspeaker_layouts</a> supported in this specification.</p>
+   </ul>
+   <p>Down-mix paths, which conform to the above rule, are only allowed as depicted in Figure 11-4.</p>
+   <center><img height="716" src="images/Down-mix Path.png" width="792"></center>
+   <center><b>Figure 11-4. </b>IA Down-mix Path</center>
+   <h5 class="heading settled" data-level="5.2.2.4" id="iaencoding-iaencoder-channelaudio-recongaingeneration"><span class="secno">5.2.2.4. </span><span class="content">Recon Gain Generation</span><a class="self-link" href="#iaencoding-iaencoder-channelaudio-recongaingeneration"></a></h5>
+   <p>This section describes how to generate <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain③">Recon_Gain</a>.</p>
+   <p>Recon_Gain needs to be applied to de-mixed channels. For this, IA encoder needs to deliver it to IA decoders.</p>
+   <p>Let’s define followings:</p>
+   <ul>
+    <li data-md>
+     <p>Level Ok is the signal power for the frame #k of a channel of the down-mixed audio for CL #i.</p>
+    <li data-md>
+     <p>Level Mk is the signal power for the frame #k of the relevant mixed channel of the down-mixed audio for CL #i-1.</p>
+    <li data-md>
+     <p>Level Dk is the signal power for the frame #k of the de-mixed channel for CL #i (after demixing).</p>
+   </ul>
+   <p>If 10*log10(level Ok / maxL^2) is less than the first threshold value (e.g. -80dB), Recon_Gain (k, i)  = 0. Where, maxL = 32767 for 16bits.</p>
+   <p>If 10*log10(level Ok / level Mk ) is less than the second threshold value (e.g. -6dB), Recon_Gain (k, i) is set to the value which makes level Ok = Recon_Gain (k, i)^2 x level Dk. Otherwise, Recon_Gain (k, i) = 1. Actual value to be delivered is floor(255*Recon_Gain).</p>
+<pre>For example, if we assume CL #i = 7.1.4ch and CL #i-1 = 5.1.2ch, then de-mixed channels are D_Lrs7, D_Rrs7, D_Ltb4 and D_Rtb4.
+- D_Lrs7 and D_Rrs7 are de-mixed from Ls5 and Rs5 in the (i-1)th ChanngelGroup by using Lss7 and Rss7 in the ith ChannelGroup and its relevant demixing parameters (i.e., α(k) and β(k)) , respectively.
+- D_Ltb4 and D_Rtb4 are de-mixed from Ltf2 and Rtf2 in the (i-1)th ChanngelGroup by using Ltf4 and Rtf4 in the ith ChannelGroup and its relevant demixing parameter (i.e., γ(k)), respectively.
+
+Recon_Gain for D_Lrs7:
+- Level Ok is the signal power for the frame #k of Lrs7 in the ith ChanngGroup.
+- Level Mk is the signal power for the frame #k of Ls5 in the (i-1)th ChannelGroup.
+- Level Dk is the signal power for the frame #k of D_Lrs7.
+Recon_Gain for D_Rrs7:
+- Level Ok is the signal power for the frame #k of Rrs7 in the ith ChanngGroup.
+- Level Mk is the signal power for the frame #k of Rs5 in the (i-1)th ChannelGroup.
+- Level Dk is the signal power for the frame #k of D_Rrs7.
+Recon_Gain for D_Ltb4:
+- Level Ok is the signal power for the frame #k of Ltf4 in the ith ChanngGroup.
+- Level Mk is the signal power for the frame #k of Ltf2 in the (i-1)th ChannelGroup.
+- Level Dk is the signal power for the frame #k of D_Ltb4.
+Recon_Gain for D_Rtb4:
+- Level Ok is the signal power for the frame #k of Rtf4 in the ith ChanngGroup.
+- Level Mk is the signal power for the frame #k of Rtf2 in the (i-1)th ChannelGroup.
+- Level Dk is the signal power for the frame #k of D_Rtb4.
+</pre>
+   <h5 class="heading settled" data-level="5.2.2.5" id="iaencoding-iaencoder-channelaudio-channelgroupgenerationrule"><span class="secno">5.2.2.5. </span><span class="content">ChannelGroup Generation Rule</span><a class="self-link" href="#iaencoding-iaencoder-channelaudio-channelgroupgenerationrule"></a></h5>
+   <p>This section describes the generation rule for ChannelGroup.</p>
+   <p>For a given Channel Audio and the list of CLs ({CL #i: i = 1, 2, ..., n}), CG Generation module outputs the transformed audio (i.e. ChannelGroups) which conforms to following rules:</p>
+   <ul>
+    <li data-md>
+     <p>It consists of C number of channels and is structured to n number of CGs, where C is the number of channels for the Channel Audio.</p>
+    <li data-md>
+     <p>CG #1 (as called BCG): This CG is the down-mixed audio itself for CL #1 generated from the Channel Audio. It contains C1 number of channels.</p>
+    <li data-md>
+     <p>CG #i (as called DCG, i = 2, 3, …, n): This CG contains (Ci – Ci-1) number of channels. (Ci – Ci-1) channel(s) consists of as follows:</p>
+     <ul>
+      <li data-md>
+       <p>(Si – Si-1) surround channel(s) if Si > Si-1 . When S_set = { x | Si-1 &lt; x ≤ Si and x is an integer},</p>
+       <ul>
+        <li data-md>
+         <p>If 2 is an element of S_set, the L2 channel is contained in this CG #i.</p>
+        <li data-md>
+         <p>If 3 is an element of S_set, the Center channel is contained in this CG #i.</p>
+        <li data-md>
+         <p>If 5 is an element of S_set, the L5 and R5 channels are contained in this CG #i.</p>
+        <li data-md>
+         <p>If 7 is an element of S_set, the L7 and R7 channels are contained in this CG #i.</p>
+       </ul>
+      <li data-md>
+       <p>The LFE channel if Wi > Wi-1 .</p>
+      <li data-md>
+       <p>(Ti – Ti-1) top channels if Ti > Ti-1 .</p>
+       <ul>
+        <li data-md>
+         <p>If Ti-1 = 0, the top channels of the down-mixed audio for CL #i are contained in this CG #i.</p>
+        <li data-md>
+         <p>If Ti-1 = 2, the Ltf and Rtf channels of the down-mixed audio for CL #i are contained in this CG #i.</p>
+       </ul>
+     </ul>
+   </ul>
+   <p>Figure 15 shows one example of transformation matrix with 4 CGs (2ch/3.1.2ch/5.1.2ch/7.1.4ch).</p>
+   <center><img height="261" src="images/Example of Transformation Matrix with 4 CGs.png" width="800"></center>
+   <center><b>Figure 11-5. </b>Example of Transformation Matrix with 4 CGs</center>
+   <h4 class="heading settled" data-level="5.2.3" id="iaencoding-iaencoder-ambisoncis-channelaudio"><span class="secno">5.2.3. </span><span class="content">IA Encoder for Ambisonics and Channel Audio format</span><a class="self-link" href="#iaencoding-iaencoder-ambisoncis-channelaudio"></a></h4>
+   <p>For Ambisonics and Channel Audio format:</p>
+   <ul>
+    <li data-md>
+     <p>One single <a data-link-type="dfn">ChannelGroup</a> for Ambisonics is generated in the same way with <a href="#iaencoding-iaencoder-ambisonics">§ 5.2.1 IA Encoder for Ambisonics format</a>.</p>
+    <li data-md>
+     <p>One or more ChannelGroups and <a data-link-type="dfn">Timed Metadata</a> for Channel Audio are generated in the same way with <a href="#iaencoding-iaencoder-ambisonics">§ 5.2.1 IA Encoder for Ambisonics format</a>.</p>
+    <li data-md>
+     <p><a data-link-type="dfn">IA_Static_Meta</a> is set to as follows:</p>
+     <ul>
+      <li data-md>
+       <p><a data-link-type="dfn">Ambiosonics_Mode</a> is set to according to Ambisonics mode in the same way with <a href="#iaencoding-iaencoder-ambisonics">§ 5.2.1 IA Encoder for Ambisonics format</a>.</p>
+      <li data-md>
+       <p><a data-link-type="dfn" href="#channel_audio_layer" id="ref-for-channel_audio_layer④">Channel_Audio_Layer</a> is set in the same way with <a href="#iaencoding-iaencoder-channelaudio">§ 5.2.2 IA Encoder for Channel Audio format</a>.</p>
+      <li data-md>
+       <p><a data-link-type="dfn">ambix_layer_config()</a> is set in the same way with <a href="#iaencoding-iaencoder-ambisonics">§ 5.2.1 IA Encoder for Ambisonics format</a>.</p>
+      <li data-md>
+       <p><a data-link-type="dfn">channel_audio_layer_config()</a> is set in the same way with <a href="#iaencoding-iaencoder-channelaudio">§ 5.2.2 IA Encoder for Channel Audio format</a>.</p>
+     </ul>
+    <li data-md>
+     <p><a data-link-type="dfn">Temporal Unit</a> is composed of <a data-link-type="dfn">Temporal_Delimiter_OBU</a>, followed by OBUs for <a data-link-type="dfn">Timed Metadata</a> and followed by OBUs for <a data-link-type="dfn">Substreams</a>.</p>
+     <ul>
+      <li data-md>
+       <p>OBUs for Substreams composing of ChannelGroup for Ambisonics comes first and followed by OBUs for Substreams composing of ChannelGroups for Channel Audio.</p>
+     </ul>
+   </ul>
+   <p>Figure 12 shows IA encoding flowchart for Ambisonics and Channel Audio format with non-scalable channel audio.</p>
+   <center><img height="337" src="images/IA Encoding Flowchart for Ambisonics and Channel Audio Format.png" width="745"></center>
+   <center><b>Figure 12. </b>IA Encoding Flowchart for Ambisonics and Channel Audio Format</center>
+   <h2 class="heading settled" data-level="6" id="iadecoding"><span class="secno">6. </span><span class="content">Informative Annex: IA Decoding Process</span><a class="self-link" href="#iadecoding"></a></h2>
     TBA 
    <h3 class="heading settled" data-level="6.1" id="downmix-matrix"><span class="secno">6.1. </span><span class="content">Downmix Matrix</span><a class="self-link" href="#downmix-matrix"></a></h3>
     NOTE: We agree to with a fixed set of downmix matrics in this version, and possibly have a future version number for different matrices. 
@@ -2942,6 +3389,8 @@ Quantity:  One of more
    <a href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#">https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#termref-for-">2.2.9. Channel Audio Layer Config Syntax and Semantics</a>
+    <li><a href="#termref-for-">5.2.2. IA Encoder for Channel Audio format</a> <a href="#termref-for-">(2)</a>
+    <li><a href="#termref-for-">5.2.2.1. Down-mix parameter and Loudness</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
@@ -3055,6 +3504,9 @@ Quantity:  One of more
     <li><a href="#termref-for-">3.3.1.3. Syntax</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.4. Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
     <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
+    <li><a href="#termref-for-">5.1. Input Audio Format</a>
+    <li><a href="#termref-for-">5.2. IA Encoder</a>
+    <li><a href="#termref-for-">5.2.1. IA Encoder for Ambisonics format</a> <a href="#termref-for-">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
@@ -3067,6 +3519,9 @@ Quantity:  One of more
     <li><a href="#termref-for-">3.3.1.3. Syntax</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.4. Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
     <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
+    <li><a href="#termref-for-">5.1. Input Audio Format</a>
+    <li><a href="#termref-for-">5.2. IA Encoder</a>
+    <li><a href="#termref-for-">5.2.1. IA Encoder for Ambisonics format</a> <a href="#termref-for-">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
@@ -3079,6 +3534,9 @@ Quantity:  One of more
     <li><a href="#termref-for-">3.3.1.3. Syntax</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.4. Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
     <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
+    <li><a href="#termref-for-">5.1. Input Audio Format</a>
+    <li><a href="#termref-for-">5.2. IA Encoder</a>
+    <li><a href="#termref-for-">5.2.1. IA Encoder for Ambisonics format</a> <a href="#termref-for-">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
@@ -3091,6 +3549,9 @@ Quantity:  One of more
     <li><a href="#termref-for-">3.3.1.3. Syntax</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.4. Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
     <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
+    <li><a href="#termref-for-">5.1. Input Audio Format</a>
+    <li><a href="#termref-for-">5.2. IA Encoder</a>
+    <li><a href="#termref-for-">5.2.1. IA Encoder for Ambisonics format</a> <a href="#termref-for-">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
@@ -3103,6 +3564,9 @@ Quantity:  One of more
     <li><a href="#termref-for-">3.3.1.3. Syntax</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.4. Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
     <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
+    <li><a href="#termref-for-">5.1. Input Audio Format</a>
+    <li><a href="#termref-for-">5.2. IA Encoder</a>
+    <li><a href="#termref-for-">5.2.1. IA Encoder for Ambisonics format</a> <a href="#termref-for-">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
@@ -3115,6 +3579,9 @@ Quantity:  One of more
     <li><a href="#termref-for-">3.3.1.3. Syntax</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.4. Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
     <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
+    <li><a href="#termref-for-">5.1. Input Audio Format</a>
+    <li><a href="#termref-for-">5.2. IA Encoder</a>
+    <li><a href="#termref-for-">5.2.1. IA Encoder for Ambisonics format</a> <a href="#termref-for-">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
@@ -3134,25 +3601,22 @@ Quantity:  One of more
   <aside class="dfn-panel" data-for="term-for-">
    <a href="https://tools.ietf.org/html/rfc7845#">https://tools.ietf.org/html/rfc7845#</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#termref-for-">2.1.1. IAC-OPUS Specific</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
-    <li><a href="#termref-for-">2.2.8. Ambisonics Layer Config Syntax and Semantics</a>
+    <li><a href="#termref-for-">2.1.1. IAC-OPUS Specific</a> <a href="#termref-for-">(2)</a>
     <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
    <a href="https://tools.ietf.org/html/rfc7845#">https://tools.ietf.org/html/rfc7845#</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#termref-for-">2.1.1. IAC-OPUS Specific</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
-    <li><a href="#termref-for-">2.2.8. Ambisonics Layer Config Syntax and Semantics</a>
+    <li><a href="#termref-for-">2.1.1. IAC-OPUS Specific</a> <a href="#termref-for-">(2)</a>
     <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
-   <a href="https://tools.ietf.org/html/rfc7845#">https://tools.ietf.org/html/rfc7845#</a><b>Referenced in:</b>
+   <a href="https://tools.ietf.org/html/rfc8486#">https://tools.ietf.org/html/rfc8486#</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#termref-for-">2.1.1. IAC-OPUS Specific</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
+    <li><a href="#termref-for-">2.1.1. IAC-OPUS Specific</a>
     <li><a href="#termref-for-">2.2.8. Ambisonics Layer Config Syntax and Semantics</a>
-    <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a>
    </ul>
   </aside>
   <h3 class="no-num no-ref heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
@@ -3226,9 +3690,13 @@ Quantity:  One of more
    <li>
     <a data-link-type="biblio">[RFC7845]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="term-for-③⓪">channel count</span>
-     <li><span class="dfn-paneled" id="term-for-③①">id header</span>
-     <li><span class="dfn-paneled" id="term-for-③②">output gain</span>
+     <li><span class="dfn-paneled" id="term-for-③⓪">id header</span>
+     <li><span class="dfn-paneled" id="term-for-③①">output gain</span>
+    </ul>
+   <li>
+    <a data-link-type="biblio">[RFC8486]</a> defines the following terms:
+    <ul>
+     <li><span class="dfn-paneled" id="term-for-③②">channel count</span>
     </ul>
   </ul>
   <h2 class="no-num no-ref heading settled" id="references"><span class="content">References</span><a class="self-link" href="#references"></a></h2>
@@ -3261,11 +3729,17 @@ Quantity:  One of more
    <dt id="biblio-rfc8486">[RFC8486]
    <dd>J. Skoglund; M. Graczyk. <a href="https://www.rfc-editor.org/rfc/rfc8486"><cite>Ambisonics in an Ogg Opus Container</cite></a>. October 2018. Proposed Standard. URL: <a href="https://www.rfc-editor.org/rfc/rfc8486">https://www.rfc-editor.org/rfc/rfc8486</a>
   </dl>
+  <h3 class="no-num no-ref heading settled" id="informative"><span class="content">Informative References</span><a class="self-link" href="#informative"></a></h3>
+  <dl>
+   <dt id="biblio-ai-cad-mixing">[AI-CAD-Mixing]
+   <dd><a href="https://www.aes.org/e-lib/browse.cfm?elib=21489"><cite>AI 3D immersive audio codec based on content-adaptive dynamic down-mixing and up-mixing framework</cite></a>. Paper. URL: <a href="https://www.aes.org/e-lib/browse.cfm?elib=21489">https://www.aes.org/e-lib/browse.cfm?elib=21489</a>
+  </dl>
   <aside class="dfn-panel" data-for="codec_specific_info">
    <b><a href="#codec_specific_info">#codec_specific_info</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-codec_specific_info">2.1.1. IAC-OPUS Specific</a>
     <li><a href="#ref-for-codec_specific_info①">2.2.6. Codec Specific Info OBU Syntax and Semantics</a> <a href="#ref-for-codec_specific_info②">(2)</a>
+    <li><a href="#ref-for-codec_specific_info③">5.2. IA Encoder</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="codec_id">
@@ -3284,10 +3758,118 @@ Quantity:  One of more
     <li><a href="#ref-for-decoder_config②">4. Informative Annex: IAC Decapsulation Guideline</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="codec_specific_info_obu">
+   <b><a href="#codec_specific_info_obu">#codec_specific_info_obu</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-codec_specific_info_obu">5.2.2. IA Encoder for Channel Audio format</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="ambisonics_mode">
+   <b><a href="#ambisonics_mode">#ambisonics_mode</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-ambisonics_mode">5.2.1. IA Encoder for Ambisonics format</a> <a href="#ref-for-ambisonics_mode①">(2)</a> <a href="#ref-for-ambisonics_mode②">(3)</a> <a href="#ref-for-ambisonics_mode③">(4)</a> <a href="#ref-for-ambisonics_mode④">(5)</a>
+    <li><a href="#ref-for-ambisonics_mode⑤">5.2.2. IA Encoder for Channel Audio format</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="channel_audio_layer">
+   <b><a href="#channel_audio_layer">#channel_audio_layer</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-channel_audio_layer">5.2.1. IA Encoder for Ambisonics format</a>
+    <li><a href="#ref-for-channel_audio_layer①">5.2.2. IA Encoder for Channel Audio format</a> <a href="#ref-for-channel_audio_layer②">(2)</a> <a href="#ref-for-channel_audio_layer③">(3)</a>
+    <li><a href="#ref-for-channel_audio_layer④">5.2.3. IA Encoder for Ambisonics and Channel Audio format</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="output_channel_count">
+   <b><a href="#output_channel_count">#output_channel_count</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-output_channel_count">5.2.1. IA Encoder for Ambisonics format</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="substream_count">
    <b><a href="#substream_count">#substream_count</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-substream_count">2.2.13. Substream OBU Syntax and Semantics</a>
+    <li><a href="#ref-for-substream_count①">5.2.1. IA Encoder for Ambisonics format</a>
+    <li><a href="#ref-for-substream_count②">5.2.2. IA Encoder for Channel Audio format</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="coupled_substream_count">
+   <b><a href="#coupled_substream_count">#coupled_substream_count</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-coupled_substream_count">5.2.1. IA Encoder for Ambisonics format</a>
+    <li><a href="#ref-for-coupled_substream_count①">5.2.2. IA Encoder for Channel Audio format</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="channel_mapping">
+   <b><a href="#channel_mapping">#channel_mapping</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-channel_mapping">5.2.1. IA Encoder for Ambisonics format</a> <a href="#ref-for-channel_mapping①">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="demixing_matrix">
+   <b><a href="#demixing_matrix">#demixing_matrix</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-demixing_matrix">5.2.1. IA Encoder for Ambisonics format</a> <a href="#ref-for-demixing_matrix①">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="loudspeaker_layout">
+   <b><a href="#loudspeaker_layout">#loudspeaker_layout</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-loudspeaker_layout">5.1. Input Audio Format</a>
+    <li><a href="#ref-for-loudspeaker_layout①">5.2. IA Encoder</a>
+    <li><a href="#ref-for-loudspeaker_layout②">5.2.2. IA Encoder for Channel Audio format</a>
+    <li><a href="#ref-for-loudspeaker_layout③">5.2.2.3. Channel Layout Generation Rule</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="output_gain_is_present_flag">
+   <b><a href="#output_gain_is_present_flag">#output_gain_is_present_flag</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-output_gain_is_present_flag">5.2.2. IA Encoder for Channel Audio format</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="recon_gain_is_present_flag">
+   <b><a href="#recon_gain_is_present_flag">#recon_gain_is_present_flag</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-recon_gain_is_present_flag">5.2.2. IA Encoder for Channel Audio format</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="loudness">
+   <b><a href="#loudness">#loudness</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-loudness">5.2.2. IA Encoder for Channel Audio format</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="output_gain_flags">
+   <b><a href="#output_gain_flags">#output_gain_flags</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-output_gain_flags">5.2.2. IA Encoder for Channel Audio format</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="output_gain">
+   <b><a href="#output_gain">#output_gain</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-output_gain">5.2.2. IA Encoder for Channel Audio format</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="dmixp_mode">
+   <b><a href="#dmixp_mode">#dmixp_mode</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-dmixp_mode">5.2.2. IA Encoder for Channel Audio format</a>
+    <li><a href="#ref-for-dmixp_mode①">5.2.2.1. Down-mix parameter and Loudness</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="recon_gain_flags">
+   <b><a href="#recon_gain_flags">#recon_gain_flags</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-recon_gain_flags">5.2.2. IA Encoder for Channel Audio format</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="recon_gain">
+   <b><a href="#recon_gain">#recon_gain</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-recon_gain">5.2.2. IA Encoder for Channel Audio format</a> <a href="#ref-for-recon_gain①">(2)</a>
+    <li><a href="#ref-for-recon_gain②">5.2.2.1. Down-mix parameter and Loudness</a>
+    <li><a href="#ref-for-recon_gain③">5.2.2.4. Recon Gain Generation</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="iasampleentry">
