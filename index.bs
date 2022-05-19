@@ -1079,7 +1079,235 @@ Figure 12 shows IA encoding flowchart for Ambisonics and Channel Audio format wi
 <center><b>Figure 12. </b>IA Encoding Flowchart for Ambisonics and Channel Audio Format</center>
 
 # Informative Annex: IA Decoding Process #  {#iadecoding}
-TBA
+
+This section provides a guideline for IA decoding for a given [=IA bitstream=].
+
+## IA Decoder ## {#iadecoding-iadecoder}
+
+IA decoder can selects one of three decoding modes based on [=Ambisonics_Mode=] and [=Channel_Audio_Layer=] in [=IA_Static_Meta=].
+- Ambisonics decoding in case of Ambisonics_Mode !=0 and Channel_Audio_Layer = 0.
+- Channel Audio decoding in case of Ambisonics_Mode = 0 and Channel_Audio_Layer > 0.
+- Ambisonics + Channel Audio decoding in case of Ambisonics_Mode != 0 and Channel_Audio_Layer > 0.
+
+<b>Abmisonics decoding</b>, it conforms to [[!RFC8486]] except codec specific processing and outputs Ambisonics channels in ACN (Ambisonics Channel Number) order.
+
+<b>Channel Audio decoding</b>, it outputs the channel audio (e.g. 3.1.2ch or 7.1.4ch) for the target channel layout.
+
+<b>Ambisonics + Channel Audio decoding</b>, it outputs both of Ambisonics channels and the channel audio for the target channel layout.
+- In this case, implementors may have additional processing converting Ambisonics to Channel Audio (including Binaural) but it is not specified in this specification.
+
+IA decoder is composed of OBU parser, Codec decoder and Post-processor as depicted in Figure 13.
+- OBU parser depacketizes [=IA bitstream=] to output one or more [=Substreams=] with one single [=Decoder_Config()=], [=IA_Static_Meta=] and [=Timed Metadata=].
+	- OBU parser is composed of Non-timed Metadata parser and Temporal Unit parser.
+		- Non-timed Metadata parser depacketizes OBUs for Codec_Specific_Info and IA_Static_Meta, and figures out the configuration of IA bitstream including the codec to decoder Substreams.
+		- Temporal Unit parser depacketizes OBUs for each Temporal Unit and outputs Timed Metadata and Substreams for each frame.
+	- One or more Substreams with one single Decoder_Config() are passed to Codec decoder.
+	- IA_Static_Meta and Timed Metadata for each frame are passed to Post-processor.
+	- For IAC-OPUS, Substream is one single [=opus packet=] of [[!RFC6716]] which has non-delimiting frame structure and for IAC-AAC-LC, Substreams is one single [=raw_data_block()=] of [[!AAC]].
+- Codec decoder prepares the Mono/Stereo decoders as many as the number of Substreams. Each Mono/Stereo decoder is initialized with Decoder_Config() and decodes Substream.
+	- Each Mono/Stereo decoder outputs one or two channels to Post-processor.
+- Post-processor outputs Ambisonics and/or Channel Audio based on the decoding mode. 
+	- Post-processor is composed of Ambiosonics processor and Channel Audio processor. 
+	- Post-processor figures out the configuration of ChannelGroups based on IA_Static_Meta.
+	- Ambisonics processor outputs Ambisonics channels in ACN order by applying [=Channel Mapping=] or [=Demixing Matrix=] to the first ChannelGroup.
+	- Channel Audio processor outputs channel audio for the target channel layout after some processing of the relevant ChannelGroups by using Timed Metadata if needed.
+
+<center><img src="images/IA Decoder Configuration.png"></center>
+<center><b>Figure 13. </b>IA Decoder Configuration</center>
+
+### IA Decoder for Ambisonics decoding ### {#iadecoding-iadecoder-ambisonics}
+
+This section describes IA decoding operation for Ambisonics.
+
+Figure 14 shows the decoding flowchart of Ambisonics decoding.
+- OBU parser outputs the first [=Substreams=], among Substream in [=IA bitstream=], as many as [=substream_count=] specified in [=ambix_layer_config()=] of [=IA_Static_Meta=], with Decoder_Config().
+	- OBU parser outputs [=channel_mapping=] or [=demixing_matrix=] according to [=Ambisonics_Mode=] to Channel_Mapping/Demixing_Matrix module
+- Codec decoder outputs channels as many as the nubmer of Substreams after decoding of each Substream.
+- Channel_Mapping/Demixing_Matrix module applies channel_mapping or demixing_matrix according to Ambisonics_Mode to the channels (PCM) and outputs channels as many as [=output_channel_count=] in ACN order.
+
+<center><img src="images/Ambisonics Decoding Flowchart.png"></center>
+<center><b>Figure 14. </b>Ambisonics Decoding Flowchart</center>
+
+### IA Decoder for Channel Audio decoding ### {#iadecoding-iadecoder-channelaudio}
+
+This section describes IA decoding operation for Channe Audio.
+
+Figure 15 shows the decoding flowchart of Channel Audio decoding.
+
+<center><img src="images/Channel Audio Decoding Flowchart.png"></center>
+<center><b>Figure 15. </b>Channel Audio Decoding Flowchart</center>
+
+For a given target channel layout (i.e. CL #i) among the list of [=loudspeaker_layout=] in [=IA_Static_Meta=], 
+- OBU Parser gets Substreams for [=ChannelGroup=] #1 ~ ChannelGroup #i and pass them to Codec decoder with [=Decoder_Config()=].
+- Codec decoder outputs decoded channels (PCM) in the transmission order.
+	- For non-scalable audio (i.e i = 1), its order is converted to the loudspeaker location order for CL #1.
+	- For scalable audio, its order is converted to the loudspeaker location order for CL #i after going through necessary modules such as Gain, De-Mixer, Recon_Gain etc..
+- When Output_Gain_Is_Present_Flag(j) for ChanneGroup #j (j = 1, 2, …, i-1) is on, Gain module applies Output_Gain(j) to all audio samples of the mixed channels in the ChannelGroup #j indicated by Output_Gain_Flag(j).
+- De-Mixer outputs de-mixed channels (PCM) for CL #i generated through de-mixing of the mixed channels from Gain module by using non-mixed channels and demixing parameters for each frame.
+- Recon_Gain module outputs smoothed channels (PCM) by appling Recon_Gain to each frame of the de-mixed channels.
+- Loudness normalization module outputs loudness normalized channels at -24 LKFS from non-mixed channels and smoothed channels (if present) by using loudness value for CL #i.
+- DRC control module applies the pre-defined DRC compression to the loudness normalized channels, after that it outputs loudness normalized channels at -16 LKFS.
+- Limiter module limits the true peak of input channels at -1dB. 
+
+Following sections, [[#iadecoding-iadecoder-channelaudio-gain]], [[#iadecoding-iadecoder-channelaudio-demixer]] and [[#iadecoding-iadecoder-channelaudio-recongain]] are only needed for decoding of scalable audio. 
+[[#iadecoding-iadecoder-channelaudio-loudness]] and [[#iadecoding-iadecoder-channelaudio-drc]] may not be recommended according to application.
+
+#### Gain #### {#iadecoding-iadecoder-channelaudio-gain}
+
+Gain module is the mirror process of Attenuation module. It recovers the reduced sample values using Output_Gain when its flag for ChannelGroup #j is on. When its flag is off, then this module is bypassed for ChannelGroup #j. Output_Gain(j) for ChannelGroup #j is applied to all samples of the mixed channels in the ChannelGroup #j. Where, mixed channels means the mixed channels from an input channel audio (i.e. a channel audio for CL #n).
+
+To apply the gain, an implementation MUST use the following:
+
+```
+	Sample *= pow(10, Output_Gain(j) / (20.0*256))
+```
+
+Where, Output_Gain(j) is the raw 16-bit value from [=IA_Static_Meta=].
+
+#### De-mixer #### {#iadecoding-iadecoder-channelaudio-demixer}
+
+For scalable audio, some channels of [=down-mixed audio=] for CL #i are delivered as is but the rest are mixed with other channels for CL #i-1.
+
+De-mixer module reconstructs the rest of the down-mixed audio for CL #i from the mixed channels, which is passed by Gain module, and its relevant non-mixed channels using its relevant demixing parameters.
+
+De-mixing for down-mixed audio for CL #i is a combination of following surround and top de-mixers:
+- Surround de-mixers
+	- <dfn noexport>S1to2 de-mixer</dfn>: R2 = 2 x Mono – L2
+	- <dfn noexport>S2to3 de-mixer</dfn>: L3 = L2 – 0.707 x C and R3 = R2 – 0.707 x C
+	- <dfn noexport>S3to5 de-mixer</dfn>: Ls = 1/δ(k) x (L3 – L5) and Rs = 1/δ(k) x (R3 – R5) 
+	- <dfn noexport>S5to7 de-mixer</dfn>: Lrs = 1/β(k) x (Ls – α(k) x Lss) and Rrs = 1/β(k) x (Rs – α(k) x Rss) 
+- Top de-mixers
+	- <dfn noexport>TF2toT2 de-mixer</dfn>: Ltf2 = Ltf3 – w(k) x (L3 – L5) and Rtf2 = Rtf3 – w(k) x (R3 – R5)
+	- <dfn noexport>T2to4 de-mixer</dfn>: Ltb = 1/γ(k) x (Ltf2 – Ltf4) and Rtb = 1/γ(k) x (Rtf2 – Rtf4)  
+- Where, Ltf2 / Rtf2 is top channel of x.1.2ch, Ltf3 / Rtf3 is top channel of 3.1.2ch, and Ltf4 / Rtf4 is to channel of x.1.4ch (x = 5 or 7) and w(k) is determined from the value of wIdx(k).
+
+Initially, wIdx(0) = 0 and the value of wIdx(k) is derived as follows:
+- <dfn noexport>wIdx(k)</dfn> = Clip3 (0, 10, wIdx(k-1) + w_idx_offset(k))
+- Where, Clip3 (x, min, max) = max if x > max, min if x < min, x otherwise.
+
+Mapping of wIdx(k) to w(k) is as follows:
+<pre class = "def">
+ wIdx(k) :   w(k)
+    0    :    0
+    1    :  0.0179
+    2    :  0.0391
+    3    :  0.0658
+    4    :  0.1038
+    5    :  0.25
+    6    :  0.3962
+    7    :  0.4342
+    8    :  0.4609
+    9    :  0.4821
+    10    : 0.5
+</pre>
+
+When D_set = { x | S1 < x ≤ Si and x is an integer},
+- If 2 is an element of D_set, the combination includes [=S1to2 de-mixer=].
+- If 3 is an element of D_set, the combination includes [=S2to3 de-mixer=].
+- If 5 is an element of D_set, the combination includes [=S3to5 de-mixer=].
+- If 7 is an element of D_set, the combination includes [=S5to7 de-mixer=].
+
+When Ti = 2,
+- If Sj = 3 (j=1,2,…, i-1), the combination includes [=TF2toT2 de-mixer=].
+
+When Ti = 4,
+- If Sj = 3 (j=1,2,…, i-1), the combination includes [=TF2toT2 de-mixer=] and [=T2to4 de-mixer=].
+- Elseif Tj = 2 (j=1,2,…, i-1), the combination includes [=T2to4 de-mixer=].
+
+For example, when CL #1 = 2ch, CL #2 = 3.1.2ch, CL #3 = 5.1.2ch and CL #4 = 7.1.4ch. To reconstruct the rest (i.e. Ls5/Rs5/Ltf/Rtf) of th down-mixed 5.1.2ch, 
+- The combination includes [=S2to3 de-mixer=], [=S3to5 de-mixer=] and [=TF2toF2 de-mixer].
+- Ls5 and Rs5 are recovered by S2to3 de-mixer and S3to5 de-mixer.
+- Ltf and Rtf are recovered by S2to3 de-mixer and TF2toT2 de-mixer.
+
+```
+	Ls5 = 1/δ(k) × (L2 - 0.707 × C - L5) and Rs5 = 1/δ(k) × (R2 - 0.707 × C - R5).
+	Ltf = Ltf3 - w(k) x (L2 - 0.707 x C - L5) and Rtf = Rtf3 - w(k) x (R2 - 0.707 x C - R5).  
+```
+
+#### Recon Gain #### {#iadecoding-iadecoder-channelaudio-recongain}
+
+[=Recon_Gain=] is only applied to all of audio samples of the de-mixed channels from De-mixer module.
+- [=Recon_Gain_Info=] indicates each channel of CL #i which Recon_Gain needs to be applied to and provides Recon_Gain value for each frame of the channel. 
+	- Sample (k,i) *= Smoothed_Recon_Gain (k,i), where k is the frame index and i is the sample index of the frame.
+	- Smoothed_Recon_Gain (k) = MA_gain (k-1) x e_window + MA_gain (k) x s_window
+	- MA_gain (k) = 2 / (N+1) x Recon_Gain (k) / 255 + (1 – 2/(N+1)) x MA_gain (k-1), where MA_gain (0) = 1.
+	- e_window[:ps – olen] = 1, e_window[ps – olen: ps] = hanning[olen:], e_window[ps:flen] = 0.
+	- s_window[:ps – olen] = 0, s_window[ps – olen: ps] = hanning[:olen], s_window[ps:flen] = 1.
+	- Where, hanning = np.hanning (2*olen), ps is the pre-skip value, flen is the frame size and olen is the overlab size.
+	- Recommend values: N = 7
+
+Figure 16 shows the smoothing scheme of [=Recon_Gain=].
+
+<center><img src="images/Smoothing Scheme of Recon Gain.png"></center>
+<center><b>Figure 16. </b>Smoothing Scheme of Recon Gain</center>
+
+Recommend values for specific codecs are as follows
+- IAC-OPUS: olen = 60, the pre-skip (ps) value is indicated in [=Codec_Specific_Info=] for IAC-OPUS.
+- IAC-AAC-LC: olen = 64, ps = 720.
+
+#### Loudness Normalization #### {#iadecoding-iadecoder-channelaudio-loudness}
+
+Loudness normalization is done by adjusting a loudness level to -24 LKFS based on the loudness value of the target channel layout (i.e. CL #i) which is signaled in [=Channel_Audio_Layer_Config()=].
+
+Real implementations for [[#iadecoding-iadecoder-channelaudio-loudness]], [[#iadecoding-iadecoder-channelaudio-drc]] and [[#iadecoding-iadecoder-channelaudio-limiter]] are soly dependent on implementers (i.e., out of scope of this specification). This specification only recommends the principles for them.
+
+#### DRC Control #### {#iadecoding-iadecoder-channelaudio-drc}
+
+In this specification, DRC Control assumes an input loudness of -24 LKFS and targets an output loudness of -16 LKFS.
+
+DRC Control module applies the pre-defined DRC compression by assuming a target loudness is adjusted to -16 LKFS as follows:
+- DRC Segment 0
+	- Threshold: not applicable
+	- Ratio: 1:1
+	- Type: Neutral 
+- DRC Segment 1
+	- Threshold: -16.5 dBFS
+	- Ratio: 1.5:1
+	- Type: Compressor
+- DRC Segment 2
+	- Threshold: -9 dBFS
+	- Ratio: 2:1
+	- Type: Compressor
+- DRC Segment 3
+	- Threshold: -6 dBFS
+	- Ratio: 3:1
+	- Type: Compressor
+	
+Figure 17 shows the schematic diagram of the pre-defined DRC compression.
+
+<center><img src="images/Pre-defined DRC Compression Scheme.png"></center>
+<center><b>Figure 17. </b>Pre-defined DRC Compression Scheme</center>
+
+The below is the equation that represents the compressor scheme of Figure 17.
+
+```
+Y = D_T(i) + (X - T(i)) / R(i), where X ∈ Seg(i) and D_T (i) = T(0) + ∑ ((T(k+1) - T(k)) / R(k)) (k = 0 to i-1).	
+Where, 
+Seg(i): ith Segment
+ T(i) : Threshold vlaue in dBFS for Seg(i), where T(0) = -96.33
+ R(i) : Ratio value for Seg(i)
+D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) = T(0)
+  X   : Input sample value in dBFS
+  Y   : Output sample value in dBFS
+```
+
+#### Limiter #### {#iadecoding-iadecoder-channelaudio-limiter}
+
+This module limits the true peak of input signal at -1dB. The definition of thr true peak is base on [[!ITU1770-4]].
+
+Below is a recommended loudness normalization and DRC control principle according to application.
+- For AV application, it only applies Limiter at -1dBTP.
+- For TV application, it only applies Loudness normalization at -24LKFS and Limiter at -1dBTP.
+- For Mobile application, it applies Loudness normalization at -24LKFS, the pre-defined DRC control and adjusting of target loudness at -16 LKFS, and Limiter at -1dBTP.
+
+NOTE: The definitions of AV, TV and Mobile applications are as follows:
+.AV application: Sound devices with external speakers such as Soundbar, AV receiver, HiFi speaker etc..
+.TV application: Television with built-in speakers such as LCD/OLED slim TV.
+.Mobile application: Handheld devices with built-in speakers such as smartphone, tablet etc..
+
+### IA Decoder for Ambisonics and Channel Audio decoding ### {#iadecoding-iadecoder-ambisonics-channelaudio}
+
+Ambisonics and Channel Audio decoding is a simple parallel processing of both Ambisoncis decoding and Channel Audio decoding which are described in [[#iadecoding-iadecoder-ambisonics]] and [[#iadecoding-iadecoder-channelaudio]], respectively.
 
 ## Downmix Matrix
 NOTE: We agree to with a fixed set of downmix matrics in this version, and possibly have a future version number for different matrices.
