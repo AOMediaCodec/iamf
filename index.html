@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version fb1e763a4, updated Tue Mar 1 13:13:50 2022 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iac/" rel="canonical">
-  <meta content="00aa717147bbc7bed53b78aa958263dd6ee62d02" name="document-revision">
+  <meta content="139ebc3d99bb37812293978fb75dc6915349ab3d" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -2311,6 +2311,7 @@ dfn > a.self-link::before      { content: "#"; }
   unsigned int (8) version;
   unsigned int (2) ambisonics_mode;
   unsigned int (3) channel_audio_layer;
+  unsigned int (3) reserved;
   if (ambisonics_mode == 1 or 2)
     ambix_layer_config(ambisonics_mode);
   for (i=1; i&lt;= channel_audio_layer; i++)
@@ -2357,11 +2358,13 @@ greater is incompatible.</p>
   unsigned int (4) loudspeaker_layout(i);
   unsigned int (1) output_gain_is_presetn_flag(i);
   unsigned int (1) recon_gain_is_presetn_flag(i);
+  unsigned int (2) reserved;
   unsigned int (8) substream_count(i);
   unsigned int (8) coupled_substream_count(i);
   signed int (16) loudness(i);
   if (output_gain_is_presetn_flag(i) == 1) {
     unsigned int (6) output_gain_flag(i);
+    unsigned int (2) reserved;
     signed int (16) output_gain(i);
   }
 }
@@ -2441,10 +2444,10 @@ greater is incompatible.</p>
       unsigned int(leb128()) recon_gain_flags(i);
       for (j=0; j&lt; n(i); j++) {
         if (recon_gain_flag(i)(j) == 1)
-          ussigned int (8) recon_gain;
-			}
-		}
-	}
+          unsigned int (8) recon_gain;
+      }
+    }
+  }
 }
 </pre>
    <p><b>Semantics</b></p>
