@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version fb1e763a4, updated Tue Mar 1 13:13:50 2022 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iac/" rel="canonical">
-  <meta content="0c44c0aee6dc42ea5a28a7b7fbf71728e95f0b1d" name="document-revision">
+  <meta content="5ccfd16384e47a84457174442da1a5db64204fd0" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -2077,7 +2077,7 @@ dfn > a.self-link::before      { content: "#"; }
          </ol>
         <li><a href="#iadecoding-iadecoder-ambisonics-channelaudio"><span class="secno">6.1.3</span> <span class="content">IA Decoder for Ambisonics and Channel Audio decoding</span></a>
        </ol>
-      <li><a href="#downmix-matrix"><span class="secno">6.2</span> <span class="content">Downmix Matrix</span></a>
+      <li><a href="#iadecoding-downmixmatrix"><span class="secno">6.2</span> <span class="content">Down-mix Matrix (Static)</span></a>
      </ol>
     <li><a href="#conformance"><span class="secno"></span> <span class="content"> Conformance</span></a>
     <li>
@@ -3444,8 +3444,27 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
 .Mobile application: Handheld devices with built-in speakers such as smartphone, tablet etc..</p>
    <h4 class="heading settled" data-level="6.1.3" id="iadecoding-iadecoder-ambisonics-channelaudio"><span class="secno">6.1.3. </span><span class="content">IA Decoder for Ambisonics and Channel Audio decoding</span><a class="self-link" href="#iadecoding-iadecoder-ambisonics-channelaudio"></a></h4>
    <p>Ambisonics and Channel Audio decoding is a simple parallel processing of both Ambisoncis decoding and Channel Audio decoding which are described in <a href="#iadecoding-iadecoder-ambisonics">§ 6.1.1 IA Decoder for Ambisonics decoding</a> and <a href="#iadecoding-iadecoder-channelaudio">§ 6.1.2 IA Decoder for Channel Audio decoding</a>, respectively.</p>
-   <h3 class="heading settled" data-level="6.2" id="downmix-matrix"><span class="secno">6.2. </span><span class="content">Downmix Matrix</span><a class="self-link" href="#downmix-matrix"></a></h3>
-    NOTE: We agree to with a fixed set of downmix matrics in this version, and possibly have a future version number for different matrices. 
+   <h3 class="heading settled" data-level="6.2" id="iadecoding-downmixmatrix"><span class="secno">6.2. </span><span class="content">Down-mix Matrix (Static)</span><a class="self-link" href="#iadecoding-downmixmatrix"></a></h3>
+   <p>This section provides static down-mix matrices to stereo and 3.1.2ch.</p>
+   <p>IAC players need to support any valid channel layout, even if the number of channels does not match the physically connected audio hardware. Players needs to perform channel mixing to increase or reduce the number of channels as needed.</p>
+   <p>Implementations can use the matrices in Figure 18 to Figure 24 to implement down-mixing from output channel audio, which are known to give acceptable results for stereo and 3.1.2ch.</p>
+   <p>For down-mixing to stereo, both sub-woofer and top channels are discarded during down-mixing. Therefore surround channels are only down-mixed and it only defines three down-mixing matrices, 3.x.x to stereo, 5.x.x to stereo and 7.x.x to stereo. Matrix for 3 channels is normalized so each coefficient row sums to 1 to avoid clipping. For 5 or more channels, they are normalized to 2 as a compromise between clipping and dynamic range reduction.</p>
+   <center><img height="135" src="images/Stereo Down-mix Matrix for 3.x.x ch.png" width="634"></center>
+   <center><b>Figure 18. </b>Stereo Down-mix matrix for 3.x.x ch</center>
+   <center><img height="230" src="images/Stereo Down-mix Matrix for 5.x.x ch.png" width="800"></center>
+   <center><b>Figure 19. </b>Stereo Down-mix matrix for 5.x.x ch</center>
+   <center><img height="274" src="images/Stereo Down-mix Matrix for 7.x.x ch.png" width="800"></center>
+   <center><b>Figure 20. </b>Stereo Down-mix matrix for 7.x.x ch</center>
+   <p>Figure 21 to Figure 24 show static down-mix matrices to 3.1.2ch.</p>
+   <center><img height="359" src="images/3.1.2ch Down-mix Matrix for 5.1.2ch.png" width="774"></center>
+   <center><b>Figure 21. </b>3.1.2ch Down-mix matrix for 5.1.2ch</center>
+   <center><img height="415" src="images/3.1.2ch Down-mix Matrix for 5.1.4ch.png" width="800"></center>
+   <center><b>Figure 22. </b>3.1.2ch Down-mix matrix for 5.1.4ch</center>
+   <center><img height="314" src="images/3.1.2ch Down-mix Matrix for 7.1.2ch.png" width="800"></center>
+   <center><b>Figure 23. </b>3.1.2ch Down-mix matrix for 7.1.2ch</center>
+   <center><img height="338" src="images/3.1.2ch Down-mix Matrix for 7.1.4ch.png" width="800"></center>
+   <center><b>Figure 24. </b>3.1.2ch Down-mix matrix for 7.1.4ch</center>
+   <p>Where, p1 = 0.707 and p2 = 0.3535</p>
   </main>
   <div data-fill-with="conformance">
    <h2 class="no-ref no-num heading settled" id="conformance"><span class="content"> Conformance</span><a class="self-link" href="#conformance"></a></h2>
