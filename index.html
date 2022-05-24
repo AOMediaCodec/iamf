@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version fb1e763a4, updated Tue Mar 1 13:13:50 2022 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iac/" rel="canonical">
-  <meta content="ea7fc2c44dde5c58b14a7641220220e70f6dc5c3" name="document-revision">
+  <meta content="f14ed1de5a12707875ee5ce36f1d1a957dba4b9a" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -2061,7 +2061,23 @@ dfn > a.self-link::before      { content: "#"; }
     <li>
      <a href="#iadecoding"><span class="secno">6</span> <span class="content">Informative Annex: IA Decoding Process</span></a>
      <ol class="toc">
-      <li><a href="#downmix-matrix"><span class="secno">6.1</span> <span class="content">Downmix Matrix</span></a>
+      <li>
+       <a href="#iadecoding-iadecoder"><span class="secno">6.1</span> <span class="content">IA Decoder</span></a>
+       <ol class="toc">
+        <li><a href="#iadecoding-iadecoder-ambisonics"><span class="secno">6.1.1</span> <span class="content">IA Decoder for Ambisonics decoding</span></a>
+        <li>
+         <a href="#iadecoding-iadecoder-channelaudio"><span class="secno">6.1.2</span> <span class="content">IA Decoder for Channel Audio decoding</span></a>
+         <ol class="toc">
+          <li><a href="#iadecoding-iadecoder-channelaudio-gain"><span class="secno">6.1.2.1</span> <span class="content">Gain</span></a>
+          <li><a href="#iadecoding-iadecoder-channelaudio-demixer"><span class="secno">6.1.2.2</span> <span class="content">De-mixer</span></a>
+          <li><a href="#iadecoding-iadecoder-channelaudio-recongain"><span class="secno">6.1.2.3</span> <span class="content">Recon Gain</span></a>
+          <li><a href="#iadecoding-iadecoder-channelaudio-loudness"><span class="secno">6.1.2.4</span> <span class="content">Loudness Normalization</span></a>
+          <li><a href="#iadecoding-iadecoder-channelaudio-drc"><span class="secno">6.1.2.5</span> <span class="content">DRC Control</span></a>
+          <li><a href="#iadecoding-iadecoder-channelaudio-limiter"><span class="secno">6.1.2.6</span> <span class="content">Limiter</span></a>
+         </ol>
+        <li><a href="#iadecoding-iadecoder-ambisonics-channelaudio"><span class="secno">6.1.3</span> <span class="content">IA Decoder for Ambisonics and Channel Audio decoding</span></a>
+       </ol>
+      <li><a href="#iadecoding-downmixmatrix"><span class="secno">6.2</span> <span class="content">Down-mix Matrix (Static)</span></a>
      </ol>
     <li><a href="#conformance"><span class="secno"></span> <span class="content"> Conformance</span></a>
     <li>
@@ -2209,7 +2225,7 @@ dfn > a.self-link::before      { content: "#"; }
    </ul>
    <p><dfn data-dfn-type="dfn" data-noexport id="drop_obu">drop_obu( )<a class="self-link" href="#drop_obu"></a></dfn> is a function call that indicates when IAC decoder should ignore an OBU because it is not assumed as IA bitstream.</p>
    <p>After SeenIABitstream sets to 1, IA bitstream shall be presented to IAC-OBU parser. After parsing Codec_Specific_Info_OBU and IA_Static_Meta_OBU, IAC-OBU parser prepares Substream decoders as many as the number of Substreams and reconstruts each coded stream, from Substream_OBUs, to be feeded to each Substream decoder. At the same time, IAC-OBU parser feeds IA_Static_Meta_OBU and Recon_Gain_Info_OBU to Post-Processor.</p>
-   <center><img src="images/Hypothetical IAC Decoder Model.png"></center>
+   <center><img height="423" src="images/Hypothetical IAC Decoder Model.png" width="800"></center>
    <center><b>Figure 7. </b>Hypothetical IAC Decoder Model</center>
    <h4 class="heading settled" data-level="2.2.1" id="general-obu-syntax-and-semantics"><span class="secno">2.2.1. </span><span class="content">General OBU Syntax and Semantics</span><a class="self-link" href="#general-obu-syntax-and-semantics"></a></h4>
    <p><b>Syntax</b></p>
@@ -2311,6 +2327,7 @@ dfn > a.self-link::before      { content: "#"; }
   unsigned int (8) version;
   unsigned int (2) ambisonics_mode;
   unsigned int (3) channel_audio_layer;
+  unsigned int (3) reserved;
   if (ambisonics_mode == 1 or 2)
     ambix_layer_config(ambisonics_mode);
   for (i=1; i&lt;= channel_audio_layer; i++)
@@ -2357,18 +2374,20 @@ greater is incompatible.</p>
   unsigned int (4) loudspeaker_layout(i);
   unsigned int (1) output_gain_is_presetn_flag(i);
   unsigned int (1) recon_gain_is_presetn_flag(i);
+  unsigned int (2) reserved;
   unsigned int (8) substream_count(i);
   unsigned int (8) coupled_substream_count(i);
   signed int (16) loudness(i);
   if (output_gain_is_presetn_flag(i) == 1) {
     unsigned int (6) output_gain_flag(i);
+    unsigned int (2) reserved;
     signed int (16) output_gain(i);
   }
 }
 </pre>
    <p><b>Semantics</b></p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="loudspeaker_layout">loudspeaker_layout</dfn> shall indicate the channel layout for the channels to be reconstructed from the precedent ChannelGroups and the current ChannelGroup among ChannelGroups for channel audio in IA_Frame.</p>
-   <left><img src="images/Loudspeaker Layout.png"></left>
+   <left><img height="446" src="images/Loudspeaker Layout.png" width="800"></left>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="output_gain_is_present_flag">output_gain_is_present_flag</dfn> shall indicate if output_gain information fields for the ChannelGroup presents .</p>
    <ul>
     <li data-md>
@@ -2431,7 +2450,7 @@ greater is incompatible.</p>
      <p>7: reserved</p>
    </ul>
    <p><dfn data-dfn-type="dfn" data-noexport id="alpha">alpha<a class="self-link" href="#alpha"></a></dfn> and <dfn data-dfn-type="dfn" data-noexport id="beta">beta<a class="self-link" href="#beta"></a></dfn> are gain values used for S7to5 down-mixer, <dfn data-dfn-type="dfn" data-noexport id="gamma">gamma<a class="self-link" href="#gamma"></a></dfn> for T4to2 down-mixer, <dfn data-dfn-type="dfn" data-noexport id="delta">delta<a class="self-link" href="#delta"></a></dfn> for S5to3 down-mixer and <dfn data-dfn-type="dfn" data-noexport id="w_idx_offset">w_idx_offset<a class="self-link" href="#w_idx_offset"></a></dfn> is the offset to generate a gain value <dfn data-dfn-type="dfn" data-noexport id="w">w<a class="self-link" href="#w"></a></dfn> used for T2toTF2 down-mixer.</p>
-   <center><img src="images/IA Downmix Mechanism.png"></center>
+   <center><img height="388" src="images/IA Downmix Mechanism.png" width="800"></center>
    <center><b>Figure 8. </b>IA Downmix Mechanism</center>
    <h4 class="heading settled" data-level="2.2.12" id="recon-gain-info-obu-syntax-and-semantics"><span class="secno">2.2.12. </span><span class="content">Recon Gain Info OBU Syntax and Semantics</span><a class="self-link" href="#recon-gain-info-obu-syntax-and-semantics"></a></h4>
    <p><b>Syntax</b></p>
@@ -2441,15 +2460,15 @@ greater is incompatible.</p>
       unsigned int(leb128()) recon_gain_flags(i);
       for (j=0; j&lt; n(i); j++) {
         if (recon_gain_flag(i)(j) == 1)
-          ussigned int (8) recon_gain;
-			}
-		}
-	}
+          unsigned int (8) recon_gain;
+      }
+    }
+  }
 }
 </pre>
    <p><b>Semantics</b></p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="recon_gain_flags">recon_gain_flags</dfn> shall indicates the channels which recon_gain is applied to.</p>
-   <left><img src="images/Recon_Gain_Flags.png"></left>
+   <left><img height="94" src="images/Recon_Gain_Flags.png" width="800"></left>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="recon_gain">recon_gain</dfn> shall indicates the gain value to be applied to the channel, which is indicated by <dfn data-dfn-type="dfn" data-noexport id="recon_gain_flalgs">recon_gain_flalgs<a class="self-link" href="#recon_gain_flalgs"></a></dfn>, after decoding of the following IA_Coded_Data.</p>
    <h4 class="heading settled" data-level="2.2.13" id="substream-obu-syntax-and-semantics"><span class="secno">2.2.13. </span><span class="content">Substream OBU Syntax and Semantics</span><a class="self-link" href="#substream-obu-syntax-and-semantics"></a></h4>
    <p><b>Syntax</b></p>
@@ -2512,7 +2531,7 @@ Quantity:          One or more.
   unsigned int (3) channel_audio_layer;
   unsigned int (3) reserved;
   unsigned int (8) ambisonics_channel_count;
-  for (i=0; i&lt;channel_audio_layer; i++) {
+  for (i=0; i&lt;channel_audio_layer; i++)
     unsigned int (4) loudspeaker_layout;
   byte_alignment(); 
   CodecSpecificBox config;
@@ -3071,7 +3090,7 @@ Recon_Gain for D_Rtb4:
         <li data-md>
          <p>If 5 is an element of S_set, the L5 and R5 channels are contained in this CG #i.</p>
         <li data-md>
-         <p>If 7 is an element of S_set, the L7 and R7 channels are contained in this CG #i.</p>
+         <p>If 7 is an element of S_set, the Lss7 and Rss7 channels are contained in this CG #i.</p>
        </ul>
       <li data-md>
        <p>The LFE channel if Wi > Wi-1 .</p>
@@ -3118,9 +3137,334 @@ Recon_Gain for D_Rtb4:
    <center><img height="337" src="images/IA Encoding Flowchart for Ambisonics and Channel Audio Format.png" width="745"></center>
    <center><b>Figure 12. </b>IA Encoding Flowchart for Ambisonics and Channel Audio Format</center>
    <h2 class="heading settled" data-level="6" id="iadecoding"><span class="secno">6. </span><span class="content">Informative Annex: IA Decoding Process</span><a class="self-link" href="#iadecoding"></a></h2>
-    TBA 
-   <h3 class="heading settled" data-level="6.1" id="downmix-matrix"><span class="secno">6.1. </span><span class="content">Downmix Matrix</span><a class="self-link" href="#downmix-matrix"></a></h3>
-    NOTE: We agree to with a fixed set of downmix matrics in this version, and possibly have a future version number for different matrices. 
+   <p>This section provides a guideline for IA decoding for a given <a data-link-type="dfn">IA bitstream</a>.</p>
+   <h3 class="heading settled" data-level="6.1" id="iadecoding-iadecoder"><span class="secno">6.1. </span><span class="content">IA Decoder</span><a class="self-link" href="#iadecoding-iadecoder"></a></h3>
+   <p>IA decoder can selects one of three decoding modes based on <a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode⑥">Ambisonics_Mode</a> and <a data-link-type="dfn" href="#channel_audio_layer" id="ref-for-channel_audio_layer⑤">Channel_Audio_Layer</a> in <a data-link-type="dfn">IA_Static_Meta</a>.</p>
+   <ul>
+    <li data-md>
+     <p>Ambisonics decoding in case of Ambisonics_Mode !=0 and Channel_Audio_Layer = 0.</p>
+    <li data-md>
+     <p>Channel Audio decoding in case of Ambisonics_Mode = 0 and Channel_Audio_Layer > 0.</p>
+    <li data-md>
+     <p>Ambisonics + Channel Audio decoding in case of Ambisonics_Mode != 0 and Channel_Audio_Layer > 0.</p>
+   </ul>
+   <p><b>Abmisonics decoding</b>, it conforms to <a data-link-type="biblio" href="#biblio-rfc8486">[RFC8486]</a> except codec specific processing and outputs Ambisonics channels in ACN (Ambisonics Channel Number) order.</p>
+   <p><b>Channel Audio decoding</b>, it outputs the channel audio (e.g. 3.1.2ch or 7.1.4ch) for the target channel layout.</p>
+   <p><b>Ambisonics + Channel Audio decoding</b>, it outputs both of Ambisonics channels and the channel audio for the target channel layout.</p>
+   <ul>
+    <li data-md>
+     <p>In this case, implementors may have additional processing converting Ambisonics to Channel Audio (including Binaural) but it is not specified in this specification.</p>
+   </ul>
+   <p>IA decoder is composed of OBU parser, Codec decoder and Post-processor as depicted in Figure 13.</p>
+   <ul>
+    <li data-md>
+     <p>OBU parser depacketizes <a data-link-type="dfn">IA bitstream</a> to output one or more <a data-link-type="dfn">Substreams</a> with one single <a data-link-type="dfn">Decoder_Config()</a>, <a data-link-type="dfn">IA_Static_Meta</a> and <a data-link-type="dfn">Timed Metadata</a>.</p>
+     <ul>
+      <li data-md>
+       <p>OBU parser is composed of Non-timed Metadata parser and Temporal Unit parser.</p>
+       <ul>
+        <li data-md>
+         <p>Non-timed Metadata parser depacketizes OBUs for Codec_Specific_Info and IA_Static_Meta, and figures out the configuration of IA bitstream including the codec to decoder Substreams.</p>
+        <li data-md>
+         <p>Temporal Unit parser depacketizes OBUs for each Temporal Unit and outputs Timed Metadata and Substreams for each frame.</p>
+       </ul>
+      <li data-md>
+       <p>One or more Substreams with one single Decoder_Config() are passed to Codec decoder.</p>
+      <li data-md>
+       <p>IA_Static_Meta and Timed Metadata for each frame are passed to Post-processor.</p>
+      <li data-md>
+       <p>For IAC-OPUS, Substream is one single <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6716#" id="termref-for-⑥⑨">opus packet</a> of <a data-link-type="biblio" href="#biblio-rfc6716">[RFC6716]</a> which has non-delimiting frame structure and for IAC-AAC-LC, Substreams is one single <a data-link-type="dfn" href="https://www.iso.org/standard/43345.html#" id="termref-for-⑦⓪">raw_data_block()</a> of <a data-link-type="biblio" href="#biblio-aac">[AAC]</a>.</p>
+     </ul>
+    <li data-md>
+     <p>Codec decoder prepares the Mono/Stereo decoders as many as the number of Substreams. Each Mono/Stereo decoder is initialized with Decoder_Config() and decodes Substream.</p>
+     <ul>
+      <li data-md>
+       <p>Each Mono/Stereo decoder outputs one or two channels to Post-processor.</p>
+     </ul>
+    <li data-md>
+     <p>Post-processor outputs Ambisonics and/or Channel Audio based on the decoding mode.</p>
+     <ul>
+      <li data-md>
+       <p>Post-processor is composed of Ambiosonics processor and Channel Audio processor.</p>
+      <li data-md>
+       <p>Post-processor figures out the configuration of ChannelGroups based on IA_Static_Meta.</p>
+      <li data-md>
+       <p>Ambisonics processor outputs Ambisonics channels in ACN order by applying <a data-link-type="dfn">Channel Mapping</a> or <a data-link-type="dfn">Demixing Matrix</a> to the first ChannelGroup.</p>
+      <li data-md>
+       <p>Channel Audio processor outputs channel audio for the target channel layout after some processing of the relevant ChannelGroups by using Timed Metadata if needed.</p>
+     </ul>
+   </ul>
+   <center><img height="252" src="images/IA Decoder Configuration.png" width="800"></center>
+   <center><b>Figure 13. </b>IA Decoder Configuration</center>
+   <h4 class="heading settled" data-level="6.1.1" id="iadecoding-iadecoder-ambisonics"><span class="secno">6.1.1. </span><span class="content">IA Decoder for Ambisonics decoding</span><a class="self-link" href="#iadecoding-iadecoder-ambisonics"></a></h4>
+   <p>This section describes IA decoding operation for Ambisonics.</p>
+   <p>Figure 14 shows the decoding flowchart of Ambisonics decoding.</p>
+   <ul>
+    <li data-md>
+     <p>OBU parser outputs the first <a data-link-type="dfn">Substreams</a>, among Substream in <a data-link-type="dfn">IA bitstream</a>, as many as <a data-link-type="dfn" href="#substream_count" id="ref-for-substream_count③">substream_count</a> specified in <a data-link-type="dfn">ambix_layer_config()</a> of <a data-link-type="dfn">IA_Static_Meta</a>, with Decoder_Config().</p>
+     <ul>
+      <li data-md>
+       <p>OBU parser outputs <a data-link-type="dfn" href="#channel_mapping" id="ref-for-channel_mapping②">channel_mapping</a> or <a data-link-type="dfn" href="#demixing_matrix" id="ref-for-demixing_matrix②">demixing_matrix</a> according to <a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode⑦">Ambisonics_Mode</a> to Channel_Mapping/Demixing_Matrix module</p>
+     </ul>
+    <li data-md>
+     <p>Codec decoder outputs channels as many as the nubmer of Substreams after decoding of each Substream.</p>
+    <li data-md>
+     <p>Channel_Mapping/Demixing_Matrix module applies channel_mapping or demixing_matrix according to Ambisonics_Mode to the channels (PCM) and outputs channels as many as <a data-link-type="dfn" href="#output_channel_count" id="ref-for-output_channel_count①">output_channel_count</a> in ACN order.</p>
+   </ul>
+   <center><img height="369" src="images/Ambisonics Decoding Flowchart.png" width="452"></center>
+   <center><b>Figure 14. </b>Ambisonics Decoding Flowchart</center>
+   <h4 class="heading settled" data-level="6.1.2" id="iadecoding-iadecoder-channelaudio"><span class="secno">6.1.2. </span><span class="content">IA Decoder for Channel Audio decoding</span><a class="self-link" href="#iadecoding-iadecoder-channelaudio"></a></h4>
+   <p>This section describes IA decoding operation for Channe Audio.</p>
+   <p>Figure 15 shows the decoding flowchart of Channel Audio decoding.</p>
+   <center><img height="785" src="images/Channel Audio Decoding Flowchart.png" width="541"></center>
+   <center><b>Figure 15. </b>Channel Audio Decoding Flowchart</center>
+   <p>For a given target channel layout (i.e. CL #i) among the list of <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout④">loudspeaker_layout</a> in <a data-link-type="dfn">IA_Static_Meta</a>,</p>
+   <ul>
+    <li data-md>
+     <p>OBU Parser gets Substreams for <a data-link-type="dfn">ChannelGroup</a> #1 ~ ChannelGroup #i and pass them to Codec decoder with <a data-link-type="dfn">Decoder_Config()</a>.</p>
+    <li data-md>
+     <p>Codec decoder outputs decoded channels (PCM) in the transmission order.</p>
+     <ul>
+      <li data-md>
+       <p>For non-scalable audio (i.e i = 1), its order is converted to the loudspeaker location order for CL #1.</p>
+      <li data-md>
+       <p>For scalable audio, its order is converted to the loudspeaker location order for CL #i after going through necessary modules such as Gain, De-Mixer, Recon_Gain etc..</p>
+     </ul>
+    <li data-md>
+     <p>When Output_Gain_Is_Present_Flag(j) for ChanneGroup #j (j = 1, 2, …, i-1) is on, Gain module applies Output_Gain(j) to all audio samples of the mixed channels in the ChannelGroup #j indicated by Output_Gain_Flag(j).</p>
+    <li data-md>
+     <p>De-Mixer outputs de-mixed channels (PCM) for CL #i generated through de-mixing of the mixed channels from Gain module by using non-mixed channels and demixing parameters for each frame.</p>
+    <li data-md>
+     <p>Recon_Gain module outputs smoothed channels (PCM) by appling Recon_Gain to each frame of the de-mixed channels.</p>
+    <li data-md>
+     <p>Loudness normalization module outputs loudness normalized channels at -24 LKFS from non-mixed channels and smoothed channels (if present) by using loudness value for CL #i.</p>
+    <li data-md>
+     <p>DRC control module applies the pre-defined DRC compression to the loudness normalized channels, after that it outputs loudness normalized channels at -16 LKFS.</p>
+    <li data-md>
+     <p>Limiter module limits the true peak of input channels at -1dB.</p>
+   </ul>
+   <p>Following sections, <a href="#iadecoding-iadecoder-channelaudio-gain">§ 6.1.2.1 Gain</a>, <a href="#iadecoding-iadecoder-channelaudio-demixer">§ 6.1.2.2 De-mixer</a> and <a href="#iadecoding-iadecoder-channelaudio-recongain">§ 6.1.2.3 Recon Gain</a> are only needed for decoding of scalable audio. <a href="#iadecoding-iadecoder-channelaudio-loudness">§ 6.1.2.4 Loudness Normalization</a> and <a href="#iadecoding-iadecoder-channelaudio-drc">§ 6.1.2.5 DRC Control</a> may not be recommended according to application.</p>
+   <h5 class="heading settled" data-level="6.1.2.1" id="iadecoding-iadecoder-channelaudio-gain"><span class="secno">6.1.2.1. </span><span class="content">Gain</span><a class="self-link" href="#iadecoding-iadecoder-channelaudio-gain"></a></h5>
+   <p>Gain module is the mirror process of Attenuation module. It recovers the reduced sample values using Output_Gain when its flag for ChannelGroup #j is on. When its flag is off, then this module is bypassed for ChannelGroup #j. Output_Gain(j) for ChannelGroup #j is applied to all samples of the mixed channels in the ChannelGroup #j. Where, mixed channels means the mixed channels from an input channel audio (i.e. a channel audio for CL #n).</p>
+   <p>To apply the gain, an implementation MUST use the following:</p>
+<pre>Sample *= pow(10, Output_Gain(j) / (20.0*256))
+</pre>
+   <p>Where, Output_Gain(j) is the raw 16-bit value from <a data-link-type="dfn">IA_Static_Meta</a>.</p>
+   <h5 class="heading settled" data-level="6.1.2.2" id="iadecoding-iadecoder-channelaudio-demixer"><span class="secno">6.1.2.2. </span><span class="content">De-mixer</span><a class="self-link" href="#iadecoding-iadecoder-channelaudio-demixer"></a></h5>
+   <p>For scalable audio, some channels of <a data-link-type="dfn">down-mixed audio</a> for CL #i are delivered as is but the rest are mixed with other channels for CL #i-1.</p>
+   <p>De-mixer module reconstructs the rest of the down-mixed audio for CL #i from the mixed channels, which is passed by Gain module, and its relevant non-mixed channels using its relevant demixing parameters.</p>
+   <p>De-mixing for down-mixed audio for CL #i is a combination of following surround and top de-mixers:</p>
+   <ul>
+    <li data-md>
+     <p>Surround de-mixers</p>
+     <ul>
+      <li data-md>
+       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="s1to2-de-mixer">S1to2 de-mixer</dfn>: R2 = 2 x Mono – L2</p>
+      <li data-md>
+       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="s2to3-de-mixer">S2to3 de-mixer</dfn>: L3 = L2 – 0.707 x C and R3 = R2 – 0.707 x C</p>
+      <li data-md>
+       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="s3to5-de-mixer">S3to5 de-mixer</dfn>: Ls = 1/δ(k) x (L3 – L5) and Rs = 1/δ(k) x (R3 – R5)</p>
+      <li data-md>
+       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="s5to7-de-mixer">S5to7 de-mixer</dfn>: Lrs = 1/β(k) x (Ls – α(k) x Lss) and Rrs = 1/β(k) x (Rs – α(k) x Rss)</p>
+     </ul>
+    <li data-md>
+     <p>Top de-mixers</p>
+     <ul>
+      <li data-md>
+       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="tf2tot2-de-mixer">TF2toT2 de-mixer</dfn>: Ltf2 = Ltf3 – w(k) x (L3 – L5) and Rtf2 = Rtf3 – w(k) x (R3 – R5)</p>
+      <li data-md>
+       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="t2to4-de-mixer">T2to4 de-mixer</dfn>: Ltb = 1/γ(k) x (Ltf2 – Ltf4) and Rtb = 1/γ(k) x (Rtf2 – Rtf4)</p>
+     </ul>
+    <li data-md>
+     <p>Where, Ltf2 / Rtf2 is top channel of x.1.2ch, Ltf3 / Rtf3 is top channel of 3.1.2ch, and Ltf4 / Rtf4 is to channel of x.1.4ch (x = 5 or 7) and w(k) is determined from the value of wIdx(k).</p>
+   </ul>
+   <p>Initially, wIdx(0) = 0 and the value of wIdx(k) is derived as follows:</p>
+   <ul>
+    <li data-md>
+     <p><dfn data-dfn-type="dfn" data-noexport id="widx-k">wIdx(k)<a class="self-link" href="#widx-k"></a></dfn> = Clip3 (0, 10, wIdx(k-1) + w_idx_offset(k))</p>
+    <li data-md>
+     <p>Where, Clip3 (x, min, max) = max if x > max, min if x &lt; min, x otherwise.</p>
+   </ul>
+   <p>Mapping of wIdx(k) to w(k) is as follows:</p>
+<pre class="def">wIdx(k) :   w(k)
+   0    :    0
+   1    :  0.0179
+   2    :  0.0391
+   3    :  0.0658
+   4    :  0.1038
+   5    :  0.25
+   6    :  0.3962
+   7    :  0.4342
+   8    :  0.4609
+   9    :  0.4821
+   10    : 0.5
+</pre>
+   <p>When D_set = { x | S1 &lt; x ≤ Si and x is an integer},</p>
+   <ul>
+    <li data-md>
+     <p>If 2 is an element of D_set, the combination includes <a data-link-type="dfn" href="#s1to2-de-mixer" id="ref-for-s1to2-de-mixer">S1to2 de-mixer</a>.</p>
+    <li data-md>
+     <p>If 3 is an element of D_set, the combination includes <a data-link-type="dfn" href="#s2to3-de-mixer" id="ref-for-s2to3-de-mixer">S2to3 de-mixer</a>.</p>
+    <li data-md>
+     <p>If 5 is an element of D_set, the combination includes <a data-link-type="dfn" href="#s3to5-de-mixer" id="ref-for-s3to5-de-mixer">S3to5 de-mixer</a>.</p>
+    <li data-md>
+     <p>If 7 is an element of D_set, the combination includes <a data-link-type="dfn" href="#s5to7-de-mixer" id="ref-for-s5to7-de-mixer">S5to7 de-mixer</a>.</p>
+   </ul>
+   <p>When Ti = 2,</p>
+   <ul>
+    <li data-md>
+     <p>If Sj = 3 (j=1,2,…, i-1), the combination includes <a data-link-type="dfn" href="#tf2tot2-de-mixer" id="ref-for-tf2tot2-de-mixer">TF2toT2 de-mixer</a>.</p>
+   </ul>
+   <p>When Ti = 4,</p>
+   <ul>
+    <li data-md>
+     <p>If Sj = 3 (j=1,2,…, i-1), the combination includes <a data-link-type="dfn" href="#tf2tot2-de-mixer" id="ref-for-tf2tot2-de-mixer①">TF2toT2 de-mixer</a> and <a data-link-type="dfn" href="#t2to4-de-mixer" id="ref-for-t2to4-de-mixer">T2to4 de-mixer</a>.</p>
+    <li data-md>
+     <p>Elseif Tj = 2 (j=1,2,…, i-1), the combination includes <a data-link-type="dfn" href="#t2to4-de-mixer" id="ref-for-t2to4-de-mixer①">T2to4 de-mixer</a>.</p>
+   </ul>
+   <p>For example, when CL #1 = 2ch, CL #2 = 3.1.2ch, CL #3 = 5.1.2ch and CL #4 = 7.1.4ch. To reconstruct the rest (i.e. Ls5/Rs5/Ltf/Rtf) of th down-mixed 5.1.2ch,</p>
+   <ul>
+    <li data-md>
+     <p>The combination includes <a data-link-type="dfn" href="#s2to3-de-mixer" id="ref-for-s2to3-de-mixer①">S2to3 de-mixer</a>, <a data-link-type="dfn" href="#s3to5-de-mixer" id="ref-for-s3to5-de-mixer①">S3to5 de-mixer</a> and [=TF2toF2 de-mixer].</p>
+    <li data-md>
+     <p>Ls5 and Rs5 are recovered by S2to3 de-mixer and S3to5 de-mixer.</p>
+    <li data-md>
+     <p>Ltf and Rtf are recovered by S2to3 de-mixer and TF2toT2 de-mixer.</p>
+   </ul>
+<pre>Ls5 = 1/δ(k) × (L2 - 0.707 × C - L5) and Rs5 = 1/δ(k) × (R2 - 0.707 × C - R5).
+Ltf = Ltf3 - w(k) x (L2 - 0.707 x C - L5) and Rtf = Rtf3 - w(k) x (R2 - 0.707 x C - R5).  
+</pre>
+   <h5 class="heading settled" data-level="6.1.2.3" id="iadecoding-iadecoder-channelaudio-recongain"><span class="secno">6.1.2.3. </span><span class="content">Recon Gain</span><a class="self-link" href="#iadecoding-iadecoder-channelaudio-recongain"></a></h5>
+   <p><a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain④">Recon_Gain</a> is only applied to all of audio samples of the de-mixed channels from De-mixer module.</p>
+   <ul>
+    <li data-md>
+     <p><a data-link-type="dfn">Recon_Gain_Info</a> indicates each channel of CL #i which Recon_Gain needs to be applied to and provides Recon_Gain value for each frame of the channel.</p>
+     <ul>
+      <li data-md>
+       <p>Sample (k,i) *= Smoothed_Recon_Gain (k,i), where k is the frame index and i is the sample index of the frame.</p>
+      <li data-md>
+       <p>Smoothed_Recon_Gain (k) = MA_gain (k-1) x e_window + MA_gain (k) x s_window</p>
+      <li data-md>
+       <p>MA_gain (k) = 2 / (N+1) x Recon_Gain (k) / 255 + (1 – 2/(N+1)) x MA_gain (k-1), where MA_gain (0) = 1.</p>
+      <li data-md>
+       <p>e_window[:ps – olen] = 1, e_window[ps – olen: ps] = hanning[olen:], e_window[ps:flen] = 0.</p>
+      <li data-md>
+       <p>s_window[:ps – olen] = 0, s_window[ps – olen: ps] = hanning[:olen], s_window[ps:flen] = 1.</p>
+      <li data-md>
+       <p>Where, hanning = np.hanning (2*olen), ps is the pre-skip value, flen is the frame size and olen is the overlab size.</p>
+      <li data-md>
+       <p>Recommend values: N = 7</p>
+     </ul>
+   </ul>
+   <p>Figure 16 shows the smoothing scheme of <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain⑤">Recon_Gain</a>.</p>
+   <center><img height="200" src="images/Smoothing Scheme of Recon Gain.png" width="800"></center>
+   <center><b>Figure 16. </b>Smoothing Scheme of Recon Gain</center>
+   <p>Recommend values for specific codecs are as follows</p>
+   <ul>
+    <li data-md>
+     <p>IAC-OPUS: olen = 60, the pre-skip (ps) value is indicated in <a data-link-type="dfn" href="#codec_specific_info" id="ref-for-codec_specific_info④">Codec_Specific_Info</a> for IAC-OPUS.</p>
+    <li data-md>
+     <p>IAC-AAC-LC: olen = 64, ps = 720.</p>
+   </ul>
+   <h5 class="heading settled" data-level="6.1.2.4" id="iadecoding-iadecoder-channelaudio-loudness"><span class="secno">6.1.2.4. </span><span class="content">Loudness Normalization</span><a class="self-link" href="#iadecoding-iadecoder-channelaudio-loudness"></a></h5>
+   <p>Loudness normalization is done by adjusting a loudness level to -24 LKFS based on the loudness value of the target channel layout (i.e. CL #i) which is signaled in <a data-link-type="dfn">Channel_Audio_Layer_Config()</a>.</p>
+   <p>Real implementations for <a href="#iadecoding-iadecoder-channelaudio-loudness">§ 6.1.2.4 Loudness Normalization</a>, <a href="#iadecoding-iadecoder-channelaudio-drc">§ 6.1.2.5 DRC Control</a> and <a href="#iadecoding-iadecoder-channelaudio-limiter">§ 6.1.2.6 Limiter</a> are soly dependent on implementers (i.e., out of scope of this specification). This specification only recommends the principles for them.</p>
+   <h5 class="heading settled" data-level="6.1.2.5" id="iadecoding-iadecoder-channelaudio-drc"><span class="secno">6.1.2.5. </span><span class="content">DRC Control</span><a class="self-link" href="#iadecoding-iadecoder-channelaudio-drc"></a></h5>
+   <p>In this specification, DRC Control assumes an input loudness of -24 LKFS and targets an output loudness of -16 LKFS.</p>
+   <p>DRC Control module applies the pre-defined DRC compression by assuming a target loudness is adjusted to -16 LKFS as follows:</p>
+   <ul>
+    <li data-md>
+     <p>DRC Segment 0</p>
+     <ul>
+      <li data-md>
+       <p>Threshold: not applicable</p>
+      <li data-md>
+       <p>Ratio: 1:1</p>
+      <li data-md>
+       <p>Type: Neutral</p>
+     </ul>
+    <li data-md>
+     <p>DRC Segment 1</p>
+     <ul>
+      <li data-md>
+       <p>Threshold: -16.5 dBFS</p>
+      <li data-md>
+       <p>Ratio: 1.5:1</p>
+      <li data-md>
+       <p>Type: Compressor</p>
+     </ul>
+    <li data-md>
+     <p>DRC Segment 2</p>
+     <ul>
+      <li data-md>
+       <p>Threshold: -9 dBFS</p>
+      <li data-md>
+       <p>Ratio: 2:1</p>
+      <li data-md>
+       <p>Type: Compressor</p>
+     </ul>
+    <li data-md>
+     <p>DRC Segment 3</p>
+     <ul>
+      <li data-md>
+       <p>Threshold: -6 dBFS</p>
+      <li data-md>
+       <p>Ratio: 3:1</p>
+      <li data-md>
+       <p>Type: Compressor</p>
+     </ul>
+   </ul>
+   <p>Figure 17 shows the schematic diagram of the pre-defined DRC compression.</p>
+   <center><img height="673" src="images/Pre-defined DRC Compression Scheme.png" width="800"></center>
+   <center><b>Figure 17. </b>Pre-defined DRC Compression Scheme</center>
+   <p>The below is the equation that represents the compressor scheme of Figure 17.</p>
+<pre>Y = D_T(i) + (X - T(i)) / R(i). Where,
+X ∈ Seg(i) and D_T (i) = T(0) + ∑ ((T(k+1) - T(k)) / R(k)) (k = 0 to i-1).	
+Seg(i): ith Segment
+ T(i) : Threshold vlaue in dBFS for Seg(i), where T(0) = -96.33
+ R(i) : Ratio value for Seg(i)
+D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) = T(0)
+  X   : Input sample value in dBFS
+  Y   : Output sample value in dBFS
+</pre>
+   <h5 class="heading settled" data-level="6.1.2.6" id="iadecoding-iadecoder-channelaudio-limiter"><span class="secno">6.1.2.6. </span><span class="content">Limiter</span><a class="self-link" href="#iadecoding-iadecoder-channelaudio-limiter"></a></h5>
+   <p>This module limits the true peak of input signal at -1dB. The definition of thr true peak is base on <a data-link-type="biblio" href="#biblio-itu1770-4">[ITU1770-4]</a>.</p>
+   <p>Below is a recommended loudness normalization and DRC control principle according to application.</p>
+   <ul>
+    <li data-md>
+     <p>For AV application, it only applies Limiter at -1dBTP.</p>
+    <li data-md>
+     <p>For TV application, it only applies Loudness normalization at -24LKFS and Limiter at -1dBTP.</p>
+    <li data-md>
+     <p>For Mobile application, it applies Loudness normalization at -24LKFS, the pre-defined DRC control and adjusting of target loudness at -16 LKFS, and Limiter at -1dBTP.</p>
+   </ul>
+   <p class="note" role="note"><span>NOTE:</span> The definitions of AV, TV and Mobile applications are as follows:
+.AV application: Sound devices with external speakers such as Soundbar, AV receiver, HiFi speaker etc..
+.TV application: Television with built-in speakers such as LCD/OLED slim TV.
+.Mobile application: Handheld devices with built-in speakers such as smartphone, tablet etc..</p>
+   <h4 class="heading settled" data-level="6.1.3" id="iadecoding-iadecoder-ambisonics-channelaudio"><span class="secno">6.1.3. </span><span class="content">IA Decoder for Ambisonics and Channel Audio decoding</span><a class="self-link" href="#iadecoding-iadecoder-ambisonics-channelaudio"></a></h4>
+   <p>Ambisonics and Channel Audio decoding is a simple parallel processing of both Ambisoncis decoding and Channel Audio decoding which are described in <a href="#iadecoding-iadecoder-ambisonics">§ 6.1.1 IA Decoder for Ambisonics decoding</a> and <a href="#iadecoding-iadecoder-channelaudio">§ 6.1.2 IA Decoder for Channel Audio decoding</a>, respectively.</p>
+   <h3 class="heading settled" data-level="6.2" id="iadecoding-downmixmatrix"><span class="secno">6.2. </span><span class="content">Down-mix Matrix (Static)</span><a class="self-link" href="#iadecoding-downmixmatrix"></a></h3>
+   <p>This section provides static down-mix matrices to stereo and 3.1.2ch.</p>
+   <p>IAC players need to support any valid channel layout, even if the number of channels does not match the physically connected audio hardware. Players needs to perform channel mixing to increase or reduce the number of channels as needed.</p>
+   <p>Implementations can use the matrices in Figure 18 to Figure 24 to implement down-mixing from output channel audio, which are known to give acceptable results for stereo and 3.1.2ch.</p>
+   <p>For down-mixing to stereo, both sub-woofer and top channels are discarded during down-mixing. Therefore surround channels are only down-mixed and it only defines three down-mixing matrices, 3.x.x to stereo, 5.x.x to stereo and 7.x.x to stereo. Matrix for 3 channels is normalized so each coefficient row sums to 1 to avoid clipping. For 5 or more channels, they are normalized to 2 as a compromise between clipping and dynamic range reduction.</p>
+   <center><img height="135" src="images/Stereo Down-mix Matrix for 3.x.x ch.png" width="634"></center>
+   <center><b>Figure 18. </b>Stereo Down-mix matrix for 3.x.x ch</center>
+   <center><img height="230" src="images/Stereo Down-mix Matrix for 5.x.x ch.png" width="800"></center>
+   <center><b>Figure 19. </b>Stereo Down-mix matrix for 5.x.x ch</center>
+   <center><img height="274" src="images/Stereo Down-mix Matrix for 7.x.x ch.png" width="800"></center>
+   <center><b>Figure 20. </b>Stereo Down-mix matrix for 7.x.x ch</center>
+   <p>Figure 21 to Figure 24 show static down-mix matrices to 3.1.2ch.</p>
+   <center><img height="359" src="images/3.1.2ch Down-mix Matrix for 5.1.2ch.png" width="774"></center>
+   <center><b>Figure 21. </b>3.1.2ch Down-mix matrix for 5.1.2ch</center>
+   <center><img height="415" src="images/3.1.2ch Down-mix Matrix for 5.1.4ch.png" width="800"></center>
+   <center><b>Figure 22. </b>3.1.2ch Down-mix matrix for 5.1.4ch</center>
+   <center><img height="314" src="images/3.1.2ch Down-mix Matrix for 7.1.2ch.png" width="800"></center>
+   <center><b>Figure 23. </b>3.1.2ch Down-mix matrix for 7.1.2ch</center>
+   <center><img height="338" src="images/3.1.2ch Down-mix Matrix for 7.1.4ch.png" width="800"></center>
+   <center><b>Figure 24. </b>3.1.2ch Down-mix matrix for 7.1.4ch</center>
+   <p>Where, p1 = 0.707 and p2 = 0.3535</p>
   </main>
   <div data-fill-with="conformance">
    <h2 class="no-ref no-num heading settled" id="conformance"><span class="content"> Conformance</span><a class="self-link" href="#conformance"></a></h2>
@@ -3315,10 +3659,17 @@ Recon_Gain for D_Rtb4:
    <li><a href="#recon_gain_flags">recon_gain_flags</a><span>, in § 2.2.12</span>
    <li><a href="#recon_gain_flalgs">recon_gain_flalgs</a><span>, in § 2.2.12</span>
    <li><a href="#recon_gain_is_present_flag">recon_gain_is_present_flag</a><span>, in § 2.2.9</span>
+   <li><a href="#s1to2-de-mixer">S1to2 de-mixer</a><span>, in § 6.1.2.2</span>
+   <li><a href="#s2to3-de-mixer">S2to3 de-mixer</a><span>, in § 6.1.2.2</span>
+   <li><a href="#s3to5-de-mixer">S3to5 de-mixer</a><span>, in § 6.1.2.2</span>
+   <li><a href="#s5to7-de-mixer">S5to7 de-mixer</a><span>, in § 6.1.2.2</span>
    <li><a href="#seeniabitstream">SeenIABitstream</a><span>, in § 2.2.5</span>
    <li><a href="#substream_count">substream_count</a><span>, in § 2.2.8</span>
+   <li><a href="#t2to4-de-mixer">T2to4 de-mixer</a><span>, in § 6.1.2.2</span>
+   <li><a href="#tf2tot2-de-mixer">TF2toT2 de-mixer</a><span>, in § 6.1.2.2</span>
    <li><a href="#version">version</a><span>, in § 2.2.7</span>
    <li><a href="#w">w</a><span>, in § 2.2.11</span>
+   <li><a href="#widx-k">wIdx(k)</a><span>, in § 6.1.2.2</span>
    <li><a href="#w_idx_offset">w_idx_offset</a><span>, in § 2.2.11</span>
    <li><a href="#zero_bit">zero_bit</a><span>, in § 2.2.3</span>
   </ul>
@@ -3329,6 +3680,7 @@ Recon_Gain for D_Rtb4:
     <li><a href="#termref-for-">2.2.13. Substream OBU Syntax and Semantics</a>
     <li><a href="#termref-for-">3.3.2.3. Syntax</a>
     <li><a href="#termref-for-">3.3.2.4. Semantics</a>
+    <li><a href="#termref-for-">6.1. IA Decoder</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
@@ -3338,6 +3690,7 @@ Recon_Gain for D_Rtb4:
     <li><a href="#termref-for-">2.2.13. Substream OBU Syntax and Semantics</a>
     <li><a href="#termref-for-">3.3.2.3. Syntax</a>
     <li><a href="#termref-for-">3.3.2.4. Semantics</a>
+    <li><a href="#termref-for-">6.1. IA Decoder</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
@@ -3347,6 +3700,7 @@ Recon_Gain for D_Rtb4:
     <li><a href="#termref-for-">2.2.13. Substream OBU Syntax and Semantics</a>
     <li><a href="#termref-for-">3.3.2.3. Syntax</a>
     <li><a href="#termref-for-">3.3.2.4. Semantics</a>
+    <li><a href="#termref-for-">6.1. IA Decoder</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
@@ -3596,6 +3950,7 @@ Recon_Gain for D_Rtb4:
     <li><a href="#termref-for-">2.1.1. IAC-OPUS Specific</a>
     <li><a href="#termref-for-">2.2.13. Substream OBU Syntax and Semantics</a>
     <li><a href="#termref-for-">3.3.1.4. Semantics</a>
+    <li><a href="#termref-for-">6.1. IA Decoder</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
@@ -3740,6 +4095,7 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-codec_specific_info">2.1.1. IAC-OPUS Specific</a>
     <li><a href="#ref-for-codec_specific_info①">2.2.6. Codec Specific Info OBU Syntax and Semantics</a> <a href="#ref-for-codec_specific_info②">(2)</a>
     <li><a href="#ref-for-codec_specific_info③">5.2. IA Encoder</a>
+    <li><a href="#ref-for-codec_specific_info④">6.1.2.3. Recon Gain</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="codec_id">
@@ -3769,6 +4125,8 @@ Recon_Gain for D_Rtb4:
    <ul>
     <li><a href="#ref-for-ambisonics_mode">5.2.1. IA Encoder for Ambisonics format</a> <a href="#ref-for-ambisonics_mode①">(2)</a> <a href="#ref-for-ambisonics_mode②">(3)</a> <a href="#ref-for-ambisonics_mode③">(4)</a> <a href="#ref-for-ambisonics_mode④">(5)</a>
     <li><a href="#ref-for-ambisonics_mode⑤">5.2.2. IA Encoder for Channel Audio format</a>
+    <li><a href="#ref-for-ambisonics_mode⑥">6.1. IA Decoder</a>
+    <li><a href="#ref-for-ambisonics_mode⑦">6.1.1. IA Decoder for Ambisonics decoding</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="channel_audio_layer">
@@ -3777,12 +4135,14 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-channel_audio_layer">5.2.1. IA Encoder for Ambisonics format</a>
     <li><a href="#ref-for-channel_audio_layer①">5.2.2. IA Encoder for Channel Audio format</a> <a href="#ref-for-channel_audio_layer②">(2)</a> <a href="#ref-for-channel_audio_layer③">(3)</a>
     <li><a href="#ref-for-channel_audio_layer④">5.2.3. IA Encoder for Ambisonics and Channel Audio format</a>
+    <li><a href="#ref-for-channel_audio_layer⑤">6.1. IA Decoder</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="output_channel_count">
    <b><a href="#output_channel_count">#output_channel_count</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-output_channel_count">5.2.1. IA Encoder for Ambisonics format</a>
+    <li><a href="#ref-for-output_channel_count①">6.1.1. IA Decoder for Ambisonics decoding</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="substream_count">
@@ -3791,6 +4151,7 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-substream_count">2.2.13. Substream OBU Syntax and Semantics</a>
     <li><a href="#ref-for-substream_count①">5.2.1. IA Encoder for Ambisonics format</a>
     <li><a href="#ref-for-substream_count②">5.2.2. IA Encoder for Channel Audio format</a>
+    <li><a href="#ref-for-substream_count③">6.1.1. IA Decoder for Ambisonics decoding</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="coupled_substream_count">
@@ -3804,12 +4165,14 @@ Recon_Gain for D_Rtb4:
    <b><a href="#channel_mapping">#channel_mapping</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-channel_mapping">5.2.1. IA Encoder for Ambisonics format</a> <a href="#ref-for-channel_mapping①">(2)</a>
+    <li><a href="#ref-for-channel_mapping②">6.1.1. IA Decoder for Ambisonics decoding</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="demixing_matrix">
    <b><a href="#demixing_matrix">#demixing_matrix</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-demixing_matrix">5.2.1. IA Encoder for Ambisonics format</a> <a href="#ref-for-demixing_matrix①">(2)</a>
+    <li><a href="#ref-for-demixing_matrix②">6.1.1. IA Decoder for Ambisonics decoding</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="loudspeaker_layout">
@@ -3819,6 +4182,7 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-loudspeaker_layout①">5.2. IA Encoder</a>
     <li><a href="#ref-for-loudspeaker_layout②">5.2.2. IA Encoder for Channel Audio format</a>
     <li><a href="#ref-for-loudspeaker_layout③">5.2.2.3. Channel Layout Generation Rule</a>
+    <li><a href="#ref-for-loudspeaker_layout④">6.1.2. IA Decoder for Channel Audio decoding</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="output_gain_is_present_flag">
@@ -3870,6 +4234,7 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-recon_gain">5.2.2. IA Encoder for Channel Audio format</a> <a href="#ref-for-recon_gain①">(2)</a>
     <li><a href="#ref-for-recon_gain②">5.2.2.1. Down-mix parameter and Loudness</a>
     <li><a href="#ref-for-recon_gain③">5.2.2.4. Recon Gain Generation</a>
+    <li><a href="#ref-for-recon_gain④">6.1.2.3. Recon Gain</a> <a href="#ref-for-recon_gain⑤">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="iasampleentry">
@@ -3895,6 +4260,42 @@ Recon_Gain for D_Rtb4:
    <b><a href="#ia-sample">#ia-sample</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-ia-sample">3.2.2. Description</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="s1to2-de-mixer">
+   <b><a href="#s1to2-de-mixer">#s1to2-de-mixer</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-s1to2-de-mixer">6.1.2.2. De-mixer</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="s2to3-de-mixer">
+   <b><a href="#s2to3-de-mixer">#s2to3-de-mixer</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-s2to3-de-mixer">6.1.2.2. De-mixer</a> <a href="#ref-for-s2to3-de-mixer①">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="s3to5-de-mixer">
+   <b><a href="#s3to5-de-mixer">#s3to5-de-mixer</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-s3to5-de-mixer">6.1.2.2. De-mixer</a> <a href="#ref-for-s3to5-de-mixer①">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="s5to7-de-mixer">
+   <b><a href="#s5to7-de-mixer">#s5to7-de-mixer</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-s5to7-de-mixer">6.1.2.2. De-mixer</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="tf2tot2-de-mixer">
+   <b><a href="#tf2tot2-de-mixer">#tf2tot2-de-mixer</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-tf2tot2-de-mixer">6.1.2.2. De-mixer</a> <a href="#ref-for-tf2tot2-de-mixer①">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="t2to4-de-mixer">
+   <b><a href="#t2to4-de-mixer">#t2to4-de-mixer</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-t2to4-de-mixer">6.1.2.2. De-mixer</a> <a href="#ref-for-t2to4-de-mixer①">(2)</a>
    </ul>
   </aside>
 <script>/* script-dfn-panel */
