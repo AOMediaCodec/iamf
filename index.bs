@@ -1312,6 +1312,38 @@ NOTE: The definitions of AV, TV and Mobile applications are as follows:
 
 Ambisonics and Channel Audio decoding is a simple parallel processing of both Ambisoncis decoding and Channel Audio decoding which are described in [[#iadecoding-iadecoder-ambisonics]] and [[#iadecoding-iadecoder-channelaudio]], respectively.
 
-## Downmix Matrix
-NOTE: We agree to with a fixed set of downmix matrics in this version, and possibly have a future version number for different matrices.
+## Down-mix Matrix (Static) ## {#iadecoding-downmixmatrix}
+
+This section provides static down-mix matrices to stereo and 3.1.2ch.
+
+IAC players need to support any valid channel layout, even if the number of channels does not match the physically connected audio hardware. Players needs to perform channel mixing to increase or reduce the number of channels as needed.
+
+Implementations can use the matrices in Figure 18 to Figure 24 to implement down-mixing from output channel audio, which are known to give acceptable results for stereo and 3.1.2ch.
+
+For down-mixing to stereo, both sub-woofer and top channels are discarded during down-mixing. Therefore surround channels are only down-mixed and it only defines three down-mixing matrices, 3.x.x to stereo, 5.x.x to stereo and 7.x.x to stereo. Matrix for 3 channels is normalized so each coefficient row sums to 1 to avoid clipping. For 5 or more channels, they are normalized to 2 as a compromise between clipping and dynamic range reduction.
+
+<center><img src="images/Stereo Down-mix Matrix for 3.x.x ch.png"></center>
+<center><b>Figure 18. </b>Stereo Down-mix matrix for 3.x.x ch</center>
+
+<center><img src="images/Stereo Down-mix Matrix for 5.x.x ch.png"></center>
+<center><b>Figure 19. </b>Stereo Down-mix matrix for 5.x.x ch</center>
+
+<center><img src="images/Stereo Down-mix Matrix for 7.x.x ch.png"></center>
+<center><b>Figure 20. </b>Stereo Down-mix matrix for 7.x.x ch</center>
+
+Figure 21 to Figure 24 show static down-mix matrices to 3.1.2ch.
+
+<center><img src="images/3.1.2ch Down-mix Matrix for 5.1.2ch.png"></center>
+<center><b>Figure 21. </b>3.1.2ch Down-mix matrix for 5.1.2ch</center>
+
+<center><img src="images/3.1.2ch Down-mix Matrix for 5.1.4ch.png"></center>
+<center><b>Figure 22. </b>3.1.2ch Down-mix matrix for 5.1.4ch</center>
+
+<center><img src="images/3.1.2ch Down-mix Matrix for 7.1.2ch.png"></center>
+<center><b>Figure 23. </b>3.1.2ch Down-mix matrix for 7.1.2ch</center>
+
+<center><img src="images/3.1.2ch Down-mix Matrix for 7.1.4ch.png"></center>
+<center><b>Figure 24. </b>3.1.2ch Down-mix matrix for 7.1.4ch</center>
+
+Where, p1 = 0.707 and p2 = 0.3535
 
