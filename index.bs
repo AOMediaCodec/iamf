@@ -7,7 +7,7 @@ Editor: Felicia Lim, Google, flim@google.com
 Repository: AOMediaCodec/iac
 Shortname: iac
 URL: https://aomediacodec.github.io/iac/
-Date: 2022-04-18
+Date: 2022-05-26
 Abstract: This document specifies the storage format for immersive audio (IA) bitstreams in [[!ISOBMFF]] tracks.
 </pre>
 
@@ -17,6 +17,8 @@ url: https://www.iso.org/standard/68960.html#; spec: ISOBMFF; type: dfn;
 	text: boxtype
 	text: grouping_type
 	text: SampleGroupDescriptionEntry
+	text: channelcount
+	text: samplerate
 
 url: https://www.iso.org/standard/68960.html#; spec: ISOBMFF; type: property;
 	text: iso6
@@ -27,7 +29,6 @@ url: https://www.iso.org/standard/68960.html#; spec: ISOBMFF; type: property;
 url: https://www.iso.org/standard/43345.html#; spec: AAC; type: dfn;
 	text: raw_data_block()
 	text: ADTS
-	text: channelConfiguration
 	text: Low Complexity Profile
 
 url: https://opus-codec.org/docs/opus_in_isobmff.html#; spec: OPUS-IN-ISOBMFF; type: dfn;
@@ -35,6 +36,9 @@ url: https://opus-codec.org/docs/opus_in_isobmff.html#; spec: OPUS-IN-ISOBMFF; t
 	text: OutputChannelCount
 	text: OutputGain
 	text: ChannelMappingFamily
+	text: PreSkip
+	text: InputSampleRate
+
 
 url: https://opus-codec.org/docs/opus_in_isobmff.html#; spec: OPUS-IN-ISOBMFF; type: property;
 	text: opus
@@ -71,8 +75,6 @@ url: https://tools.ietf.org/html/rfc8486#; spec: RFC8486; type: dfn;
 
 url: https://tools.ietf.org/html/rfc7845#; spec: RFC7845; type: dfn;
 	text: ID Header
-	text: ChannelMappingFamily
-	text: Channel Count
 	text: Output Gain
 
 url: https://tools.ietf.org/html/rfc6716#; spec: RFC6716; type: dfn;
@@ -134,9 +136,9 @@ url: https://en.wikipedia.org/wiki/Q_(number_format); spec: Q-Format; type: dfn;
 </pre>
  
 
-# Introduction # {#introduciton}
+# Introduction # {#introduction}
 
-Immersive audio container (IAC) is the storage format for immersive audio (IA) bitstreams in [[!ISOBMFF]] tracks.
+Immersive audio container (<dfn noexport>IAC</dfn>) is the storage format for immersive audio (IA) bitstreams in [[!ISOBMFF]] tracks.
 
 IAC is aimed to cover a wide range of applications for both surround sound and 3D audio, which is becoming more prevalent and accessible. These applications include internet audio streaming, multicasting/broadcasting services, file download, gaming, communication and extended-reality XR. The IAC format should help to provide an immersive 3D audio experience on a wide-range of devices from big screen to home entertainment, e.g. headsets, mobile phones, tablets, TVs, sound bars and home theater systems.
 
@@ -153,39 +155,39 @@ For a given 3D audio such as Ambisonics and/or multichannel audio,
 - Audio Codec Dec outputs a decoded Pre-Processed Audio after decoding of Codec-Dependent Bitstream.
 - Post-Processor outputs Immersive 3D Audio by using the decoded Pre-Processed Audio and Codec Agnostic Metadata. 
 
-IA bitstream is an codec-agnostic audio bitstream format to deliver three dimensional sound fields that can be used for multichannel sound playback and immersive experience and conceptually it consists of codec-dependent bitstream(s) and codec-agnostic metadata. And, it is designed to be able to reuse conventional mono or stereo encoding and decoding mechanisam as the codec-dependent bitstream consists of one or more coded streams. Where, each coded stream is an coded data for mono or stereo channels.
+<dfn noexport>IA bitstream</dfn> is an codec-agnostic audio bitstream format to deliver three dimensional sound fields that can be used for multichannel sound playback and immersive experience and conceptually it consists of codec-dependent bitstream(s) and codec-agnostic metadata. And, it is designed to be able to reuse conventional mono or stereo encoding and decoding mechanisam as the codec-dependent bitstream consists of one or more coded streams. Where, each coded stream is an coded data for mono or stereo channels.
 
 This specification is formulated as follows:
-- <b>Section 1 Introduction</b> describes a conceptual IAC architecture (Informative section).
-- <b>Section 2 Immersive Audio Bitstream Definition</b> specifies the definition of IA bitstream (Normative section).
-- <b>Section 3 Basic Encapsulation Scheme</b> specifies the way to encapsulate IA bitstream into [[!ISOBMFF]] tracks (Normative section).
-- <b>Section 4 IAC Decapsulation Process</b> provides a way to decapsulate IAC file back into IA bitstream (Informative section).
-- <b>Section 5 IA Encoding Process</b> provides a guideline for Pre-Processor to generate Pre-Processed Audio and Codec Agnostic Metadata and IAC encoding model based on the conventional more or stereo encoding model (Informative section).
-- <b>Section 6 IA Decoding Process</b> provides IAC decoding model based on the conventional more or stereo decoding model and a guideline for Post-Processor to generate Immersive 3D Audio (Informative section).
+- [[#introduction]] describes a conceptual IAC architecture (Informative section).
+- [[#iabitstream-definition]] specifies the definition of IA bitstream (Normative section).
+- [[#basic-encapsulation]] specifies the way to encapsulate IA bitstream into [[!ISOBMFF]] tracks (Normative section).
+- [[#iacdecapsulation]] provides a way to decapsulate IAC file back into IA bitstream (Informative section).
+- [[#iaencoding]] provides a guideline for Pre-Processor to generate Pre-Processed Audio and Codec Agnostic Metadata and IAC encoding model based on the conventional more or stereo encoding model (Informative section).
+- [[#iadecoding]] provides IAC decoding model based on the conventional more or stereo decoding model and a guideline for Post-Processor to generate Immersive 3D Audio (Informative section).
 
 
 # Immersive Audio Bitstream Definition # {#iabitstream-definition}
 
 An immersive audio (IA) sequence is composed of a sequence of IA bitstreams.
 
-Each IA bitstream is a self-decodable and composed of Non-timed Metadata and followed by a sequence of IA Frames, and the structure of the IA Frame is defined by the Non-timed Metadata:
-- Non-timed Metadata is a common metadata which has been applied to all of following IA Frames. It is composed of Codec_Specific_Info and IA_Static_Meta.
-- Codec_Specific_Info is a static metadata indicating a codec specific information which has been used to generate a Substream. 
-- IA_Static_Meta is a codec-agnostic and static metadata indicating the configuration of IA Frames.
-- IA Frame is a frame format for immersive audio (IA). It is composed of Timed Meta if present and followed by IA_Coded_Data. 
-- Timed Meta is a codec-agnostic and non-static metadata including frame variable informaiton. It is composed of Demixing_Info, Substream_Boundary_Info and Recon_Gain_Info.
-- IA_Coded_Data is a coded data for IA Frame. It is composed of one or more ChannelGroups. Where, ChannelGroup is composed of one or more Substreams.
-- ChannelGroup is a set of Substreams which is able to provide a spatial resolution of audio contents by itself or which is able to provide an enhanced spatial resolution of audio contents by combining with the preceding ChannelGroups within the IA Frame.
-- Substream is a byte aligned raw coded stream for single channel or two channels.
+Each [=IA bitstream=] is a self-decodable and composed of [=Non-timed Metadata=] and followed by a sequence of [=IA Frames=], and the structure of the IA Frame is defined by the Non-timed Metadata:
+- <dfn noexprot>Non-timed Metadata</dfn> is a common metadata which has been applied to all of following IA Frames. It is composed of Codec_Specific_Info and IA_Static_Meta.
+- <dfn noexprot>Codec_Specific_Info</dfn> is a static metadata indicating a codec specific information which has been used to generate a Substream. 
+- <dfn noexprot>IA_Static_Meta</dfn> is a codec-agnostic and static metadata indicating the configuration of IA Frames.
+- <dfn noexprot>IA Frame</dfn> is a frame format for immersive audio (IA). It is composed of Timed Metadata if present and followed by IA_Coded_Data. 
+- <dfn noexprot>Timed Metadata</dfn> is a codec-agnostic and non-static metadata including frame variable informaiton. It is composed of Demixing_Info, Substream_Boundary_Info and Recon_Gain_Info.
+- <dfn noexprot>IA_Coded_Data</dfn> is a coded data for IA Frame. It is composed of one or more ChannelGroups. Where, ChannelGroup is composed of one or more Substreams.
+- <dfn noexport>ChannelGroup</dfn> is a set of Substreams which is able to provide a spatial resolution of audio contents by itself or which is able to provide an enhanced spatial resolution of audio contents by combining with the preceding ChannelGroups within the IA Frame.
+- <dfn noexprot>Substream</dfn> is a byte aligned raw coded stream for single channel or two channels.
 
 Figure 5 shows the configuration of IA bitstream (before packing [=OBUs=]).
 
 <center><img src="images/Configuration of IA Bitstream.png"></center>
 <center><b>Figure 5. </b>Configuration of IA Bitstream (before packing OBUs)</center> 
 
-For IAC, each IA bitstream is packed by OBUs so that it is composed of a sequence of OBUs, Non-timed Metadata and followed by grouped into [=Temporal Units=]. Where, each Temporal Unit shall start Temproal_Delimitor_OBU and shall consist of OBUs for only one single IA_Frame. And, the order of Substreams in each Temporal Unit shall be maintained in the same order as in IA_Coded_Data.
+For [=IAC=], each IA bitstream is packed by OBUs so that it is composed of a sequence of OBUs, Non-timed Metadata and followed by grouped into [=Temporal Units=]. Where, each <dfn noexport>Temporal Unit</dfn> shall start Temproal_Delimitor_OBU and shall consist of OBUs for only one single IA_Frame. And, the order of Substreams in each Temporal Unit shall be maintained in the same order as in [=IA_Coded_Data=].
 
-NOTE: OBU_IA_Stream_Indicator is only placed at the front of the first IA bitstream (i.e. at the front of IA sequence) to be feeded to OBU parsers.
+NOTE: IA_Stream_Indicator_OBU is only placed at the front of the first IA bitstream (i.e. at the front of IA sequence) to be feeded to OBU parsers.
 
 OBUs are made of a 1 byte header, identifying in particular the type of OBU, followed by an optional length field and by an optional payload, whose presence and content depend on the OBU type. Depending on its type, an OBU can carry Codec_Specific_Info, IA_Static_Meta, Demixing_Info, Recon_Gain_Info or Substream.
 
@@ -194,13 +196,13 @@ Figure 6 shows a configuration of IA bitstream (after packing OBUs).
 <center><img src="images/Configuration of IA Bitstream_OBU_Substream.png"></center>
 <center><b>Figure 6. </b>Configuration of IA Bitstream (after packing OBUs)</center>  
 
-NOTE: All OBUs composing of IA bitstream except Codec_Specific_Info_OBU and Substream_OBU is codec-agnostic. [=OBU Syntax=] and [=OBU Semantics=] sections in this specification define its syntax and semantics for all information comprosing of IA bitstream except Codec_Specific_Info and Substream. Syntax and semantics for Codec_Specific_Info and Substream are defined by a given codec.
+NOTE: All OBUs composing of IA bitstream except Codec_Specific_Info_OBU and Substream_OBU is codec-agnostic. OBU Syntax and OBU Semantics sections in this specification define its syntax and semantics for all information comprosing of IA bitstream except Codec_Specific_Info and Substream. Syntax and semantics for Codec_Specific_Info and Substream are defined by a given codec.
 
 ## Codec Specific ## {#codec-specific}
 
 This section defines codec specific information for Codec_Specific_Info and Substream.
 
-- <dfn export>Codec_Specific_Info</dfn> is composed of [=Codec_ID=] and [=Decoder_Config=]. Codec_ID shall indicate the codec which has been used to generate Substreams within IA bitstream and Decder_Config shall indicate the decoding parameters which are applied to all of Substreams within IA bitstream.
+- Codec_Specific_Info is composed of [=Codec_ID=] and [=Decoder_Config=]. Codec_ID shall indicate the codec which has been used to generate Substreams within IA bitstream and Decder_Config shall indicate the decoding parameters which are applied to all of Substreams within IA bitstream.
 
 For legacy codecs, Decder_Config shall be exactly the same information as the conventional file parser feeds to the codec decoders for decoding of mono or stereo bitstream. For future codecs, Decder_Config shall include all of decoding parameters which are required to decode Substreams.
 
@@ -232,14 +234,14 @@ Substream format shall be [=opus packet=] of [[!RFC6716]] which contains only on
 
 Substream format shall be [=raw_data_block()=] of [[!AAC]] which contains only one single frame of mono or stereo channels.
  
-## OPEN Bitstream Unit (OBU) Syntax and Semantics
+## OPEN Bitstream Unit (OBU) Syntax and Semantics ## {#obu-section}
 
-This section specifies the syntax elements and the meaning of the syntax elements read in the OBU syntax and semantics structures by assuming IAC decoder receives IA bitstream starting with IA Stream Indicator OBU as input. Where, IAC decoder consists of IAC-OBU parer, Substream decoders and Post-Processor.
+This section specifies the syntax elements and the meaning of the syntax elements read in the <dfn noexport>OBU</dfn> syntax and semantics structures by assuming IAC decoder receives IA bitstream starting with IA Stream Indicator OBU as input. Where, IAC decoder consists of IAC-OBU parer, Substream decoders and Post-Processor.
 - SeenIABitstream initially shall be set to 0.
 - SeenIABitstream shall be set to 1 after receiving IA Stream Indicator OBU.
 - If SeenIABitstream is set to 1, then following OBUs shall be given to the IAC decoder. Otherwise, the OBU will be dropped.
 
-<dfn>drop_obu( )</dfn> is a function call that indicates when IAC decoder should ignore an OBU because it is not assumed as IA bitstream.
+<dfn noexport>drop_obu( )</dfn> is a function call that indicates when IAC decoder should ignore an OBU because it is not assumed as IA bitstream.
 
 After SeenIABitstream sets to 1, IA bitstream shall be presented to IAC-OBU parser. After parsing Codec_Specific_Info_OBU and IA_Static_Meta_OBU, IAC-OBU parser prepares Substream decoders as many as the number of Substreams and reconstruts each coded stream, from Substream_OBUs, to be feeded to each Substream decoder. At the same time, IAC-OBU parser feeds IA_Static_Meta_OBU and Recon_Gain_Info_OBU to Post-Processor.
 
@@ -247,7 +249,7 @@ After SeenIABitstream sets to 1, IA bitstream shall be presented to IAC-OBU pars
 <center><b>Figure 7. </b>Hypothetical IAC Decoder Model</center>  
 
 
-### General OBU Syntax and Semantics
+### General OBU Syntax and Semantics ### {#obu-general}
 
 <b>Syntax</b>
 
@@ -287,12 +289,12 @@ When SeenIABitstream is set to 1, an ordered series of OBUs is presented to the 
 
 If the syntax element obu_has_size_field (in the OBU header) is equal to 1, then the variable sz will be unused and does not have to be provided.
 
-<dfn>obu_size</dfn> shall indicate the size in bytes of the OBU not including the bytes within obu_header or the obu_size syntax element.
+<dfn noexport>obu_size</dfn> shall indicate the size in bytes of the OBU not including the bytes within obu_header or the obu_size syntax element.
 
 OBU data starts on the first (most significant) bit and ends on the last bit of the given bytes. The payload of an OBU lies between the first bit of the given bytes and the last bit before the first zero bit of byte alingment. 
 
 
-### OBU Header Syntax and Semantics
+### OBU Header Syntax and Semantics ### {#obu-header}
 
 <b>Syntax</b>
 
@@ -310,16 +312,16 @@ class obu_header() {
 
 OBUs are structured with a header and a payload. The header identifies the type of the payload using the obu_type header parameter.
 
-<dfn>obu_forbidden_bit</dfn> shall be set to 0.
+<dfn noexport>obu_forbidden_bit</dfn> shall be set to 0.
 
-<dfn>obu_type</dfn> shall specify the type of data structure contained in the OBU payload.
+<dfn noexport>obu_type</dfn> shall specify the type of data structure contained in the OBU payload.
 
 <pre class = "def">
 obu_type: Name of obu_type
    0    : OBU_IA_Stream_Indicator
    1    : OBU_Codec_Specific_Info
    2    : OBU_IA_Static_Meta
-   3    : OBU_Temporal_Delimitor
+   3    : OBU_Temporal_Delimiter
    4    : OBU_Demixing_Info
    5    : OBU_Recon_Gain_Info
    6    : OBU_Substream
@@ -329,12 +331,12 @@ obu_type: Name of obu_type
 
 Reserved units are for future use and shall be ignored by IAC-OBU parser.
 
-<dfn>obu_reserved_1bit</dfn> shall be set to 0. The value is ignored by a IAC-OBU parser.
+<dfn noexport>obu_reserved_1bit</dfn> shall be set to 0. The value is ignored by a IAC-OBU parser.
 
-<dfn>obu_has_size_field</dfn> equal to 1 indicates that the obu_size syntax element will be present. obu_has_size_field equal to 0 indicates tha the obu_size syntax element will not be present. 
+<dfn noexport>obu_has_size_field</dfn> equal to 1 indicates that the obu_size syntax element will be present. obu_has_size_field equal to 0 indicates tha the obu_size syntax element will not be present. 
 
 
-### Byte Alignment Syntax and Semantics
+### Byte Alignment Syntax and Semantics ### {#obu-bytealignment}
 
 <b>Syntax</b>
 
@@ -347,15 +349,15 @@ class byte_aligment() {
 
 <b>Semantics</b>
 
-<dfn>zero_bit</dfn> shall be equal to 0 and is inserted into the bitstream to align the bit position to a multiple of 8 bits.
+<dfn noexport>zero_bit</dfn> shall be equal to 0 and is inserted into the bitstream to align the bit position to a multiple of 8 bits.
 
 
-### Reserved OBU Syntax and Semantics
+### Reserved OBU Syntax and Semantics ### {#obu-reserved}
 
 The reserved OBU allows the extension of this specification with additional OBU types in a way that allows older IAC-OBU parser to ignore them.
 
 
-### IA Stream Indicator OBU Syntax and Semantics
+### IA Stream Indicator OBU Syntax and Semantics ### {#obu-iastreamindicator}
 
 <b>Syntax</b>
 
@@ -369,10 +371,10 @@ NOTE: The IA Stream Indicator OBU has an empty payload.
 
 <b>Semantics</b>
 
-<dfn>SeenIABitstream</dfn> is to indicater whether a series of OBUs for IA bitstream will follow or not. It is initialized to zero.
+<dfn noexport>SeenIABitstream</dfn> is to indicater whether a series of OBUs for IA bitstream will follow or not. It is initialized to zero.
 
 
-### Codec Specific Info OBU Syntax and Semantics
+### Codec Specific Info OBU Syntax and Semantics ### {#obu-codec}
 
 <b>Syntax</b>
 
@@ -385,15 +387,13 @@ class codec_specific_info_obu() {
 
 <b>Semantics</b>
 
-<dfn>codec_id</dfn> is a ‘four-character code’ (4CC) to identify the codec which has been used to generate Substream. It shall be the same as the [=boxtype=] of its AduioSampleEntry if exist. It shall be 'opus' for IAC-OPUS and 'mp4a' for IAC-AAC-LC.
+<dfn noexport>codec_id</dfn> is a ‘four-character code’ (4CC) to identify the codec which has been used to generate Substream. It shall be the same as the [=boxtype=] of its AduioSampleEntry if exist. It shall be 'opus' for IAC-OPUS and 'mp4a' for IAC-AAC-LC.
 
-<dfn>decoder_config</dfn> is a set of decoding parameters to decode Substream for a given codec_id. It shall be the set of decoding parameters which the conventional mono or stereo decoders need to decoder the Substream. 
+<dfn noexport>decoder_config</dfn> is a set of decoding parameters to decode Substream for a given codec_id. It shall be the set of decoding parameters which the conventional mono or stereo decoders need to decoder the Substream. 
 
-<dfn>codec_specific_info_obu</dfn> for IAC-OPUS shall conform to [=Codec_Specific_Info=] of [[#iac-opus-specific]] and codec_specific_info for IAC-AAC-LC shall conform to [=Codec_Specific_Info=] of [[#iac-aac-lc-specific]].
+<dfn noexport>codec_specific_info_obu</dfn> for IAC-OPUS shall conform to [=Codec_Specific_Info=] of [[#iac-opus-specific]] and codec_specific_info for IAC-AAC-LC shall conform to [=Codec_Specific_Info=] of [[#iac-aac-lc-specific]].
 
-### IA Static Meta OBU Syntax and Semantics ### {#iastaticmeta-obu}
-
-NOTE: We agree to with a fixed set of layouts in this version, and possibly have a future version number for different layouts.
+### IA Static Meta OBU Syntax and Semantics ### {#obu-iastaticmeta}
 
 <b>Syntax</b>
 
@@ -412,10 +412,10 @@ class ia_static_meta_obu() {
 
 <b>Semantics</b>
 
-<dfn>version</dfn> shall indicate the version of IA bitstream. It shall be set to 0 for this version of the specification. Implementations should treat IA bitstream where the MSB four bits of the version number match that of a recognized specification as backwards compatible with that specification. That is, the version number can be split into "major" and "minor" version sub-fields, with changes to the minor sub-field (in the LSB four bits) signaling compatible changes. For example, an implementation of this specification should accept any stream with a version number of ’15’ or less, and should assume any stream with a version number ’16’ or
+<dfn noexport>version</dfn> shall indicate the version of IA bitstream. It shall be set to 0 for this version of the specification. Implementations should treat IA bitstream where the MSB four bits of the version number match that of a recognized specification as backwards compatible with that specification. That is, the version number can be split into "major" and "minor" version sub-fields, with changes to the minor sub-field (in the LSB four bits) signaling compatible changes. For example, an implementation of this specification should accept any stream with a version number of ’15’ or less, and should assume any stream with a version number ’16’ or
 greater is incompatible.
 
-<dfn>ambisonics_mode</dfn> shall indicate if IA bitstream include Ambiosnics and which type if includes.
+<dfn noexport>ambisonics_mode</dfn> shall indicate if IA bitstream include Ambiosnics and which type if includes.
 - 0: IA bitstream includes no Ambisonics.
 - 1: The first ChannelGroup of each IA_Frame is for Ambisonics with Channel_Mapping
 - 2: The first ChannelGroup of each IA_Frame is for Ambisonics with Demixing_Matrix
@@ -423,10 +423,12 @@ greater is incompatible.
 
 NOTE: In the case of ambisonics_mode = 1 or 2, the channel audio if present is regarded as non-diegetic channels.
 
-<dfn>channel_audio_layer</dfn> shall indicate the number of ChannelGroups for channel audio in each IA_Frame. To indicate that IA bitstream includes no channel audio, it shall be set to zero. Its maximum number shall be limited to 6.
+<dfn noexport>channel_audio_layer</dfn> shall indicate the number of ChannelGroups for channel audio in each IA_Frame. To indicate that IA bitstream includes no channel audio, it shall be set to zero. Its maximum number shall be limited to 6.
 
 
-### Ambisonics Layer Config Syntax and Semantics
+### Ambisonics Layer Config Syntax and Semantics ### {#obu-ambisonicslayerconfig}
+
+<dfn noexport>ambix_layer_config</dfn> contains information regarding the configuration of Ambiosnics ChannelGroup.
 
 <b>Syntax</b>
 
@@ -444,18 +446,20 @@ class ambix_layer_config(mode) {
 
 <b>Semantics</b>
 
-<dfn>output_channel_count</dfn> shall be the same as [=channel count=] in [[!RFC8486].
+<dfn noexport>output_channel_count</dfn> shall be the same as [=channel count=] in [[!RFC8486].
 
-<dfn>substream_count</dfn> shall indicate the number of Substreams composing of ChannelGroup.
+<dfn noexport>substream_count</dfn> shall indicate the number of Substreams composing of ChannelGroup.
 
-<dfn>coupled_substream_count</dfn> shall indicate the number of coupled Substreams among Substreams composing of ChannelGroup.
+<dfn noexport>coupled_substream_count</dfn> shall indicate the number of coupled Substreams among Substreams composing of ChannelGroup. Where, <dfn noexport>coupled Substream</dfn> is a coded Substream from one pair of [=coupled channels=].
 
-<dfn>channel_mapping</dfn> shall be the same as the one for [=ChannelMappingFamily=] = 2 in [[!RFC8486]].
+<dfn noexport>channel_mapping</dfn> shall be the same as the one for [=ChannelMappingFamily=] = 2 in [[!RFC8486]].
 
-<dfn>demixing_matrix</dfn> shall be the same as the one for [=ChannelMappingFamily=] = 3 in [[!RFC8486]].
+<dfn noexport>demixing_matrix</dfn> shall be the same as the one for [=ChannelMappingFamily=] = 3 in [[!RFC8486]].
 
 
-### Channel Audio Layer Config Syntax and Semantics ### {#channelaudiolayerconfig}
+### Channel Audio Layer Config Syntax and Semantics ### {#obu-channelaudiolayerconfig}
+
+<dfn noexport>channel_audio_layer_config</dfn> contains information regarding the configuration of ChannelGroup for channel audio.
 
 <b>Syntax</b>
 
@@ -478,22 +482,22 @@ class channel_audio_layer_config(i) {
 
 <b>Semantics</b>
 
-<dfn>loudspeaker_layout</dfn> shall indicate the channel layout for the channels to be reconstructed from the precedent ChannelGroups and the current ChannelGroup among ChannelGroups for channel audio in IA_Frame.
+<dfn noexport>loudspeaker_layout</dfn> shall indicate the channel layout for the channels to be reconstructed from the precedent ChannelGroups and the current ChannelGroup among ChannelGroups for channel audio in IA_Frame.
 
 <left><img src="images/Loudspeaker Layout.png"></left>
 
-<dfn>output_gain_is_present_flag</dfn> shall indicate if output_gain information fields for the ChannelGroup presents .
+<dfn noexport>output_gain_is_present_flag</dfn> shall indicate if output_gain information fields for the ChannelGroup presents .
 - 0: No output_gain information fields for the ChannelGroup present.
 - 1: output_gain information fields for the ChannelGroup present. In this case, output_gain_flags and output_gain fields present.
 
-<dfn>recon_gain_is_present_flag</dfn> shall indicate if recon_gain information fields for the ChannelGroup presents in Recon_Gain_Info_OBU .
+<dfn noexport>recon_gain_is_present_flag</dfn> shall indicate if recon_gain information fields for the ChannelGroup presents in Recon_Gain_Info_OBU .
 - 0: No recon_gain information fields for the ChannelGroup present in Recon_Gain_Info_OBU.
 - 1: recon_gain information fields for the ChannelGroup present in Recon_Gain_Info_OBU. In this case, recon_gain_flags and recon_gain fields present.
 
 
-<dfn>loudness</dfn> shall indicate the loudness value of the downmixed channels, for the channel layout which is indicated by loudspeaker_layout, from the original channel audio. It shall be stored in fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]) and shall be [=LKFS=] based on [[!ITU1770-4]], so it shall be to represent zero or negative value.
+<dfn noexport>loudness</dfn> shall indicate the loudness value of the downmixed channels, for the channel layout which is indicated by loudspeaker_layout, from the original channel audio. It shall be stored in fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]) and shall be [=LKFS=] based on [[!ITU1770-4]], so it shall be to represent zero or negative value.
 
-<dfn>output_gain_flags</dfn> shall indicate the channels which output_gian is applied to. If a bit set to 1, output_gain shall be applied to the channel. Otherwise, output_gain shall not be applied to the channel.
+<dfn noexport>output_gain_flags</dfn> shall indicate the channels which output_gian is applied to. If a bit set to 1, output_gain shall be applied to the channel. Otherwise, output_gain shall not be applied to the channel.
 
 
 <pre class = "def">
@@ -507,15 +511,15 @@ Bit position : Channel Name
       
 </pre>
 
-<dfn>output_gain</dfn> shall indicate the gain value to be applied to the mixed channels which are indicated by output_gain_flags. It is 20*log10 of the factor by which to scale the mixed channels. It is stored in a 16-bit, signed, two’s complement fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]). Where, each mixed channel is generated by downmixing two or more input channels.
+<dfn noexport>output_gain</dfn> shall indicate the gain value to be applied to the mixed channels which are indicated by output_gain_flags. It is 20*log10 of the factor by which to scale the mixed channels. It is stored in a 16-bit, signed, two’s complement fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]). Where, each mixed channel is generated by downmixing two or more input channels.
 
 
-### Temporal Delimitor OBU Syntax and Semantics
+### Temporal Delimitor OBU Syntax and Semantics ### {#obu-temporaldelimitor}
 
 <b>Syntax</b>
 
 ```
-class temporal_delimitor_obu() {
+class temporal_delimiter_obu() {
 }
 ```
 
@@ -526,7 +530,9 @@ NOTE: The temporal delimitor has an empty payload.
 It shall indicate the start of [=Temporal Unit=].
 
 
-### Demixing Info OBU Syntax and Semantics
+### Demixing Info OBU Syntax and Semantics ### {#obu-demixinginfo}
+
+<dfn noexport>demixing_info</dfn> contains demixing parameter mode to be used to reconstruct demixed channels.
 
 <b>Syntax</b>
 
@@ -539,7 +545,7 @@ class demixing_info_obu() {
 
 <b>Semantics</b>
 
-<dfn>dmixp_mode</dfn> shall indicate a mode of pre-defined combinations of five demix parameters for the following IA_Coded_Data.
+<dfn noexport>dmixp_mode</dfn> shall indicate a mode of pre-defined combinations of five demix parameters for the following IA_Coded_Data.
 - 0: mode1, (alpha, beta, gamma, delta, w_idx_offset) = (1, 1, 0.707, 0.707, -1)
 - 1: mode2, (alpha, beta, gamma, delta, w_idx_offset) = (0.707, 0.707, 0.707, 0.707, -1)
 - 2: mode3, (alpha, beta, gamma, delta, w_idx_offset) = (1, 0.866, 0.866, 0.866, -1)
@@ -549,13 +555,15 @@ class demixing_info_obu() {
 - 6: mode3, (alpha, beta, gamma, delta, w_idx_offset) = (1, 0.866, 0.866, 0.866, 1)
 - 7: reserved
 
-<dfn>alpha</dfn> and <dfn>beta</dfn> are gain values used for S7to5 down-mixer, <dfn>gamma</dfn> for T4to2 down-mixer, <dfn>delta</dfn> for S5to3 down-mixer and <dfn>w_idx_offset</dfn> is the offset to generate a gain value <dfn>w</dfn> used for T2toTF2 down-mixer.
+<dfn noexport>alpha</dfn> and <dfn noexport>beta</dfn> are gain values used for S7to5 down-mixer, <dfn noexport>gamma</dfn> for T4to2 down-mixer, <dfn noexport>delta</dfn> for S5to3 down-mixer and <dfn noexport>w_idx_offset</dfn> is the offset to generate a gain value <dfn noexport>w</dfn> used for T2toTF2 down-mixer.
 
 <center><img src="images/IA Downmix Mechanism.png"></center>
 <center><b>Figure 8. </b>IA Downmix Mechanism</center>  
 
 
-### Recon Gain Info OBU Syntax and Semantics
+### Recon Gain Info OBU Syntax and Semantics ### {#obu-recongaininfo}
+
+<dfn noexport>recon_gain_info</dfn> contains recon gain values for demixed channels.
 
 <b>Syntax</b>
 
@@ -575,14 +583,14 @@ class recon_gain_info_obu() {
 
 <b>Semantics</b>
 
-<dfn>recon_gain_flags</dfn> shall indicates the channels which recon_gain is applied to.
+<dfn noexport>recon_gain_flags</dfn> shall indicates the channels which recon_gain is applied to.
 
 <left><img src="images/Recon_Gain_Flags.png"></left>
 
-<dfn>recon_gain</dfn> shall indicates the gain value to be applied to the channel, which is indicated by <dfn>recon_gain_flalgs</dfn>, after decoding of the following IA_Coded_Data.
+<dfn noexport>recon_gain</dfn> shall indicates the gain value to be applied to the channel, which is indicated by <dfn noexport>recon_gain_flalgs</dfn>, after decoding of the following IA_Coded_Data.
 
 
-### Substream OBU Syntax and Semantics
+### Substream OBU Syntax and Semantics ### {#obu-substream}
 
 <b>Syntax</b>
 
@@ -616,10 +624,10 @@ Parsers shall support the structures required by the <code>'iso6'</code> brand a
 
 During encapsulation process, OBUs of IA bistream are encapsulated into [[!ISOBMFF]] as follows:
 - CodecSpecificBox, which is defined from Codec_Specific_Info in IA bitstream, shall be stored in sample entry.
-- IA_Static_Meta (with OBU syntax) shall be stored as a new sample group having [=grouping_type=], 'iatm'.
+- IA_Static_Meta (with OBU syntax) shall be stored as a new sample group having [=grouping_type=], [=iasm=].
 - Some fields of IA_Static_Meta, related to MIME codecs parameter, shall be copied in sample entry.
-- Temporal_Delimitor_OBUs shall be discarded from [=Temporal Units=].
-- Demixing_Info_OBUs (with OBU syntax) may be stored as a new sample group having [=grouping_type=], 'admi'.
+- Temporal_Delimiter_OBUs shall be discarded from [=Temporal Units=].
+- Demixing_Info_OBUs (with OBU syntax) may be stored as a new sample group having [=grouping_type=], [=admi=].
 - Remainded OBUs of [=Temporal Units=] shall be stored as sample data without gap among OBUs.
 
 ## IA Sample Entry ## {#iasampleentry-section}
@@ -639,7 +647,7 @@ NOTE: We agree that ChannelMappingFamily is always 0, and that OutputChannelCoun
 
 ### Description ### {#iasampleentry-description}
 
-The <dfn>IASampleEntry</dfn> sample entry identifies that the track contains [=IA Samples=], and uses one single [=codec specific box=].
+The <dfn noexport>IASampleEntry</dfn> sample entry identifies that the track contains [=IA Samples=], and uses one single [=codec specific box=].
 
 ### Syntax ### {#iasampleentry-syntax}
 
@@ -667,19 +675,19 @@ version and channel_audio_layer shall be the same as the ones in IA_Static_Meta_
 
 ambisonics_mode and channel_audio_layer shall be the same as the ones in IA_Static_Meta_OBU.
 
-<dfn>ambisonics_channel_count</dfn> shall be the same as output_channel_count in IA_Static_Meta_OBU. When ambisonics_mode set to 0, this field shall be ignored.
+<dfn noexport>ambisonics_channel_count</dfn> shall be the same as [=output_channel_count=] in IA_Static_Meta_OBU. When ambisonics_mode set to 0, this field shall be ignored.
 
 loudspeaker_layout shall be the same as the one in IA_Static_Meta_OBU.
 
 ## Codec Specific Box ## {#codecspecificbox-section}
 
-This section describes a codec specific box for the decoding parameters, which is defined by codec_id of Codec_Specific_Info_OBU, to decode one single Substream of IA bitstream. <dfn>aiac</dfn> shall contain only one single codec specific box regardless of the number of Substreams in IA_Coded_Data. So, the codec specific box is applied to allo of Substreams in sample data.
+This section describes a <dfn noexport>codec specific box</dfn> for the decoding parameters, which is defined by codec_id of Codec_Specific_Info_OBU, to decode one single Substream of IA bitstream. <code>aiac</code> shall contain only one single codec specific box regardless of the number of Substreams in IA_Coded_Data. So, the codec specific box is applied to allo of Substreams in sample data.
 
-### OPUS Specific Box ### {#opusspecificbox}
+### OPUS Specific Box ### {#codecspecificbox-opus}
 
 This shal be [=OpusSpecificBox=] ('dOps') for 'opus' audiosampleentry which is specified in [[!OPUS-IN-ISOBMFF]]. 
 
-#### Definition #### {#opuscodecconfigurationbox-definition}
+#### Definition #### {#codecspecificbox-opus-definition}
 
 <pre class="def">
 	Box Type:  <dfn export>dOps</dfn>
@@ -688,26 +696,26 @@ This shal be [=OpusSpecificBox=] ('dOps') for 'opus' audiosampleentry which is s
 	Quantity:  One
 </pre>
 
-#### Description #### {#opuscodecconfigurationbox-description}
+#### Description #### {#codecspecificbox-opus-description}
 
 This box is for one single Substream.
 
 
-#### Syntax #### {#opuscodecconfigurationbox-syntax}
+#### Syntax #### {#codecspecificbox-opus-syntax}
 
 It shall be the same as 'dOps' box for 'opus' with that [=ChannelMappingFamily=] shall be set to 0.
 
-#### Semantics #### {#opuscodecconfigurationbox-semantics}
+#### Semantics #### {#codecspecificbox-opus-semantics}
 
 It shall be the same as the semantics except followings:
 - [=OutputChannelCount=] should be set to 2. [=OutputChannelCount=] can be ignored because the real value can be determined from the IA_Static_Meta_OBU and from the [=opus packet=] header.
 - In case of channel_audio_layer > 0, [=OutputGain=] shall be set to 0.
 - [=ChannelMappingFamily=] shall be set to 0.
 
-### MP4A Specific Box ### {#mp4aspecificbox}
+### MP4A Specific Box ### {#codecspecificbox-mp4a}
 This is [=ESDBox=] ('esds') for 'mp4a' which is specified in [[!MP4]]. 
 
-#### Definition #### {#mp4aspecificbox-definition}
+#### Definition #### {#codecspecificbox-mp4a-definition}
 <pre class="def">
 	Box Type:  <dfn export>esds</dfn>
 	Container: IA Sample Entry ('aiac')
@@ -715,51 +723,51 @@ This is [=ESDBox=] ('esds') for 'mp4a' which is specified in [[!MP4]].
 	Quantity:  One of more
 </pre>
 
-#### Description #### {#mp4aspecificbox-description}
+#### Description #### {#codecspecificbox-mp4a-description}
 
 This box is for one single Substream.
 
-#### Syntax #### {#mp4aspecificbox-syntax}
+#### Syntax #### {#codecspecificbox-mp4a-syntax}
 
 It shall be the same as 'esds' box for [=Low Complexity Profile=] of [[!AAC]] (AAC-LC).
 
-#### Semantics #### {#mp4aspecificbox-semantics}
+#### Semantics #### {#codecspecificbox-mp4a-semantics}
 
 It shall be the same as the semantics except followings:
 - [=channelConfiguration=] field should be set to 2. The real value can be implied from the IA_Static_Meta_OBU.
 
-## IA Sample Format ## {#sampleformat}
+## IA Sample Format ## {#iasampleformat}
 
-For tracks using the [=IASampleEntry=], an <dfn>IA Sample</dfn> has the following constraints:
+For tracks using the [=IASampleEntry=], an <dfn noexport>IA Sample</dfn> has the following constraints:
 - The sample data shall be a sequence of [=OBUs=] forming a [=Temporal Unit=].
-- Temporal_Delimitor_OBU shall not be present. It shall be discarded when [=Temporal Unit=] is stored as sample data.
+- Temporal_Delimiter_OBU shall not be present. It shall be discarded when [=Temporal Unit=] is stored as sample data.
 - OBUs for Timed Metadata (if present) come first and followed by OBU(s) for IA_Coded_Data.
 - Each OBU shall follow OBU syntax as specified in this specificaiton.
 
-## IA Sample Group
+## IA Sample Group ## {#iasamplegroup}
 
 NOTE: We agree to create a generic sample group where the payload is exactly the OBU content (with header and length). This is to be used for demixing OBU and possibly others in the future. We still need to discuss if sample groups shall or should or can be used, possibly based on the OBU type.
 
-### Demixing Info Sample Group
+### Demixing Info Sample Group ## {#iasamplegroup-demixing}
 
-During encapsulation process, Demixing_Info_OBUs shall or should or can be discarded from IA bistream. A new sample group for Demixing_Info_OBUs is defined by using [=sgpd=] and [sbgp] boxes with following requirements:
-- [=grouping_type=] shall be set to 'admi'.
+During encapsulation process, Demixing_Info_OBUs shall or should or can be discarded from IA bistream. A new sample group for Demixing_Info_OBUs is defined by using 'sgpd'' and 'sbgp' boxes with following requirements:
+- [=grouping_type=] shall be set to <dfn noexport>admi</dfn>.
 - Each [=SampleGroupDescriptionEntry=] shall be Demixing_Info_OBU with OBU syntax.
 
-### IA Static Meta Sample Group
+### IA Static Meta Sample Group ## {#iasamplegroup-iastaticmeta}
 
-During encapsulation process, IA_Static_Meta_OBUs are discarded from IA bistream. A new sample group for IA_Static_Meta_OBUs is defined by using [=sgpd=] and [sbgp] boxes with following requirements:
-- [=grouping_type=] shall be set to 'iasm'.
+During encapsulation process, IA_Static_Meta_OBUs are discarded from IA bistream. A new sample group for IA_Static_Meta_OBUs is defined by using 'sgpd' and 'sbgp' boxes with following requirements:
+- [=grouping_type=] shall be set to <dfn noexport>iasm</dfn>.
 - [=SampleGroupDescriptionEntry=] shall be IA_Static_Meta_OBU with OBU syntax.
 
 
 ## Common Encryption ## {#CommonEncryption}
 TBA
 
-## Codecs Parameter String ## {#codecsparam}
+## Codecs Parameter String ## {#codecsparameter}
 DASH and other applications require defined values for the 'Codecs' parameter specified in [[!RFC6381]] for ISO Media tracks. The codecs parameter string for the AOM IA codec shall be:
-- For IAC-OPUS: <dfn>aiac.'IAC-specific-needs'.Opus</dfn>
-- For IAC-AAC-LC: <dfn>aiac.'IAC-specific-needs'.mp4a.40.2</dfn>
+- For IAC-OPUS: <dfn noexport>aiac.IAC-specific-needs.Opus</dfn>
+- For IAC-AAC-LC: <dfn noexport>aiac.IAC-specific-needs.mp4a.40.2</dfn>
 
 <b>IAC-specific-needs</b> shall be <b>AA.L(CC)*</b> as follows:
 - The first <b>A</b> shall be one digit and represent the mode of Ambisonics
@@ -790,15 +798,15 @@ Figure 9 shows the mirroring process of the encapsulation scheme of IA bitstream
 
 During decapsulation process, IAC file is decapsulated into IA bitstreams which conform to [[#iabitstream-definition]] as follows:
 - Step1: Reconstruction of Non-timed Metadata (Codec_Specific_OBU and followed by IA_Static_Meta_OBU) for the ith IA bitstream
-	- [Step1-1] Codec_Specific_Info_OBU: generate Codec_Specific_Info from CodecSpecificBox of 'aiac' sample entry, and packetize it by OBU with obu_type = OBU_Codec_Sepcific_info.
-	- [Step1-2] IA_Static_Meta_OBU: take the ith SampleGroupDescriptionEntry as it is in SampleGroup with grouping_type, 'iasm'.
+	- [Step1-1] Codec_Specific_Info_OBU: generate Codec_Specific_Info from CodecSpecificBox of <code>aiac</code> sample entry, and packetize it by OBU with obu_type = OBU_Codec_Sepcific_info.
+	- [Step1-2] IA_Static_Meta_OBU: take the ith SampleGroupDescriptionEntry as it is in SampleGroup with grouping_type, [=iasm=].
 	- [Step1-3] Place Codec_Specific_Info_OBU at the front of IA_Static_Meta_OBU without gap to reconstruct Non-timed Metadata.
 	- [Step1-4] Figure out the offset (i1) and number (im) of Samples, which the ith SampleGroupDescriptionEntry is applied to, from the SampleGroup.
 - Step2: Reconstructing of the jth Temporal Unit of the ith IA Bitstream (j = i1, i2, …, im) 
-	- [Step2-1] Prepare Temporal_Delimitor_OBU with obu_type = OBU_Temporal_Delimitor.
-	- [Step2-2] If there is the SampleGroup with grouping_type, 'admi', then place the Demixing_Info_OBU at the front of jth Sample without gap. Otherwise, take jth Sample as it is.
-		- Demixing_Info_OBU: take the SampleGroupDescriptionEntry as it is, from SampleGrouop with grouping_type, 'admi', mapped to jth Sample.
-	- [Step2-3] Place Temporal_Delimitor_OBU at the front of the result of Step2-2 without gap to reconstruct the jth Temporal Unit.
+	- [Step2-1] Prepare Temporal_Delimiter_OBU with obu_type = OBU_Temporal_Delimiter.
+	- [Step2-2] If there is the SampleGroup with grouping_type, [=admi=], then place the Demixing_Info_OBU at the front of jth Sample without gap. Otherwise, take jth Sample as it is.
+		- Demixing_Info_OBU: take the SampleGroupDescriptionEntry as it is, from SampleGrouop with grouping_type, [=admi=], mapped to jth Sample.
+	- [Step2-3] Place Temporal_Delimiter_OBU at the front of the result of Step2-2 without gap to reconstruct the jth Temporal Unit.
 - Step3: Place Non-Timed Metadata and followed by Temporal Units in order (j = i1, i2, …, im) without gap to reconstruct the ith IA bitstream.
 
 Codec_Specific_Info_OBU for IAC-OPUS is generated as follows:
@@ -818,7 +826,7 @@ This section provides a guideline for IA encoding for a given input audio format
 
 Recommended input audo format for IA encoding is as follows:
 - Ambiosnics format: It conforms to [=ChannelMappingFamily=] = 2 or 3 of [[RFC8486]].
-- Channel Audio format: It conforms to[=loudspeaker_layout=] specified in [[#channelaudiolayerconfig]].
+- Channel Audio format: It conforms to[=loudspeaker_layout=] specified in [[#obu-channelaudiolayerconfig]].
 - Ambisonics + Channel Audio format: In this case, Channel Audio is regarded as Non-diegetic.
 - Input Smapling Rate: 48000hz
 - Bitdepth: 16 bits or 24 bits
@@ -842,12 +850,12 @@ IA encoder is composed of Pre-processor, Codec encoder and OBU packetizer as dep
 - Pre-processor outputs one or more [=ChannelGroups=], [=IA_Static_Meta=] and [=Timed Metadata=] if needed based on the input audio and user inputs.
 	- It outputs one single ChannelGroup for Ambisonics.
 	- It outputs one or more ChannelGroups for Channel audio.
-- Codec encoder generates one or more [=Substreams=] from each ChannelGroup and outputs the Substream(s) with one single Decoder_Config().
+- Codec encoder generates one or more [=Substreams=] from each ChannelGroup and outputs the Substream(s) with one single Decoder_Config.
 	- Mono or stereo coding is only allowed.
 		- Ambisonics format: each channel is coded as mono mode
 		- Channel Audio format: each pair of coupled channels in the same ChannelGroup is coded as stereo mode to generate one single Substream and each of non-coupled channels in the same ChannelGroup is coded as mono mode to generate one single Substream.
-			- Coupled channels: L/R, Ls/Rs, Lss/Rss, Lrs/Rrs, Ltf/Rtf, Ltb/Rtb
-			- Non-coupled channels: C, LFE, L
+			- <dfn noexport>Coupled channels</dfn>: L/R, Ls/Rs, Lss/Rss, Lrs/Rrs, Ltf/Rtf, Ltb/Rtb
+			- <dnf noexport>Non-coupled channels</dfn>: C, LFE, L
 - OBU packetizer generates [=Non-timed Metadata=] and [=Temporal Unit=] for each frame, and outputs [=IA bitstream=].
 	- Non-timed Metadata generator generates OBUs for [=Codec_Specific_Info=] and [=IA_Static_Meta=].
 	- Temporal Unit generator generates [=Temporal Unit=] for each frame from [=Timed Metadata=] if present and [=Substreams=].
@@ -858,12 +866,13 @@ IA encoder is composed of Pre-processor, Codec encoder and OBU packetizer as dep
 The order of Substreams in each ChannelGroup is as follows:
 - In ChannelGroup for Ambisonics: The order conforms to [[RFC8486]].
 - In ChannelGroup for Channel audio: The order conforms to following rules:
-	- [=Coupled Substream(s)=] comes first and followed by [=non-coupled Substream(s)=].
-	- Coupled Substream(s) for surround channels comes first and followed by one(s) for top channels.
-	- Coupled Substream(s) for front channels comes first and followed by one(s) for side, rear and back channels.
-	- Coupled Substream(s) for side channels comes first and followed by one(s) for rear channels.
+	- [=Coupled Substreams=] comes first and followed by [=non-coupled Substreams=].
+	- Coupled Substreams for surround channels comes first and followed by one(s) for top channels.
+	- Coupled Substreams for front channels comes first and followed by one(s) for side, rear and back channels.
+	- Coupled Substreams for side channels comes first and followed by one(s) for rear channels.
 	- Center channel comes first and followed by LFE and followed by the other one.
 
+Where, <dfn noexport>non-coupled Substream</dfn> is a coded Substream from one of [=non-coupled channels].
 
 ### IA Encoder for Ambisonics format ### {#iaencoding-iaencoder-ambisonics}
 
@@ -876,7 +885,7 @@ For Ambisonics format:
 			- [=output_channel_count=], [=substream_count=] and [=coupled_substream_count=] are set to the number of channels for Ambisonics.
 			- [=channel_mapping=] for [=Ambisonics_Mode=] = 1 or [=demixing_matrix=] for [=Ambisonics_Mode=] = 2 is assigned to according to the order of Substreams in ChannelGroup.
 - Codec Enc. outputs Substreams as many as the number of channels for Ambisoncis by coding each channel in a mono mode.
-- [=Temporal Unit=] is composed of [=Temporal_Delimitor_OBU=] and followded by OBUs for [=Substreams=]. 
+- [=Temporal Unit=] is composed of Temporal_Delimiter_OBU and followded by OBUs for [=Substreams=]. 
 	- The order of Substreams in ChanngelGroup is aligned with [=channel_mapping=] for [=Ambisonics_Mode=] = 1 or [=demixing_matrix=] for [=Ambisonics_Mode=] = 2.
 
 ### IA Encoder for Channel Audio format ### {#iaencoding-iaencoder-channelaudio}
@@ -909,7 +918,7 @@ For Channel Audio format:
 			- [=dmixp_mode=] of Demixing_Info for the kth frame is set to indicate (α(k), β(k), γ(k), δ(k)) and w_idx_offset(k). Where w_idx_offset(k) = 1 or -1. 
 			- [=recon_gain_flags=] of Recon_Gain_Info are set to indicate the de-mixed channels, which need to apply [=recon_gain=] among the output channels after demixing for ith channel layout.
 			- [=recon_gain=] is set to the gain value to be applied to the channel which is indicated by recon_gain_flags for the ith ChannelGroup.		
-- [=Temporal Unit=] is composed of [=Temporal_Delimitor_OBU=], followed by OBUs for [=Timed Metadata=] and followed by OBUs for [=Substreams=]. 
+- [=Temporal Unit=] is composed of Temporal_Delimiter_OBU, followed by OBUs for [=Timed Metadata=] and followed by OBUs for [=Substreams=]. 
 	- ChannelGroups in Temporal Unit are placed in order. In other words, ChannelGroup for the first channel layout comes first, followed by ChannelGroup for the second channel layout, followed by ChannelGroup for the third channel layout and so on.  
 			
 Figure 11-1 shows IA encoding flowchart for Channel Audio Format.
@@ -919,13 +928,13 @@ Figure 11-1 shows IA encoding flowchart for Channel Audio Format.
 - Non-mixed channels of the transformed audio (i.e., the original channels of the input channel audio) are directly input to Codec encoder, but the mixed channels may be input first to Attenuation module and then to Codec encoder. 
 - The Attenuation module reduces all sample values of the mixed channels in the same CG at a uniform rate (Output_Gain).
 	- A range of 0dB to -6dB is recommended for the attenuation. (i.e. a range of 0dB to 6dB for Output_Gain)
-- Codec Enc. generates the coded Substreams from PCMs and passes Substreams and one single Decoder_Config() to OBU Packetizer.
-- OBU packetizer generates [=Non-timed Metadata=] which consists of [=Codec_Specific_Info_OBU=] and [=IA_Static_Meta_OBU=].
-	- Codec_Specific_Info_OBU is generated based on [=Decoder_Config()=].
-	- IA_Static_Meta_OBU is generated based on [=Ambix_Layer_Config()=] and [=Channel_Audio_Layer_Config()=].
+- Codec Enc. generates the coded Substreams from PCMs and passes Substreams and one single Decoder_Config to OBU Packetizer.
+- OBU packetizer generates [=Non-timed Metadata=] which consists of OBU for [=Codec_Specific_Info=] and OBU for [=IA_Static_Meta=].
+	- Codec_Specific_Info_OBU is generated based on [=Decoder_Config=].
+	- IA_Static_Meta_OBU is generated based on [=Ambix_Layer_Config=] and [=Channel_Audio_Layer_Config=].
 - OBU packetizer generates [=Temporal Unit=] for each frame.
-	- OBU Packetizer generates [=Timed Metadata=], which consists of [=Demixing_Info_OBU=] and [=Recon_Gain_Info_OBU=], for each frame.
-	- OBU Packetizer generates [=Substream_OBUs=] for each frame.
+	- OBU Packetizer generates [=Timed Metadata=], which consists of OBU for [=Demixing_Info=] and OBU for [=Recon_Gain_Info=], for each frame.
+	- OBU Packetizer generates OBUs for [=Substreams=] for each frame.
 - OBU Packetizer outputs [=IA Bitstream=] which is composed of OBUs for Non-timed Metadata and followed by OBUs for Temporal Units.
 
 <center><img src="images/IA Encoding Flowchart for Channel Audio Format.png"></center>
@@ -957,7 +966,7 @@ For a given Channel Audio (e.g. 7.1.4ch) and a given list of channel layouts bas
 
 #### Down-mix Mechanism #### {#iaencoding-iaencoder-channelaudio-downmixmechanism}
 
-This section describes the down-mixing mechanism for IA.
+This section describes the down-mixing mechanism to generate <dfn noexport>down-mixed audio</dfn> for IA.
 
 For a given Channel Audio which conforms to [[=loudspeaker_layout]], teh surround and top channels (if any) are separately down-mixed and especially step by step until to get a target channels.
 
@@ -1069,11 +1078,11 @@ For Ambisonics and Channel Audio format:
 - One single [=ChannelGroup=] for Ambisonics is generated in the same way with [[#iaencoding-iaencoder-ambisonics]].
 - One or more ChannelGroups and [=Timed Metadata=] for Channel Audio are generated in the same way with [[#iaencoding-iaencoder-ambisonics]].
 - [=IA_Static_Meta=] is set to as follows:
-	- [=Ambiosonics_Mode=] is set to according to Ambisonics mode in the same way with [[#iaencoding-iaencoder-ambisonics]].
+	- [=Ambisonics_Mode=] is set to according to Ambisonics mode in the same way with [[#iaencoding-iaencoder-ambisonics]].
 	- [=Channel_Audio_Layer=] is set in the same way with [[#iaencoding-iaencoder-channelaudio]].
-	- [=ambix_layer_config()=] is set in the same way with [[#iaencoding-iaencoder-ambisonics]].
-	- [=channel_audio_layer_config()=] is set in the same way with [[#iaencoding-iaencoder-channelaudio]].
-- [=Temporal Unit=] is composed of [=Temporal_Delimiter_OBU=], followed by OBUs for [=Timed Metadata=] and followed by OBUs for [=Substreams=].
+	- [=ambix_layer_config=] is set in the same way with [[#iaencoding-iaencoder-ambisonics]].
+	- [=channel_audio_layer_config=] is set in the same way with [[#iaencoding-iaencoder-channelaudio]].
+- [=Temporal Unit=] is composed of Temporal_Delimiter_OBU, followed by OBUs for [=Timed Metadata=] and followed by OBUs for [=Substreams=].
 	- OBUs for Substreams composing of ChannelGroup for Ambisonics comes first and followed by OBUs for Substreams composing of ChannelGroups for Channel Audio. 
 
 Figure 12 shows IA encoding flowchart for Ambisonics and Channel Audio format with non-scalable channel audio.
@@ -1100,19 +1109,19 @@ IA decoder can selects one of three decoding modes based on [=Ambisonics_Mode=] 
 - In this case, implementors may have additional processing converting Ambisonics to Channel Audio (including Binaural) but it is not specified in this specification.
 
 IA decoder is composed of OBU parser, Codec decoder and Post-processor as depicted in Figure 13.
-- OBU parser depacketizes [=IA bitstream=] to output one or more [=Substreams=] with one single [=Decoder_Config()=], [=IA_Static_Meta=] and [=Timed Metadata=].
+- OBU parser depacketizes [=IA bitstream=] to output one or more [=Substreams=] with one single [=Decoder_Config=], [=IA_Static_Meta=] and [=Timed Metadata=].
 	- OBU parser is composed of Non-timed Metadata parser and Temporal Unit parser.
 		- Non-timed Metadata parser depacketizes OBUs for Codec_Specific_Info and IA_Static_Meta, and figures out the configuration of IA bitstream including the codec to decoder Substreams.
 		- Temporal Unit parser depacketizes OBUs for each Temporal Unit and outputs Timed Metadata and Substreams for each frame.
-	- One or more Substreams with one single Decoder_Config() are passed to Codec decoder.
+	- One or more Substreams with one single Decoder_Config are passed to Codec decoder.
 	- IA_Static_Meta and Timed Metadata for each frame are passed to Post-processor.
 	- For IAC-OPUS, Substream is one single [=opus packet=] of [[!RFC6716]] which has non-delimiting frame structure and for IAC-AAC-LC, Substreams is one single [=raw_data_block()=] of [[!AAC]].
-- Codec decoder prepares the Mono/Stereo decoders as many as the number of Substreams. Each Mono/Stereo decoder is initialized with Decoder_Config() and decodes Substream.
+- Codec decoder prepares the Mono/Stereo decoders as many as the number of Substreams. Each Mono/Stereo decoder is initialized with Decoder_Config and decodes Substream.
 	- Each Mono/Stereo decoder outputs one or two channels to Post-processor.
 - Post-processor outputs Ambisonics and/or Channel Audio based on the decoding mode. 
 	- Post-processor is composed of Ambiosonics processor and Channel Audio processor. 
 	- Post-processor figures out the configuration of ChannelGroups based on IA_Static_Meta.
-	- Ambisonics processor outputs Ambisonics channels in ACN order by applying [=Channel Mapping=] or [=Demixing Matrix=] to the first ChannelGroup.
+	- Ambisonics processor outputs Ambisonics channels in ACN order by applying [=Channel_Mapping=] or [=Demixing_Matrix=] to the first ChannelGroup.
 	- Channel Audio processor outputs channel audio for the target channel layout after some processing of the relevant ChannelGroups by using Timed Metadata if needed.
 
 <center><img src="images/IA Decoder Configuration.png"></center>
@@ -1123,7 +1132,7 @@ IA decoder is composed of OBU parser, Codec decoder and Post-processor as depict
 This section describes IA decoding operation for Ambisonics.
 
 Figure 14 shows the decoding flowchart of Ambisonics decoding.
-- OBU parser outputs the first [=Substreams=], among Substream in [=IA bitstream=], as many as [=substream_count=] specified in [=ambix_layer_config()=] of [=IA_Static_Meta=], with Decoder_Config().
+- OBU parser outputs the first [=Substreams=], among Substream in [=IA bitstream=], as many as [=substream_count=] specified in [=ambix_layer_config=] of [=IA_Static_Meta=], with Decoder_Config.
 	- OBU parser outputs [=channel_mapping=] or [=demixing_matrix=] according to [=Ambisonics_Mode=] to Channel_Mapping/Demixing_Matrix module
 - Codec decoder outputs channels as many as the nubmer of Substreams after decoding of each Substream.
 - Channel_Mapping/Demixing_Matrix module applies channel_mapping or demixing_matrix according to Ambisonics_Mode to the channels (PCM) and outputs channels as many as [=output_channel_count=] in ACN order.
@@ -1141,7 +1150,7 @@ Figure 15 shows the decoding flowchart of Channel Audio decoding.
 <center><b>Figure 15. </b>Channel Audio Decoding Flowchart</center>
 
 For a given target channel layout (i.e. CL #i) among the list of [=loudspeaker_layout=] in [=IA_Static_Meta=], 
-- OBU Parser gets Substreams for [=ChannelGroup=] #1 ~ ChannelGroup #i and pass them to Codec decoder with [=Decoder_Config()=].
+- OBU Parser gets Substreams for [=ChannelGroup=] #1 ~ ChannelGroup #i and pass them to Codec decoder with [=Decoder_Config=].
 - Codec decoder outputs decoded channels (PCM) in the transmission order.
 	- For non-scalable audio (i.e i = 1), its order is converted to the loudspeaker location order for CL #1.
 	- For scalable audio, its order is converted to the loudspeaker location order for CL #i after going through necessary modules such as Gain, De-Mixer, Recon_Gain etc..
@@ -1250,7 +1259,7 @@ Recommend values for specific codecs are as follows
 
 #### Loudness Normalization #### {#iadecoding-iadecoder-channelaudio-loudness}
 
-Loudness normalization is done by adjusting a loudness level to -24 LKFS based on the loudness value of the target channel layout (i.e. CL #i) which is signaled in [=Channel_Audio_Layer_Config()=].
+Loudness normalization is done by adjusting a loudness level to -24 LKFS based on the loudness value of the target channel layout (i.e. CL #i) which is signaled in [=Channel_Audio_Layer_Config=].
 
 Real implementations for [[#iadecoding-iadecoder-channelaudio-loudness]], [[#iadecoding-iadecoder-channelaudio-drc]] and [[#iadecoding-iadecoder-channelaudio-limiter]] are soly dependent on implementers (i.e., out of scope of this specification). This specification only recommends the principles for them.
 
