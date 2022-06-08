@@ -7,7 +7,7 @@ Editor: Felicia Lim, Google, flim@google.com
 Repository: AOMediaCodec/iac
 Shortname: iac
 URL: https://aomediacodec.github.io/iac/
-Date: 2022-06-03
+Date: 2022-06-08
 Abstract: This document specifies the storage format for immersive audio (IA) bitstreams in [[!ISOBMFF]] tracks.
 </pre>
 
@@ -773,24 +773,44 @@ TBA
 
 ## Codecs Parameter String ## {#codecsparameter}
 DASH and other applications require defined values for the 'Codecs' parameter specified in [[!RFC6381]] for ISO Media tracks. The codecs parameter string for the AOM IA codec shall be:
-- For IAC-OPUS: <dfn noexport>aiac.IAC-specific-needs.Opus</dfn>
-- For IAC-AAC-LC: <dfn noexport>aiac.IAC-specific-needs.mp4a.40.2</dfn>
+- For IAC-OPUS
 
-<b>IAC-specific-needs</b> shall be <b>AA.L(CC)*</b> as follows:
-- The first <b>A</b> shall be one digit and represent the mode of Ambisonics
-- The second <b>A</b> shall be one or two digit and represent the order of Ambisonics.
-- <b>L</b> shall be one digit and represent <b>channel_audio_layer</b> of the channel audio.
-- The first <b>C</b> of <b>(CC)</b> shall be one digit and represent the number of surround channels.
-- The second <b>C</b> of <b>(CC)</b> shall be one digit and represent the number of top channels.
-- <b>*</b> shall represent that <b>(CC)</b> comes L times.
-- The ith <b>(CC)</b> shall represent for the ith layer of the channel audio, where i = 1, 2, ..., L.
+``` 
+	aiac.IAC-specific-needs.Opus 
+```
 
+- For IAC-AAC-LC
 
-NOTE: We agree with the slides from April 11, with the following:
-- adding the version field
-- signaling of Ambisonics mode with 2 or 3 digits depending on the order
-- signaling of the layers as intended by the author
-- We need to discuss if have variable length codecs parameter is a problem or not.
+``` 
+	aiac.IAC-specific-needs.mp4a.40.2 
+```
+
+<b>IAC-specific-needs</b> shall be <b>V.AA.L(CC)*</b> as follows:
+- <dfn noexport>V</dfn> shall be four digits and shall represent [=version=] of [=IA_Static_Meta=]. 
+	- The first two digits shall represent the major version within the range 0 to 15.
+	- The second two digits shall represent the minor version within the range 0 to 15.
+- <dfn noexport>AA</dfn> shall be two or three digits.
+	- The first <b>A</b> shall be one digit and shall represent the mode of Ambisonics.
+	- The second <b>A</b> shall be one or two digits and shall represent the order of Ambisonics.
+- <dfn noexport>L(CC)*</dfn> means that <b>CC</b> commes L times. 
+	- <dfn noexport>L</dfn> shall be one digit and shall represent [=channel_audio_layer=] of the channel audio.
+	- <dfn noexport>CC</dfn> shall be two digits and shall represent the number of surround and top channels.
+		- The first <b>C</b> shall be one digit and shall represent the number of surround channels.
+		- The second <b>C</b> shall be one digit and shall represent the number of top channels.
+	- The ith [=CC=] shall represent for the ith layer of the channel audio, where i = 1, 2, ..., L.
+
+For example, for this version of the specification
+- The codecs parameter string of IAC-AAC-LC for the second order of Ambiosnics (SOA) with channel mapping:
+
+```
+	aiac.0000.12.mp4a.40.2
+```
+
+- The codecs parameter string of IAC-OPUS for channel audio with 3 layers (2ch/3.1.2ch/7.1.4ch): 
+
+```
+	aiac.0000.00.203274.Opus
+```
 
 # Informative Annex: IAC Decapsulation Guideline # {#iacdecapsulation}
 
