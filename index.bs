@@ -83,6 +83,14 @@ url: https://tools.ietf.org/html/rfc6716#; spec: RFC6716; type: dfn;
 url: https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#; spec: ITU1770-4; type: dfn;
 	text: LKFS
 	
+url: https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.2051-3-202205-I!!PDF-E.pdf#; spec: ITU2051-3; type: dfn;
+	text: Loudspeaker configuration for Sound System A (0+2+0)
+	text: Loudspeaker configuration for Sound System B (0+5+0)
+	text: Loudspeaker configuration for Sound System C (2+5+0)
+	text: Loudspeaker configuration for Sound System D (4+5+0)
+	text: Loudspeaker configuration for Sound System I (0+7+0)
+	text: Loudspeaker configuration for Sound System J (4+7+0)
+	
 url: https://en.wikipedia.org/wiki/Q_(number_format); spec: Q-Format; type: dfn;
 	text: 
 
@@ -126,6 +134,12 @@ url: https://en.wikipedia.org/wiki/Q_(number_format); spec: Q-Format; type: dfn;
 		"publisher": "ITU",
 		"href": "https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf"
 	},
+	"ITU2051-3": {
+		"title": "Advance sound system for programme production",
+		"status": "Standard",
+		"publisher": "ITU",
+		"href": "https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.2051-3-202205-I!!PDF-E.pdf"
+	},	
 	"Q-Format": {
 		"title": "Q (number format)",
 		"status": "Best Practice",
@@ -491,7 +505,33 @@ class channel_audio_layer_config(i) {
 
 <dfn noexport>loudspeaker_layout</dfn> shall indicate the channel layout for the channels to be reconstructed from the precedent ChannelGroups and the current ChannelGroup among ChannelGroups for channel audio in IA_Frame.
 
-<left><img src="images/Loudspeaker Layout.png"></left>
+In the current version of the specification, [=loudspeaker_layout=] shall indicate one of 9 channel layouts including Mono, Stereo, 5.1ch, 5.1.2ch, 5.1.4ch, 7.1ch, 7.1.2ch, 7.1.4ch and 3.1.2ch. Where,
+- <dfn noexport>Stereo</dfn> is the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System A (0+2+0)=] of [[!ITU2051-3]].
+- <dfn noexport>5.1ch</dfn> is the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System B (0+5+0)=] of [[!ITU2051-3]].
+- <dfn noexport>5.1.2ch</dfn> is the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System C (2+5+0)=] of [[!ITU2051-3]].
+- <dfn noexport>5.1.4ch</dfn> is the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System D (4+5+0)=] of [[!ITU2051-3]].
+- <dfn noexport>7.1ch</dfn> is the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System I (0+7+0)=] of [[!ITU2051-3]].
+- <dfn noexport>7.1.2ch</dfn> is the combination of the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System I (0+7+0)=] of [[!ITU2051-3]] and the left and right top front pair of the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System J (4+7+0)=] of [[!ITU2051-3]].
+- <dfn noexport>7.1.4ch</dfn> is the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System J (4+7+0)=] of [[!ITU2051-3]].
+- <dfn noexport>3.1.2ch</dfn> is the front subset (L/C/R/Ltf/Rtf/LFE) of [=7.1.4ch=].
+
+<pre class = "def">
+Loudspekaer Layout (4 bits) :  Channel Layout  : Loudspeaker Location Ordering
+             0000           :       Mono       : C
+             0001           :      Stereo      : L/R
+             0010           :      5.1ch       : L/C/R/Ls/Rs/LFE
+             0011           :     5.1.2ch      : L/C/R/Ls/Rs/Ltf/Rtf/LFE
+             0100           :     5.1.4ch      : L/C/R/Ls/Rs/Ltf/Rtf/Ltr/Rtr/LFE
+             0101           :      7.1ch       : L/C/R/Lss/Rss/Lrs/Rrs/LFE
+             0110           :     7.1.2ch      : L/C/R/Lss/Rss/Lrs/Rrs/Ltf/Rtf/LFE
+             0111           :     7.1.4ch      : L/C/R/Lss/Rss/Lrs/Rrs/Ltf/Rtf/Ltb/Rtb/LFE
+             1000           :     3.1.2ch      : L/C/R//Ltf/Rtf/LFE
+            others          :     reserved     : 
+</pre>
+
+```
+Where, C: Center, L: Left, R: Right, Ls: Left Surround, Lss: Left Side Surround, Rs: Right Surround, Rss: Right Side Surround, Ltf: Left Top Front, Rtf: Right Top Front, Ltr: Left Top Rear, Rtr: Right Top Rear, Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
+```
 
 <dfn noexport>output_gain_is_present_flag</dfn> shall indicate if output_gain information fields for the ChannelGroup presents .
 - 0: No output_gain information fields for the ChannelGroup present.
