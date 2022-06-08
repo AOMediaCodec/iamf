@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 37b7e7e68, updated Fri May 27 15:08:11 2022 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iac/" rel="canonical">
-  <meta content="09b1afec29cfaddb72d20a36615b17804f5d7244" name="document-revision">
+  <meta content="aedf87c6609b41e2d3144b48c18a582b887e046c" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -1934,7 +1934,7 @@ dfn > a.self-link::before      { content: "#"; }
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.aomedia.org/" style="width: 200px"> <img alt="AOM" height="60" src="https://aomedia.org/assets/images/aomedia-logo-rgb.svg" width="200"> </a> </p>
    <h1 class="p-name no-ref" id="title">Immersive Audio Container</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">AOM Working Group Draft, <time class="dt-updated" datetime="2022-05-26">26 May 2022</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">AOM Working Group Draft, <time class="dt-updated" datetime="2022-06-03">3 June 2022</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -2145,7 +2145,7 @@ dfn > a.self-link::before      { content: "#"; }
     <li data-md>
      <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="ia-frame" noexprot>IA Frame</dfn> is a frame format for immersive audio (IA). It is composed of Timed Metadata if present and followed by IA_Coded_Data.</p>
     <li data-md>
-     <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="timed-metadata" noexprot>Timed Metadata</dfn> is a codec-agnostic and non-static metadata including frame variable informaiton. It is composed of Demixing_Info, Substream_Boundary_Info and Recon_Gain_Info.</p>
+     <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="timed-metadata" noexprot>Timed Metadata</dfn> is a codec-agnostic and non-static metadata including frame variable informaiton. It is composed of Demixing_Info and Recon_Gain_Info.</p>
     <li data-md>
      <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="ia_coded_data" noexprot>IA_Coded_Data</dfn> is a coded data for IA Frame. It is composed of one or more ChannelGroups. Where, ChannelGroup is composed of one or more Substreams.</p>
     <li data-md>
@@ -2164,7 +2164,7 @@ dfn > a.self-link::before      { content: "#"; }
    <center><b>Figure 6. </b>Configuration of IA Bitstream (after packing OBUs)</center>
    <p class="note" role="note"><span>NOTE:</span> All OBUs composing of IA bitstream except Codec_Specific_Info_OBU and Substream_OBU is codec-agnostic. OBU Syntax and OBU Semantics sections in this specification define its syntax and semantics for all information comprosing of IA bitstream except Codec_Specific_Info and Substream. Syntax and semantics for Codec_Specific_Info and Substream are defined by a given codec.</p>
    <h3 class="heading settled" data-level="2.1" id="codec-specific"><span class="secno">2.1. </span><span class="content">Codec Specific</span><a class="self-link" href="#codec-specific"></a></h3>
-   <p>This section defines codec specific information for Codec_Specific_Info and Substream.</p>
+   <p>This section defines codec specific information for Codec_Specific_Info and Substream and random access point.</p>
    <ul>
     <li data-md>
      <p>Codec_Specific_Info is composed of <a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id">Codec_ID</a> and <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config">Decoder_Config</a>. Codec_ID shall indicate the codec which has been used to generate Substreams within IA bitstream and Decder_Config shall indicate the decoding parameters which are applied to all of Substreams within IA bitstream.</p>
@@ -2174,8 +2174,13 @@ dfn > a.self-link::before      { content: "#"; }
     <li data-md>
      <p>Substream is a raw coded stream for mono or stereo channels. Substream format shall be exactly the same as the sample format (before packing OBU) for mono or stereo audio file which consists of only one single coded stream by the Codec_ID.</p>
    </ul>
+   <p>In this version of the specification, <a data-link-type="dfn" href="#timed-metadata" id="ref-for-timed-metadata">Timed Metadata</a> of an IA_Frame has no decoding dependency with Timed Metadatas of the preceding IA_Frames. Therefore, every <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit①">Temporal Unit</a> is a random access point with following constraints as long as every frame of Substream by a given codec is a random access point:</p>
+   <ul>
+    <li data-md>
+     <p>Prior to beginning to decode the Temporal Unit, IAC decoders need to be initialized with its relevant <a data-link-type="dfn" href="#non-timed-metadata" id="ref-for-non-timed-metadata①">Non-timed Metadata</a> (i.e. <a data-link-type="dfn" href="#codec_specific_info" id="ref-for-codec_specific_info">Codec_Specific_Info</a> and <a data-link-type="dfn" href="#ia_static_meta" id="ref-for-ia_static_meta">IA_Static_Meta</a> related to the Temporal Unit) which defines the following Temporal Units including the Temporal Unit.</p>
+   </ul>
    <h4 class="heading settled" data-level="2.1.1" id="iac-opus-specific"><span class="secno">2.1.1. </span><span class="content">IAC-OPUS Specific</span><a class="self-link" href="#iac-opus-specific"></a></h4>
-   <p><a data-link-type="dfn" href="#codec_specific_info" id="ref-for-codec_specific_info">Codec_Specific_Info</a> for IAC-OPUS shall conform to <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="termref-for-">ID Header</a> with <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-①">ChannelMappingFamily</a> = 0 of <a data-link-type="biblio" href="#biblio-rfc7845">[RFC7845]</a> with following constraints:</p>
+   <p><a data-link-type="dfn" href="#codec_specific_info" id="ref-for-codec_specific_info①">Codec_Specific_Info</a> for IAC-OPUS shall conform to <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="termref-for-">ID Header</a> with <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-①">ChannelMappingFamily</a> = 0 of <a data-link-type="biblio" href="#biblio-rfc7845">[RFC7845]</a> with following constraints:</p>
    <ul>
     <li data-md>
      <p><a data-link-type="dfn" href="https://tools.ietf.org/html/rfc8486#" id="termref-for-②">Channel Count</a> should be set to 2.</p>
@@ -2183,6 +2188,7 @@ dfn > a.self-link::before      { content: "#"; }
      <p><a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="termref-for-③">Output Gain</a> shall not be used. In other words, it shall be set to 0dB.</p>
    </ul>
    <p>Substream format shall be <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6716#" id="termref-for-④">opus packet</a> of <a data-link-type="biblio" href="#biblio-rfc6716">[RFC6716]</a> which contains only one single frame of mono or stereo channels.</p>
+   <p>As every frame of <a data-link-type="dfn" href="#substream" id="ref-for-substream">Substream</a> by IAC-OPUS is a random access point, every <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit②">Temporal Unit</a> for IAC-OPUS is a random access point.</p>
    <h4 class="heading settled" data-level="2.1.2" id="iac-aac-lc-specific"><span class="secno">2.1.2. </span><span class="content">IAC-AAC-LC Specific</span><a class="self-link" href="#iac-aac-lc-specific"></a></h4>
    <p><a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id①">Codec_ID</a> shall be <a class="property css" data-link-type="property" href="https://www.iso.org/standard/79110.html#" id="termref-for-⑤">mp4a</a>.</p>
    <p><a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config①">Decoder_Config</a> for IAC-AAC-LC shall be <a data-link-type="dfn" href="https://www.iso.org/standard/55688.html#" id="termref-for-⑥">DecoderConfigDescriptor()</a> of <a data-link-type="biblio" href="#biblio-mp4-systems">[MP4-Systems]</a>, which is a subset of <a data-link-type="dfn" href="https://www.iso.org/standard/79110.html#" id="termref-for-⑦">ESDBox</a> for <a data-link-type="biblio" href="#biblio-mp4-audio">[MP4-Audio]</a>, with following constraints:</p>
@@ -2213,6 +2219,7 @@ dfn > a.self-link::before      { content: "#"; }
      </ul>
    </ul>
    <p>Substream format shall be <a data-link-type="dfn" href="https://www.iso.org/standard/43345.html#" id="termref-for-②⓪">raw_data_block()</a> of <a data-link-type="biblio" href="#biblio-aac">[AAC]</a> which contains only one single frame of mono or stereo channels.</p>
+   <p>As every frame of <a data-link-type="dfn" href="#substream" id="ref-for-substream①">Substream</a> by IAC-AAC-LC is a random access point, every <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit③">Temporal Unit</a> for IAC-AAC-LC is a random access point.</p>
    <h3 class="heading settled" data-level="2.2" id="obu-section"><span class="secno">2.2. </span><span class="content">OPEN Bitstream Unit (OBU) Syntax and Semantics</span><a class="self-link" href="#obu-section"></a></h3>
    <p>This section specifies the syntax elements and the meaning of the syntax elements read in the <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="obu">OBU</dfn> syntax and semantics structures by assuming IAC decoder receives IA bitstream starting with IA Stream Indicator OBU as input. Where, IAC decoder consists of IAC-OBU parer, Substream decoders and Post-Processor.</p>
    <ul>
@@ -2319,7 +2326,7 @@ dfn > a.self-link::before      { content: "#"; }
    <p><b>Semantics</b></p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="codec_id">codec_id</dfn> is a ‘four-character code’ (4CC) to identify the codec which has been used to generate Substream. It shall be the same as the <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-②①">boxtype</a> of its AduioSampleEntry if exist. It shall be <a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②②">opus</a> for IAC-OPUS and <a class="property css" data-link-type="property" href="https://www.iso.org/standard/79110.html#" id="termref-for-②③">mp4a</a> for IAC-AAC-LC.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="decoder_config">decoder_config</dfn> is a set of decoding parameters to decode Substream for a given codec_id. It shall be the set of decoding parameters which the conventional mono or stereo decoders need to decoder the Substream.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="codec_specific_info_obu">codec_specific_info_obu<a class="self-link" href="#codec_specific_info_obu"></a></dfn> for IAC-OPUS shall conform to <a data-link-type="dfn" href="#codec_specific_info" id="ref-for-codec_specific_info①">Codec_Specific_Info</a> of <a href="#iac-opus-specific">§ 2.1.1 IAC-OPUS Specific</a> and codec_specific_info for IAC-AAC-LC shall conform to <a data-link-type="dfn" href="#codec_specific_info" id="ref-for-codec_specific_info②">Codec_Specific_Info</a> of <a href="#iac-aac-lc-specific">§ 2.1.2 IAC-AAC-LC Specific</a>.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="codec_specific_info_obu">codec_specific_info_obu<a class="self-link" href="#codec_specific_info_obu"></a></dfn> for IAC-OPUS shall conform to <a data-link-type="dfn" href="#codec_specific_info" id="ref-for-codec_specific_info②">Codec_Specific_Info</a> of <a href="#iac-opus-specific">§ 2.1.1 IAC-OPUS Specific</a> and codec_specific_info for IAC-AAC-LC shall conform to <a data-link-type="dfn" href="#codec_specific_info" id="ref-for-codec_specific_info③">Codec_Specific_Info</a> of <a href="#iac-aac-lc-specific">§ 2.1.2 IAC-AAC-LC Specific</a>.</p>
    <h4 class="heading settled" data-level="2.2.7" id="obu-iastaticmeta"><span class="secno">2.2.7. </span><span class="content">IA Static Meta OBU Syntax and Semantics</span><a class="self-link" href="#obu-iastaticmeta"></a></h4>
    <p><b>Syntax</b></p>
 <pre>class ia_static_meta_obu() {
@@ -2422,7 +2429,7 @@ greater is incompatible.</p>
 </pre>
    <p class="note" role="note"><span>NOTE:</span> The temporal delimitor has an empty payload.</p>
    <p><b>Semantics</b></p>
-   <p>It shall indicate the start of <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit①">Temporal Unit</a>.</p>
+   <p>It shall indicate the start of <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit④">Temporal Unit</a>.</p>
    <h4 class="heading settled" data-level="2.2.11" id="obu-demixinginfo"><span class="secno">2.2.11. </span><span class="content">Demixing Info OBU Syntax and Semantics</span><a class="self-link" href="#obu-demixinginfo"></a></h4>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="demixing_info">demixing_info</dfn> contains demixing parameter mode to be used to reconstruct demixed channels.</p>
    <p><b>Syntax</b></p>
@@ -2509,11 +2516,11 @@ Each ChannelGroup shall have Substreams as many as <a data-link-type="dfn" href=
     <li data-md>
      <p>Some fields of IA_Static_Meta, related to MIME codecs parameter, shall be copied in sample entry.</p>
     <li data-md>
-     <p>Temporal_Delimiter_OBUs shall be discarded from <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit②">Temporal Units</a>.</p>
+     <p>Temporal_Delimiter_OBUs shall be discarded from <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit⑤">Temporal Units</a>.</p>
     <li data-md>
      <p>Demixing_Info_OBUs (with OBU syntax) may be stored as a new sample group having <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-③③">grouping_type</a>, <a data-link-type="dfn" href="#admi" id="ref-for-admi">admi</a>.</p>
     <li data-md>
-     <p>Remainded OBUs of <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit③">Temporal Units</a> shall be stored as sample data without gap among OBUs.</p>
+     <p>Remainded OBUs of <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit⑥">Temporal Units</a> shall be stored as sample data without gap among OBUs.</p>
    </ul>
    <h3 class="heading settled" data-level="3.2" id="iasampleentry-section"><span class="secno">3.2. </span><span class="content">IA Sample Entry</span><a class="self-link" href="#iasampleentry-section"></a></h3>
    <p class="note" role="note"><span>NOTE:</span> As discussed, we have an agreement to specify that only codec specific info is stored (no loop, no override). We might reconsider if new use cases are brought forward.
@@ -2593,9 +2600,9 @@ Quantity:  One of more
    <p>For tracks using the <a data-link-type="dfn" href="#iasampleentry" id="ref-for-iasampleentry①">IASampleEntry</a>, an <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="ia-sample">IA Sample</dfn> has the following constraints:</p>
    <ul>
     <li data-md>
-     <p>The sample data shall be a sequence of <a data-link-type="dfn" href="#obu" id="ref-for-obu①">OBUs</a> forming a <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit④">Temporal Unit</a>.</p>
+     <p>The sample data shall be a sequence of <a data-link-type="dfn" href="#obu" id="ref-for-obu①">OBUs</a> forming a <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit⑦">Temporal Unit</a>.</p>
     <li data-md>
-     <p>Temporal_Delimiter_OBU shall not be present. It shall be discarded when <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit⑤">Temporal Unit</a> is stored as sample data.</p>
+     <p>Temporal_Delimiter_OBU shall not be present. It shall be discarded when <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit⑧">Temporal Unit</a> is stored as sample data.</p>
     <li data-md>
      <p>OBUs for Timed Metadata (if present) come first and followed by OBU(s) for IA_Coded_Data.</p>
     <li data-md>
@@ -2753,7 +2760,7 @@ Quantity:  One of more
    <p>IA encoder is composed of Pre-processor, Codec encoder and OBU packetizer as depicted in Figure 10.</p>
    <ul>
     <li data-md>
-     <p>Pre-processor outputs one or more <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup">ChannelGroups</a>, <a data-link-type="dfn" href="#ia_static_meta" id="ref-for-ia_static_meta">IA_Static_Meta</a> and <a data-link-type="dfn" href="#timed-metadata" id="ref-for-timed-metadata">Timed Metadata</a> if needed based on the input audio and user inputs.</p>
+     <p>Pre-processor outputs one or more <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup">ChannelGroups</a>, <a data-link-type="dfn" href="#ia_static_meta" id="ref-for-ia_static_meta①">IA_Static_Meta</a> and <a data-link-type="dfn" href="#timed-metadata" id="ref-for-timed-metadata①">Timed Metadata</a> if needed based on the input audio and user inputs.</p>
      <ul>
       <li data-md>
        <p>It outputs one single ChannelGroup for Ambisonics.</p>
@@ -2761,7 +2768,7 @@ Quantity:  One of more
        <p>It outputs one or more ChannelGroups for Channel audio.</p>
      </ul>
     <li data-md>
-     <p>Codec encoder generates one or more <a data-link-type="dfn" href="#substream" id="ref-for-substream">Substreams</a> from each ChannelGroup and outputs the Substream(s) with one single Decoder_Config.</p>
+     <p>Codec encoder generates one or more <a data-link-type="dfn" href="#substream" id="ref-for-substream②">Substreams</a> from each ChannelGroup and outputs the Substream(s) with one single Decoder_Config.</p>
      <ul>
       <li data-md>
        <p>Mono or stereo coding is only allowed.</p>
@@ -2779,12 +2786,12 @@ Quantity:  One of more
        </ul>
      </ul>
     <li data-md>
-     <p>OBU packetizer generates <a data-link-type="dfn" href="#non-timed-metadata" id="ref-for-non-timed-metadata①">Non-timed Metadata</a> and <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit⑥">Temporal Unit</a> for each frame, and outputs <a data-link-type="dfn" href="#ia-bitstream" id="ref-for-ia-bitstream②">IA bitstream</a>.</p>
+     <p>OBU packetizer generates <a data-link-type="dfn" href="#non-timed-metadata" id="ref-for-non-timed-metadata②">Non-timed Metadata</a> and <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit⑨">Temporal Unit</a> for each frame, and outputs <a data-link-type="dfn" href="#ia-bitstream" id="ref-for-ia-bitstream②">IA bitstream</a>.</p>
      <ul>
       <li data-md>
-       <p>Non-timed Metadata generator generates OBUs for <a data-link-type="dfn" href="#codec_specific_info" id="ref-for-codec_specific_info③">Codec_Specific_Info</a> and <a data-link-type="dfn" href="#ia_static_meta" id="ref-for-ia_static_meta①">IA_Static_Meta</a>.</p>
+       <p>Non-timed Metadata generator generates OBUs for <a data-link-type="dfn" href="#codec_specific_info" id="ref-for-codec_specific_info④">Codec_Specific_Info</a> and <a data-link-type="dfn" href="#ia_static_meta" id="ref-for-ia_static_meta②">IA_Static_Meta</a>.</p>
       <li data-md>
-       <p>Temporal Unit generator generates <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit⑦">Temporal Unit</a> for each frame from <a data-link-type="dfn" href="#timed-metadata" id="ref-for-timed-metadata①">Timed Metadata</a> if present and <a data-link-type="dfn" href="#substream" id="ref-for-substream①">Substreams</a>.</p>
+       <p>Temporal Unit generator generates <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit①⓪">Temporal Unit</a> for each frame from <a data-link-type="dfn" href="#timed-metadata" id="ref-for-timed-metadata②">Timed Metadata</a> if present and <a data-link-type="dfn" href="#substream" id="ref-for-substream③">Substreams</a>.</p>
      </ul>
    </ul>
    <center><img height="272" src="images/IA Encoder Configuration.png" width="800"></center>
@@ -2835,7 +2842,7 @@ Quantity:  One of more
     <li data-md>
      <p>Codec Enc. outputs Substreams as many as the number of channels for Ambisoncis by coding each channel in a mono mode.</p>
     <li data-md>
-     <p><a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit⑧">Temporal Unit</a> is composed of Temporal_Delimiter_OBU and followded by OBUs for <a data-link-type="dfn" href="#substream" id="ref-for-substream②">Substreams</a>.</p>
+     <p><a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit①①">Temporal Unit</a> is composed of Temporal_Delimiter_OBU and followded by OBUs for <a data-link-type="dfn" href="#substream" id="ref-for-substream④">Substreams</a>.</p>
      <ul>
       <li data-md>
        <p>The order of Substreams in ChanngelGroup is aligned with <a data-link-type="dfn" href="#channel_mapping" id="ref-for-channel_mapping①">channel_mapping</a> for <a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode③">Ambisonics_Mode</a> = 1 or <a data-link-type="dfn" href="#demixing_matrix" id="ref-for-demixing_matrix①">demixing_matrix</a> for <a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode④">Ambisonics_Mode</a> = 2.</p>
@@ -2845,7 +2852,7 @@ Quantity:  One of more
    <p>For Channel Audio format:</p>
    <ul>
     <li data-md>
-     <p>Pre-processor outputs one or more <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup①">ChannelGroups</a>, <a data-link-type="dfn" href="#ia_static_meta" id="ref-for-ia_static_meta②">IA_Static_Meta</a> and <a data-link-type="dfn" href="#timed-metadata" id="ref-for-timed-metadata②">Timed Metadata</a>. It is composed of Down-mix parameter generator, Down-mixer, Loudness, ChannelGroup generator, Attenation and Meta generator.</p>
+     <p>Pre-processor outputs one or more <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup①">ChannelGroups</a>, <a data-link-type="dfn" href="#ia_static_meta" id="ref-for-ia_static_meta③">IA_Static_Meta</a> and <a data-link-type="dfn" href="#timed-metadata" id="ref-for-timed-metadata③">Timed Metadata</a>. It is composed of Down-mix parameter generator, Down-mixer, Loudness, ChannelGroup generator, Attenation and Meta generator.</p>
      <ul>
       <li data-md>
        <p>For non-scalable channel audio (i.e. <a data-link-type="dfn" href="#channel_audio_layer" id="ref-for-channel_audio_layer①">Channel_Audio_Layer</a> = 1):</p>
@@ -2913,7 +2920,7 @@ Quantity:  One of more
        </ul>
      </ul>
     <li data-md>
-     <p><a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit⑨">Temporal Unit</a> is composed of Temporal_Delimiter_OBU, followed by OBUs for <a data-link-type="dfn" href="#timed-metadata" id="ref-for-timed-metadata③">Timed Metadata</a> and followed by OBUs for <a data-link-type="dfn" href="#substream" id="ref-for-substream③">Substreams</a>.</p>
+     <p><a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit①②">Temporal Unit</a> is composed of Temporal_Delimiter_OBU, followed by OBUs for <a data-link-type="dfn" href="#timed-metadata" id="ref-for-timed-metadata④">Timed Metadata</a> and followed by OBUs for <a data-link-type="dfn" href="#substream" id="ref-for-substream⑤">Substreams</a>.</p>
      <ul>
       <li data-md>
        <p>ChannelGroups in Temporal Unit are placed in order. In other words, ChannelGroup for the first channel layout comes first, followed by ChannelGroup for the second channel layout, followed by ChannelGroup for the third channel layout and so on.</p>
@@ -2940,7 +2947,7 @@ Quantity:  One of more
     <li data-md>
      <p>Codec Enc. generates the coded Substreams from PCMs and passes Substreams and one single Decoder_Config to OBU Packetizer.</p>
     <li data-md>
-     <p>OBU packetizer generates <a data-link-type="dfn" href="#non-timed-metadata" id="ref-for-non-timed-metadata②">Non-timed Metadata</a> which consists of OBU for <a data-link-type="dfn" href="#codec_specific_info" id="ref-for-codec_specific_info④">Codec_Specific_Info</a> and OBU for <a data-link-type="dfn" href="#ia_static_meta" id="ref-for-ia_static_meta③">IA_Static_Meta</a>.</p>
+     <p>OBU packetizer generates <a data-link-type="dfn" href="#non-timed-metadata" id="ref-for-non-timed-metadata③">Non-timed Metadata</a> which consists of OBU for <a data-link-type="dfn" href="#codec_specific_info" id="ref-for-codec_specific_info⑤">Codec_Specific_Info</a> and OBU for <a data-link-type="dfn" href="#ia_static_meta" id="ref-for-ia_static_meta④">IA_Static_Meta</a>.</p>
      <ul>
       <li data-md>
        <p>Codec_Specific_Info_OBU is generated based on <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config③">Decoder_Config</a>.</p>
@@ -2948,19 +2955,19 @@ Quantity:  One of more
        <p>IA_Static_Meta_OBU is generated based on <a data-link-type="dfn" href="#ambix_layer_config" id="ref-for-ambix_layer_config">Ambix_Layer_Config</a> and <a data-link-type="dfn" href="#channel_audio_layer_config" id="ref-for-channel_audio_layer_config">Channel_Audio_Layer_Config</a>.</p>
      </ul>
     <li data-md>
-     <p>OBU packetizer generates <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit①⓪">Temporal Unit</a> for each frame.</p>
+     <p>OBU packetizer generates <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit①③">Temporal Unit</a> for each frame.</p>
      <ul>
       <li data-md>
-       <p>OBU Packetizer generates <a data-link-type="dfn" href="#timed-metadata" id="ref-for-timed-metadata④">Timed Metadata</a>, which consists of OBU for <a data-link-type="dfn" href="#demixing_info" id="ref-for-demixing_info①">Demixing_Info</a> and OBU for <a data-link-type="dfn" href="#recon_gain_info" id="ref-for-recon_gain_info①">Recon_Gain_Info</a>, for each frame.</p>
+       <p>OBU Packetizer generates <a data-link-type="dfn" href="#timed-metadata" id="ref-for-timed-metadata⑤">Timed Metadata</a>, which consists of OBU for <a data-link-type="dfn" href="#demixing_info" id="ref-for-demixing_info①">Demixing_Info</a> and OBU for <a data-link-type="dfn" href="#recon_gain_info" id="ref-for-recon_gain_info①">Recon_Gain_Info</a>, for each frame.</p>
       <li data-md>
-       <p>OBU Packetizer generates OBUs for <a data-link-type="dfn" href="#substream" id="ref-for-substream④">Substreams</a> for each frame.</p>
+       <p>OBU Packetizer generates OBUs for <a data-link-type="dfn" href="#substream" id="ref-for-substream⑥">Substreams</a> for each frame.</p>
      </ul>
     <li data-md>
      <p>OBU Packetizer outputs <a data-link-type="dfn" href="#ia-bitstream" id="ref-for-ia-bitstream③">IA Bitstream</a> which is composed of OBUs for Non-timed Metadata and followed by OBUs for Temporal Units.</p>
    </ul>
    <center><img height="551" src="images/IA Encoding Flowchart for Channel Audio Format.png" width="800"></center>
    <center><b>Figure 11-1. </b>IA Encoding Flowchart for Channel Audio Format</center>
-   <p>Following sections, <a href="#iaencoding-iaencoder-channelaudio-downmixparameter">§ 5.2.2.1 Down-mix parameter and Loudness</a>, <a href="#iaencoding-iaencoder-channelaudio-downmixmechanism">§ 5.2.2.2 Down-mix Mechanism</a>, <a href="#iaencoding-iaencoder-channelaudio-channellayoutgenerationrule">§ 5.2.2.3 Channel Layout Generation Rule</a>, <a href="#iaencoding-iaencoder-channelaudio-recongaingeneration">§ 5.2.2.4 Recon Gain Generation</a> and <a href="#iaencoding-iaencoder-channelaudio-channelgroupgenerationrule">§ 5.2.2.5 ChannelGroup Generation Rule</a> are not needed for non-scalable channel audio (i.e., when <a data-link-type="dfn" href="#channel_audio_layer" id="ref-for-channel_audio_layer③">Channel_Audio_Layer</a> of <a data-link-type="dfn" href="#ia_static_meta" id="ref-for-ia_static_meta④">IA_Static_Meta</a> is set to 1).</p>
+   <p>Following sections, <a href="#iaencoding-iaencoder-channelaudio-downmixparameter">§ 5.2.2.1 Down-mix parameter and Loudness</a>, <a href="#iaencoding-iaencoder-channelaudio-downmixmechanism">§ 5.2.2.2 Down-mix Mechanism</a>, <a href="#iaencoding-iaencoder-channelaudio-channellayoutgenerationrule">§ 5.2.2.3 Channel Layout Generation Rule</a>, <a href="#iaencoding-iaencoder-channelaudio-recongaingeneration">§ 5.2.2.4 Recon Gain Generation</a> and <a href="#iaencoding-iaencoder-channelaudio-channelgroupgenerationrule">§ 5.2.2.5 ChannelGroup Generation Rule</a> are not needed for non-scalable channel audio (i.e., when <a data-link-type="dfn" href="#channel_audio_layer" id="ref-for-channel_audio_layer③">Channel_Audio_Layer</a> of <a data-link-type="dfn" href="#ia_static_meta" id="ref-for-ia_static_meta⑤">IA_Static_Meta</a> is set to 1).</p>
    <h5 class="heading settled" data-level="5.2.2.1" id="iaencoding-iaencoder-channelaudio-downmixparameter"><span class="secno">5.2.2.1. </span><span class="content">Down-mix parameter and Loudness</span><a class="self-link" href="#iaencoding-iaencoder-channelaudio-downmixparameter"></a></h5>
    <p>This section describes how to generate down-mix parameters and loudness level for a given channel audio and a given list of channel layouts for scalability.</p>
    <p>Figure 11-2 shows a block diagram for down-mix parameter and loudness module including down-mixer.</p>
@@ -3117,9 +3124,9 @@ Recon_Gain for D_Rtb4:
     <li data-md>
      <p>One single <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup②">ChannelGroup</a> for Ambisonics is generated in the same way with <a href="#iaencoding-iaencoder-ambisonics">§ 5.2.1 IA Encoder for Ambisonics format</a>.</p>
     <li data-md>
-     <p>One or more ChannelGroups and <a data-link-type="dfn" href="#timed-metadata" id="ref-for-timed-metadata⑤">Timed Metadata</a> for Channel Audio are generated in the same way with <a href="#iaencoding-iaencoder-ambisonics">§ 5.2.1 IA Encoder for Ambisonics format</a>.</p>
+     <p>One or more ChannelGroups and <a data-link-type="dfn" href="#timed-metadata" id="ref-for-timed-metadata⑥">Timed Metadata</a> for Channel Audio are generated in the same way with <a href="#iaencoding-iaencoder-ambisonics">§ 5.2.1 IA Encoder for Ambisonics format</a>.</p>
     <li data-md>
-     <p><a data-link-type="dfn" href="#ia_static_meta" id="ref-for-ia_static_meta⑤">IA_Static_Meta</a> is set to as follows:</p>
+     <p><a data-link-type="dfn" href="#ia_static_meta" id="ref-for-ia_static_meta⑥">IA_Static_Meta</a> is set to as follows:</p>
      <ul>
       <li data-md>
        <p><a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode⑥">Ambisonics_Mode</a> is set to according to Ambisonics mode in the same way with <a href="#iaencoding-iaencoder-ambisonics">§ 5.2.1 IA Encoder for Ambisonics format</a>.</p>
@@ -3131,7 +3138,7 @@ Recon_Gain for D_Rtb4:
        <p><a data-link-type="dfn" href="#channel_audio_layer_config" id="ref-for-channel_audio_layer_config①">channel_audio_layer_config</a> is set in the same way with <a href="#iaencoding-iaencoder-channelaudio">§ 5.2.2 IA Encoder for Channel Audio format</a>.</p>
      </ul>
     <li data-md>
-     <p><a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit①①">Temporal Unit</a> is composed of Temporal_Delimiter_OBU, followed by OBUs for <a data-link-type="dfn" href="#timed-metadata" id="ref-for-timed-metadata⑥">Timed Metadata</a> and followed by OBUs for <a data-link-type="dfn" href="#substream" id="ref-for-substream⑤">Substreams</a>.</p>
+     <p><a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit①④">Temporal Unit</a> is composed of Temporal_Delimiter_OBU, followed by OBUs for <a data-link-type="dfn" href="#timed-metadata" id="ref-for-timed-metadata⑦">Timed Metadata</a> and followed by OBUs for <a data-link-type="dfn" href="#substream" id="ref-for-substream⑦">Substreams</a>.</p>
      <ul>
       <li data-md>
        <p>OBUs for Substreams composing of ChannelGroup for Ambisonics comes first and followed by OBUs for Substreams composing of ChannelGroups for Channel Audio.</p>
@@ -3143,7 +3150,7 @@ Recon_Gain for D_Rtb4:
    <h2 class="heading settled" data-level="6" id="iadecoding"><span class="secno">6. </span><span class="content">Informative Annex: IA Decoding Process</span><a class="self-link" href="#iadecoding"></a></h2>
    <p>This section provides a guideline for IA decoding for a given <a data-link-type="dfn" href="#ia-bitstream" id="ref-for-ia-bitstream④">IA bitstream</a>.</p>
    <h3 class="heading settled" data-level="6.1" id="iadecoding-iadecoder"><span class="secno">6.1. </span><span class="content">IA Decoder</span><a class="self-link" href="#iadecoding-iadecoder"></a></h3>
-   <p>IA decoder can selects one of three decoding modes based on <a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode⑦">Ambisonics_Mode</a> and <a data-link-type="dfn" href="#channel_audio_layer" id="ref-for-channel_audio_layer⑤">Channel_Audio_Layer</a> in <a data-link-type="dfn" href="#ia_static_meta" id="ref-for-ia_static_meta⑥">IA_Static_Meta</a>.</p>
+   <p>IA decoder can selects one of three decoding modes based on <a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode⑦">Ambisonics_Mode</a> and <a data-link-type="dfn" href="#channel_audio_layer" id="ref-for-channel_audio_layer⑤">Channel_Audio_Layer</a> in <a data-link-type="dfn" href="#ia_static_meta" id="ref-for-ia_static_meta⑦">IA_Static_Meta</a>.</p>
    <ul>
     <li data-md>
      <p>Ambisonics decoding in case of Ambisonics_Mode !=0 and Channel_Audio_Layer = 0.</p>
@@ -3162,7 +3169,7 @@ Recon_Gain for D_Rtb4:
    <p>IA decoder is composed of OBU parser, Codec decoder and Post-processor as depicted in Figure 13.</p>
    <ul>
     <li data-md>
-     <p>OBU parser depacketizes <a data-link-type="dfn" href="#ia-bitstream" id="ref-for-ia-bitstream⑤">IA bitstream</a> to output one or more <a data-link-type="dfn" href="#substream" id="ref-for-substream⑥">Substreams</a> with one single <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config④">Decoder_Config</a>, <a data-link-type="dfn" href="#ia_static_meta" id="ref-for-ia_static_meta⑦">IA_Static_Meta</a> and <a data-link-type="dfn" href="#timed-metadata" id="ref-for-timed-metadata⑦">Timed Metadata</a>.</p>
+     <p>OBU parser depacketizes <a data-link-type="dfn" href="#ia-bitstream" id="ref-for-ia-bitstream⑤">IA bitstream</a> to output one or more <a data-link-type="dfn" href="#substream" id="ref-for-substream⑧">Substreams</a> with one single <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config④">Decoder_Config</a>, <a data-link-type="dfn" href="#ia_static_meta" id="ref-for-ia_static_meta⑧">IA_Static_Meta</a> and <a data-link-type="dfn" href="#timed-metadata" id="ref-for-timed-metadata⑧">Timed Metadata</a>.</p>
      <ul>
       <li data-md>
        <p>OBU parser is composed of Non-timed Metadata parser and Temporal Unit parser.</p>
@@ -3205,7 +3212,7 @@ Recon_Gain for D_Rtb4:
    <p>Figure 14 shows the decoding flowchart of Ambisonics decoding.</p>
    <ul>
     <li data-md>
-     <p>OBU parser outputs the first <a data-link-type="dfn" href="#substream" id="ref-for-substream⑦">Substreams</a>, among Substream in <a data-link-type="dfn" href="#ia-bitstream" id="ref-for-ia-bitstream⑥">IA bitstream</a>, as many as <a data-link-type="dfn" href="#substream_count" id="ref-for-substream_count③">substream_count</a> specified in <a data-link-type="dfn" href="#ambix_layer_config" id="ref-for-ambix_layer_config②">ambix_layer_config</a> of <a data-link-type="dfn" href="#ia_static_meta" id="ref-for-ia_static_meta⑧">IA_Static_Meta</a>, with Decoder_Config.</p>
+     <p>OBU parser outputs the first <a data-link-type="dfn" href="#substream" id="ref-for-substream⑨">Substreams</a>, among Substream in <a data-link-type="dfn" href="#ia-bitstream" id="ref-for-ia-bitstream⑥">IA bitstream</a>, as many as <a data-link-type="dfn" href="#substream_count" id="ref-for-substream_count③">substream_count</a> specified in <a data-link-type="dfn" href="#ambix_layer_config" id="ref-for-ambix_layer_config②">ambix_layer_config</a> of <a data-link-type="dfn" href="#ia_static_meta" id="ref-for-ia_static_meta⑨">IA_Static_Meta</a>, with Decoder_Config.</p>
      <ul>
       <li data-md>
        <p>OBU parser outputs <a data-link-type="dfn" href="#channel_mapping" id="ref-for-channel_mapping③">channel_mapping</a> or <a data-link-type="dfn" href="#demixing_matrix" id="ref-for-demixing_matrix③">demixing_matrix</a> according to <a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode⑧">Ambisonics_Mode</a> to Channel_Mapping/Demixing_Matrix module</p>
@@ -3222,7 +3229,7 @@ Recon_Gain for D_Rtb4:
    <p>Figure 15 shows the decoding flowchart of Channel Audio decoding.</p>
    <center><img height="785" src="images/Channel Audio Decoding Flowchart.png" width="541"></center>
    <center><b>Figure 15. </b>Channel Audio Decoding Flowchart</center>
-   <p>For a given target channel layout (i.e. CL #i) among the list of <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout④">loudspeaker_layout</a> in <a data-link-type="dfn" href="#ia_static_meta" id="ref-for-ia_static_meta⑨">IA_Static_Meta</a>,</p>
+   <p>For a given target channel layout (i.e. CL #i) among the list of <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout④">loudspeaker_layout</a> in <a data-link-type="dfn" href="#ia_static_meta" id="ref-for-ia_static_meta①⓪">IA_Static_Meta</a>,</p>
    <ul>
     <li data-md>
      <p>OBU Parser gets Substreams for <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup③">ChannelGroup</a> #1 ~ ChannelGroup #i and pass them to Codec decoder with <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config⑤">Decoder_Config</a>.</p>
@@ -3253,7 +3260,7 @@ Recon_Gain for D_Rtb4:
    <p>To apply the gain, an implementation MUST use the following:</p>
 <pre>Sample *= pow(10, Output_Gain(j) / (20.0*256))
 </pre>
-   <p>Where, Output_Gain(j) is the raw 16-bit value from <a data-link-type="dfn" href="#ia_static_meta" id="ref-for-ia_static_meta①⓪">IA_Static_Meta</a>.</p>
+   <p>Where, Output_Gain(j) is the raw 16-bit value from <a data-link-type="dfn" href="#ia_static_meta" id="ref-for-ia_static_meta①①">IA_Static_Meta</a>.</p>
    <h5 class="heading settled" data-level="6.1.2.2" id="iadecoding-iadecoder-channelaudio-demixer"><span class="secno">6.1.2.2. </span><span class="content">De-mixer</span><a class="self-link" href="#iadecoding-iadecoder-channelaudio-demixer"></a></h5>
    <p>For scalable audio, some channels of <a data-link-type="dfn" href="#down-mixed-audio" id="ref-for-down-mixed-audio">down-mixed audio</a> for CL #i are delivered as is but the rest are mixed with other channels for CL #i-1.</p>
    <p>De-mixer module reconstructs the rest of the down-mixed audio for CL #i from the mixed channels, which is passed by Gain module, and its relevant non-mixed channels using its relevant demixing parameters.</p>
@@ -3366,7 +3373,7 @@ Ltf = Ltf3 - w(k) x (L2 - 0.707 x C - L5) and Rtf = Rtf3 - w(k) x (R2 - 0.707 x 
    <p>Recommend values for specific codecs are as follows</p>
    <ul>
     <li data-md>
-     <p>IAC-OPUS: olen = 60, the pre-skip (ps) value is indicated in <a data-link-type="dfn" href="#codec_specific_info" id="ref-for-codec_specific_info⑤">Codec_Specific_Info</a> for IAC-OPUS.</p>
+     <p>IAC-OPUS: olen = 60, the pre-skip (ps) value is indicated in <a data-link-type="dfn" href="#codec_specific_info" id="ref-for-codec_specific_info⑥">Codec_Specific_Info</a> for IAC-OPUS.</p>
     <li data-md>
      <p>IAC-AAC-LC: olen = 64, ps = 720.</p>
    </ul>
@@ -4216,30 +4223,33 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
    <b><a href="#non-timed-metadata">#non-timed-metadata</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-non-timed-metadata">2. Immersive Audio Bitstream Definition</a>
-    <li><a href="#ref-for-non-timed-metadata①">5.2. IA Encoder</a>
-    <li><a href="#ref-for-non-timed-metadata②">5.2.2. IA Encoder for Channel Audio format</a>
+    <li><a href="#ref-for-non-timed-metadata①">2.1. Codec Specific</a>
+    <li><a href="#ref-for-non-timed-metadata②">5.2. IA Encoder</a>
+    <li><a href="#ref-for-non-timed-metadata③">5.2.2. IA Encoder for Channel Audio format</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="codec_specific_info">
    <b><a href="#codec_specific_info">#codec_specific_info</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-codec_specific_info">2.1.1. IAC-OPUS Specific</a>
-    <li><a href="#ref-for-codec_specific_info①">2.2.6. Codec Specific Info OBU Syntax and Semantics</a> <a href="#ref-for-codec_specific_info②">(2)</a>
-    <li><a href="#ref-for-codec_specific_info③">5.2. IA Encoder</a>
-    <li><a href="#ref-for-codec_specific_info④">5.2.2. IA Encoder for Channel Audio format</a>
-    <li><a href="#ref-for-codec_specific_info⑤">6.1.2.3. Recon Gain</a>
+    <li><a href="#ref-for-codec_specific_info">2.1. Codec Specific</a>
+    <li><a href="#ref-for-codec_specific_info①">2.1.1. IAC-OPUS Specific</a>
+    <li><a href="#ref-for-codec_specific_info②">2.2.6. Codec Specific Info OBU Syntax and Semantics</a> <a href="#ref-for-codec_specific_info③">(2)</a>
+    <li><a href="#ref-for-codec_specific_info④">5.2. IA Encoder</a>
+    <li><a href="#ref-for-codec_specific_info⑤">5.2.2. IA Encoder for Channel Audio format</a>
+    <li><a href="#ref-for-codec_specific_info⑥">6.1.2.3. Recon Gain</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="ia_static_meta">
    <b><a href="#ia_static_meta">#ia_static_meta</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-ia_static_meta">5.2. IA Encoder</a> <a href="#ref-for-ia_static_meta①">(2)</a>
-    <li><a href="#ref-for-ia_static_meta②">5.2.2. IA Encoder for Channel Audio format</a> <a href="#ref-for-ia_static_meta③">(2)</a> <a href="#ref-for-ia_static_meta④">(3)</a>
-    <li><a href="#ref-for-ia_static_meta⑤">5.2.3. IA Encoder for Ambisonics and Channel Audio format</a>
-    <li><a href="#ref-for-ia_static_meta⑥">6.1. IA Decoder</a> <a href="#ref-for-ia_static_meta⑦">(2)</a>
-    <li><a href="#ref-for-ia_static_meta⑧">6.1.1. IA Decoder for Ambisonics decoding</a>
-    <li><a href="#ref-for-ia_static_meta⑨">6.1.2. IA Decoder for Channel Audio decoding</a>
-    <li><a href="#ref-for-ia_static_meta①⓪">6.1.2.1. Gain</a>
+    <li><a href="#ref-for-ia_static_meta">2.1. Codec Specific</a>
+    <li><a href="#ref-for-ia_static_meta①">5.2. IA Encoder</a> <a href="#ref-for-ia_static_meta②">(2)</a>
+    <li><a href="#ref-for-ia_static_meta③">5.2.2. IA Encoder for Channel Audio format</a> <a href="#ref-for-ia_static_meta④">(2)</a> <a href="#ref-for-ia_static_meta⑤">(3)</a>
+    <li><a href="#ref-for-ia_static_meta⑥">5.2.3. IA Encoder for Ambisonics and Channel Audio format</a>
+    <li><a href="#ref-for-ia_static_meta⑦">6.1. IA Decoder</a> <a href="#ref-for-ia_static_meta⑧">(2)</a>
+    <li><a href="#ref-for-ia_static_meta⑨">6.1.1. IA Decoder for Ambisonics decoding</a>
+    <li><a href="#ref-for-ia_static_meta①⓪">6.1.2. IA Decoder for Channel Audio decoding</a>
+    <li><a href="#ref-for-ia_static_meta①①">6.1.2.1. Gain</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="ia-frame">
@@ -4251,10 +4261,11 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
   <aside class="dfn-panel" data-for="timed-metadata">
    <b><a href="#timed-metadata">#timed-metadata</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-timed-metadata">5.2. IA Encoder</a> <a href="#ref-for-timed-metadata①">(2)</a>
-    <li><a href="#ref-for-timed-metadata②">5.2.2. IA Encoder for Channel Audio format</a> <a href="#ref-for-timed-metadata③">(2)</a> <a href="#ref-for-timed-metadata④">(3)</a>
-    <li><a href="#ref-for-timed-metadata⑤">5.2.3. IA Encoder for Ambisonics and Channel Audio format</a> <a href="#ref-for-timed-metadata⑥">(2)</a>
-    <li><a href="#ref-for-timed-metadata⑦">6.1. IA Decoder</a>
+    <li><a href="#ref-for-timed-metadata">2.1. Codec Specific</a>
+    <li><a href="#ref-for-timed-metadata①">5.2. IA Encoder</a> <a href="#ref-for-timed-metadata②">(2)</a>
+    <li><a href="#ref-for-timed-metadata③">5.2.2. IA Encoder for Channel Audio format</a> <a href="#ref-for-timed-metadata④">(2)</a> <a href="#ref-for-timed-metadata⑤">(3)</a>
+    <li><a href="#ref-for-timed-metadata⑥">5.2.3. IA Encoder for Ambisonics and Channel Audio format</a> <a href="#ref-for-timed-metadata⑦">(2)</a>
+    <li><a href="#ref-for-timed-metadata⑧">6.1. IA Decoder</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="ia_coded_data">
@@ -4275,25 +4286,30 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
   <aside class="dfn-panel" data-for="substream">
    <b><a href="#substream">#substream</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-substream">5.2. IA Encoder</a> <a href="#ref-for-substream①">(2)</a>
-    <li><a href="#ref-for-substream②">5.2.1. IA Encoder for Ambisonics format</a>
-    <li><a href="#ref-for-substream③">5.2.2. IA Encoder for Channel Audio format</a> <a href="#ref-for-substream④">(2)</a>
-    <li><a href="#ref-for-substream⑤">5.2.3. IA Encoder for Ambisonics and Channel Audio format</a>
-    <li><a href="#ref-for-substream⑥">6.1. IA Decoder</a>
-    <li><a href="#ref-for-substream⑦">6.1.1. IA Decoder for Ambisonics decoding</a>
+    <li><a href="#ref-for-substream">2.1.1. IAC-OPUS Specific</a>
+    <li><a href="#ref-for-substream①">2.1.2. IAC-AAC-LC Specific</a>
+    <li><a href="#ref-for-substream②">5.2. IA Encoder</a> <a href="#ref-for-substream③">(2)</a>
+    <li><a href="#ref-for-substream④">5.2.1. IA Encoder for Ambisonics format</a>
+    <li><a href="#ref-for-substream⑤">5.2.2. IA Encoder for Channel Audio format</a> <a href="#ref-for-substream⑥">(2)</a>
+    <li><a href="#ref-for-substream⑦">5.2.3. IA Encoder for Ambisonics and Channel Audio format</a>
+    <li><a href="#ref-for-substream⑧">6.1. IA Decoder</a>
+    <li><a href="#ref-for-substream⑨">6.1.1. IA Decoder for Ambisonics decoding</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="temporal-unit">
    <b><a href="#temporal-unit">#temporal-unit</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-temporal-unit">2. Immersive Audio Bitstream Definition</a>
-    <li><a href="#ref-for-temporal-unit①">2.2.10. Temporal Delimitor OBU Syntax and Semantics</a>
-    <li><a href="#ref-for-temporal-unit②">3.1. General Requirements &amp; Brands</a> <a href="#ref-for-temporal-unit③">(2)</a>
-    <li><a href="#ref-for-temporal-unit④">3.4. IA Sample Format</a> <a href="#ref-for-temporal-unit⑤">(2)</a>
-    <li><a href="#ref-for-temporal-unit⑥">5.2. IA Encoder</a> <a href="#ref-for-temporal-unit⑦">(2)</a>
-    <li><a href="#ref-for-temporal-unit⑧">5.2.1. IA Encoder for Ambisonics format</a>
-    <li><a href="#ref-for-temporal-unit⑨">5.2.2. IA Encoder for Channel Audio format</a> <a href="#ref-for-temporal-unit①⓪">(2)</a>
-    <li><a href="#ref-for-temporal-unit①①">5.2.3. IA Encoder for Ambisonics and Channel Audio format</a>
+    <li><a href="#ref-for-temporal-unit①">2.1. Codec Specific</a>
+    <li><a href="#ref-for-temporal-unit②">2.1.1. IAC-OPUS Specific</a>
+    <li><a href="#ref-for-temporal-unit③">2.1.2. IAC-AAC-LC Specific</a>
+    <li><a href="#ref-for-temporal-unit④">2.2.10. Temporal Delimitor OBU Syntax and Semantics</a>
+    <li><a href="#ref-for-temporal-unit⑤">3.1. General Requirements &amp; Brands</a> <a href="#ref-for-temporal-unit⑥">(2)</a>
+    <li><a href="#ref-for-temporal-unit⑦">3.4. IA Sample Format</a> <a href="#ref-for-temporal-unit⑧">(2)</a>
+    <li><a href="#ref-for-temporal-unit⑨">5.2. IA Encoder</a> <a href="#ref-for-temporal-unit①⓪">(2)</a>
+    <li><a href="#ref-for-temporal-unit①①">5.2.1. IA Encoder for Ambisonics format</a>
+    <li><a href="#ref-for-temporal-unit①②">5.2.2. IA Encoder for Channel Audio format</a> <a href="#ref-for-temporal-unit①③">(2)</a>
+    <li><a href="#ref-for-temporal-unit①④">5.2.3. IA Encoder for Ambisonics and Channel Audio format</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="obu">
