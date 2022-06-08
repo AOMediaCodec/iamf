@@ -7,7 +7,7 @@ Editor: Felicia Lim, Google, flim@google.com
 Repository: AOMediaCodec/iac
 Shortname: iac
 URL: https://aomediacodec.github.io/iac/
-Date: 2022-05-26
+Date: 2022-06-03
 Abstract: This document specifies the storage format for immersive audio (IA) bitstreams in [[!ISOBMFF]] tracks.
 </pre>
 
@@ -175,7 +175,7 @@ Each [=IA bitstream=] is a self-decodable and composed of [=Non-timed Metadata=]
 - <dfn noexprot>Codec_Specific_Info</dfn> is a static metadata indicating a codec specific information which has been used to generate a Substream. 
 - <dfn noexprot>IA_Static_Meta</dfn> is a codec-agnostic and static metadata indicating the configuration of IA Frames.
 - <dfn noexprot>IA Frame</dfn> is a frame format for immersive audio (IA). It is composed of Timed Metadata if present and followed by IA_Coded_Data. 
-- <dfn noexprot>Timed Metadata</dfn> is a codec-agnostic and non-static metadata including frame variable informaiton. It is composed of Demixing_Info, Substream_Boundary_Info and Recon_Gain_Info.
+- <dfn noexprot>Timed Metadata</dfn> is a codec-agnostic and non-static metadata including frame variable informaiton. It is composed of Demixing_Info and Recon_Gain_Info.
 - <dfn noexprot>IA_Coded_Data</dfn> is a coded data for IA Frame. It is composed of one or more ChannelGroups. Where, ChannelGroup is composed of one or more Substreams.
 - <dfn noexport>ChannelGroup</dfn> is a set of Substreams which is able to provide a spatial resolution of audio contents by itself or which is able to provide an enhanced spatial resolution of audio contents by combining with the preceding ChannelGroups within the IA Frame.
 - <dfn noexprot>Substream</dfn> is a byte aligned raw coded stream for single channel or two channels.
@@ -200,14 +200,17 @@ NOTE: All OBUs composing of IA bitstream except Codec_Specific_Info_OBU and Subs
 
 ## Codec Specific ## {#codec-specific}
 
-This section defines codec specific information for Codec_Specific_Info and Substream.
+This section defines codec specific information for Codec_Specific_Info and Substream and random access point.
 
 - Codec_Specific_Info is composed of [=Codec_ID=] and [=Decoder_Config=]. Codec_ID shall indicate the codec which has been used to generate Substreams within IA bitstream and Decder_Config shall indicate the decoding parameters which are applied to all of Substreams within IA bitstream.
 
 For legacy codecs, Decder_Config shall be exactly the same information as the conventional file parser feeds to the codec decoders for decoding of mono or stereo bitstream. For future codecs, Decder_Config shall include all of decoding parameters which are required to decode Substreams.
 
 - Substream is a raw coded stream for mono or stereo channels. Substream format shall be exactly the same as the sample format (before packing OBU) for mono or stereo audio file which consists of only one single coded stream by the Codec_ID.
- 
+
+In this version of the specification, [=Timed Metadata=] of an IA_Frame has no decoding dependency with Timed Metadatas of the preceding IA_Frames. Therefore, every [=Temporal Unit=] is a random access point with following constraints as long as every frame of Substream by a given codec is a random access point:
+- Prior to beginning to decode the Temporal Unit, IAC decoders need to be initialized with its relevant [=Non-timed Metadata=] (i.e. [=Codec_Specific_Info=] and [=IA_Static_Meta=] related to the Temporal Unit) which defines the following Temporal Units including the Temporal Unit.
+
 ### IAC-OPUS Specific ### {#iac-opus-specific}
 
 [=Codec_Specific_Info=] for IAC-OPUS shall conform to [=ID Header=] with [=ChannelMappingFamily=] = 0 of [[!RFC7845]] with following constraints:
@@ -215,6 +218,8 @@ For legacy codecs, Decder_Config shall be exactly the same information as the co
 - [=Output Gain=] shall not be used. In other words, it shall be set to 0dB.
 
 Substream format shall be [=opus packet=] of [[!RFC6716]] which contains only one single frame of mono or stereo channels.
+
+As every frame of [=Substream=] by IAC-OPUS is a random access point, every [=Temporal Unit=] for IAC-OPUS is a random access point.
 
 ### IAC-AAC-LC Specific ### {#iac-aac-lc-specific}
 
@@ -233,6 +238,8 @@ Substream format shall be [=opus packet=] of [[!RFC6716]] which contains only on
 		- [=extensionFlag=] = 0
 
 Substream format shall be [=raw_data_block()=] of [[!AAC]] which contains only one single frame of mono or stereo channels.
+
+As every frame of [=Substream=] by IAC-AAC-LC is a random access point, every [=Temporal Unit=] for IAC-AAC-LC is a random access point.
  
 ## OPEN Bitstream Unit (OBU) Syntax and Semantics ## {#obu-section}
 
