@@ -1487,9 +1487,9 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version 37b7e7e68, updated Fri May 27 15:08:11 2022 -0700" name="generator">
+  <meta content="Bikeshed version 44af0bf3e, updated Fri Jul 29 17:05:16 2022 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iac/" rel="canonical">
-  <meta content="c52ef6d9441330cc017700039b5e6e42923b5ea2" name="document-revision">
+  <meta content="6ece6ddbdd8b0f0fccde28d05c213d806ff1aa90" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -1934,7 +1934,7 @@ dfn > a.self-link::before      { content: "#"; }
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.aomedia.org/" style="width: 200px"> <img alt="AOM" height="60" src="https://aomedia.org/assets/images/aomedia-logo-rgb.svg" width="200"> </a> </p>
    <h1 class="p-name no-ref" id="title">Immersive Audio Container</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">AOM Working Group Draft, <time class="dt-updated" datetime="2022-06-08">8 June 2022</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">AOM Working Group Draft, <time class="dt-updated" datetime="2022-07-26">26 July 2022</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1961,7 +1961,7 @@ dfn > a.self-link::before      { content: "#"; }
   </div>
   <div class="p-summary" data-fill-with="abstract">
    <h2 class="no-num no-toc no-ref heading settled" id="abstract"><span class="content">Abstract</span></h2>
-   <p>This document specifies the storage format for immersive audio (IA) bitstreams in <a data-link-type="biblio" href="#biblio-isobmff">[ISOBMFF]</a> tracks.</p>
+   <p>This document specifies the immersive audio (IA) bitstream format and the storage format for the IA bitstream in one single <a data-link-type="biblio" href="#biblio-isobmff">[ISOBMFF]</a> track.</p>
   </div>
   <div data-fill-with="at-risk"></div>
   <nav data-fill-with="table-of-contents" id="toc">
@@ -2037,9 +2037,9 @@ dfn > a.self-link::before      { content: "#"; }
       <li><a href="#CommonEncryption"><span class="secno">3.6</span> <span class="content">Common Encryption</span></a>
       <li><a href="#codecsparameter"><span class="secno">3.7</span> <span class="content">Codecs Parameter String</span></a>
      </ol>
-    <li><a href="#iacdecapsulation"><span class="secno">4</span> <span class="content">Informative Annex: IAC Decapsulation Guideline</span></a>
+    <li><a href="#iacdecapsulation"><span class="secno">4</span> <span class="content">IAC Decapsulation Process</span></a>
     <li>
-     <a href="#iaencoding"><span class="secno">5</span> <span class="content">Informative Annex: IA Encoding Guideline</span></a>
+     <a href="#iaencoding"><span class="secno">5</span> <span class="content">IA Encoding Process</span></a>
      <ol class="toc">
       <li><a href="#iaencoding-inputaudioformat"><span class="secno">5.1</span> <span class="content">Input Audio Format</span></a>
       <li>
@@ -2059,7 +2059,7 @@ dfn > a.self-link::before      { content: "#"; }
        </ol>
      </ol>
     <li>
-     <a href="#iadecoding"><span class="secno">6</span> <span class="content">Informative Annex: IA Decoding Process</span></a>
+     <a href="#iadecoding"><span class="secno">6</span> <span class="content">IA Decoding Process</span></a>
      <ol class="toc">
       <li>
        <a href="#iadecoding-iadecoder"><span class="secno">6.1</span> <span class="content">IA Decoder</span></a>
@@ -2096,7 +2096,8 @@ dfn > a.self-link::before      { content: "#"; }
   </nav>
   <main>
    <h2 class="heading settled" data-level="1" id="introduction"><span class="secno">1. </span><span class="content">Introduction</span><a class="self-link" href="#introduction"></a></h2>
-   <p>Immersive audio container (<dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="iac">IAC</dfn>) is the storage format for immersive audio (IA) bitstreams in <a data-link-type="biblio" href="#biblio-isobmff">[ISOBMFF]</a> tracks.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="ia-bitstream">IA bitstream</dfn> is an codec-agnostic audio bitstream format to deliver three dimensional sound fields that can be used for multichannel sound playback and immersive experience and conceptually it consists of codec-dependent bitstream(s) and codec-agnostic metadata. And, it is designed to be able to reuse conventional encoding and decoding mechanisam as the codec-dependent bitstream consists of one or more coded streams. Where, each coded stream is an coded data for mono or stereo or more than 2 channels.</p>
+   <p>Immersive audio container (<dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="iac">IAC</dfn>) is the storage format for immersive audio (IA) bitstream in one single <a data-link-type="biblio" href="#biblio-isobmff">[ISOBMFF]</a> track.</p>
    <p>IAC is aimed to cover a wide range of applications for both surround sound and 3D audio, which is becoming more prevalent and accessible. These applications include internet audio streaming, multicasting/broadcasting services, file download, gaming, communication and extended-reality XR. The IAC format should help to provide an immersive 3D audio experience on a wide-range of devices from big screen to home entertainment, e.g. headsets, mobile phones, tablets, TVs, sound bars and home theater systems.</p>
    <p>Figure 1 shows an conceptual IAC architecture.</p>
    <center><img height="216" src="images/Conceptual IAC Architecture.png" width="800"></center>
@@ -2116,21 +2117,20 @@ dfn > a.self-link::before      { content: "#"; }
     <li data-md>
      <p>Post-Processor outputs Immersive 3D Audio by using the decoded Pre-Processed Audio and Codec Agnostic Metadata.</p>
    </ul>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="ia-bitstream">IA bitstream</dfn> is an codec-agnostic audio bitstream format to deliver three dimensional sound fields that can be used for multichannel sound playback and immersive experience and conceptually it consists of codec-dependent bitstream(s) and codec-agnostic metadata. And, it is designed to be able to reuse conventional mono or stereo encoding and decoding mechanisam as the codec-dependent bitstream consists of one or more coded streams. Where, each coded stream is an coded data for mono or stereo channels.</p>
    <p>This specification is formulated as follows:</p>
    <ul>
     <li data-md>
-     <p><a href="#introduction">§ 1 Introduction</a> describes a conceptual IAC architecture (Informative section).</p>
+     <p><a href="#introduction">§ 1 Introduction</a> describes a conceptual IAC architecture.</p>
     <li data-md>
-     <p><a href="#iabitstream-definition">§ 2 Immersive Audio Bitstream Definition</a> specifies the definition of IA bitstream (Normative section).</p>
+     <p><a href="#iabitstream-definition">§ 2 Immersive Audio Bitstream Definition</a> specifies the definition of IA bitstream.</p>
     <li data-md>
-     <p><a href="#basic-encapsulation">§ 3 Basic Encapsulation Scheme</a> specifies the way to encapsulate IA bitstream into <a data-link-type="biblio" href="#biblio-isobmff">[ISOBMFF]</a> tracks (Normative section).</p>
+     <p><a href="#basic-encapsulation">§ 3 Basic Encapsulation Scheme</a> specifies the way to encapsulate IA bitstream into <a data-link-type="biblio" href="#biblio-isobmff">[ISOBMFF]</a> tracks.</p>
     <li data-md>
-     <p><a href="#iacdecapsulation">§ 4 Informative Annex: IAC Decapsulation Guideline</a> provides a way to decapsulate IAC file back into IA bitstream (Informative section).</p>
+     <p><a href="#iacdecapsulation">§ 4 IAC Decapsulation Process</a> provides a way to decapsulate IAC file back into IA bitstream.</p>
     <li data-md>
-     <p><a href="#iaencoding">§ 5 Informative Annex: IA Encoding Guideline</a> provides a guideline for Pre-Processor to generate Pre-Processed Audio and Codec Agnostic Metadata and IAC encoding model based on the conventional more or stereo encoding model (Informative section).</p>
+     <p><a href="#iaencoding">§ 5 IA Encoding Process</a> provides a guideline for Pre-Processor to generate Pre-Processed Audio and Codec Agnostic Metadata and IAC encoding model based on the conventional more or stereo encoding model.</p>
     <li data-md>
-     <p><a href="#iadecoding">§ 6 Informative Annex: IA Decoding Process</a> provides IAC decoding model based on the conventional more or stereo decoding model and a guideline for Post-Processor to generate Immersive 3D Audio (Informative section).</p>
+     <p><a href="#iadecoding">§ 6 IA Decoding Process</a> provides IAC decoding model based on the conventional more or stereo decoding model and a guideline for Post-Processor to generate Immersive 3D Audio.</p>
    </ul>
    <h2 class="heading settled" data-level="2" id="iabitstream-definition"><span class="secno">2. </span><span class="content">Immersive Audio Bitstream Definition</span><a class="self-link" href="#iabitstream-definition"></a></h2>
    <p>An immersive audio (IA) sequence is composed of a sequence of IA bitstreams.</p>
@@ -2722,7 +2722,7 @@ Quantity:  One of more
    </ul>
 <pre>aiac.0000.00.203274.Opus
 </pre>
-   <h2 class="heading settled" data-level="4" id="iacdecapsulation"><span class="secno">4. </span><span class="content">Informative Annex: IAC Decapsulation Guideline</span><a class="self-link" href="#iacdecapsulation"></a></h2>
+   <h2 class="heading settled" data-level="4" id="iacdecapsulation"><span class="secno">4. </span><span class="content">IAC Decapsulation Process</span><a class="self-link" href="#iacdecapsulation"></a></h2>
    <p>This section provides a guideline for IAC parser to reconstruct IA bitstreams (i.e., IA sequence) from IAC file.</p>
    <p>When IAC parser feeds the reconstructed IA bitstreams to IAC-OBU parser, IA_Stream_Indicator_OBU is placed at the front of the first IA bistream to let IAC-OBU parser know OBUs for IA bistreams are coming.</p>
    <p>Figure 9 shows the mirroring process of the encapsulation scheme of IA bitstream specified in <a href="#basic-encapsulation">§ 3 Basic Encapsulation Scheme</a>.</p>
@@ -2775,7 +2775,7 @@ Quantity:  One of more
     <li data-md>
      <p><a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config②">Decoder_Config</a> is copied from <a data-link-type="dfn" href="https://www.iso.org/standard/55688.html#" id="termref-for-⑦⑦">DecoderConfigDescriptor()</a> of <a data-link-type="dfn" href="#esds" id="ref-for-esds">esds</a> box.</p>
    </ul>
-   <h2 class="heading settled" data-level="5" id="iaencoding"><span class="secno">5. </span><span class="content">Informative Annex: IA Encoding Guideline</span><a class="self-link" href="#iaencoding"></a></h2>
+   <h2 class="heading settled" data-level="5" id="iaencoding"><span class="secno">5. </span><span class="content">IA Encoding Process</span><a class="self-link" href="#iaencoding"></a></h2>
    <p>This section provides a guideline for IA encoding for a given input audio format.</p>
    <h3 class="heading settled" data-level="5.1" id="iaencoding-inputaudioformat"><span class="secno">5.1. </span><span class="content">Input Audio Format</span><a class="self-link" href="#iaencoding-inputaudioformat"></a></h3>
    <p>Recommended input audo format for IA encoding is as follows:</p>
@@ -3052,7 +3052,7 @@ Quantity:  One of more
        <p>Height Energy Quantification module generates a surround to height mixing parameter (w(k)) which is decided according to the relative energy difference between the top and surround channels of input channel audio.</p>
        <ul>
         <li data-md>
-         <p>If the energy of top channels is bigger than that of surround ones, then w_idx_offset(k) is set to 1. Otherwise, it is set to -1. And, w(k) is calculated based on w_idx_offset(k) and conforms to <a href="#iadecoding">§ 6 Informative Annex: IA Decoding Process</a>.</p>
+         <p>If the energy of top channels is bigger than that of surround ones, then w_idx_offset(k) is set to 1. Otherwise, it is set to -1. And, w(k) is calculated based on w_idx_offset(k) and conforms to <a href="#iadecoding">§ 6 IA Decoding Process</a>.</p>
        </ul>
      </ul>
     <li data-md>
@@ -3205,7 +3205,7 @@ Recon_Gain for D_Rtb4:
    <p>Figure 12 shows IA encoding flowchart for Ambisonics and Channel Audio format with non-scalable channel audio.</p>
    <center><img height="337" src="images/IA Encoding Flowchart for Ambisonics and Channel Audio Format.png" width="745"></center>
    <center><b>Figure 12. </b>IA Encoding Flowchart for Ambisonics and Channel Audio Format</center>
-   <h2 class="heading settled" data-level="6" id="iadecoding"><span class="secno">6. </span><span class="content">Informative Annex: IA Decoding Process</span><a class="self-link" href="#iadecoding"></a></h2>
+   <h2 class="heading settled" data-level="6" id="iadecoding"><span class="secno">6. </span><span class="content">IA Decoding Process</span><a class="self-link" href="#iadecoding"></a></h2>
    <p>This section provides a guideline for IA decoding for a given <a data-link-type="dfn" href="#ia-bitstream" id="ref-for-ia-bitstream④">IA bitstream</a>.</p>
    <h3 class="heading settled" data-level="6.1" id="iadecoding-iadecoder"><span class="secno">6.1. </span><span class="content">IA Decoder</span><a class="self-link" href="#iadecoding-iadecoder"></a></h3>
    <p>IA decoder can selects one of three decoding modes based on <a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode⑦">Ambisonics_Mode</a> and <a data-link-type="dfn" href="#channel_audio_layer" id="ref-for-channel_audio_layer⑥">Channel_Audio_Layer</a> in <a data-link-type="dfn" href="#ia_static_meta" id="ref-for-ia_static_meta⑧">IA_Static_Meta</a>.</p>
@@ -3550,7 +3550,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
    <div class="example" id="example-example"><a class="self-link" href="#example-example"></a> This is an example of an informative example. </div>
    <p> Informative notes begin with the word “Note”
             and are set apart from the normative text with <code>class="note"</code>, like this: </p>
-   <p class="note" role="note"> Note, this is an informative note. </p>
+   <p class="note" role="note"> Note, this is an informative note.</p>
   </div>
 <script>
 (function() {
@@ -3923,7 +3923,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
     <li><a href="#termref-for-">2.2.6. Codec Specific Info OBU Syntax and Semantics</a>
     <li><a href="#termref-for-">3.3.2. MP4A Specific Box</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.2.3. Syntax</a>
-    <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a>
+    <li><a href="#termref-for-">4. IAC Decapsulation Process</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
@@ -3933,7 +3933,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
     <li><a href="#termref-for-">2.2.6. Codec Specific Info OBU Syntax and Semantics</a>
     <li><a href="#termref-for-">3.3.2. MP4A Specific Box</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.2.3. Syntax</a>
-    <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a>
+    <li><a href="#termref-for-">4. IAC Decapsulation Process</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
@@ -3943,7 +3943,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
     <li><a href="#termref-for-">2.2.6. Codec Specific Info OBU Syntax and Semantics</a>
     <li><a href="#termref-for-">3.3.2. MP4A Specific Box</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.2.3. Syntax</a>
-    <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a>
+    <li><a href="#termref-for-">4. IAC Decapsulation Process</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
@@ -3999,35 +3999,35 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
    <a href="https://www.iso.org/standard/55688.html#">https://www.iso.org/standard/55688.html#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#termref-for-">2.1.2. IAC-AAC-LC Specific</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a> <a href="#termref-for-">(5)</a>
-    <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a>
+    <li><a href="#termref-for-">4. IAC Decapsulation Process</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
    <a href="https://www.iso.org/standard/55688.html#">https://www.iso.org/standard/55688.html#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#termref-for-">2.1.2. IAC-AAC-LC Specific</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a> <a href="#termref-for-">(5)</a>
-    <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a>
+    <li><a href="#termref-for-">4. IAC Decapsulation Process</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
    <a href="https://www.iso.org/standard/55688.html#">https://www.iso.org/standard/55688.html#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#termref-for-">2.1.2. IAC-AAC-LC Specific</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a> <a href="#termref-for-">(5)</a>
-    <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a>
+    <li><a href="#termref-for-">4. IAC Decapsulation Process</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
    <a href="https://www.iso.org/standard/55688.html#">https://www.iso.org/standard/55688.html#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#termref-for-">2.1.2. IAC-AAC-LC Specific</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a> <a href="#termref-for-">(5)</a>
-    <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a>
+    <li><a href="#termref-for-">4. IAC Decapsulation Process</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
    <a href="https://www.iso.org/standard/55688.html#">https://www.iso.org/standard/55688.html#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#termref-for-">2.1.2. IAC-AAC-LC Specific</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a> <a href="#termref-for-">(5)</a>
-    <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a>
+    <li><a href="#termref-for-">4. IAC Decapsulation Process</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
@@ -4039,7 +4039,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
     <li><a href="#termref-for-">3.3.1. OPUS Specific Box</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.3. Syntax</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.4. Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
-    <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a> <a href="#termref-for-">(5)</a>
+    <li><a href="#termref-for-">4. IAC Decapsulation Process</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a> <a href="#termref-for-">(5)</a>
     <li><a href="#termref-for-">5.1. Input Audio Format</a>
     <li><a href="#termref-for-">5.2. IA Encoder</a>
     <li><a href="#termref-for-">5.2.1. IA Encoder for Ambisonics format</a> <a href="#termref-for-">(2)</a>
@@ -4054,7 +4054,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
     <li><a href="#termref-for-">3.3.1. OPUS Specific Box</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.3. Syntax</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.4. Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
-    <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a> <a href="#termref-for-">(5)</a>
+    <li><a href="#termref-for-">4. IAC Decapsulation Process</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a> <a href="#termref-for-">(5)</a>
     <li><a href="#termref-for-">5.1. Input Audio Format</a>
     <li><a href="#termref-for-">5.2. IA Encoder</a>
     <li><a href="#termref-for-">5.2.1. IA Encoder for Ambisonics format</a> <a href="#termref-for-">(2)</a>
@@ -4069,7 +4069,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
     <li><a href="#termref-for-">3.3.1. OPUS Specific Box</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.3. Syntax</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.4. Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
-    <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a> <a href="#termref-for-">(5)</a>
+    <li><a href="#termref-for-">4. IAC Decapsulation Process</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a> <a href="#termref-for-">(5)</a>
     <li><a href="#termref-for-">5.1. Input Audio Format</a>
     <li><a href="#termref-for-">5.2. IA Encoder</a>
     <li><a href="#termref-for-">5.2.1. IA Encoder for Ambisonics format</a> <a href="#termref-for-">(2)</a>
@@ -4084,7 +4084,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
     <li><a href="#termref-for-">3.3.1. OPUS Specific Box</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.3. Syntax</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.4. Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
-    <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a> <a href="#termref-for-">(5)</a>
+    <li><a href="#termref-for-">4. IAC Decapsulation Process</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a> <a href="#termref-for-">(5)</a>
     <li><a href="#termref-for-">5.1. Input Audio Format</a>
     <li><a href="#termref-for-">5.2. IA Encoder</a>
     <li><a href="#termref-for-">5.2.1. IA Encoder for Ambisonics format</a> <a href="#termref-for-">(2)</a>
@@ -4099,7 +4099,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
     <li><a href="#termref-for-">3.3.1. OPUS Specific Box</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.3. Syntax</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.4. Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
-    <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a> <a href="#termref-for-">(5)</a>
+    <li><a href="#termref-for-">4. IAC Decapsulation Process</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a> <a href="#termref-for-">(5)</a>
     <li><a href="#termref-for-">5.1. Input Audio Format</a>
     <li><a href="#termref-for-">5.2. IA Encoder</a>
     <li><a href="#termref-for-">5.2.1. IA Encoder for Ambisonics format</a> <a href="#termref-for-">(2)</a>
@@ -4114,7 +4114,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
     <li><a href="#termref-for-">3.3.1. OPUS Specific Box</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.3. Syntax</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.4. Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
-    <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a> <a href="#termref-for-">(5)</a>
+    <li><a href="#termref-for-">4. IAC Decapsulation Process</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a> <a href="#termref-for-">(5)</a>
     <li><a href="#termref-for-">5.1. Input Audio Format</a>
     <li><a href="#termref-for-">5.2. IA Encoder</a>
     <li><a href="#termref-for-">5.2.1. IA Encoder for Ambisonics format</a> <a href="#termref-for-">(2)</a>
@@ -4129,7 +4129,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
     <li><a href="#termref-for-">3.3.1. OPUS Specific Box</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.3. Syntax</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.4. Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
-    <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a> <a href="#termref-for-">(5)</a>
+    <li><a href="#termref-for-">4. IAC Decapsulation Process</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a> <a href="#termref-for-">(5)</a>
     <li><a href="#termref-for-">5.1. Input Audio Format</a>
     <li><a href="#termref-for-">5.2. IA Encoder</a>
     <li><a href="#termref-for-">5.2.1. IA Encoder for Ambisonics format</a> <a href="#termref-for-">(2)</a>
@@ -4144,7 +4144,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
     <li><a href="#termref-for-">3.3.1. OPUS Specific Box</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.3. Syntax</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a>
     <li><a href="#termref-for-">3.3.1.4. Semantics</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
-    <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a> <a href="#termref-for-">(5)</a>
+    <li><a href="#termref-for-">4. IAC Decapsulation Process</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a> <a href="#termref-for-">(5)</a>
     <li><a href="#termref-for-">5.1. Input Audio Format</a>
     <li><a href="#termref-for-">5.2. IA Encoder</a>
     <li><a href="#termref-for-">5.2.1. IA Encoder for Ambisonics format</a> <a href="#termref-for-">(2)</a>
@@ -4169,14 +4169,14 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
    <a href="https://tools.ietf.org/html/rfc7845#">https://tools.ietf.org/html/rfc7845#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#termref-for-">2.1.1. IAC-OPUS Specific</a> <a href="#termref-for-">(2)</a>
-    <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a>
+    <li><a href="#termref-for-">4. IAC Decapsulation Process</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
    <a href="https://tools.ietf.org/html/rfc7845#">https://tools.ietf.org/html/rfc7845#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#termref-for-">2.1.1. IAC-OPUS Specific</a> <a href="#termref-for-">(2)</a>
-    <li><a href="#termref-for-">4. Informative Annex: IAC Decapsulation Guideline</a>
+    <li><a href="#termref-for-">4. IAC Decapsulation Process</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
@@ -4319,21 +4319,21 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
    <dt id="biblio-ai-cad-mixing">[AI-CAD-Mixing]
    <dd><a href="https://www.aes.org/e-lib/browse.cfm?elib=21489"><cite>AI 3D immersive audio codec based on content-adaptive dynamic down-mixing and up-mixing framework</cite></a>. Paper. URL: <a href="https://www.aes.org/e-lib/browse.cfm?elib=21489">https://www.aes.org/e-lib/browse.cfm?elib=21489</a>
   </dl>
-  <aside class="dfn-panel" data-for="iac">
-   <b><a href="#iac">#iac</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-iac">2. Immersive Audio Bitstream Definition</a>
-   </ul>
-  </aside>
   <aside class="dfn-panel" data-for="ia-bitstream">
    <b><a href="#ia-bitstream">#ia-bitstream</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-ia-bitstream">2. Immersive Audio Bitstream Definition</a>
     <li><a href="#ref-for-ia-bitstream①">5.2. IA Encoder</a> <a href="#ref-for-ia-bitstream②">(2)</a>
     <li><a href="#ref-for-ia-bitstream③">5.2.2. IA Encoder for Channel Audio format</a>
-    <li><a href="#ref-for-ia-bitstream④">6. Informative Annex: IA Decoding Process</a>
+    <li><a href="#ref-for-ia-bitstream④">6. IA Decoding Process</a>
     <li><a href="#ref-for-ia-bitstream⑤">6.1. IA Decoder</a>
     <li><a href="#ref-for-ia-bitstream⑥">6.1.1. IA Decoder for Ambisonics decoding</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="iac">
+   <b><a href="#iac">#iac</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-iac">2. Immersive Audio Bitstream Definition</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="non-timed-metadata">
@@ -4442,7 +4442,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
    <ul>
     <li><a href="#ref-for-codec_id">2.1. Codec Specific</a>
     <li><a href="#ref-for-codec_id①">2.1.2. IAC-AAC-LC Specific</a>
-    <li><a href="#ref-for-codec_id②">4. Informative Annex: IAC Decapsulation Guideline</a>
+    <li><a href="#ref-for-codec_id②">4. IAC Decapsulation Process</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="decoder_config">
@@ -4450,7 +4450,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
    <ul>
     <li><a href="#ref-for-decoder_config">2.1. Codec Specific</a>
     <li><a href="#ref-for-decoder_config①">2.1.2. IAC-AAC-LC Specific</a>
-    <li><a href="#ref-for-decoder_config②">4. Informative Annex: IAC Decapsulation Guideline</a>
+    <li><a href="#ref-for-decoder_config②">4. IAC Decapsulation Process</a>
     <li><a href="#ref-for-decoder_config③">5.2.2. IA Encoder for Channel Audio format</a>
     <li><a href="#ref-for-decoder_config④">6.1. IA Decoder</a>
     <li><a href="#ref-for-decoder_config⑤">6.1.2. IA Decoder for Channel Audio decoding</a>
@@ -4642,13 +4642,13 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
   <aside class="dfn-panel" data-for="dops">
    <b><a href="#dops">#dops</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dops">4. Informative Annex: IAC Decapsulation Guideline</a>
+    <li><a href="#ref-for-dops">4. IAC Decapsulation Process</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="esds">
    <b><a href="#esds">#esds</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-esds">4. Informative Annex: IAC Decapsulation Guideline</a>
+    <li><a href="#ref-for-esds">4. IAC Decapsulation Process</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="ia-sample">
@@ -4661,14 +4661,14 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
    <b><a href="#admi">#admi</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-admi">3.1. General Requirements &amp; Brands</a>
-    <li><a href="#ref-for-admi①">4. Informative Annex: IAC Decapsulation Guideline</a> <a href="#ref-for-admi②">(2)</a>
+    <li><a href="#ref-for-admi①">4. IAC Decapsulation Process</a> <a href="#ref-for-admi②">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="iasm">
    <b><a href="#iasm">#iasm</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-iasm">3.1. General Requirements &amp; Brands</a>
-    <li><a href="#ref-for-iasm①">4. Informative Annex: IAC Decapsulation Guideline</a>
+    <li><a href="#ref-for-iasm①">4. IAC Decapsulation Process</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="cc">
