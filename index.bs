@@ -7,7 +7,7 @@ Editor: Felicia Lim, Google, flim@google.com
 Repository: AOMediaCodec/iac
 Shortname: iac
 URL: https://aomediacodec.github.io/iac/
-Date: 2022-07-26
+Date: 2022-8-22
 Abstract: This document specifies the immersive audio (IA) bitstream format and the storage format for the IA bitstream in one single [[!ISOBMFF]] track.
 </pre>
 
@@ -152,24 +152,24 @@ url: https://en.wikipedia.org/wiki/Q_(number_format); spec: Q-Format; type: dfn;
 
 # Introduction # {#introduction}
 
-<dfn noexport>IA bitstream</dfn> is an codec-agnostic audio bitstream format to deliver three dimensional sound fields that can be used for multichannel sound playback and immersive experience and conceptually it consists of codec-dependent bitstream(s) and codec-agnostic metadata. And, it is designed to be able to reuse conventional encoding and decoding mechanisam as the codec-dependent bitstream consists of one or more coded streams. Where, each coded stream is an coded data for mono or stereo or more than 2 channels.
+The <dfn noexport>IA bitstream</dfn> is designed to represent immersive audio for presentation on a wide range of devices in both dynamic streaming and offline applications. These applications include internet audio streaming, multicasting/broadcasting services, file download, gaming, communication, virtual and augmented reality, and others. In these applications, audio may be played back on a wide range of devices, e.g. headsets, mobile phones, tablets, TVs, sound bars, home theater systems and big screen. 
 
-Immersive audio container (<dfn noexport>IAC</dfn>) is the storage format for immersive audio (IA) bitstream in one single [[!ISOBMFF]] track.
+The bitstream comprises a number of coded audio substreams and the metadata that describes how to decode, render and mix the substreams to generate an audio signal for playback. The bitstream format itself is codec-agnostic; any supported audio codec may be used to code the audio substreams.
 
-IAC is aimed to cover a wide range of applications for both surround sound and 3D audio, which is becoming more prevalent and accessible. These applications include internet audio streaming, multicasting/broadcasting services, file download, gaming, communication and extended-reality XR. The IAC format should help to provide an immersive 3D audio experience on a wide-range of devices from big screen to home entertainment, e.g. headsets, mobile phones, tablets, TVs, sound bars and home theater systems.
+The immersive audio container (<dfn noexport>IAC</dfn>) is the storage format for immersive audio (IA) bitstream in one single [[!ISOBMFF]] track.
 
-Figure 1 shows an conceptual IAC architecture.
+The figure below shows the conceptual IAC architecture.
 
 <center><img src="images/Conceptual IAC Architecture.png"></center>
-<center><b>Figure 1. </b>Conceptual IAC Architecture</center>
+<center><figcaption>Conceptual IAC Architecture</figcaption></center>
 
-For a given 3D audio such as Ambisonics and/or multichannel audio, 
+For a given input 3D audio,
 - Pre-Processor generates Pre-Processed Audio and Codec Agnostic Metadata for immersive audio (IA).
-- Audio Codec Enc generates Codec-Dependent Bitstream, which consists of the coded streams, coded from Pre-Processed Audio. 
+- Audio Codec Enc generates Codec-Dependent Bitstream, which consists of the coded streams, coded from Pre-Processed Audio.
 - File Packager generates IAC File by encapsulating IA bitstream, which consists of Codec-Dependent Bitstream and Codec Agnostic Metadata, into [[!ISOBMFF]] tracks.
 - File Parser reconstructs IA bitstream by decapsulating IAC File.
 - Audio Codec Dec outputs a decoded Pre-Processed Audio after decoding of Codec-Dependent Bitstream.
-- Post-Processor outputs Immersive 3D Audio by using the decoded Pre-Processed Audio and Codec Agnostic Metadata. 
+- Post-Processor outputs Immersive 3D Audio by using the decoded Pre-Processed Audio and Codec Agnostic Metadata.
 
 
 This specification is formulated as follows:
@@ -179,6 +179,7 @@ This specification is formulated as follows:
 - [[#iacdecapsulation]] provides a way to decapsulate IAC file back into IA bitstream.
 - [[#iaencoding]] provides a guideline for Pre-Processor to generate Pre-Processed Audio and Codec Agnostic Metadata and IAC encoding model based on the conventional more or stereo encoding model.
 - [[#iadecoding]] provides IAC decoding model based on the conventional more or stereo decoding model and a guideline for Post-Processor to generate Immersive 3D Audio.
+- [[#iaprofiles]] provides profiles for IA bitstreams and IA decoders.
 
 
 # Immersive Audio Bitstream Definition # {#iabitstream-definition}
@@ -1424,3 +1425,20 @@ Figure 21 to Figure 24 show static down-mix matrices to 3.1.2ch.
 
 Where, p1 = 0.707 and p2 = 0.3535
 
+# IA Profiles # {#iaprofiles}
+
+The IA Profiles define a set of capabilities that are required to decode the coresponding IA bitstreams.
+
+ISSUE: Define the profiles and their capabilities/constraints.
+
+## IA Simple Profile ## {#iaprofiles-simple}
+
+This section defines the simple profile for IA bitstream and IA decoder and specifies the conformance points of this profile.
+
+## IA Base Profile ## {#iaprofiles-base}
+
+This section defines the base profile for IA bitstream and IA decoder and specifies the conformance points of this profile.
+
+## IA Enhanced Profile ## {#iaprofiles-Enhanced}
+
+This section defines the enhanced profile for IA bitstream and IA decoder and specifies the conformance points of this profile.
