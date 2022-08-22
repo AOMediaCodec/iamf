@@ -152,6 +152,33 @@ url: https://en.wikipedia.org/wiki/Q_(number_format); spec: Q-Format; type: dfn;
 
 # Introduction # {#introduction}
 
+<dfn noexport>IA bitstream</dfn> is an codec-agnostic audio bitstream format to deliver three dimensional sound fields that can be used for multichannel sound playback and immersive experience and conceptually it consists of codec-dependent bitstream(s) and codec-agnostic metadata. And, it is designed to be able to reuse conventional encoding and decoding mechanisam as the codec-dependent bitstream consists of one or more coded streams. Where, each coded stream is an coded data for mono or stereo or more than 2 channels.
+
+Immersive audio container (<dfn noexport>IAC</dfn>) is the storage format for immersive audio (IA) bitstream in one single [[!ISOBMFF]] track.
+
+IAC is aimed to cover a wide range of applications for both surround sound and 3D audio, which is becoming more prevalent and accessible. These applications include internet audio streaming, multicasting/broadcasting services, file download, gaming, communication and extended-reality XR. The IAC format should help to provide an immersive 3D audio experience on a wide-range of devices from big screen to home entertainment, e.g. headsets, mobile phones, tablets, TVs, sound bars and home theater systems.
+
+Figure 1 shows an conceptual IAC architecture.
+
+<center><img src="images/Conceptual IAC Architecture.png"></center>
+<center><b>Figure 1. </b>Conceptual IAC Architecture</center>
+
+For a given 3D audio such as Ambisonics and/or multichannel audio, 
+- Pre-Processor generates Pre-Processed Audio and Codec Agnostic Metadata for immersive audio (IA).
+- Audio Codec Enc generates Codec-Dependent Bitstream, which consists of the coded streams, coded from Pre-Processed Audio. 
+- File Packager generates IAC File by encapsulating IA bitstream, which consists of Codec-Dependent Bitstream and Codec Agnostic Metadata, into [[!ISOBMFF]] tracks.
+- File Parser reconstructs IA bitstream by decapsulating IAC File.
+- Audio Codec Dec outputs a decoded Pre-Processed Audio after decoding of Codec-Dependent Bitstream.
+- Post-Processor outputs Immersive 3D Audio by using the decoded Pre-Processed Audio and Codec Agnostic Metadata. 
+
+
+This specification is formulated as follows:
+- [[#introduction]] describes a conceptual IAC architecture.
+- [[#iabitstream-definition]] specifies the definition of IA bitstream.
+- [[#basic-encapsulation]] specifies the way to encapsulate IA bitstream into [[!ISOBMFF]] tracks.
+- [[#iacdecapsulation]] provides a way to decapsulate IAC file back into IA bitstream.
+- [[#iaencoding]] provides a guideline for Pre-Processor to generate Pre-Processed Audio and Codec Agnostic Metadata and IAC encoding model based on the conventional more or stereo encoding model.
+- [[#iadecoding]] provides IAC decoding model based on the conventional more or stereo decoding model and a guideline for Post-Processor to generate Immersive 3D Audio.
 
 
 
