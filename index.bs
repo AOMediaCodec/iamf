@@ -560,6 +560,7 @@ ISSUE: We need to move sync_offset field into Update_Metadata_OBU which will pre
 class global_metadata_obu() {
   unsigned int (8) version;
   unsigned int (8) profile_version;
+  unsigned int (8) unique_counter
   unsigned int (leb128()) num_functions;
   for (i = 0; i < num_functions; i++) {
     unsigned int (leb128()) function_id_ref;
@@ -573,6 +574,8 @@ class global_metadata_obu() {
 greater is incompatible.
 
 <dfn noexport>profile_version</dfn> shall indicate the profile of an IA sequence. The MSB four bits shall indicate the profile of an IA sequence. Implementations should treat IA bitstreams where the MSB four bits of the version number match that of a recognized profile as backwards compatible with that specification. That is, the version number can be split into "profile major" and "profile minor" version sub-fields, with changes to the minor sub-field (in the LSB four bits) signaling compatible changes with the profile major version. The semantic of this field shall be only valid when the MSB four bits of [=version=] = 0. 
+
+<dfn noexport>unique_counter</dfn> shall be increased by one if this global metadata is changed from the previous one. Otherwise, it shall be set to the same value as unique_counter in the previous global metadata. The initial value shall be set to 0 (i.e. in the first global_metadata obu of IA sequence).
 
 <dfn noexport>num_functions</dfn> shall indicate the number of functions to be called in this OBU.
 
