@@ -19,6 +19,7 @@ url: https://www.iso.org/standard/68960.html#; spec: ISOBMFF; type: dfn;
 	text: SampleGroupDescriptionEntry
 	text: channelcount
 	text: samplerate
+	text: AudioPreRollEntry
 
 url: https://www.iso.org/standard/68960.html#; spec: ISOBMFF; type: property;
 	text: iso6
@@ -27,6 +28,7 @@ url: https://www.iso.org/standard/68960.html#; spec: ISOBMFF; type: property;
 	text: sbgp
 	text: edts
 	text: stts
+	text: prol
 
 url: https://www.iso.org/standard/43345.html#; spec: AAC; type: dfn;
 	text: raw_data_block()
@@ -190,7 +192,6 @@ The following specifies the type of syntax elements
  
  min if z < x, y if z > y, z otherwise.
  
- 
 
 # Introduction # {#introduction}
 
@@ -322,8 +323,9 @@ class obu_header() {
   unsigned int (1) obu_sync_flag;
   unsigned int (1) obu_duration_flag;
   unsigned int (1) obu_counter_flag;
+  unsigned int (2) obu_trimming_flag;
   unsigned int (1) obu_extension_flag;
-  unsigned int (7) obu_reserved_7bit;
+  unsigned int (5) obu_reserved_5bit;
 
   leb128() obu_size;
 
@@ -335,6 +337,10 @@ class obu_header() {
     leb128() obu_duration;
   if (obu_counter_flag == 1)
     leb128() obu_counter;
+  if (obu_trimming_flag == 1)
+    leb128() num_samples_to_trim_at_end;
+  if (obu_trimming_flag == 2)
+    leb128() num_samples_to_trim_at_start;
   if (obu_extension_flag == 1)
     leb128() extension_header_size;
 }
@@ -377,9 +383,13 @@ Where, the duration shall indicate the number of audio samples at the sampling r
 
 <dfn noexport>obu_counter</dfn> shall increment when its payload is different to the previous OBU of the same obu_type. If the payload is identical to the previous OBU of the same obu_type, i.e. it was redundantly copied or repeated in the bitstream, the value of obu_counter shall remain unchanged.
 
+<dfn noexport>num_samples_to_trim_at_start</dfn> shall indicate the number of samples that needs to be trimmed from the start of the samples in this Audio Frame OBU. 
+
+<dfn noexport>num_samples_to_trim_at_end</dfn> shall indicate the number of samples that needs to be trimmed from the end of the samples in this Audio Frame OBU.
+
 <dfn noexport>extension_header_size</dfn> shall indicate the size in bytes of the extension.
 
-<dfn noexport>obu_reserved_7bit</dfn> shall be set to 0. Reserved units are for future use and shall be ignored by an IAC-OBU parser.
+<dfn noexport>obu_reserved_5bit</dfn> shall be set to 0. Reserved units are for future use and shall be ignored by an IAC-OBU parser.
 
 ### Byte Alignment Syntax and Semantics ### {#obu-bytealignment}
 
@@ -451,8 +461,7 @@ class codec_config() {
   unsigned int (32) codec_id;
   decoder_config(codec_id);
   leb128() num_samples_per_frame;
-  leb128() num_samples_to_trim_at_start;
-  leb128() num_samples_to_trim_at_end;
+  signed int (16) roll_distance;
 }
 ```
 
@@ -470,9 +479,8 @@ For ISOBMFF encapsulation, it shall be the same as the [=boxtype=] of its AduioS
 
 <dfn noexport>num_samples_per_frame</dfn> shall indicate the frame length, in samples, of the raw coded audio provided in by audio_frame_obu().
 
-<dfn noexport>num_samples_to_trim_at_start</dfn> shall indicate the number of samples that needs to be trimmed from the start of the audio substream for gapless playback. It shall be same as that in decoder_config() if any or that implied from information of decoder_config() and its substream format.
-
-<dfn noexport>num_samples_to_trim_at_end</dfn> shall indicate the number of samples that needs to be trimmed from the end of the audio substream for gapless playback. It shall be same as that in decoder_config() if any. It shall be same as that in decoder_config() if any or that implied from information of decoder_config() and its substream format.
+<dfn noexport>roll_distance</dfn> is a signed integer that gives the number of frames that need to be decoded in order for a frame to be decoded correctly. A negative value indicates the number of frames before the frame to be decoded corrently.
+- It shall be set to -1 for IAC-AAC-LC and -4 (when the frame size = 960) for IAC-OPUS. IAC-FLAC may ignore this field. 
 
 <dfn value noexport for = "codec_config_obu" >num_audio_elements</dfn> shall specify the number of audio elements that are applying the codec_config() in this OBU.
 
@@ -1322,10 +1330,17 @@ IA bitstream shall comply with the bitstream which is specified in [#profiles-si
 
 During encapsulation process, OBUs of IA bistream are encapsulated into [[!ISOBMFF]] as follows:
 - Start Code OBU: version and profile version fields shall be moved to IASampleEntry.
-- Codec Config OBU: codec_id and decoder_config shall move to IASampleEntry. 'edts' shall reflect the trimming information.
+- Codec Config OBU: 
+	- codec_id and decoder_config() shall move to IASampleEntry.
+	- num_samples_per_frame shall mmove to 'stts'.
+	- roll_distance shall be stored as [=AudioPreRollEntry=] having [=grouping_type=], 'prol'.
 - Audio Element OBUs and Mix Presentation OBUs (with OBU syntax) shall be stored as a new sample group having [=grouping_type=], [=iagd=].
 - Parameter Block OBU for demixing_info() (with OBU syntax) may be stored as a new sample group having [=grouping_type=], [=demi=].
-- Sync OBU: shall be discarded
+- Sync OBU: shall be discarded if present.
+- Audio Frame OBU: 
+	- If obu_trimming_flag of the first Audio Frame OBU is set to 2, keep parsing following Audio Frame OBUs until get the Audio Frame OBU having obu_trimming_flag =  0, 1 or 11 and sum num_samples_to_trim_at_start. Then move it to 'edts'.
+	- If obu_trimming_flag of the last Audio Frame OBU is set to 1, then reflect num_samples_to_trim_at_end to stts.
+	
 - Each access unit (with OBU syntax) shall be stored as sample data without gap among OBUs.
 
 ### IA Sample Entry ### {#iasampleentry-section}
@@ -2150,7 +2165,7 @@ Below figure shows the mirroring process of the encapsulation scheme of IA bitst
 During decapsulation process, IAC file is decapsulated into IA bitstreams which conform to [[#obu-syntax]] as follows:
 - Step1: Reconstruction of descriptor OBUs (one Start Code OBU, followed by one Codec Config OBU, folowed by one or more Audio Element OBUs and followed by zero or more Mix Presentation OBUs) for the ith IA bitstream.
 	- [Step1-1] Start Code OBU: take version and profile_version fields from <code>aiac</code> sample entry.
-	- [Step1-2] Codec Config OBU: generate [=codec_id=] and [=decoder_config()=] from CodecSpecificBox of <code>aiac</code> sample entry, num_samples_per_frame from 'stts' box, and num_samples_to_trim_at_start and num_samples_to_trim_at_end, and packetize it by OBU with obu_type = OBU_IA_Codec_Config.
+	- [Step1-2] Codec Config OBU: generate [=codec_id=] and [=decoder_config()=] from CodecSpecificBox of <code>aiac</code> sample entry, num_samples_per_frame from 'stts' box and take roll_distance from [=AudioPreRollEntry=], and packetize it by OBU with obu_type = OBU_IA_Codec_Config.
 	- [Step1-3] Audio Element OBUs and Mix Presentation OBUs: take the ith SampleGroupDescriptionEntry as it is in SampleGroup with grouping_type, [=iagd=].
 	- [Step1-4] Figure out the offset (i1) and number (im) of Samples, which the ith SampleGroupDescriptionEntry is applied to, from the SampleGroup.
 - Step2: Reconstructing of the jth Temporal Unit of the ith IA Bitstream (j = i1, i2, …, im)
