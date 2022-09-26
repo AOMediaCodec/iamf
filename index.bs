@@ -1343,13 +1343,19 @@ During encapsulation process, OBUs of IA bistream are encapsulated into [[!ISOBM
 	- num_samples_per_frame shall mmove to 'stts'.
 	- roll_distance shall be stored as [=AudioPreRollEntry=] having [=grouping_type=], 'prol'.
 - Audio Element OBUs and Mix Presentation OBUs (with OBU syntax) shall be stored as a new sample group having [=grouping_type=], [=iagd=].
-- Parameter Block OBU for demixing_info() (with OBU syntax) may be stored as a new sample group having [=grouping_type=], [=demi=].
-- Sync OBU: shall be discarded if present.
-- Audio Frame OBU: 
-	- If obu_trimming_flag of the first Audio Frame OBU is set to 2, keep parsing following Audio Frame OBUs until get the Audio Frame OBU having obu_trimming_flag =  0, 1 or 11 and sum num_samples_to_trim_at_start. Then move it to 'edts'.
-	- If obu_trimming_flag of the last Audio Frame OBU is set to 1, then reflect num_samples_to_trim_at_end to stts.
+- Each access unit:
+	- Sync OBU: shall be discarded if present.
+	- Parameter Block OBU for demixing_info() (with OBU syntax) shall be stored as a new sample group having [=grouping_type=], [=demi=].
+	- Remained OBUs of each access unit shall be stored as sample data without gap among OBUs.
+- Audio Frame OBUs:
+	- Select one substream. 
+	- If obu_trimming_flag of the first Audio Frame OBU of the subsgtream is set to 2, keep parsing following Audio Frame OBUs of the substream until meets the Audio Frame OBU having obu_trimming_flag =  0, 1 or 11 and sum num_samples_to_trim_at_start. Then reflect the result of the summation to 'edts'.
+	- If obu_trimming_flag of the last Audio Frame OBU of the substream is set to 1, then reflect num_samples_to_trim_at_end to 'stts.
 	
-- Each access unit (with OBU syntax) shall be stored as sample data without gap among OBUs.
+
+<center><img src="images/IAC Encapsulation Guideline.png" style="width:100%; height:auto;"></center>
+<center><figcaption>IAC Encapsulation Scheme</figcaption></center>
+
 
 ### IA Sample Entry ### {#iasampleentry-section}
 
