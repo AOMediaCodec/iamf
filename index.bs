@@ -578,8 +578,8 @@ class mix_presentation_obu() {
     element_mix_config();
   }
 
-  mix_bus_config();
   mix_loudness_info();
+  mix_bus_config();
 }
 ```
 
@@ -626,9 +626,9 @@ ISSUE: The language used to express the label should be provided, following IETF
 
 <dfn noexport>element_mix_config()</dfn> is a class that provides the metadata required for applying any processing to the referenced and rendered audio element before being summed with other processed audio elements.
 
-<dfn noexport>mix_bus_config()</dfn> is a class that provides the metadata required for applying any post-processing to the mixed audio signal to generate the final output audio signal for playback.
-
 <dfn noexport>mix_loudness_info()</dfn> is a class that provides the loudness information and statistics for the final output audio signal.
+
+<dfn noexport>mix_bus_config()</dfn> is a class that provides the metadata required for applying any post-processing to the mixed audio signal to generate the final output audio signal for playback.
 
 
 ### Parameter Block OBU Syntax and Semantics ### {#obu-parameterblock}
@@ -766,6 +766,7 @@ class channel_audio_layer_config(i) {
 ```
 
 When an audio element is composed of G(r) number of substreams, scalable channel audio for the audio element shall be layered into [=num_layers=] = r number of ChannelGroups.
+- The order of ChannelGroups in each temporal unit shall be same as the order of channel_audio_layer_config()s in scalable_channel_layout_config().
 - <dfn noexport>ChannelGroup</dfn> is a set of substreams which is able to provide a spatial resolution of audio contents by itself or which is able to provide an enhanced spatial resolution of audio contents by combining with the preceding ChannelGroups within the [=audio frames=].
 - ChannelGroup #q consists of G(q)-G(q-1) number of substreams. Where, q = 1, 2, ..., r and G(0) = 0.
 - IA frame shall be a set of audio_frame_obus with the same sync offsets of the single audio element for scalable channel audio. Each of them shall come from each substream.
@@ -779,7 +780,7 @@ When an audio element is composed of G(r) number of substreams, scalable channel
 
 <dfn noexport>num_layers</dfn> shall indicate the number of ChannelGroups for scalable channel audio. It shall not be set to zero and its maximum number shall be limited to 6.
 
-<dfn noexport>channel_audio_layer_config()</dfn> is a function call that provides the information regarding the configuration of ChannelGroup for scalable channel audio.
+<dfn noexport>channel_audio_layer_config()</dfn> is a function call that provides the information regarding the configuration of ChannelGroup for scalable channel audio. channel_audio_layer_config(i) shall provide information regarding the configuaration of ChannelGroup #i.
 
 <dfn noexport>loudspeaker_layout</dfn> shall indicate the channel layout for the channels to be reconstructed from the precedent ChannelGroups and the current ChannelGroup among ChannelGroups for scalable channel audio.
 
@@ -983,36 +984,35 @@ class element_mix_config() {
 
 <b>Semantics</b>
 
-### Mix Bus Config Syntax and Semantics ### {#syntax-mix-bus-config}
-
-To be added
-
-<b>Syntax</b>
-
-```
-class mix_bus_config() {
-  // TODO
-  drc_config();
-}
-```
-
-class drc_config() {
-	// TODO
-}
-
-<b>Semantics</b>
-
 ### Mix Loudness Info Syntax and Semantics ### {#syntax-mix-loudness-info}
-
-To be added
 
 <b>Syntax</b>
 
 ```
 class mix_loudness_info() {
-  // TODO
+  signed int (16) mix_loudness
 }
 ```
+
+<b>Semantics</b>
+
+<dfn noexport>mix_loudness</dfn> shall indicate the loudness value of the mixed channels, for the [=mix_target_layout=], from the audio elements which are specified in the mix_presentation_obu(). It is stored in fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]) and the value should be [=LKFS=] based on [[!ITU1770-4]], so it shall be to represent zero or negative value.
+
+
+### Mix Bus Config Syntax and Semantics ### {#syntax-mix-bus-config}
+
+<b>Syntax</b>
+
+```
+class mix_bus_config() {
+  //To do
+  drc_config();
+}
+```
+
+class drc_config() {	
+  //To do
+}
 
 <b>Semantics</b>
 
