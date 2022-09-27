@@ -185,6 +185,10 @@ The following specifies the type of syntax elements
  
  Unsigned integer represented by a variable number of little-endian bytes. Its size in bits shall be 8 x the variable number of bytes.
  
+ <b>uleb128()</b>
+ 
+ Signed integer represented by a variable number of little-endian bytes. Its size in bits shall be 8 x the variable number of bytes.
+ 
  
 ## Mathemetical functions ## {#mathmeticalfunctions}
  
@@ -245,7 +249,7 @@ The figure below shows the relationship between the audio substreams, audio elem
 
 ## Use of OBU Syntax ## {#use-of-obu}
 
-### Descriptors
+### Descriptors ### {#descriptors}
 
 The descriptor OBUS contains all the information that is required to setup and configure the decoders, reconstruction algorithms, renderers and mixers.
 
@@ -254,14 +258,16 @@ The descriptor OBUS contains all the information that is required to setup and c
 - <dfn noexport>Audio Element OBU</dfn> describes information to combine one or more audio substreams to reconstruct an audio element.
 - <dfn noexport>Mix Presentation OBU</dfn> describes information to render and mix one or more audio elements to generate the final audio output.
 
-### Data
+### Data ### {#data}
 
 The data OBUs contain the actual time-varying data that is required in the generation of the final audio output.
 
 - <dfn noexport>Parameter Block OBU</dfn> provides the time-varying parameter values for an algorithm used in any of the decoding, reconstruction, rendering or mixing steps.
 - <dfn noexport>Audio Frame OBU</dfn> provides the raw coded audio frame for an audio substream.
+- Temporal Unit consists of one or more Audio Frame OBUs with the same sync offset (which comes from the same audio element) and followed by zero or more Parameter Block OBUs.
+	- It may have the immediately preceding Temporal Delimiter OBU. If present, every Temoral Unit has Temporal Delimiter OBU.
 
-### Logistics
+### Logistics ### {#logistics}
 
 The IA bitstream supports the description of multiple audio substreams and algorithms, which may have different metadata update rates to each other. The update rate for the audio substreams and audio elements is governed by the frame rates of the audio codec used. Since a single bitstream may support multiple codecs, this may lead to multiple different frame rates. The algorithms for rendering and mixing may have parameters that update at different rates to each other and to the audio frame rates.
 
@@ -274,7 +280,9 @@ Therefore, the IA bitstream contains information to facilitate the synchronizati
 
 ## Top Level OBU Syntax and Semantics ## {#top-level-syntax}
 
-The IA bitstream uses the OBU syntax. This section specifies the top-level OBU syntax elements and their semantics.
+The IA bitstream uses the OBU syntax. IA bitstream shall be composed of descriptor OBUs and followed by one or more temporal units. Sync OBUs may be present between two adjacent temporal units or between descriptor OBUs and following temporal unit
+
+This section specifies the top-level OBU syntax elements and their semantics.
 
 ### Audio OBU Syntax and Semantics ### {#audio-obu}
 
@@ -296,6 +304,8 @@ class audio_open_bitstream_unit() {
     parameter_block_obu();
   else if (obu_type == OBU_IA_Audio_Frame)
     audio_frame_obu();
+  else if (obu_type == OBU_IA_Temporal_Delimiter)
+    temporal_delimiter_obu();
   else if (obu_type == OBU_IA_Sync)
     sync_obu();
   else
@@ -309,7 +319,7 @@ class audio_open_bitstream_unit() {
 
 If the syntax element obu_type is equal to OBU_IA_Start_Code, an ordered series of OBUs is presented to the decoding process as a string of bytes.
 
-OBU data shall start on the first (most significant) bit and shall end on the last bit of the given bytes. The payload of an OBU shall lie between the first bit of the given bytes and the last bit before the first zero bit of the byte_alignment() function call.
+OBU data shall start on the first (most significant) bit and shall end on the last bit of the given bytes. The payload of an OBU shall lie between the first bit of the given bytes and the last bit before the first zero bit of the byte_alignment().
 
 
 ### OBU Header Syntax and Semantics ### {#obu-header}
@@ -323,7 +333,7 @@ class obu_header() {
   unsigned int (1) obu_sync_flag;
   unsigned int (1) obu_duration_flag;
   unsigned int (1) obu_counter_flag;
-  unsigned int (2) obu_trimming_flag;
+  unsigned int (2) obu_trimming_status;
   unsigned int (1) obu_extension_flag;
   unsigned int (5) obu_reserved_5bit;
 
@@ -332,14 +342,14 @@ class obu_header() {
   if (obu_id_flag == 1)
     leb128() obu_id;
   if (obu_sync_flag == 1)
-    leb128() obu_sync;
+    sleb128() obu_sync;
   if (obu_duration_flag == 1)
     leb128() obu_duration;
   if (obu_counter_flag == 1)
     leb128() obu_counter;
-  if (obu_trimming_flag == 1)
+  if (obu_trimming_status == 1)
     leb128() num_samples_to_trim_at_end;
-  if (obu_trimming_flag == 2)
+  if (obu_trimming_status == 2)
     leb128() num_samples_to_trim_at_start;
   if (obu_extension_flag == 1)
     leb128() extension_header_size;
@@ -359,10 +369,31 @@ obu_type: Name of obu_type
    2    : OBU_IA_Mix_Presentation
    3    : OBU_IA_Parameter_Block
    4    : OBU_IA_Audio_Frame
-   5    : OBU_IA_Sync
-  6~14  : Reserved
+   5    : OBU_IA_Temporal_Delimiter
+   6    : OBU_IA_Sync
+  7~14  : Reserved
    15   : OBU_IA_Start_Code
 </pre>
+
+<dfn noexport>obu_id_flag</dfn> indicates whether [=obu_id=] field presents or not. If it set to 0, [=obu_id=] field shall not be present. Otherwise, [=obu_id=] field shall be present.
+
+<dfn noexport>obu_sync_flag</dfn> indicates whether [=obu_sync=] field presents or not. If it set to 0, [=obu_sync=] field shall not be present. Otherwise, [=obu_sync=] field shall be present.
+
+<dfn noexport>obu_duration_flag</dfn> indicates whether [=obu_duration=] field presents or not. If it set to 0, [=obu_duration=] field shall not be present. Otherwise, [=obu_duration=] field shall be present.
+
+<dfn noexport>obu_counter_flag</dfn> indicates whether [=obu_counter=] field presents or not. If it set to 0, [=obu_counter=] field shall not be present. Otherwise, [=obu_counter=] field shall be present.
+
+<dfn noexport>obu_trimming_status</dfn> indicates whether this OBU has audio samples to be trimmed or not.
+ - 0: Shall indicate that this OBU has no samples to be trimmed. No field shall present
+ - 1: Shall indicate that this OBU has audio samples to be trimmed at end of the audio frame. [=num_samples_to_trim_at_end=] field shall present.
+ - 2: Shall indicate that this OBU has audio samples to be trimmed at start of the audio frame. [=num_samples_to_trim_at_start=] field shall present.
+ - 3: All of audio samples of this OBU shall be trimmed. No field present
+
+<dfn noexport>obu_extension_flag</dfn> indicates whether [=extension_header_size=] field presents or not. If it set to 0, [=extension_header_size=] field shall not be present. Otherwise, [=extension_header_size=] field shall be present.
+
+This flag shall be set to 0 for the current version of the specification (i.e. version = 0). The IAC-OBU parse, which conformants to the current version of the specification, shall be able to parse this flag and [=extension_header_size=].
+
+NOTE: For a future version of specification may use this flag to have extension header field by setting [=obu_extension_flag=] = 1 and setting the size of extended header to [=extension_header_size=].
 
 <dfn noexport>obu_size</dfn> shall indicate the size in bytes of the OBU not including the bytes within obu_header of the preceding fields, i.e. obu_type, the various OBU flags and obu_reserved_7bit.
 
@@ -373,13 +404,34 @@ obu_type: Name of obu_type
  - If obu_type = OBU_IA_Parameter_Block, then it shall indicate a unique ID (i.e. parameter_id or mix) in IA bitstream for a given parameter. It shall be same as [=parameter_id=] which is mapped to the parameter in audio_element_obu. 
  - If obu_type = OBU_IA_Audio_Frame, then it shall indicate a unique ID (i.e. audio_substream_id) in IA bitstream for a given substream. Therefore, all of audio_frame_obus of the same substream shall have the same obu_id.
 
+The below figure shows the linking scheme among [=obu_id=]s in obu_header and ids in obu payload.
+
+<center><img src="images/ID Linking Example.png" style="width:100%; height:auto;"></center>
+<center><figcaption>ID Linking Scheme</figcaption></center>
+
+In the above figure, 
+- codec config obu is saying that there are two audio elements (audio_element_id = 11 and 12) which are coded by using the codec_config() in the obu.
+	- The audio element having audio_element_id = 11 is linked to the audio element obu having obu_id = 11.
+		- The audio element obu is saying that there are two substreams (substream_id = 31 and 32) which composing of this audio element.
+			- The audio substream having substream_id = 31 is linked to the audio frame obus having obu_id = 31.
+			- The audio substream having substream_id = 32 is linked to the audio frame obus having obu_id = 32.
+		- The audio element obu is saying that there are one parameter block (parameter_id = 71) for demixing_info() which is applied to the audio element.
+			- The parameter block having parameter_id = 71 is linked to the parameter block obu having obu_id = 71.
+		- IAC decoders applies the parameter block to the audio substreams after decoding by substream decoders.
+	- The audio element having audio_element_id = 12 is linked to the audio element obu having obu_id = 12.
+		- The audio element obu is saying that there are one substream (substream_id 33) which composing of this audio element. 
+			- The audio substream having substream_id = 33 is linked to the audio frame obus having obu_id = 33.
+		- Substream decoder do decoding the substream.
+- mix presentation obu is saying that there are two audio elements (audio_element_id = 11 and 12) which need to be mixed.
+	- The audio element having audio_element_id = 11 and the audio element having audio_element_id = 12 are mixed after decoding each of them.
+	- Then IAC decoders may do process loudness and drc controls by using mix_loudness_info() and drc_config().		
+
 <dfn noexport>obu_sync</dfn> shall indicate the offset from a reference point in the IA bitstream for which the OBU is valid and applicable. The reference point used depends on the IA Profile (See Profiles Section).
+ - If the sampling rate of audio elements and parameter blocks are same, then the offset shall indicate the number of audio samples at the sampling rate. Otherwise, the offset shall indicate the number of audio samples at 48000hz.
 
-Where, the offset shall indicate the number of audio samples at the sampling rate of the audio element or the audio element which the parameter block is applied to.
-
-<dfn noexport>obu_duration</dfn> shall indicate the duration for which the OBU is valid and applicable.
-
-Where, the duration shall indicate the number of audio samples at the sampling rate of the audio element which the parameter block is applied to.
+<dfn noexport>obu_duration</dfn> shall indicate the duration for which the OBU is valid and applicable. This field shall only be valid when obu_type = OBU_IA_Parameter_Block.
+ - If the parameter block obu is applied to an audio element, the duration shall indicate the number of audio samples at the sampling rate of the audio element.
+ - If the parameter block obu is applied to an mixed audio by a mix presentation obu, the duration shall indiate the number of audio samples at 48000khz.
 
 <dfn noexport>obu_counter</dfn> shall increment when its payload is different to the previous OBU of the same obu_type. If the payload is identical to the previous OBU of the same obu_type, i.e. it was redundantly copied or repeated in the bitstream, the value of obu_counter shall remain unchanged.
 
@@ -387,7 +439,7 @@ Where, the duration shall indicate the number of audio samples at the sampling r
 
 <dfn noexport>num_samples_to_trim_at_end</dfn> shall indicate the number of samples that needs to be trimmed from the end of the samples in this Audio Frame OBU.
 
-<dfn noexport>extension_header_size</dfn> shall indicate the size in bytes of the extension.
+<dfn noexport>extension_header_size</dfn> shall indicate the size in bytes of the extension header including this field.
 
 <dfn noexport>obu_reserved_5bit</dfn> shall be set to 0. Reserved units are for future use and shall be ignored by an IAC-OBU parser.
 
@@ -471,7 +523,7 @@ class codec_config() {
 
 For ISOBMFF encapsulation, it shall be the same as the [=boxtype=] of its AduioSampleEntry if exist. 
 
-<dfn noexport>decoder_config()</dfn> specifies the set of codec parameters required to decode an audio substream for the given codec_id.
+<dfn noexport>decoder_config()</dfn> specifies the set of codec parameters required to decode an audio substream for the given codec_id. It shall be byte aligned.
 - The codec_id and decoder_config() for IAC-OPUS shall conform to [=Codec_Specific_Info=] of [[#iac-opus-specific]]
 - The codec_id and decoder_config() for IAC-AAC-LC shall conform to [=Codec_Specific_Info=] of [[#iac-aac-lc-specific]].
 - The codec_id and decoder_config() for IAC-FLAC shall conform to [=Codec_Specific_Info=] of [[#iac-flac-specific]]
@@ -482,7 +534,7 @@ For ISOBMFF encapsulation, it shall be the same as the [=boxtype=] of its AduioS
 <dfn noexport>roll_distance</dfn> is a signed integer that gives the number of frames that need to be decoded in order for a frame to be decoded correctly. A negative value indicates the number of frames before the frame to be decoded corrently.
 - It shall be set to -1 for IAC-AAC-LC and -4 (when the frame size = 960) for IAC-OPUS. IAC-FLAC may ignore this field. 
 
-<dfn value noexport for = "codec_config_obu" >num_audio_elements</dfn> shall specify the number of audio elements that are applying the codec_config() in this OBU.
+<dfn value noexport for = "codec_config_obu()" >num_audio_elements</dfn> shall specify the number of audio elements that are applying the codec_config() in this OBU.
 
 <dfn noexport>audio_element_id</dfn> shall specify the unique ID of the audio element that is applying the codec_config() in this OBU.
 
@@ -497,7 +549,7 @@ For this obu, both of obu_sync_flag and obu_duratrion_flag shall be set to 0.
 
 ```
 class audio_element_obu() {
-  f(3) audio_element_type;
+  unsigned int (3) audio_element_type;
   unsigned int (5) reserved;
 
   leb128() num_substreams;
@@ -614,7 +666,7 @@ Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
 
 An IA bitstream may have one or more mix_presentation() specified, each with different mix_target_layout values. In this case, the IA decoder shall select the mix presentation that matches the physical playback layout. If there is no match, the IA decoder should select the closest specified layout and apply up or down-mixing appropriately. Sections [[#iacgeneration-scalablechannelaudio-downmixmechanism]] and [[#processing-downmixmatrix]] provide example dynamic and static down-mixing matrices for some common layouts that may be used by the IA decoder.
 
-<dfn noexport>num_audio_elements</dfn> shall specify the number of audio elements that are used in this mix presentation to generate the final output audio signal for playback.
+<dfn value noexport for ="mix_presentation_obu()">num_audio_elements</dfn> shall specify the number of audio elements that are used in this mix presentation to generate the final output audio signal for playback.
 
 <dfn noexport>audio_element_friendly_label</dfn> shall specify a human-friendly label to describe the referenced audio element.
 
@@ -687,8 +739,9 @@ If parameter_type is equal to PROCEDURAL, this shall indicate that the parameter
 <dfn noexport>parameter_sample_rate</dfn> shall specify the rate at which the parameters are provided. This value may be different from the audio sample rate.
 
 <dfn noexport>smoothing_duration</dfn> shall specify the duration over which the parameter is interpolated from its previous value.
+ - The duration shall be the number of samples at the sampling rate which is indicated by [=parameter_sample_rate=].
 
-<dfn noexport>param_config()</dfn> is the function call that provides the actual parameter values and any additional metadata that may be required by the algorithm to specify how the parameter values are applied to the audio samples. This will be different for each algorithm.
+<dfn noexport>param_config()</dfn> is a class that provides the actual parameter values and any additional metadata that may be required by the algorithm to specify how the parameter values are applied to the audio samples. This will be different for each algorithm.
 
 ### Audio Frame OBU Syntax and Semantics ### {#obu-audioframe}
 
@@ -706,7 +759,7 @@ class audio_frame_obu(obu_size) {
 
 <b>Semantics</b>
 
-<dfn noexport>substream()</dfn> is a function call that contains the raw coded audio data.
+<dfn noexport>substream()</dfn> is the raw coded audio data for the frame. It shall be [=opus packet=] of [[!RFC6716]] for IAC-OPUS, [=raw_data_block()=] of [[!AAC]] for IAC-AAC-LC, [=FRAME=] of [[!FLAC]] for IAC-FLAC and audio samples for IAC-LPCM
 
 ### Sync OBU Syntax and Semantics ### {#obu-sync}
 
@@ -724,13 +777,6 @@ class sync_obu() {
 ```
 
 NOTE: sync_obu() has the empty payload
-
-### ID Linking ### {#example-linking}
-
-This section shows an example how obu_ids of obu header are linked among them.
-
-<center><img src="images/ID Linking Example.png" style="width:100%; height:auto;"></center>
-<center><figcaption>Example: ID Linking</figcaption></center>
 
 ## Detailed OBU Syntax and Semantics ## {#syntax-detailed}
 
@@ -780,7 +826,7 @@ When an audio element is composed of G(r) number of substreams, scalable channel
 
 <dfn noexport>num_layers</dfn> shall indicate the number of ChannelGroups for scalable channel audio. It shall not be set to zero and its maximum number shall be limited to 6.
 
-<dfn noexport>channel_audio_layer_config()</dfn> is a function call that provides the information regarding the configuration of ChannelGroup for scalable channel audio. channel_audio_layer_config(i) shall provide information regarding the configuaration of ChannelGroup #i.
+<dfn noexport>channel_audio_layer_config()</dfn> is a class that provides the information regarding the configuration of ChannelGroup for scalable channel audio. channel_audio_layer_config(i) shall provide information regarding the configuaration of ChannelGroup #i.
 
 <dfn noexport>loudspeaker_layout</dfn> shall indicate the channel layout for the channels to be reconstructed from the precedent ChannelGroups and the current ChannelGroup among ChannelGroups for scalable channel audio.
 
@@ -860,16 +906,16 @@ class ambisonics_config() {
 }
 
 class ambisonics_mono_config() {
-  unsigned int(8) output_channel_count (C);
-  unsigned int(8) substream_count (N);
-  unsigned int(8 * C) channel_mapping;
+  unsigned int (8) output_channel_count (C);
+  unsigned int (8) substream_count (N);
+  unsigned int (8 * C) channel_mapping;
 }
 
 class ambisonics_projection_config() {
-  unsigned int(8) output_channel_count (C);
-  unsigned int(8) substream_count (N);
-  unsigned int(8) coupled_substream_count (M);
-  unsigned int(16 * (N + M) * C) demixing_matrix;
+  unsigned int (8) output_channel_count (C);
+  unsigned int (8) substream_count (N);
+  unsigned int (8) coupled_substream_count (M);
+  unsigned int (16 * (N + M) * C) demixing_matrix;
 }
 ```
 
@@ -1022,7 +1068,7 @@ This section defines codec specific information for Codec_Specific_Info and Subs
 
 - <dfn noexport>Codec_Specific_Info</dfn> shall be composed of [=Codec_ID=] and [=Decoder_Config()=]. Codec_ID shall indicate the codec which has been used to generate a given substream within IA bitstream and Decder_Config() shall indicate the decoding parameters which are applied to the substream within IA bitstream.
 
-For legacy codecs, Decoder_Config() shall be exactly the same information as the conventional file parser feeds to the codec decoders for decoding of the substream. For future codecs, Decder_Config() shall include all of decoding parameters which are required to decode Substreams.
+For legacy codecs, Decoder_Config() shall be exactly the same information as the conventional file parser feeds to the codec decoders for decoding of the substream. For future codecs, Decoder_Config() shall include all of decoding parameters which are required to decode Substreams.
 
 - Substream shall be a raw coded stream for one or more channels. Substream format shall be exactly the same as the sample format (before packing OBU and except parameter blocks) for the audio file which consists of only one single coded stream by the Codec_ID.
 
@@ -1090,7 +1136,9 @@ Additionally, the following restrictions shall apply to all profiles:
 2. The descriptor OBUs shall identify the configuration of following one or more audio elements.
 3. If OBU_IA_Parameter_Block is present, the global descriptor shall be followed by one or more parameter blocks. The one or more parameter blocks may redundantly contain information specified by previous parameter blocks that are still valid for the time after the descriptor OBUs.
 4. Substream IDs may be omitted if the audio frames from the various audio substreams are ordered in the bitstream in well-defined way that remains unchanged, such that an implicit ordering can be reliably inferred. In a bitstream, the substream IDs shall be either included for all substreams or omitted for all substreams; the bitstream shall not have a combination of both.
-5. Below table indicates the usage of flags in OBU header according to OBU type.
+5. - There may be OBU_IA_Temporal_Delimiter present. 
+	- If every audio frame OBU has its own obu_id reprsenting its substream_id, then temporal delmiter OBU shall not be present.	
+6. Below table indicates the usage of flags in OBU header according to OBU type.
 
 <pre class = "def">
 OBU Type / Flags  : obu_id_flag : obu_sync_flag : obu_duration_flag : obu_counter_flag
@@ -1101,11 +1149,11 @@ OBU Type / Flags  : obu_id_flag : obu_sync_flag : obu_duration_flag : obu_counte
  Mix Present. OBU :      Use    :     No Use    :       No Use      :      No Use     
  Audio Frame OBU  :      Use    :       Use     :       No Use      :      No Use     
  Para. Block OBU  :      Use    :       Use     :         Use       :       Use       
+   Temp. Del OBU  :      Use    :     No Use    :       No Use      :      No Use 
 	   Sync OBU     :      Use    :       Use     :       No Use      :      No Use     
 
 </pre> 
 
-obu_trimming_flag is used only for Audio Frame OBUs.
 
 ## IA Simple Profile ## {#profiles-simple}
 
@@ -1119,8 +1167,9 @@ Restrictions on IA bitstream:
 - [=num_layers=] shall be set to 1 for channel-based audio element (i.e. non-scalable channel audio)
     - In this case, OBU_IA_Parameter_Block including demixing_info() may be present in the IA bitstream.
 - All audio frames shall have aligned frame boundaries.
+- There shall not be OBU_IA_Temporal_Delimiter present.
 - There shall not be OBU_IA_Sync present.
-- All parameter blocks (if present) shall be synced relative to the frame boundary of the audio frame that comes immediately after.
+- All parameter blocks (if present) shall be synced relative to the frame boundary of the immediately preceding audio frame.
 - Below table shall indicate the usage of flags in OBU header according to OBU type.
 
 <pre class = "def">
@@ -1159,8 +1208,11 @@ Restrictions on IA bitstream:
     - In this case, [=demixing_info()=] and [=recon_gain_info()=] may be present in the IA bitstream.
   - In case of simple scalable channel audio (e.g. mono for layer 1 & stereo for layer 2), [=demixing_info()=] and [=recon_gain_info()=] shall not be present in the bitstream.
 - All audio frames shall have aligned frame boundaries.
+- There may be OBU_IA_Temporal_Delimiter present.
+	- If present, then OBU_IA_Temporal_Delimiter shall be present in front of every temporal unit. For a given audio element, the obu_id of temporal delimiter obu shall be same as the audio_element_id of the audio element.
+	- If not present, the immediately preceding descriptor OBUs shall identify the change of the configuration whereever the configuration (e.g. the number of substreams for each audio element or the number of audio elements) of following audio elements is changed.
 - There shall not be OBU_IA_Sync present.
-- All parameter blocks (if present) shall be synced relative to the frame boundary of the audio frame that comes immediately after.
+- All parameter blocks (if present) shall be synced relative to the frame boundary of the immediately preceding audio frame.
 
 - Below table indicates the usage of flags in OBU header according to OBU type.
 
@@ -1173,6 +1225,7 @@ OBU Type / Flags  : obu_id_flag : obu_sync_flag : obu_duration_flag : obu_counte
  Mix Present. OBU :      Use    :     No Use    :       No Use      :      No Use 
  Audio Frame OBU  :    No Use   :     No Use    :       No Use      :      No Use 
  Para. Block OBU  :     Use     :     No Use    :       No Use      :       Use 
+   Temp. Del OBU  :      Use    :     No Use    :       No Use      :      No Use 
 
 </pre>
 
@@ -1204,6 +1257,9 @@ Restrictions on IA sequence:
 - [=num_layers=] shall be set to 1 or up to 6 for Channel-based audio element (i.e. scalable channel audio)
     - In this case, [=demixing_info()=] and [=recon_gain_info()=] may be present in the IA bitstream.
     - In case of simple scalable channel audio (e.g. mono for layer 1 & stereo for layer 2), [=demixing_info()=] and [=recon_gain_info()=] shall not be present in the bitstream.
+- There may be OBU_IA_Temporal_Delimiter present.
+	- If every audio frame OBU has its own obu_id reprsenting its substream_id, then temporal delmiter OBU shall not be present.	
+	- If present, then OBU_IA_Temporal_Delimiter shall be present in front of every temporal unit. For a given audio element, the obu_id of temporal delimiter obu shall be same as the audio_element_id of the audio element.
 - There shall be OBU_IA_Sync present when multiple codec_config_obu()s present.
 - All parameter blocks shall be synced relative to the immediately preceding OBU_IA_Sync.
 - Below table indicates the usage of flags in OBU header according to OBU type.
@@ -1217,6 +1273,7 @@ OBU Type / Flags  : obu_id_flag : obu_sync_flag : obu_duration_flag : obu_counte
  Mix Present. OBU :      Use    :     No Use    :       No Use      :      No Use 
  Audio Frame OBU  :      Use    :       Use     :       No Use      :      No Use 
  Para. Block OBU  :      Use    :       Use     :         Use       :       Use 
+   Temp. Del OBU  :      Use    :     No Use    :       No Use      :      No Use 
 	   Sync OBU     :      Use    :       Use     :       No Use      :      No Use 
 
 </pre> 
@@ -1234,14 +1291,15 @@ Capabilities of IA decoder:
 ISSUE: Needs a lot more details.
 
 - Global descriptors come first. This includes:
-    - Start Code OBU
-    - Codec config OBU
-    - Audio Element OBU
-    - Mix Presentation OBU
+	- Start Code OBU
+  - Codec config OBU
+  - Audio Element OBU
+  - Mix Presentation OBU
 - Followed by a series of:
-    - Sync OBU
-    - Optionally, Parameter Block OBUs, synced relative to the previous Sync OBU
-    - Audio Frame OBUs, synced relative to the previous Sync OBU.
+  - Sync OBU
+  - Audio Frame OBUs, synced relative to the previous Sync OBU.
+  - Optionally, Parameter Block OBUs, synced relative to the previous Sync OBU
+
 
 Global descriptors to be repeated frequently as needed to enable joining mid-stream. This must be followed by parameter OBUs that redundantly copy previous parameter OBUs that are still valid for the time after the global descriptors. I.e. decoders joining mid-stream that encounters a Start Code OBU knows that it will receive information in the next OBUs that give it complete information to start decoding following audio frames.
 
@@ -1257,9 +1315,9 @@ ISSUE: Below is copy-pasted from old version ("Immersive Audio Bitstream Definit
 
 An immersive audio (IA) sequence shall include one or more audio elements, each of which shall consist of one or more audio substreams. IA sequence shall start with IA_Stream_Indicator and followed by a sequence of IA bitstreams.
 
-Each IA bitstream shall be self-decodable and shall be composed of one single global metadata and followed by one or more [=access unit=]s.
-- <dfn noexport>access unit</dfn> shall be composed of optional update metadata and followed by [=audio frames=].
-- Where, <dfn noexport>audio frames</dfn> is a set of one or more audio substream frames with the same frame size and the same sync offsets.
+Each IA bitstream shall be self-decodable and shall be composed of one single global descriptors and followed by one or more [=temporal unit=]s.
+- <dfn noexport>temporal unit</dfn> shall be composed of [=audio frames=] and followed by zero or more parameter blocks.
+- Where, <dfn noexport>audio frames</dfn> is a set of one or more audio substream frames with the same frame size and the same sync offsets, which come from the same audio element.
 
 There can be two types of IA bitstreams. The first is an IA bitstream with one single frame size and the second is an IA bitstream with two or more different frame sizes. The conceptual diagrams are shown in the two figures below.
 
@@ -1268,7 +1326,7 @@ There can be two types of IA bitstreams. The first is an IA bitstream with one s
 
 In the first type of IA bitstream with one single frame size, all [=audio substreams=] in the same IA bitstream shall have the same audio_substream_config().
 
-After OBU packing, temporal_delimiter_obu shall be present at the front of every access unit to indicate the start of the access unit.
+After OBU packing, temporal_delimiter_obu may be present at the front of every temporal unit to indicate the start of the temporal unit. If present, it shall be present at the front of every temporal unit.
 
 In this case, [=audio frames=] depicted in the diagram above is a set of audio substream frames with the same sync offsets.
 - [=Audio frames=] #i is composed of Ni number of frames, each of them is frame #i of each substream. Where, i = 1, 2, ..., k.
@@ -1331,7 +1389,7 @@ This section describes the basic data structures used to signal encapsulation of
 
 ### Requirement of IA bitstream ### {#isobmff-singletrack-iabitstream}
 
-IA bitstream shall comply with the bitstream which is specified in [#profiles-simple] or [#profiles-base] for eacapsulation of ISOBMFF with single track
+IA bitstream shall comply with the bitstream which is specified in [#profiles-simple] or [#profiles-base] for eacapsulation of ISOBMFF with single track.
 
 
 ### Encapsulation Scheme ### {isobmff-singletrack-basicencapsulationscheme}
@@ -1343,10 +1401,10 @@ During encapsulation process, OBUs of IA bistream are encapsulated into [[!ISOBM
 	- num_samples_per_frame shall mmove to 'stts'.
 	- roll_distance shall be stored as [=AudioPreRollEntry=] having [=grouping_type=], 'prol'.
 - Audio Element OBUs and Mix Presentation OBUs (with OBU syntax) shall be stored as a new sample group having [=grouping_type=], [=iagd=].
-- Each access unit:
-	- Sync OBU: shall be discarded if present.
+- Each temporal unit:
+	- Temporal delimiter OBU: shall be discarded if present.
 	- Parameter Block OBU for demixing_info() (with OBU syntax) shall be stored as a new sample group having [=grouping_type=], [=demi=].
-	- Remained OBUs of each access unit shall be stored as sample data without gap among OBUs.
+	- Remained OBUs of each temporal unit shall be stored as one sample data without gap among OBUs.
 - Audio Frame OBUs:
 	- Select one substream. 
 	- If obu_trimming_flag of the first Audio Frame OBU of the subsgtream is set to 2, keep parsing following Audio Frame OBUs of the substream until meets the Audio Frame OBU having obu_trimming_flag =  0, 1 or 11 and sum num_samples_to_trim_at_start. Then reflect the result of the summation to 'edts'.
@@ -1446,7 +1504,7 @@ ISSUE: We need to add specific boxes for FLAC and LPCM.
 ### IA Sample Format ### {#iasampleformat}
 
 For tracks using the [=IASampleEntry=], an <dfn noexport>IA Sample</dfn> has the following constraints:
-- The sample data shall be a sequence of OBUs forming a access unit.
+- The one sample data shall be a sequence of OBUs forming an access unit.
 
 ### IA Sample Group ### {#iasamplegroup}
 
@@ -1532,7 +1590,7 @@ IA decoding can be done by using the combination of following decoding processin
 <b>Scalable Channel Audio decoding</b>, it shall output the channel audio (e.g. 3.1.2ch or 7.1.4ch) for the target channel layout.
 
 IA decoder is composed of OBU parser, Codec decoder, Audio Element Renderer and Post-processor as depicted in below figure.
-- OBU parser shall depacketize IA bitstream to output one or more substreams with one or more Decoder_Config but one decoder_config per audio element, descriptors and parameters.
+- OBU parser shall depacketize IA bitstream to output one or more substreams with one or more Decoder_Config() but one decoder_config() per audio element, descriptors and parameters.
 - Codec decoder for each substream shall ouptput decoded channels.
 - Audio Element Renderer reconstructs audio channels from decoded channels of Codec decoders according to the type of audio element which is specified audio element OBU.
 	- For scene-based audio element, it shall output ambisonics channels.
@@ -1872,7 +1930,7 @@ The IA encoder is composed of Pre-processor, Codec encoder and OBU packetizer.
 			- <dfn noexport>Coupled channels</dfn>: L/R, Ls/Rs, Lss/Rss, Lrs/Rrs, Ltf/Rtf, Ltb/Rtb
 			- <dnf noexport>Non-coupled channels</dfn>: C, LFE, L
 - OBU packetizer packetize descriptors, parameter blocks and audio frames by OBU, and outputs IA bitstream.
-	- Temporal Unit generator generates Temporal Unit for each frame from parameter block OBUs if present and audio frame OBUs.
+	- Temporal unit generator generates temporal unit for each frame from audio frame OBUs and parameter block OBUs (if present).
 
 <center><img src="images/IA Encoder Configuration.png" style="width:100%; height:auto;"></center>
 <center><figcaption>IA Encoder Configuration</figcaption></center>
@@ -1899,7 +1957,8 @@ For Ambisonics encoding:
 			- [=channel_mapping=] for [=ambisonics_mode=] = 0 is assigned to according to the order of substreams in ChannelGroup.
 			- [=demixing_matrix=] for [=ambisonics_mode=] = 1 is assigned to according to the order of substreams in ChannelGroup.
 - Codec Enc. outputs substreams as many as the number of channels which is indicated in [=substream_count=].
-- Temporal Unit shall be composed of Temporal_Delimiter_OBU and followded by OBUs for substreams.
+- Temporal unit shall be composed of audio frame OBUs for substreams.
+	- It may have the immediately preceding temporal delimiter OBU.
 	- The order of substreams in ChanngelGroup shall be aligned with [=channel_mapping=] for Ambisonics_Mode = 0 or [=demixing_matrix=] for Ambisonics_Mode = 1.
 
 ## Scalable Channel Audio Encoding ## {#iacgeneration-scalablechannelaudio}
@@ -1931,8 +1990,9 @@ For Scalable Channel Audio encoding:
 			- [=dmixp_mode=] of demixing_info for the kth frame shall be set to indicate (α(k), β(k), γ(k), δ(k)) and w_idx_offset(k). Where w_idx_offset(k) = 1 or -1.
 			- [=recon_gain_flags=] of recon_gain_info shall be set to indicate the de-mixed channels, which need to apply [=recon_gain=] among the output channels after demixing for ith channel layout.
 			- [=recon_gain=] shall be set to the gain value to be applied to the channel which is indicated by recon_gain_flags for the ith ChannelGroup.
-- Temporal Unit for kth frame shall be composed of Temporal_Delimiter_OBU, followed by OBUs for zero or more prameter block OBUs and audio frame OBUs for the kth frames of the substreams.
-	- ChannelGroups in Temporal Unit shall be placed in order. In other words, ChannelGroup for the first channel layout shall come first, followed by ChannelGroup for the second channel layout, followed by ChannelGroup for the third channel layout and so on.
+- Temporal unit for kth frame shall be composed of audio frame OBUs for the kth frames of the substreams and followed by OBUs for zero or more prameter block OBUs.
+	- It may have the immediately preceding temporal delimiter OBU, 
+	- ChannelGroups in temporal unit shall be placed in order. In other words, ChannelGroup for the first channel layout shall come first, followed by ChannelGroup for the second channel layout, followed by ChannelGroup for the third channel layout and so on.
 
 Below figure shows IA encoding flowchart for Scalable Channel Audio.
 - For a given Channel Audio and a given list of channel layouts for scalability, PCMs for Channel Audio are passed to CG Generation moddule.
@@ -1946,9 +2006,10 @@ Below figure shows IA encoding flowchart for Scalable Channel Audio.
 		- Codec Config OBU is generated based on [=decoder_config()=].
 - OBU packetizer generates zero or more parameter block OBUs for each frame which contains demixing_info and recon_gain_info.
 - OBU packetizer generates audio frame OBUs for each frame of the substreams.
-- OBU packetizer generates Temporal Unit for each frame.
-	- Temporal Unit consists of Temporal Delimiter OBU and followed by zero or more parameter block OBUs and audio frame OBUs.
-- OBU Packetizer outputs IA Bitstream which is composed of OBUs for descriptor OBUs and followed by OBUs for Temporal Units.
+- OBU packetizer generates temporal unit for each frame.
+	- Temporal unit consists of audio frame OBUs and followed by zero or more parameter block OBUs and audio frame OBUs.
+		- It may have the immediately preceding temporal delimiter OBU, 
+- OBU Packetizer outputs IA Bitstream which is composed of OBUs for descriptor OBUs and followed by OBUs for temporal units.
 
 <center><img src="images/IA Encoding Flowchart for Channel Audio Format.png" style="width:80%; height:auto;"></center>
 <center><figcaption>IA Encoding Flowchart for Scalable Channel Audio</figcaption></center>
@@ -2107,22 +2168,26 @@ This section provide a guideline to generate element_mix_config().
 
 ### Multiple Audio Elements Encoding ### {#iacgeneration-multipleaudioelements}
 
-This section provied a guideline to generate IA bitstream having multiple audio elements
+This section provide a guideline to generate IA bitstream having multiple audio elements
 
 #### Multiple Audio Elements with One Codec Config #### {#iacgeneration-multipleaudioelements-onecodec}
 
-This section provides a way to generate IA bitstream having multiple audio elements with the same codec config OBU. However, the result shall comply with the base profile of IA bitstream.
+This section provides a way how to generate IA bitstream having multiple audio elements with the same codec config OBU. However, the result shall comply with the base profile of IA bitstream.
 
 Step1: Descriptor OBUs are generated as follows:
  - Start Code OBU: get the larger version field and the larger profile version field, respectively.
- - Codec Config OBU: take just one.
+ - Codec Config OBU
+ 	- take just one codec_id and codec_config()
+ 	- update num_audio_elements and audio_element_id
  - Audio Element OBUs: just take all of them
  - Mix Presentation OBUs: just take all of them and generate ones which are used after mixing of multiple audio elements if needed.
 
 Step2: ith Frame is generated as follows:
- - just take all of Temporal Units for ith frames from each audio element and keep the order of Temporal Unitsas the order of audio element OBUs in descritor OBUs.
+ - just take all of temporal units for ith frames from each audio element and keep the order of temporal units as the order of audio element OBUs in descritor OBUs.
+ - It may have the immediately preceding temporal delimiter OBU for each audio element, 
 
-Step3: Generate IA bitstream which start descritpr OBUs and followed by Temporal Units.
+
+Step3: Generate IA bitstream which start descritpr OBUs and followed by temporal units in order.
 
 #### Multiple Audio Elements with Multiple Codec Config #### {#iacgeneration-multipleaudioelements-multiplecodec}
 
@@ -2135,11 +2200,10 @@ Step1: Descriptor OBUs are generated as follows:
 Step2: Data OBUs are generated as follows:
  - place Temporal Units from multiple audio elements in timing order.
  - add Sync OBU in front of Temporal Unit, frequently.
- - modify sync offsets of parameter block OBUs and audio frame OBUs. 
+ - set sync offsets of parameter block OBUs and audio frame OBUs based on the sync_offset of the immediately preceding Sync OBU.
+ - It may have the immediately preceding temporal delimiter OBU for each audio element, 
 
-Step3: Generate IA bitstream which start descritpr OBUs and followed by Temporal Units.
-
-ISSUE: Need to update it
+Step3: Generate IA bitstream which start descritpr OBUs and followed by Temporal Units in order.
 
 ### Post Processing ### {#iacgeneration-postprocessing}
 
