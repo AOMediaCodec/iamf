@@ -7,7 +7,7 @@ Editor: Felicia Lim, Google, flim@google.com
 Repository: AOMediaCodec/iac
 Shortname: iac
 URL: https://aomediacodec.github.io/iac/
-Date: 2022-09-22
+Date: 2022-09-28
 Abstract: This document specifies the immersive audio (IA) bitstream format and the container format for the IA bitstream in one single [[!ISOBMFF]] track.
 </pre>
 
@@ -161,6 +161,18 @@ url: https://xiph.org/flac/format.html; spec: FLAC; type: property;
 		"publisher": "Wikepedia",
 		"href": "https://en.wikipedia.org/wiki/Q_(number_format)"
 	},
+	"LEB128": {
+		"title": "Little Endian Base 128",
+		"status": "Best Practice",
+		"publisher": "Wikepedia",
+		"href": "https://en.wikipedia.org/wiki/LEB128"
+	},
+	"BCP47": {
+		"title": "BCP 47",
+		"status": "Best Practice",
+		"publisher": "Wikepedia",
+		"href": "https://www.rfc-editor.org/info/bcp47"
+	},
 	"FLAC": {
 		"title": "Free Lossless Audio Codec",
 		"status": "Best Practice",
@@ -177,18 +189,27 @@ url: https://xiph.org/flac/format.html; spec: FLAC; type: property;
 
 All of obu syntax is described in <b>class</b> which is a structure of C++ program language.
 
-## Type ## {#type}
+## Syntax Elements ## {#convention-syntax}
 
-The following specifies the type of syntax elements
+All of syntax elements is composed of <b>type</b> and followed by <b>syntaxName</b>.
 
- <b>leb128()</b>
+ <b>leb128()</b> <b>syntaxName</b>
  
- Unsigned integer represented by a variable number of little-endian bytes. Its size in bits shall be 8 x the variable number of bytes.
+ <b>leb128()</b> indicates the type of an unsigned integer with that its size in bits is 8 x the variable number of bytes of little-endian bytes by [[!LEB128]], variable length code compression.
+
+ <b>syntaxName</b> is an unsigned integer which shall be encoded by [[!LEB128]].
  
- <b>uleb128()</b>
+ <b>sleb128()</b> <b>syntaxName</b>
+
+ <b>sleb128()</b> indicates the type of a signed integer with that its size in bits is 8 x the variable number of bytes of little-endian bytes by [[!LEB128]], variable length code compression.
+
+ <b>syntaxName</b> is a signed integer which shall be encoded by [[!LEB128]].
  
- Signed integer represented by a variable number of little-endian bytes. Its size in bits shall be 8 x the variable number of bytes.
+ <b>string</b> <b>syntaxName</b>
+
+ <b>string</b> indicates the type of a string with that its size in bits is 8 x the number of bytes by byte representation of <b>syntaxName</b>.
  
+ <b>syntaxName</b> is a human readable lable whose byte representation shall consists of <b>primary language subtag</b> and <b>region subtag</b> which are connected by hyphen("-") and followed by <b>lable</b>. Where, <b>language tag</b> shall conform to [[!BCP47]]].
  
 ## Mathemetical functions ## {#mathmeticalfunctions}
  
@@ -639,8 +660,6 @@ class mix_presentation_obu() {
 
 <dfn noexport>mix_presentation_friendly_label</dfn> shall specify a human-friendly label to describe this mix presentation.
 
-ISSUE: The language used to express the label should be provided, following IETF BCP 47.
-
 <dfn noexport>mix_target_layout</dfn> shall specify the target playback layout that all referenced audio elements shall be rendered for. 
 
 <pre class = "def">
@@ -670,9 +689,7 @@ An IA bitstream may have one or more mix_presentation() specified, each with dif
 
 <dfn noexport>audio_element_friendly_label</dfn> shall specify a human-friendly label to describe the referenced audio element.
 
-ISSUE: The language used to express the label should be provided, following IETF BCP 47.
-
-<dfn noexport>audio_element_id_ref</dfn> shall specify the unique ID of the audio element that is used in this mix presentation.
+<dfn noexport>audio_element_id_ref</dfn> shall be the obu_id specified in obu header of audio element obu specifying the audio element that is used in this mix presentation.
 
 <dfn noexport>rendering_config()</dfn> is a class that provides the metadata required for rendering the referenced audio element.
 
@@ -752,14 +769,31 @@ For this obu, both of obu_duratrion_flag and obu_counter_flag shall be set to 0.
 <b>Syntax</b>
 
 ```
-class audio_frame_obu(obu_size) {
-  unsigned int (obu_size) substream();
+class audio_frame_obu() {
+  unsigned int (8*coded_frame_size) audio_frame();
 }
 ```
 
 <b>Semantics</b>
 
-<dfn noexport>substream()</dfn> is the raw coded audio data for the frame. It shall be [=opus packet=] of [[!RFC6716]] for IAC-OPUS, [=raw_data_block()=] of [[!AAC]] for IAC-AAC-LC, [=FRAME=] of [[!FLAC]] for IAC-FLAC and audio samples for IAC-LPCM
+<dfn noexport>coded_frame_size</dfn> is the size of [=audio_frame()=] in byte units.
+
+<dfn noexport>audio_frame()</dfn> is the raw coded audio data for the frame. It shall be [=opus packet=] of [[!RFC6716]] for IAC-OPUS, [=raw_data_block()=] of [[!AAC]] for IAC-AAC-LC, [=FRAME=] of [[!FLAC]] for IAC-FLAC and audio samples for IAC-LPCM
+
+### Temporal Delimiter OBU Syntax and Semantics ### {#obu-temporaldelimiter}
+
+This section specifies temporal delimiter obu.
+
+For this obu, all of obu_sync_flag, obu_duratrion_flag, obu_counter_flag and obu_trimming_status shall be set to 0.
+
+<b>Syntax</b>
+
+```
+class temporal_delimiter_obu() {
+}
+```
+
+NOTE: Temporal delimiter obu has an empty payload.
 
 ### Sync OBU Syntax and Semantics ### {#obu-sync}
 
@@ -1004,31 +1038,90 @@ class recon_gain_info() {
 
 ### Rendering Config Syntax and Semantics ### {#syntax-rendering-config}
 
-To be added
+ISSUE: Need to review the matrix-based rendering mechanisms.
+
+[=rendering_config()=] provides a rendering matrix to be applied to the audio element.
+
+The matrix shall be composed of [=targetChannelCount=] x [=baseChannelCount=].
+ - [=targetChannelCount=] is the nubmer of rows and [=baseChannelCount=] is the number of columns.
+ - The order of rows shall indicate the order of channels specified in [=mix_target_layout=].
+ - The order of columns shall indicate the order of channels specified in [=loudspeaker_layout=] for channel-based audio element.
+ - The order of columns shall indicate the order of ACN for scene-based audio element.
 
 <b>Syntax</b>
 
 ```
 class rendering_config() {
-  // TODO
+  unsigned int (2) rendering_mode;
+  unsigned int (6) reserved;
+  if (rendering_mode == 0) {
+    //No rendering
+  }
+  else if (rendering_mode == 1){
+    for (i = 1; i <= targetChannelCount; i++) {
+      for (j = 1; j <= baseChannelCount; j++) {
+        signed int (16) rendering_coefficient;
+      }
+    }
+  }
+  else if (rendering_mode == 2){
+    leb() num_nonzero_rows;
+    for (i = 1; i <= num_nonzero_rows; i++) {
+      leb() row_index(i);
+      leb() num_nonzero_coefficients;
+      for (j = 1; j <= num_nonzero_coefficients; j++) {
+        leb() column_index(j)
+        signed int (16) rendering_coefficient;
+      }
+    }
+  }
+
 }
 ```
 
 <b>Semantics</b>
 
+<b>redering_mode</b> shall indicate a rendering mode which is applied to the audio element.
+ - 0: No rendering
+ - 1: Matrix-based rendering with high density coefficients
+ 	- <dfn noexport>targetChannelCount</dfn> is the number of channels which are implied from [=mix_target_layout=] specified in this mix presentation obu.
+ 	- <dfn noexport>baseChannelCount</dfn> is the number of channels for the audio element.	
+ - 2: Matrix-based rendering with low density coefficients
+ 	- It shall be [=targetChannelCount=] x [=baseChannelCount=] matrix.
+ - 3: reserved
+
+<dfn noexport>rendering_coefficient</dfn> is a value in dBs. It shall be stored in a 16-bit, signed, two’s complement fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]).
+
+This value of -128 dB shall indicate the real number 0. 
+
+<dfn noexport>num_nonzero_rows</dfn> is the nubmer of rows, each of rows has at least one non-zero coefficient.
+
+<dfn noexport>row_index(i)</dfn> is the row number of the ith row which has at least one non-zero coefficient, in [=targetChannelCount=] x [=baseChannelCount=] matrix.
+
+<dfn noexport>num_nonzero_coefficients</dfn> is the nubmer of non-zero coefficients of row_index(i).
+
+<dfn noexport>column_index(j)</dfn> is the column number of the jth non-zero coefficient of the given row_index(i).
+
 ### Element Mix Config Syntax and Semantics ### {#syntax-element-mix-config}
 
-To be added
+ISSUE: Need to review the mix mechanisms.
+
+[=element_mix_config()=] provides a gain value to be applied to the audio element.
 
 <b>Syntax</b>
 
 ```
 class element_mix_config() {
-  // TODO
+  signed int (16) mix_gain;
 }
 ```
 
 <b>Semantics</b>
+
+<dfn noexport>mix_gain</dfn> is a value in dBs. For mixing of the audio element, this gain shall be applied to all of channels of the audio element. 
+
+It shall be stored in a 16-bit, signed, two’s complement fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]).
+
 
 ### Mix Loudness Info Syntax and Semantics ### {#syntax-mix-loudness-info}
 
@@ -1051,16 +1144,16 @@ class mix_loudness_info() {
 
 ```
 class mix_bus_config() {
-  //To do
   drc_config();
 }
 ```
 
 class drc_config() {	
-  //To do
 }
 
 <b>Semantics</b>
+
+NOTE: drc_config() has an empty payload.
 
 ## Codec Specific ## {#codec-specific}
 
@@ -1149,7 +1242,7 @@ OBU Type / Flags  : obu_id_flag : obu_sync_flag : obu_duration_flag : obu_counte
  Mix Present. OBU :      Use    :     No Use    :       No Use      :      No Use     
  Audio Frame OBU  :      Use    :       Use     :       No Use      :      No Use     
  Para. Block OBU  :      Use    :       Use     :         Use       :       Use       
-   Temp. Del OBU  :      Use    :     No Use    :       No Use      :      No Use 
+  Temp. Del. OBU  :      Use    :     No Use    :       No Use      :      No Use 
 	   Sync OBU     :      Use    :       Use     :       No Use      :      No Use     
 
 </pre> 
@@ -1225,7 +1318,7 @@ OBU Type / Flags  : obu_id_flag : obu_sync_flag : obu_duration_flag : obu_counte
  Mix Present. OBU :      Use    :     No Use    :       No Use      :      No Use 
  Audio Frame OBU  :    No Use   :     No Use    :       No Use      :      No Use 
  Para. Block OBU  :     Use     :     No Use    :       No Use      :       Use 
-   Temp. Del OBU  :      Use    :     No Use    :       No Use      :      No Use 
+  Temp. Del. OBU  :      Use    :     No Use    :       No Use      :      No Use 
 
 </pre>
 
@@ -1273,7 +1366,7 @@ OBU Type / Flags  : obu_id_flag : obu_sync_flag : obu_duration_flag : obu_counte
  Mix Present. OBU :      Use    :     No Use    :       No Use      :      No Use 
  Audio Frame OBU  :      Use    :       Use     :       No Use      :      No Use 
  Para. Block OBU  :      Use    :       Use     :         Use       :       Use 
-   Temp. Del OBU  :      Use    :     No Use    :       No Use      :      No Use 
+  Temp. Del. OBU  :      Use    :     No Use    :       No Use      :      No Use 
 	   Sync OBU     :      Use    :       Use     :       No Use      :      No Use 
 
 </pre> 
@@ -1383,7 +1476,7 @@ A file conformant to this specification satisfies the following:
 Parsers shall support the structures required by the <code>'iso6'</code> brand and MAY support structures required by further ISOBMFF structural brands.
 
 
-## ISOBMFF IAC Encasulation with single track ## {#isobmff-singletrack}
+## ISOBMFF IAC Encapsulation with single track ## {#isobmff-singletrack}
 
 This section describes the basic data structures used to signal encapsulation of IA sequence in [[!ISOBMFF]] containers.
 
@@ -1571,6 +1664,41 @@ For example, for this version of the specification
 	aiac.0000.0100.mp4a.40.2
 ```
 
+# ISOBMFF IAC Decapsulation # {#isobmff-decapsulation}
+
+## ISOBMFF IAC Decapsulation with single track ## {#isobmff-decapsulation-singletrack}
+
+This section provides a guideline for IAC parser to reconstruct IA bitstreams from IAC file.
+
+When IAC parser feeds the reconstructed IA bitstreams to IAC-OBU parser, descriptor OBUs shall be placed at the first and followed by Temoral Units.
+
+Below figure shows the mirroring process of the encapsulation scheme of IA bitstream specified in [[#isobmff]].
+
+<center><img src="images/IAC Decapsulation Guideline.png" style="width:100%; height:auto;"></center>
+<center><figcaption>IAC Decapsulation Guideline</figcaption></center>
+
+
+During decapsulation process, IAC file is decapsulated into IA bitstreams which conform to [[#obu-syntax]] as follows:
+- Step1: Reconstruction of descriptor OBUs (one Start Code OBU, followed by one Codec Config OBU, folowed by one or more Audio Element OBUs and followed by zero or more Mix Presentation OBUs) for the ith IA bitstream.
+	- [Step1-1] Start Code OBU: take version and profile_version fields from <code>aiac</code> sample entry.
+	- [Step1-2] Codec Config OBU: generate [=codec_id=] and [=decoder_config()=] from CodecSpecificBox of <code>aiac</code> sample entry, num_samples_per_frame from 'stts' box and take roll_distance from [=AudioPreRollEntry=], and packetize it by OBU with obu_type = OBU_IA_Codec_Config.
+	- [Step1-3] Audio Element OBUs and Mix Presentation OBUs: take the ith SampleGroupDescriptionEntry as it is in SampleGroup with grouping_type, [=iagd=].
+	- [Step1-4] Figure out the offset (i1) and number (im) of Samples, which the ith SampleGroupDescriptionEntry is applied to, from the SampleGroup.
+- Step2: Reconstructing of the jth Temporal Unit of the ith IA Bitstream (j = i1, i2, …, im)
+	- [Step2-1] Prepare Sync_OBU with obu_type = OBU_IA_Sync.
+	- [Step2-2] If there is the SampleGroup with grouping_type = [=demi=], then take the parameter block OBU for the demixing_info and jth sample. Otherwise, take jth sample as it is.
+		- Parameter block OBU for demixing_info: take the SampleGroupDescriptionEntry as it is, from SampleGrouop with grouping_type = [=demi=], mapped to jth Sample.
+	- [Step2-3] Place Sync_OBU at the front of the result of Step2-2 without gap to reconstruct the jth Temporal Unit.
+- Step3: Place descriptor OBUs and followed by Temporal Units in order (j = i1, i2, …, im) without gap to reconstruct the ith IA bitstream.
+
+[=codec_id=] and [=decoder_config()=] for IAC-OPUS is generated as follows:
+- The syntax and values shall conform to [=ID Header=] of [[!RFC7845]] with following constraints.
+	- [=OutputChannelCount=], [=PreSkip=], [=InputSampleRate=], [=OutputGain=] and [=ChannelMappingFamily=] are copied from [=dOps=] box.
+
+[=codec_id=] and [=decoder_config()=] for IAC-AAC-LC is generated as follows:
+- [=codec_id=]: 'mp4a'
+- [=decoder_config()=] is generated from [=DecoderConfigDescriptor()=] of [=esds=] box.
+
 
 # IAC processing # {#processing}
 
@@ -1737,7 +1865,7 @@ Recommend values for specific codecs are as follows
 
 //To Do: Fill in the text
 
-### Rendering for Audio Element ### {#processing-mixpresentation-Rendering}
+### Rendering for Audio Element ### {#processing-mixpresentation-rendering}
 
 This section provide a guideline by the rendering_config() which is specified in mix presentation OBU.
 
@@ -1745,7 +1873,7 @@ This section provide a guideline by the rendering_config() which is specified in
 
 //To Do: Fill in rendering method for channel-based audio element if any
 
-### Mixing for Audio Elements ### {#processing-mixpresentation-Rendering}
+### Mixing for Audio Elements ### {#processing-mixpresentation-mixing}
 
 This section provide a guideline by the element_mix_config() which is specified in mix presentation OBU.
 
@@ -2226,37 +2354,3 @@ This section provide a guideline to generate drc_config().
 
 ISSUE: TODO. Fill in example workflows.
 
-ISSUE: below is copy-pasted from the old version (IAC Decapsulation Process). TODO: update it.
-
-## IAC Decapsulation Process ## {#iacdecapsulation}
-
-This section provides a guideline for IAC parser to reconstruct IA bitstreams from IAC file.
-
-When IAC parser feeds the reconstructed IA bitstreams to IAC-OBU parser, descriptor OBUs shall be placed at the first and followed by Temoral Units.
-
-Below figure shows the mirroring process of the encapsulation scheme of IA bitstream specified in [[#isobmff]].
-
-<center><img src="images/IAC Decapsulation Guideline.png" style="width:100%; height:auto;"></center>
-<center><figcaption>IAC Decapsulation Guideline</figcaption></center>
-
-
-During decapsulation process, IAC file is decapsulated into IA bitstreams which conform to [[#obu-syntax]] as follows:
-- Step1: Reconstruction of descriptor OBUs (one Start Code OBU, followed by one Codec Config OBU, folowed by one or more Audio Element OBUs and followed by zero or more Mix Presentation OBUs) for the ith IA bitstream.
-	- [Step1-1] Start Code OBU: take version and profile_version fields from <code>aiac</code> sample entry.
-	- [Step1-2] Codec Config OBU: generate [=codec_id=] and [=decoder_config()=] from CodecSpecificBox of <code>aiac</code> sample entry, num_samples_per_frame from 'stts' box and take roll_distance from [=AudioPreRollEntry=], and packetize it by OBU with obu_type = OBU_IA_Codec_Config.
-	- [Step1-3] Audio Element OBUs and Mix Presentation OBUs: take the ith SampleGroupDescriptionEntry as it is in SampleGroup with grouping_type, [=iagd=].
-	- [Step1-4] Figure out the offset (i1) and number (im) of Samples, which the ith SampleGroupDescriptionEntry is applied to, from the SampleGroup.
-- Step2: Reconstructing of the jth Temporal Unit of the ith IA Bitstream (j = i1, i2, …, im)
-	- [Step2-1] Prepare Sync_OBU with obu_type = OBU_IA_Sync.
-	- [Step2-2] If there is the SampleGroup with grouping_type = [=demi=], then take the parameter block OBU for the demixing_info and jth sample. Otherwise, take jth sample as it is.
-		- Parameter block OBU for demixing_info: take the SampleGroupDescriptionEntry as it is, from SampleGrouop with grouping_type = [=demi=], mapped to jth Sample.
-	- [Step2-3] Place Sync_OBU at the front of the result of Step2-2 without gap to reconstruct the jth Temporal Unit.
-- Step3: Place descriptor OBUs and followed by Temporal Units in order (j = i1, i2, …, im) without gap to reconstruct the ith IA bitstream.
-
-[=codec_id=] and [=decoder_config()=] for IAC-OPUS is generated as follows:
-- The syntax and values shall conform to [=ID Header=] of [[!RFC7845]] with following constraints.
-	- [=OutputChannelCount=], [=PreSkip=], [=InputSampleRate=], [=OutputGain=] and [=ChannelMappingFamily=] are copied from [=dOps=] box.
-
-[=codec_id=] and [=decoder_config()=] for IAC-AAC-LC is generated as follows:
-- [=codec_id=]: 'mp4a'
-- [=decoder_config()=] is generated from [=DecoderConfigDescriptor()=] of [=esds=] box.
