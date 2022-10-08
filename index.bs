@@ -640,8 +640,9 @@ The metadata in mix_presentation() specifies how to render and process one or mo
 ```
 class mix_presentation_obu() {
   string mix_presentation_friendly_label;
-  unsigned int (4) mix_target_layout;
   unsigned int (4) reserved;
+
+  mix_target_layout();
 
   leb128() num_audio_elements;
   for (i = 0; i < num_audio_elements; i++) {
@@ -660,30 +661,9 @@ class mix_presentation_obu() {
 
 <dfn noexport>mix_presentation_friendly_label</dfn> shall specify a human-friendly label to describe this mix presentation.
 
-<dfn noexport>mix_target_layout</dfn> shall specify the target playback layout that all referenced audio elements shall be rendered for. 
+<dfn noexport>mix_target_layout()</dfn> is a class that specifies the target playback layout that all referenced audio elements shall be rendered for.
 
-<pre class = "def">
-Mix Target Layout (4 bits) :  Channel Layout  : Loudspeaker Location Ordering
-            0000           :       Mono       : C
-            0001           :      Stereo      : L/R
-            0010           :      5.1ch       : L/C/R/Ls/Rs/LFE
-            0011           :     5.1.2ch      : L/C/R/Ls/Rs/Ltf/Rtf/LFE
-            0100           :     5.1.4ch      : L/C/R/Ls/Rs/Ltf/Rtf/Ltr/Rtr/LFE
-            0101           :      7.1ch       : L/C/R/Lss/Rss/Lrs/Rrs/LFE
-            0110           :     7.1.2ch      : L/C/R/Lss/Rss/Lrs/Rrs/Ltf/Rtf/LFE
-            0111           :     7.1.4ch      : L/C/R/Lss/Rss/Lrs/Rrs/Ltf/Rtf/Ltb/Rtb/LFE
-            1000           :     3.1.2ch      : L/C/R//Ltf/Rtf/LFE
-           others          :     reserved     :
-</pre>
-
-```
-Where, C: Center, L: Left, R: Right, Ls: Left Surround, Lss: Left Side Surround, 
-Rs: Right Surround, Rss: Right Side Surround, 
-Ltf: Left Top Front, Rtf: Right Top Front, Ltr: Left Top Rear, Rtr: Right Top Rear, 
-Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
-```
-
-An IA bitstream may have one or more mix_presentation() specified, each with different mix_target_layout values. In this case, the IA decoder shall select the mix presentation that matches the physical playback layout. If there is no match, the IA decoder should select the closest specified layout and apply up or down-mixing appropriately. Sections [[#iacgeneration-scalablechannelaudio-downmixmechanism]] and [[#processing-downmixmatrix]] provide example dynamic and static down-mixing matrices for some common layouts that may be used by the IA decoder.
+An IA bitstream may have one or more mix presentations specified, each with a different mix target layout. In this case, the IA decoder shall select the mix presentation that matches the physical playback layout. If there is no match, the IA decoder should select the closest specified layout and apply up or down-mixing appropriately. Sections [[#iacgeneration-scalablechannelaudio-downmixmechanism]] and [[#processing-downmixmatrix]] provide example dynamic and static down-mixing matrices for some common layouts that may be used by the IA decoder.
 
 <dfn value noexport for ="mix_presentation_obu()">num_audio_elements</dfn> shall specify the number of audio elements that are used in this mix presentation to generate the final output audio signal for playback.
 
@@ -1036,6 +1016,95 @@ class recon_gain_info() {
 
 <dfn noexport>recon_gain</dfn> shall indicate the gain value to be applied to the channel, which is indicated by [=recon_gain_flags=], after decoding of the following associated frames.
 
+### Mix Target Layout Syntax and Semantics ### {#syntax-mix-target-layout}
+
+The mix target layout specifies the list of physical loudspeaker positions according to [[!ITU2051-3]].
+
+<b>Syntax</b>
+
+```
+class mix_target_layout() {
+  f(1) is_sp_label;
+  if (is_sp_label) {
+    f(7) num_loudspeakers;
+    for (i = 0; i < num_loudspeakers; i++) {
+      f(3) layer_name;
+      f(1) sign;
+      f(4) azimuth;
+    }
+  } else {
+    f(4) sound_system;
+    f(3) reserved;
+  }
+}
+```
+
+<b>Semantics</b>
+
+<dfn noexport>is_sp_label</dfn> shall indicate if the layout is defined using the SP label or the Sound System convention of [[!ITU2051-3]].
+
+<dfn noexport>num_loudspeakers</dfn> shall specify the number of loudspeakers.
+
+<dfn noexport>layer_name</dfn> shall specify the layer name.
+
+<pre class = "def">
+layer_name : Layer name
+     0     : M
+     1     : U
+     2     : UH
+     3     : T
+     4     : B
+     5     : LFE1
+     6     : LFE2
+     7     : Reserved
+</pre>
+
+<dfn noexport>sign</dfn> shall specify the sign, to be used in conjunction with the azimuth value.
+
+<pre class = "def">
+sign : Sign
+ 0   : +
+ 1   : -
+</pre>
+
+<dfn noexport>azimuth</dfn> shall specify the azimuth expressed in degrees, to be used in conjunction with the sign value.
+
+<pre class = "def">
+azimuth : Azimuth
+   0    : 000
+   1    : 022
+   2    : 030
+   3    : 045
+   4    : 060
+   5    : 090
+   6    : 110
+   7    : 135
+   8    : 180
+   9    : SC
+ 10~15  : Reserved
+</pre>
+
+If the value of sign is positive (+), this shall indicate that the azimuth angle is rotated to the left when facing the front.
+
+If the combination of sign and azimuth values is equal to +SC or -SC, this shall indicate a loudspeaker at the left or right edge of the screen, respectively.
+
+<dfn noexport>sound_system</dfn> shall specify the sound system.
+
+<pre class = "def">
+sound_system : Sound system
+     0       : A
+     1       : B
+     2       : C
+     3       : D
+     4       : E
+     5       : F
+     6       : G
+     7       : H
+     8       : I
+     9       : J
+   10~15     : Reserved
+</pre>
+
 ### Rendering Config Syntax and Semantics ### {#syntax-rendering-config}
 
 ISSUE: Need to review the matrix-based rendering mechanisms.
@@ -1044,7 +1113,7 @@ ISSUE: Need to review the matrix-based rendering mechanisms.
 
 The matrix shall be composed of [=targetChannelCount=] x [=baseChannelCount=].
  - [=targetChannelCount=] is the nubmer of rows and [=baseChannelCount=] is the number of columns.
- - The order of rows shall indicate the order of channels specified in [=mix_target_layout=].
+ - The order of rows shall indicate the order of channels specified in [=mix_target_layout()=].
  - The order of columns shall indicate the order of channels specified in [=loudspeaker_layout=] for channel-based audio element.
  - The order of columns shall indicate the order of ACN for scene-based audio element.
 
@@ -1084,7 +1153,7 @@ class rendering_config() {
 <b>redering_mode</b> shall indicate a rendering mode which is applied to the audio element.
  - 0: No rendering
  - 1: Matrix-based rendering with high density coefficients
- 	- <dfn noexport>targetChannelCount</dfn> is the number of channels which are implied from [=mix_target_layout=] specified in this mix presentation obu.
+ 	- <dfn noexport>targetChannelCount</dfn> is the number of channels which are implied from [=mix_target_layout()=] specified in this mix presentation obu.
  	- <dfn noexport>baseChannelCount</dfn> is the number of channels for the audio element.	
  - 2: Matrix-based rendering with low density coefficients
  	- It shall be [=targetChannelCount=] x [=baseChannelCount=] matrix.
@@ -1135,7 +1204,7 @@ class mix_loudness_info() {
 
 <b>Semantics</b>
 
-<dfn noexport>mix_loudness</dfn> shall indicate the loudness value of the mixed channels, for the [=mix_target_layout=], from the audio elements which are specified in the mix_presentation_obu(). It is stored in fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]) and the value should be [=LKFS=] based on [[!ITU1770-4]], so it shall be to represent zero or negative value.
+<dfn noexport>mix_loudness</dfn> shall indicate the loudness value of the mixed channels, for the [=mix_target_layout()=], from the audio elements which are specified in the mix_presentation_obu(). It is stored in fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]) and the value should be [=LKFS=] based on [[!ITU1770-4]], so it shall be to represent zero or negative value.
 
 
 ### Mix Bus Config Syntax and Semantics ### {#syntax-mix-bus-config}
@@ -1877,7 +1946,7 @@ This section provide a guideline by the rendering_config() which is specified in
 
 This section provide a guideline by the element_mix_config() which is specified in mix presentation OBU.
 
-When the output channel audio of scene-based audio element or channel-based audio element does not match with the loudspeaker layout which is indicated by mix_target_layout in mix presentation OBU.
+When the output channel audio of scene-based audio element or channel-based audio element does not match with the loudspeaker layout which is indicated by mix_target_layout() in mix presentation OBU.
 
 Down-mixing matrics, which are specified in [[#processing-downmixmatrix]], are recommended for down-mixing of the output channel audio.
 
