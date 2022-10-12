@@ -760,6 +760,8 @@ This value must be greater or equal to 22, in order to avoid collision with the 
 
 <dfn noexport>audio_frame()</dfn> is the raw coded audio data for the frame. It shall be [=opus packet=] of [[!RFC6716]] for IAC-OPUS, [=raw_data_block()=] of [[!AAC]] for IAC-AAC-LC, [=FRAME=] of [[!FLAC]] for IAC-FLAC and audio samples for IAC-LPCM.
 
+For this version of the specification, all audio frames for a given substream must be gapless.
+
 ### Temporal Delimiter OBU Syntax and Semantics ### {#obu-temporaldelimiter}
 
 This section specifies the OBU payload of OBU_IA_Temporal_Delimiter.
@@ -786,7 +788,8 @@ class sync_obu() {
   for (i = 0; i < num_obu_ids; i++) {
     leb128() obu_id;
     unsigned int (1) obu_data_type;
-    unsigned int (7) reserved;
+    unsigned int (1) reinitialize_decoder;
+    unsigned int (6) reserved;
     sleb128() relative_offset;
   }
   leb128() concatenation_rule;
@@ -797,11 +800,27 @@ class sync_obu() {
 
 <dfn noexport>global_offset</dfn> shall specify the offset that is applied to all substreams and parameters specified in this Sync OBU, in addition to their individual relative offsets.
 
+For this version of the specification, the value of global_offset shall be set to 0.
+
 <dfn noexport>num_obu_ids</dfn> shall specify the number of substream and parameter IDs that this Sync OBU specifies the offset for.
 
 <dfn noexport>obu_id</dfn> shall specify the unique ID associated with the substream or parameter that is being referred to.
 
-<dfn noexport>obu_data_type</dfn> shall specify the type of data that is being referred to. If obu_data_type = 0, this shall indicate a substream, and if obu_data_type = 1, this shall indicate a parameter.
+<dfn noexport>obu_data_type</dfn> shall specify the type of data that is being referred to.
+
+<pre class = "def">
+obu_data_type : Type of OBU data
+      0       : SUBSTREAM
+      1       : PARAMETER
+</pre>
+
+<dfn noexport>reinitialize_decoder</dfn> shall be used to specify the behaviour of a decoder when encountering gaps in the audio substream, where the gap shall be identified as described in [[#standalone-synchronizing-data-obus]]. If obu_data_type does not equal SUBSTREAM, an IAC-OBU parser shall ignore this field.
+
+If reinitialize_decoder = 0, the decoder shall not be reinitialized before decoding the audio frames after the gap. This may be used in the case where it is preferable for the decoder to fill the gap with silence instead.
+
+If reinitialize_decoder = 1, the decoder shall be reinitialized before decoding the audio frames after the gap. If a roll_distance is specified in the relevant Codec Config OBU, it is applicable after reinitializing the decoder.
+
+For this version of the specification, the value of reinitialize_decoder shall be set to 0.
 
 <dfn value noexport for="sync_obu()">reserved</dfn> shall be set to 0. Reserved units are for future use and shall be ignored by an IAC-OBU parser.
 
@@ -1419,7 +1438,7 @@ In an IA sequence, there may be OBUs that are redundant copies of previous versi
 
 ## Synchronizing Data OBUs ## {#standalone-synchronizing-data-obus}
 
-The audio frames and parameter data provided in the Data OBUs may be asynchronous; different audio substreams may have different audio frame sizes, parameter blocks may have different durations from the audio frames, or there may be gaps in a substream or parameter's timeline. This section details how these Data OBUs may be synchronized, based on their duration and the information provided in the Sync OBUs.
+The audio frames and parameter data provided in the Data OBUs may be asynchronous; different audio substreams may have different audio frame sizes, parameter blocks may have different durations from the audio frames, or there may be gaps in a parameter's timeline. This section details how these Data OBUs may be synchronized, based on their duration and the information provided in the Sync OBUs.
 
 The Sync OBU contains two pieces of information that apply to all substream and parameters that follow it: 
 
@@ -2416,3 +2435,27 @@ This section provide a guideline to generate drc_config().
 
 ISSUE: TODO. Fill in example workflows.
 
+# Annex A: Audio Substream Gaps
+
+This annex describes a number of scenarios where a gap may exist in the audio signals, where a gap is defined as no audio frames for some period of time.
+
+## A gap within an audio substream
+
+A gap within an audio substream may be expressed via the Sync OBU offsets. A decoder encountering such a gap may either:
+
+1. insert silent audio frames in the gap without reinitializing, or
+2. reinitialize before decoding the audio frames after the gap.
+
+The appropriate behaviour in this case is signalled via the [=reinitialize_decoder=] field in the Sync OBU.
+
+In this version of the specification, gaps within an audio substream are not supported.
+
+## A gap between two audio substreams
+
+A gap may occur if there is a period of time between the end of one substream and the start of another. Such a gap may be expressed via the Sync OBU offsets. Similar to the case of a gap within an audio substream, the behaviour of the decoder is determined by the [=reinitialize_decoder=] field in the Sync OBU.
+
+A gap may further occur if there is a period of time between the end of all substreams and the start of another. This case may be expressed by setting a non-zero value for the [=global_offset=] field in the Sync OBU.
+
+## A gap due to packet loss
+
+In the case where a gap is not signalled by the Sync OBUs, any unexpected absence of audio frames shall be interpreted as packet loss. The IAC parser is unable to guarantee the correctness of following OBUs received until the next set of Descriptor OBUs.
