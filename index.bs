@@ -975,7 +975,7 @@ If ambisonics_mode is equal to PROJECTION, this shall indicate that the Ambisoni
 
 <dfn noexport>coupled_substream_count</dfn> shall specify the number of referenced substreams that are coded as coupled stereo channels, where M <= N.
 
-<dfn noexport>demixing_matrix</dfn> shall be the same as the one for [=ChannelMappingFamily=] = 3 in [[!RFC8486]].
+<dfn noexport>demixing_matrix</dfn> shall be the same as the one for [=ChannelMappingFamily=] = 3 in [[!RFC8486]] except the byte order of each of matrix coefficients shall be converted to big endian.
 
 
 ### Demixing Info Syntax and Semantics ### {#syntax-demixing-info}
@@ -1171,6 +1171,7 @@ For legacy codecs, Decoder_Config() shall be exactly the same information as the
 Codec_Specific_Info for IAC-OPUS shall conform to [=ID Header=] with [=ChannelMappingFamily=] = 0 of [[!RFC7845]] with following constraints:
 - [=Channel Count=] should be set to 2.
 - [=Output Gain=] shall not be used. In other words, it shall be set to 0dB.
+- The byte order of each field in [=ID Header=] shall be converted to big endian.
 
 Substream format shall be [=opus packet=] of [[!RFC6716]] which contains only one single frame of mono or stereo channels and which has non-delimiting frame structure.
 
@@ -1213,7 +1214,7 @@ class decoder_config(lpcm) {
 }
 ```
 
-<dfn noexport>sample_rate</dfn> shall indicate the sample rate of the input audio in Hz. It shall be little endian.
+<dfn noexport>sample_rate</dfn> shall indicate the sample rate of the input audio in Hz.
 
 Substream format shall be the audio samples for the frame size.
 
@@ -1694,6 +1695,7 @@ During decapsulation process, IAC file is decapsulated into IA bitstreams which 
 [=codec_id=] and [=decoder_config()=] for IAC-OPUS is generated as follows:
 - The syntax and values shall conform to [=ID Header=] of [[!RFC7845]] with following constraints.
 	- [=OutputChannelCount=], [=PreSkip=], [=InputSampleRate=], [=OutputGain=] and [=ChannelMappingFamily=] are copied from [=dOps=] box.
+	
 
 [=codec_id=] and [=decoder_config()=] for IAC-AAC-LC is generated as follows:
 - [=codec_id=]: 'mp4a'
