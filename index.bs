@@ -1038,69 +1038,15 @@ class recon_gain_info() {
 
 ### Rendering Config Syntax and Semantics ### {#syntax-rendering-config}
 
-ISSUE: Need to review the matrix-based rendering mechanisms.
-
-[=rendering_config()=] provides a rendering matrix to be applied to the audio element.
-
-The matrix shall be composed of [=targetChannelCount=] x [=baseChannelCount=].
- - [=targetChannelCount=] is the nubmer of rows and [=baseChannelCount=] is the number of columns.
- - The order of rows shall indicate the order of channels specified in [=mix_target_layout=].
- - The order of columns shall indicate the order of channels specified in [=loudspeaker_layout=] for channel-based audio element.
- - The order of columns shall indicate the order of ACN for scene-based audio element.
-
 <b>Syntax</b>
 
 ```
 class rendering_config() {
-  unsigned int (2) rendering_mode;
-  unsigned int (6) reserved;
-  if (rendering_mode == 0) {
-    //No rendering
-  }
-  else if (rendering_mode == 1){
-    for (i = 1; i <= targetChannelCount; i++) {
-      for (j = 1; j <= baseChannelCount; j++) {
-        signed int (16) rendering_coefficient;
-      }
-    }
-  }
-  else if (rendering_mode == 2){
-    leb() num_nonzero_rows;
-    for (i = 1; i <= num_nonzero_rows; i++) {
-      leb() row_index(i);
-      leb() num_nonzero_coefficients;
-      for (j = 1; j <= num_nonzero_coefficients; j++) {
-        leb() column_index(j)
-        signed int (16) rendering_coefficient;
-      }
-    }
-  }
-
+  // TODO
 }
 ```
 
 <b>Semantics</b>
-
-<b>redering_mode</b> shall indicate a rendering mode which is applied to the audio element.
- - 0: No rendering
- - 1: Matrix-based rendering with high density coefficients
- 	- <dfn noexport>targetChannelCount</dfn> is the number of channels which are implied from [=mix_target_layout=] specified in this mix presentation obu.
- 	- <dfn noexport>baseChannelCount</dfn> is the number of channels for the audio element.	
- - 2: Matrix-based rendering with low density coefficients
- 	- It shall be [=targetChannelCount=] x [=baseChannelCount=] matrix.
- - 3: reserved
-
-<dfn noexport>rendering_coefficient</dfn> is a value in dBs. It shall be stored in a 16-bit, signed, two’s complement fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]).
-
-This value of -128 dB shall indicate the real number 0. 
-
-<dfn noexport>num_nonzero_rows</dfn> is the nubmer of rows, each of rows has at least one non-zero coefficient.
-
-<dfn noexport>row_index(i)</dfn> is the row number of the ith row which has at least one non-zero coefficient, in [=targetChannelCount=] x [=baseChannelCount=] matrix.
-
-<dfn noexport>num_nonzero_coefficients</dfn> is the nubmer of non-zero coefficients of row_index(i).
-
-<dfn noexport>column_index(j)</dfn> is the column number of the jth non-zero coefficient of the given row_index(i).
 
 ### Element Mix Config Syntax and Semantics ### {#syntax-element-mix-config}
 
@@ -1149,11 +1095,10 @@ class mix_bus_config() {
 ```
 
 class drc_config() {	
+  // TODO
 }
 
 <b>Semantics</b>
-
-NOTE: drc_config() has an empty payload.
 
 ## Codec Specific ## {#codec-specific}
 
