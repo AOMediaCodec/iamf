@@ -982,8 +982,6 @@ If ambisonics_mode is equal to PROJECTION, this shall indicate that the Ambisoni
 
 <dfn noexport>demixing_info()</dfn> specifies demixing parameter mode to be used to reconstruct output channel audio according to its [=loudspeaker_layout=].
 
-In the case of the simple scalable channel audio (e.g. mono for layer 1 and stereo for layer 2), [=demixing_info()=] shall not be used.
-
 <b>Syntax</b>
 
 ```
@@ -1013,8 +1011,6 @@ class demixing_info() {
 ### Recon Gain Info Syntax and Semantics ### {#syntax-recon-gain-info}
 
 <dfn noexport>recon_gain_info()</dfn> contains recon gain values for demixed channels.
-
-In the case of the simple scalable channel audio (e.g. mono for layer 1 and stereo for layer 2), [=recon_gain_info()=] shall not be used.
 
 <b>Syntax</b>
 
@@ -1242,37 +1238,6 @@ Restrictions on the IA sequence:
 - [=num_layers=] shall be set to 1 for channel-based audio element (i.e. non-scalable channel audio)
     - In this case, OBU_IA_Parameter_Block including demixing_info() may be present in the IA sequence.
 - All audio frames shall have aligned frame boundaries.
-- The table below specifies the valid values for obu_id_flag for the different OBU types.
-
-<table class="def">
-<tr>
-  <th>OBU Type</th><th>Valid values for obu_id_flag</th>
-</tr>
-<tr>
-  <td>Codec Config OBU</td><td>0</td>
-</tr>
-<tr>
-  <td>Audio Element OBU</td><td>0</td>
-</tr>
-<tr>
-  <td>Mix Presentation OBU</td><td>0 or 1</td>
-</tr>
-<tr>
-  <td>Parameter Block OBU</td><td>1</td>
-</tr>
-<tr>
-  <td>Audio Frame OBU</td><td>0</td>
-</tr>
-<tr>
-  <td>Temporal Delimiter OBU</td><td>0</td>
-</tr>
-<tr>
-  <td>Sync OBU</td><td>0</td>
-</tr>
-<tr>
-  <td>Start Code OBU</td><td>0</td>
-</tr>
-</table>
 
 Capabilities of the IA parser, decoder and processor:
 - They shall be able to parse an IA sequence with the MSB four bits of [=profile_version=] = 0 and the MSB four bits of [=version=] = 0 (i.e., profile_version = 0 to 15 and version = 0 to 15).
@@ -1293,38 +1258,8 @@ Restrictions on IA sequence:
 - [=profile_version=] shall be set to 16 for this version of specification.
 - [=num_layers=] shall be set to 1 or up to 6 for Channel-based audio element (i.e. scalable channel audio)
     - In this case, [=demixing_info()=] and [=recon_gain_info()=] may be present in the IA sequence.
+    - In case of simple scalable channel audio (e.g. mono for layer 1 & stereo for layer 2), demixing_info() and recon_gain_info() shall not be present in the bitstream.
 - All audio frames shall have aligned frame boundaries.
-- The table below specifies the valid values for obu_id_flag for the different OBU types.
-
-<table class="def">
-<tr>
-  <th>OBU Type</th><th>Valid values for obu_id_flag</th>
-</tr>
-<tr>
-  <td>Codec Config OBU</td><td>0</td>
-</tr>
-<tr>
-  <td>Audio Element OBU</td><td>0 or 1</td>
-</tr>
-<tr>
-  <td>Mix Presentation OBU</td><td>0 or 1</td>
-</tr>
-<tr>
-  <td>Parameter Block OBU</td><td>1</td>
-</tr>
-<tr>
-  <td>Audio Frame OBU</td><td>0</td>
-</tr>
-<tr>
-  <td>Temporal Delimiter OBU</td><td>0</td>
-</tr>
-<tr>
-  <td>Sync OBU</td><td>0</td>
-</tr>
-<tr>
-  <td>Start Code OBU</td><td>0</td>
-</tr>
-</table>
 
 Capabilities of the IA parser, decoder and processor:
 - They shall be able to parse an IA sequence with the MSB four bits of [=profile_version=] = 0 or 1 and the MSB four bits of [=version=] = 0 (i.e., profile_version = 0 to 31 and version = 0 to 15).
@@ -1342,8 +1277,7 @@ Restrictions on IA sequence:
 - There may be more than one unique Codec Config OBUs.
 - There may be more than one unique Audio Element OBUs.
 - There may be more than one unique Mix Presentation OBUs.
-- There may be Temporal Delimiter OBUs present.
-    - If every Audio Frame OBU has the obu_id_flag set to 1, there shall not be Temporal Delimiter OBUs present.
+- There shall not be Temporal Delimiter OBUs present.
 - [=version=] shall be set to 0 for this version of specification.
 - [=profile_version=] shall be set to 32 for this version of specification.
 - The different Codec Config OBUs may have different [=codec_id=]s specified with the following constraints:
@@ -1352,38 +1286,6 @@ Restrictions on IA sequence:
 - [=num_layers=] shall be set to 1 or up to 6 for Channel-based audio element (i.e. scalable channel audio)
     - In this case, [=demixing_info()=] and [=recon_gain_info()=] may be present.
     - In case of simple scalable channel audio (e.g. mono for layer 1 & stereo for layer 2), [=demixing_info()=] and [=recon_gain_info()=] shall not be present.
-
-- The table below specifies the valid values for obu_id_flag for the different OBU types.
-
-<table class="def">
-<tr>
-  <th>OBU Type</th><th>Valid values for obu_id_flag</th>
-</tr>
-<tr>
-  <td>Codec Config OBU</td><td>0 or 1</td>
-</tr>
-<tr>
-  <td>Audio Element OBU</td><td>0 or 1</td>
-</tr>
-<tr>
-  <td>Mix Presentation OBU</td><td>0 or 1</td>
-</tr>
-<tr>
-  <td>Parameter Block OBU</td><td>1</td>
-</tr>
-<tr>
-  <td>Audio Frame OBU</td><td>0 or 1</td>
-</tr>
-<tr>
-  <td>Temporal Delimiter OBU</td><td>0</td>
-</tr>
-<tr>
-  <td>Sync OBU</td><td>0</td>
-</tr>
-<tr>
-  <td>Start Code OBU</td><td>0</td>
-</tr>
-</table>
 
 Capabilities of the IA parser, decoder and processor:
 - They shall be able to parse an IA sequence with the MSB four bits of [=profile_version=] = 0, 1 or 2 and the MSB four bits of [=version=] = 0 (i.e., profile_version = 0 to 47 and version = 0 to 15).
