@@ -640,9 +640,12 @@ The metadata in mix_presentation() specifies how to render and process one or mo
 ```
 class mix_presentation_obu() {
   string mix_presentation_friendly_label;
-  unsigned int (4) reserved;
+  unsigned int (1) mix_target_layout_flag;
+  unsigned int (3) reserved;
 
-  mix_target_layout();
+  if (mix_target_layout_flag) {
+    mix_target_layout();
+  }
 
   leb128() num_audio_elements;
   for (i = 0; i < num_audio_elements; i++) {
@@ -661,9 +664,17 @@ class mix_presentation_obu() {
 
 <dfn noexport>mix_presentation_friendly_label</dfn> shall specify a human-friendly label to describe this mix presentation.
 
+<dfn noexport>mix_target_layout_flag</dfn> shall specify if this mix presentation was created for specific target loudspeaker layout. A value of 0 shall indicate that there is no specific target layout, while a value of 1 shall indicate that there is a specific target layout.
+
 <dfn noexport>mix_target_layout()</dfn> is a class that specifies the target playback layout that all referenced audio elements shall be rendered for.
 
-An IA bitstream may have one or more mix presentations specified, each with a different mix target layout. In this case, the IA decoder shall select the mix presentation that matches the physical playback layout. If there is no match, the IA decoder should select the closest specified layout and apply up or down-mixing appropriately. Sections [[#iacgeneration-scalablechannelaudio-downmixmechanism]] and [[#processing-downmixmatrix]] provide example dynamic and static down-mixing matrices for some common layouts that may be used by the IA decoder.
+An IA sequence may have one or more mix presentations specified, each with a different mix target layout. The IA parser shall select the appropriate target layout according to the following rules, in order:
+
+1. The IA parser shall first attempt to select the mix presentation that matches the physical playback layout.
+
+2. If there is no match, the IA parser shall select the mix presentation with mix_target_layout_flag = 0. In this case, the renderer specified in rendering_config() shall render the physical playback layout appropriately.
+
+3. If there is no mix presentation with mix_target_layout_flag = 0, the IA parser shall select the mix presentation with the closest specified layout to the physical layout. The renderer specified in rendering_config() shall first render the layout specified by mix_target_layout() and then apply up or down-mixing appropriately. Sections [[#iacgeneration-scalablechannelaudio-downmixmechanism]] and [[#processing-downmixmatrix]] provide example dynamic and static down-mixing matrices for some common layouts that may be used.
 
 <dfn value noexport for ="mix_presentation_obu()">num_audio_elements</dfn> shall specify the number of audio elements that are used in this mix presentation to generate the final output audio signal for playback.
 
@@ -1024,22 +1035,38 @@ The mix target layout specifies the list of physical loudspeaker positions accor
 
 ```
 class mix_target_layout() {
-  f(1) is_sp_label;
-  if (is_sp_label) {
-    f(7) num_loudspeakers;
-    for (i = 0; i < num_loudspeakers; i++) {
-      f(3) layer_name;
-      f(1) sign;
-      f(4) azimuth;
+  unsigned int (1) target_layout_type;
+
+  if (target_layout_type == LOUDSPEAKERS) {
+    unsigned int (1) is_sp_label;
+    if (is_sp_label) {
+      unsigned int (6) num_loudspeakers;
+      for (i = 0; i < num_loudspeakers; i++) {
+	unsigned int (3) layer_name;
+	unsigned int (1) sign;
+	unsigned int (4) azimuth;
+      }
+    } else {
+      unsigned int (4) sound_system;
+      unsigned int (2) reserved;
     }
-  } else {
-    f(4) sound_system;
-    f(3) reserved;
+  }
+
+  if (target_layout_type == BINAURAL) {
+    unsigned int (7) reserved;
   }
 }
 ```
 
 <b>Semantics</b>
+
+<dfn noexport>target_layout_type</dfn> shall specify the type of target layout.
+
+<pre class = "def">
+target_layout_type : Target layout type
+         0         : LOUDSPEAKERS
+         1         : BINAURAL
+</pre>
 
 <dfn noexport>is_sp_label</dfn> shall indicate if the layout is defined using the SP label or the Sound System convention of [[!ITU2051-3]].
 
