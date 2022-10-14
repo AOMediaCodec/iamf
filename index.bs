@@ -373,6 +373,7 @@ OBU data shall start on the first (most significant) bit and shall end on the la
 ```
 class obu_header() {
   unsigned int (5) obu_type;
+  unsigned int (1) obu_redundant_copy;
   unsigned int (1) obu_trimming_status_flag;
   unsigned int (1) obu_extension_flag;
   unsigned int (1) reserved;
@@ -406,6 +407,16 @@ obu_type: Name of obu_type
   9~30  : OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21
    31   : OBU_IA_Start_Code
 </pre>
+
+<dfn noexport>obu_redundant_copy</dfn> indicates whether this OBU is a redundant copy of the previous OBU in the IA sequence with the same obu_type. A value of 1 indicates that it is a redundant copy, while a value of 0 indicates that it is not.
+
+It shall always be set to 0 for the following obu_type values:
+
+- OBU_IA_Temporal_Delimiter
+- OBU_IA_Sync
+- OBU_IA_Audio_Frame
+- OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21
+- OBU_IA_Start_Code
 
 <dfn noexport>obu_trimming_status_flag</dfn> indicates whether this OBU has audio samples to be trimmed or not. If it is set to 1, the [=num_samples_to_trim_at_start=] and [=num_samples_to_trim_at_end=] fields shall be present.
 
@@ -1392,7 +1403,7 @@ A set of Descriptor OBUs shall be placed at the beginning of the bitstream in th
 One Sync OBU is placed immediately after the Descriptor OBUs. This is followed by a sequence of Audio Frame OBUs, Parameter Block OBUs, one or more additional Sync OBUs and one or more Temporal Delimiter OBUs, according to the rules below:
 
 - Audio Frame OBUs and Parameter Block OBUs must be ordered by their implied timestamp in the timeline, and may be interleaved.
-- If there are multiple Audio Frame OBUs and Parameter Block OBUs that have the same implied start timestamp, they must be grouped by audio elements.
+- If there are multiple Audio Frame OBUs that have the same implied start timestamp, they must be grouped by audio elements.
 - A new Sync OBU may be inserted anywhere in the sequence of data OBUs, as frequently as needed.
 - Between two Sync OBUs, a sequence of audio frames or parameter blocks must be gapless.
 - If an Audio Frame OBU or Parameter Block OBU has a substream or parameter ID that is not defined in the most recent Sync OBU, it must not appear in the bitstream, until a new Sync OBU is provided that specifies them.
@@ -1403,6 +1414,7 @@ Additionally, the following constraints apply to the Audio Frame and Parameter B
 
 - Audio Frame OBUs must be provided non-redundantly, such that for each substream, there shall not be two audio frames that are overlapping in time.
 - Parameter Block OBUs may be provided redundantly, such that they contain the same data as a previously provided Parameter Block OBU for the same time region.
+- Redundant Parameter Block OBUs do not need to be ordered by their implied timestamp in the timeline. The implied timestamp should be inferred from the initial non-redundant version.
 - Non-redundant Parameter Block OBUs must not provide data for overlapping time regions.
 
 ### Refreshing Descriptor OBUs ### {#standalone-obu-sequence-refreshes}
@@ -1412,10 +1424,6 @@ The above describes the full sequence of OBUs for a given set of descriptor OBUs
 The descriptor OBUs may additionally be repeated redundantly and as frequently as necessary.
 
 If there is set of descriptor OBUs placed mid-stream, there may be parameter blocks that came before them which are still valid and applicable for the duration after the descriptor OBUs. In this case, these parameter blocks must be redundantly copied and placed after the first Sync OBU that follows the descriptor OBUs. This ensures that any receiver joining mid-stream and encountering a set of descriptor OBU is guaranteed to be able to receive the complete set of metadata that is applicable to all audio frames that come after.
-
-### Identifying Redundant OBUs ### {#standalone-identify-redundant-obus}
-
-In an IA sequence, there may be OBUs that are redundant copies of previous versions. An implementation may identify these redundant copies by computing and comparing hashes of these OBUs.
 
 ## Synchronizing Data OBUs ## {#standalone-synchronizing-data-obus}
 
