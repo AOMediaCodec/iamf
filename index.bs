@@ -7,7 +7,7 @@ Editor: Felicia Lim, Google, flim@google.com
 Repository: AOMediaCodec/iac
 Shortname: iac
 URL: https://aomediacodec.github.io/iac/
-Date: 2022-10-04
+Date: 2022-10-12
 Abstract: This document specifies an immersive audio (IA) architecture and model, a standalone IA sequence format and an [[!ISOBMFF]]-based IA container format.
 </pre>
 
@@ -29,6 +29,10 @@ url: https://www.iso.org/standard/68960.html#; spec: ISOBMFF; type: property;
 	text: edts
 	text: stts
 	text: prol
+
+url: https://aomedia.org/av1/specification/conventions/; spec: AV1-Convention; type: dfn;
+	text: leb128()
+	text: Clip3
 
 url: https://www.iso.org/standard/43345.html#; spec: AAC; type: dfn;
 	text: raw_data_block()
@@ -54,6 +58,7 @@ url: https://www.iso.org/standard/55688.html#; spec: MP4-Systems; type: dfn;
 	text: upstream
 	text: decSpecificInfo()
 	text: DecoderConfigDescriptor()
+	text: Syntatic Description Language
 
 url: https://www.iso.org/standard/76383.html#; spec: MP4-Audio; type: dfn;
 	text: AudioSpecificConfig()
@@ -161,16 +166,10 @@ url: https://xiph.org/flac/format.html; spec: FLAC; type: property;
 		"publisher": "Wikepedia",
 		"href": "https://en.wikipedia.org/wiki/Q_(number_format)"
 	},
-	"LEB128": {
-		"title": "Little Endian Base 128",
-		"status": "Best Practice",
-		"publisher": "Wikepedia",
-		"href": "https://en.wikipedia.org/wiki/LEB128"
-	},
 	"BCP47": {
 		"title": "BCP 47",
 		"status": "Best Practice",
-		"publisher": "Wikepedia",
+		"publisher": "IETF",
 		"href": "https://www.rfc-editor.org/info/bcp47"
 	},
 	"FLAC": {
@@ -178,6 +177,12 @@ url: https://xiph.org/flac/format.html; spec: FLAC; type: property;
 		"status": "Best Practice",
 		"publisher": "xiph.org",
 		"href": "https://xiph.org/flac/format.html"
+	},
+	"AV1-Convention": {
+		"title": "Conventions",
+		"status": "Spec",
+		"publisher": "aomedia.org",
+		"href": "https://aomedia.org/av1/specification/conventions/"
 	}
 
 }
@@ -187,35 +192,33 @@ url: https://xiph.org/flac/format.html; spec: FLAC; type: property;
 
 ## Syntax Description ## {#convention-syntaxstructure}
 
-All of obu syntax is described in <b>class</b> which is a structure of C++ program language.
-
-## Syntax Elements ## {#convention-syntax}
-
-All of syntax elements is composed of <b>type</b> and followed by <b>syntaxName</b>.
+All of syntax elements shall conform to [=Syntatic Description Laguage=] specified in [[!MP4-Systems]] unless it is explicitly described in the specification.
 
  <b>leb128()</b> <b>syntaxName</b>
  
- <b>leb128()</b> indicates the type of an unsigned integer with that its size in bits is 8 x the variable number of bytes of little-endian bytes by [[!LEB128]], variable length code compression.
-
- <b>syntaxName</b> is an unsigned integer which shall be encoded by [[!LEB128]].
+ <b>leb128()</b> indicates the type of an unsigned integer. It indicates the following unsigned integer <b>syntaxName</b> shall be encoded by [=leb128()=] specified in [[!AV1-Convention]].
+ 
+ <b>syntaxName</b> is an unsigned integer which is encoded by [=leb128()=] specified in [[!AV1-Convention]].
  
  <b>sleb128()</b> <b>syntaxName</b>
 
- <b>sleb128()</b> indicates the type of a signed integer with that its size in bits is 8 x the variable number of bytes of little-endian bytes by [[!LEB128]], variable length code compression.
-
- <b>syntaxName</b> is a signed integer which shall be encoded by [[!LEB128]].
+ <b>sleb128()</b> indicates the type of an signed integer. It indicates the following signed integer <b>syntaxName</b> shall be encoded by [=leb128()=] specified in [[!AV1-Convention]].
+ 
+ <b>syntaxName</b> is an signed integer which is encoded by [=leb128()=] specified in [[!AV1-Convention]].
  
  <b>string</b> <b>syntaxName</b>
 
  <b>string</b> indicates the type of a string with that its size in bits is 8 x the number of bytes by byte representation of <b>syntaxName</b>.
  
- <b>syntaxName</b> is a human readable lable whose byte representation shall consists of <b>primary language subtag</b> and <b>region subtag</b> which are connected by hyphen("-") and followed by <b>lable</b>. Where, <b>language tag</b> shall conform to [[!BCP47]]].
+ <b>syntaxName</b> is a human readable label whose byte representation shall consists of <b>two-letter primary language subtags</b> and <b>two-letter region subtags</b> which are connected by hyphen("-") and followed by <b>label</b>.
+ 
+ Where, <b>two-letter primary language subtags</b> and <b>two-letter region subtags</b> shall conform to [[!BCP47]].
  
 ## Mathemetical functions ## {#mathmeticalfunctions}
  
  <b>Clip3(x, y, z)</b>
  
- min if z < x, y if z > y, z otherwise.
+ It shall conform to [=Clip3=] specified in [[!AV1-Convention]].
  
 
 # Introduction # {#introduction}
