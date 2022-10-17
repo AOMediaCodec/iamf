@@ -778,7 +778,9 @@ class audio_frame_obu() {
 
 <dfn noexport>coded_frame_size</dfn> is the size of [=audio_frame()=] in byte units.
 
-<dfn noexport>audio_frame()</dfn> is the raw coded audio data for the frame. It shall be [=opus packet=] of [[!RFC6716]] for IAC-OPUS, [=raw_data_block()=] of [[!AAC]] for IAC-AAC-LC, [=FRAME=] of [[!FLAC]] for IAC-FLAC and LPCM audio samples for IAC-LPCM
+<dfn noexport>audio_frame()</dfn> is the raw coded audio data for the frame. It shall be [=opus packet=] of [[!RFC6716]] for IAC-OPUS, [=raw_data_block()=] of [[!AAC]] for IAC-AAC-LC and [=FRAME=] of [[!FLAC]] for IAC-FLAC.
+
+For IAC-LPCM, [=audio_frame()=] shall be LPCM samples. When more than one byte is used to represent a LPCM sample, the byte order shall be in little endian. 
 
 ### Temporal Delimiter OBU Syntax and Semantics ### {#obu-temporaldelimiter}
 
@@ -1217,12 +1219,9 @@ class decoder_config(lpcm) {
 
 <dfn noexport>sample_rate</dfn> shall indicate the sample rate of the input audio in Hz.
 
-<dfn noexport>sample_size</dfn> shall indicate the size of a PCM sample in bit units.
+<dfn noexport>sample_siz</dfn> shall indicate the size of a PCM sample in bit units.
 
-When more than one byte is used to represent a PCM sample, the byte order shall be in little endian.
-
-
-Substream format shall be the audio samples for the frame size.
+Substream format shall be the LPCM audio samples for the frame size.
 
 
 # Profiles # {#profiles}
