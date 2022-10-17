@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version b0de3432c, updated Thu Oct 13 09:16:59 2022 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iac/" rel="canonical">
-  <meta content="a666246dabdb0f0dd19c50f733d05bc37db73ade" name="document-revision">
+  <meta content="45f015798ff586d034f45587629f4959b7350d70" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -1977,7 +1977,7 @@ dfn > a.self-link::before      { content: "#"; }
     <li>
      <a href="#overview"><span class="secno">3</span> <span class="content">Overview</span></a>
      <ol class="toc">
-      <li><a href="#iab-components"><span class="secno">3.1</span> <span class="content">IA Bitstream Components</span></a>
+      <li><a href="#iab-components"><span class="secno">3.1</span> <span class="content">IA sequence Components</span></a>
       <li>
        <a href="#use-of-obu"><span class="secno">3.2</span> <span class="content">Use of OBU Syntax</span></a>
        <ol class="toc">
@@ -2046,7 +2046,7 @@ dfn > a.self-link::before      { content: "#"; }
       <li>
        <a href="#isobmff-singletrack"><span class="secno">7.2</span> <span class="content">ISOBMFF IAC Encapsulation with single track</span></a>
        <ol class="toc">
-        <li><a href="#isobmff-singletrack-iabitstream"><span class="secno">7.2.1</span> <span class="content">Requirement of IA bitstream</span></a>
+        <li><a href="#isobmff-singletrack-iabitstream"><span class="secno">7.2.1</span> <span class="content">Requirement of IA sequence</span></a>
         <li><a href="#encapsulation-scheme--isobmff-singletrack-basicencapsulationscheme"><span class="secno">7.2.2</span> <span class="content">Encapsulation Scheme ### {isobmff-singletrack-basicencapsulationscheme}</span></a>
         <li><a href="#iasampleentry-section"><span class="secno">7.2.3</span> <span class="content">IA Sample Entry</span></a>
         <li>
@@ -2098,7 +2098,7 @@ dfn > a.self-link::before      { content: "#"; }
       <li>
        <a href="#processing-downmixmatrix"><span class="secno">9.5</span> <span class="content">Down-mix Matrix</span></a>
        <ol class="toc">
-        <li><a href="#processing-downmixmatrix-static"><span class="secno">9.5.1</span> <span class="content">Static Down-mix Matrix {#processing-downmixmatrix-static}</span></a>
+        <li><a href="#processing-downmixmatrix-static"><span class="secno">9.5.1</span> <span class="content">Static Down-mix Matrix</span></a>
         <li><a href="#processing-downmixmatrix-dynamic"><span class="secno">9.5.2</span> <span class="content">Dynamic Down-mix Matrix {#processing-downmixmatrix-dynamic}</span></a>
        </ol>
      </ol>
@@ -2168,7 +2168,7 @@ dfn > a.self-link::before      { content: "#"; }
    <p><b>Clip3(x, y, z)</b></p>
    <p>It shall conform to <a data-link-type="dfn" href="https://aomedia.org/av1/specification/conventions/" id="termref-for-④">Clip3</a> specified in <a data-link-type="biblio" href="#biblio-av1-convention">[AV1-Convention]</a>.</p>
    <h2 class="heading settled" data-level="2" id="introduction"><span class="secno">2. </span><span class="content">Introduction</span><a class="self-link" href="#introduction"></a></h2>
-   <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="ia-bitstream">IA bitstream</dfn> is designed to represent immersive audio for presentation on a wide range of devices in both dynamic streaming and offline applications. These applications include internet audio streaming, multicasting/broadcasting services, file download, gaming, communication, virtual and augmented reality, and others. In these applications, audio may be played back on a wide range of devices, e.g. headsets, mobile phones, tablets, TVs, sound bars, home theater systems and big screen.</p>
+   <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="ia-sequence">IA sequence</dfn> is designed to represent immersive audio for presentation on a wide range of devices in both dynamic streaming and offline applications. These applications include internet audio streaming, multicasting/broadcasting services, file download, gaming, communication, virtual and augmented reality, and others. In these applications, audio may be played back on a wide range of devices, e.g. headsets, mobile phones, tablets, TVs, sound bars, home theater systems and big screen.</p>
    <p>The bitstream comprises a number of coded audio substreams and the metadata that describes how to decode, render and mix the substreams to generate an audio signal for playback. The bitstream format itself is codec-agnostic; any supported audio codec may be used to code the audio substreams.</p>
    <p>The immersive audio container (<dfn data-dfn-type="dfn" data-noexport id="iac">IAC<a class="self-link" href="#iac"></a></dfn>) is the storage format for immersive audio (IA) bitstream in one single <a data-link-type="biblio" href="#biblio-isobmff">[ISOBMFF]</a> track.</p>
    <p>The figure below shows the conceptual IAC architecture.</p>
@@ -2183,9 +2183,9 @@ dfn > a.self-link::before      { content: "#"; }
     <li data-md>
      <p>Audio Codec Enc generates Codec-Dependent Bitstream, which consists of the coded streams, coded from Pre-Processed Audio.</p>
     <li data-md>
-     <p>File Packager generates IAC File by encapsulating IA bitstream, which consists of Codec-Dependent Bitstream and Codec Agnostic Metadata, into <a data-link-type="biblio" href="#biblio-isobmff">[ISOBMFF]</a> tracks.</p>
+     <p>File Packager generates IAC File by encapsulating IA sequence, which consists of Codec-Dependent Bitstream and Codec Agnostic Metadata, into <a data-link-type="biblio" href="#biblio-isobmff">[ISOBMFF]</a> tracks.</p>
     <li data-md>
-     <p>File Parser reconstructs IA bitstream by decapsulating IAC File.</p>
+     <p>File Parser reconstructs IA sequence by decapsulating IAC File.</p>
     <li data-md>
      <p>Audio Codec Dec outputs a decoded Pre-Processed Audio after decoding of Codec-Dependent Bitstream.</p>
     <li data-md>
@@ -2194,32 +2194,32 @@ dfn > a.self-link::before      { content: "#"; }
    <p>The rest of this specification is formulated as follows:</p>
    <ul>
     <li data-md>
-     <p><a href="#overview">§ 3 Overview</a> describes the high level IA bitstream architecture and introduces its components.</p>
+     <p><a href="#overview">§ 3 Overview</a> describes the high level IA sequence architecture and introduces its components.</p>
     <li data-md>
      <p><a href="#obu-syntax">§ 4 Open Bitstream Unit (OBU) Syntax and Semantics</a> specifies the syntax and semantics of the top level IA components and detailed IA components.</p>
     <li data-md>
-     <p><a href="#profiles">§ 5 Profiles</a> specifies the profiles for IA bitstreams and IA decoders.</p>
+     <p><a href="#profiles">§ 5 Profiles</a> specifies the profiles for IA sequences and IA decoders.</p>
     <li data-md>
-     <p><a href="#standalone">§ 6 Standalone IAC Representation</a> specifies the representation of a standalone IA bitstream.</p>
+     <p><a href="#standalone">§ 6 Standalone IAC Representation</a> specifies the representation of a standalone IA sequence.</p>
     <li data-md>
-     <p><a href="#isobmff">§ 7 ISOBMFF IAC Encapsulation</a> specifies the encapsulation of an IA bitstreaminto <a data-link-type="biblio" href="#biblio-isobmff">[ISOBMFF]</a> tracks.</p>
+     <p><a href="#isobmff">§ 7 ISOBMFF IAC Encapsulation</a> specifies the encapsulation of an IA sequence into <a data-link-type="biblio" href="#biblio-isobmff">[ISOBMFF]</a> tracks.</p>
     <li data-md>
-     <p><a href="#processing">§ 9 IAC processing</a> specifies how the IA bitstream should be decoded to generatethe output immersive 3D audio.</p>
+     <p><a href="#processing">§ 9 IAC processing</a> specifies how the IA sequence should be decoded to generatethe output immersive 3D audio.</p>
     <li data-md>
-     <p><a href="#iacgeneration">§ 10 IAC Generation Process</a> provides a guideline for generating the IA bitstream.</p>
+     <p><a href="#iacgeneration">§ 10 IAC Generation Process</a> provides a guideline for generating the IA sequence.</p>
     <li data-md>
-     <p><a href="#iacconsumption">§ 11 Consumption of IAC bitstream</a> provides a guideline for consuming the IA bitstream, for different use-cases.</p>
+     <p><a href="#iacconsumption">§ 11 Consumption of IAC bitstream</a> provides a guideline for consuming the IA sequence, for different use-cases.</p>
    </ul>
    <h2 class="heading settled" data-level="3" id="overview"><span class="secno">3. </span><span class="content">Overview</span><a class="self-link" href="#overview"></a></h2>
-   <h3 class="heading settled" data-level="3.1" id="iab-components"><span class="secno">3.1. </span><span class="content">IA Bitstream Components</span><a class="self-link" href="#iab-components"></a></h3>
-   <p>The IA bitstream includes one or more audio elements, each of which consists of one or more audio substreams. The IA bitstream further include mix presentations and parameters.</p>
+   <h3 class="heading settled" data-level="3.1" id="iab-components"><span class="secno">3.1. </span><span class="content">IA sequence Components</span><a class="self-link" href="#iab-components"></a></h3>
+   <p>The IA sequence includes one or more audio elements, each of which consists of one or more audio substreams. The IA sequence further include mix presentations and parameters.</p>
    <ul>
     <li data-md>
      <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio-substream">Audio substream</dfn> is the actual audio signal, which may be encoded with any compatible audio codec.</p>
     <li data-md>
      <p><dfn data-dfn-type="dfn" data-noexport id="audio-element">Audio element<a class="self-link" href="#audio-element"></a></dfn> is the 3D representation of the audio signals, and are constructed from one or more audio substreams and the metadata describing them. The audio substreams associated with one audio element use the same audio codec.</p>
     <li data-md>
-     <p><dfn data-dfn-type="dfn" data-noexport id="mix-presentations">Mix presentations<a class="self-link" href="#mix-presentations"></a></dfn> contain metadata that describe how the audio elements are rendered and mixed together for playback through physical loudspeakers or headphones. At any given time, only one mix presentation is used for playback. However, multiple mix presentations can be defined as alternatives to each other within the same IA bitstream. Furthermore, the choice of which mix presentation to use at playback is left to the user. For example, multi-language support is implemented by defining different mix presentations, where the first mix describes the use of the audio element with English dialogue, and the second mix describes the use of the audio element with French dialogue.</p>
+     <p><dfn data-dfn-type="dfn" data-noexport id="mix-presentations">Mix presentations<a class="self-link" href="#mix-presentations"></a></dfn> contain metadata that describe how the audio elements are rendered and mixed together for playback through physical loudspeakers or headphones. At any given time, only one mix presentation is used for playback. However, multiple mix presentations can be defined as alternatives to each other within the same IA sequence. Furthermore, the choice of which mix presentation to use at playback is left to the user. For example, multi-language support is implemented by defining different mix presentations, where the first mix describes the use of the audio element with English dialogue, and the second mix describes the use of the audio element with French dialogue.</p>
     <li data-md>
      <p><dfn data-dfn-type="dfn" data-noexport id="parameters">Parameters<a class="self-link" href="#parameters"></a></dfn> are the values that are associated with the algorithms used for decoding, reconstructing, rendering and mixing. Parameters may change their values over time and may further be animated; for example, any changes in values may be smoothed over some time interval. Their rate of change is specific to its respective algorithm, and is independent of other algorithms and the frame rates associated with the audio substreams. As such, they may be viewed as a 1D signal that have different metadata specified for different time intervals.</p>
    </ul>
@@ -2233,7 +2233,7 @@ dfn > a.self-link::before      { content: "#"; }
    <p>The descriptor OBUS contains all the information that is required to setup and configure the decoders, reconstruction algorithms, renderers and mixers.</p>
    <ul>
     <li data-md>
-     <p><dfn data-dfn-type="dfn" data-noexport id="start-code-obu">Start Code OBU<a class="self-link" href="#start-code-obu"></a></dfn> indicates the start of a full IA bitstream description, version and profile version.</p>
+     <p><dfn data-dfn-type="dfn" data-noexport id="start-code-obu">Start Code OBU<a class="self-link" href="#start-code-obu"></a></dfn> indicates the start of a full IA sequence description, version and profile version.</p>
     <li data-md>
      <p><dfn data-dfn-type="dfn" data-noexport id="codec-config-obu">Codec Config OBU<a class="self-link" href="#codec-config-obu"></a></dfn> describes information to set up a decoder for an audio substream.</p>
     <li data-md>
@@ -2264,7 +2264,7 @@ dfn > a.self-link::before      { content: "#"; }
    </ul>
    <h2 class="heading settled" data-level="4" id="obu-syntax"><span class="secno">4. </span><span class="content">Open Bitstream Unit (OBU) Syntax and Semantics</span><a class="self-link" href="#obu-syntax"></a></h2>
    <h3 class="heading settled" data-level="4.1" id="top-level-syntax"><span class="secno">4.1. </span><span class="content">Top Level OBU Syntax and Semantics</span><a class="self-link" href="#top-level-syntax"></a></h3>
-   <p>The IA bitstream uses the OBU syntax. IA bitstream shall be composed of descriptor OBUs and followed by one or more temporal units. Sync OBUs may be present between two adjacent temporal units or between descriptor OBUs and following temporal unit</p>
+   <p>The IA sequence uses the OBU syntax. IA bitstream shall be composed of descriptor OBUs and followed by one or more temporal units. Sync OBUs may be present between two adjacent temporal units or between descriptor OBUs and following temporal unit</p>
    <p>This section specifies the top-level OBU syntax elements and their semantics.</p>
    <h4 class="heading settled" data-level="4.1.1" id="audio-obu"><span class="secno">4.1.1. </span><span class="content">Audio OBU Syntax and Semantics</span><a class="self-link" href="#audio-obu"></a></h4>
    <p><b>Syntax</b></p>
@@ -2463,10 +2463,10 @@ dfn > a.self-link::before      { content: "#"; }
 }
 </pre>
    <p><b>Semantics</b></p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="ia_code">ia_code<a class="self-link" href="#ia_code"></a></dfn> shall be a ‘four-character code’ (4CC) to identify the start of the IA bitstream. It shall be <a class="property css" data-link-type="property">aiac</a>.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="version">version</dfn> shall indicate the version of an IA bitstream. It shall be set to 0 for this version of the specification. Implementations should treat IA bitstreams where the MSB four bits of the version number match that of a recognized specification as backwards compatible with that specification. That is, the version number can be split into "major" and "minor" version sub-fields, with changes to the minor sub-field (in the LSB four bits) signaling compatible changes. For example, an implementation of this specification should accept any stream with a version number of ’15’ or less, and should assume any stream with a version number ’16’ or
+   <p><dfn data-dfn-type="dfn" data-noexport id="ia_code">ia_code<a class="self-link" href="#ia_code"></a></dfn> shall be a ‘four-character code’ (4CC) to identify the start of the IA sequence. It shall be <a class="property css" data-link-type="property">aiac</a>.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="version">version</dfn> shall indicate the version of an IA sequence. It shall be set to 0 for this version of the specification. Implementations should treat IA sequences where the MSB four bits of the version number match that of a recognized specification as backwards compatible with that specification. That is, the version number can be split into "major" and "minor" version sub-fields, with changes to the minor sub-field (in the LSB four bits) signaling compatible changes. For example, an implementation of this specification should accept any stream with a version number of ’15’ or less, and should assume any stream with a version number ’16’ or
 greater is incompatible.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="profile_version">profile_version</dfn> shall indicate the profile of an IA sequence. The MSB four bits shall indicate the profile of an IA sequence. Implementations should treat IA bitstreams where the MSB four bits of the version number match that of a recognized profile as backwards compatible with that specification. That is, the version number can be split into "profile major" and "profile minor" version sub-fields, with changes to the minor sub-field (in the LSB four bits) signaling compatible changes with the profile major version. The semantic of this field shall be only valid when the MSB four bits of <a data-link-type="dfn" href="#version" id="ref-for-version">version</a> = 0.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="profile_version">profile_version</dfn> shall indicate the profile of an IA sequence. The MSB four bits shall indicate the profile of an IA sequence. Implementations should treat IA sequences where the MSB four bits of the version number match that of a recognized profile as backwards compatible with that specification. That is, the version number can be split into "profile major" and "profile minor" version sub-fields, with changes to the minor sub-field (in the LSB four bits) signaling compatible changes with the profile major version. The semantic of this field shall be only valid when the MSB four bits of <a data-link-type="dfn" href="#version" id="ref-for-version">version</a> = 0.</p>
    <h4 class="heading settled" data-level="4.1.6" id="obu-codecconfig"><span class="secno">4.1.6. </span><span class="content">Codec Config OBU Syntax and Semantics</span><a class="self-link" href="#obu-codecconfig"></a></h4>
    <p class="note" role="note"><span>NOTE:</span> This section is udpated to specify one Codec Config OBU per one codec config.</p>
    <p>This section specifies obu payload of OBU_IA_Codec_Config.</p>
@@ -2598,7 +2598,7 @@ Rs: Right Surround, Rss: Right Side Surround,
 Ltf: Left Top Front, Rtf: Right Top Front, Ltr: Left Top Rear, Rtr: Right Top Rear, 
 Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
 </pre>
-   <p>An IA bitstream may have one or more mix_presentation() specified, each with different mix_target_layout values. In this case, the IA decoder shall select the mix presentation that matches the physical playback layout. If there is no match, the IA decoder should select the closest specified layout and apply up or down-mixing appropriately. Sections <a href="#iacgeneration-scalablechannelaudio-downmixmechanism">§ 10.2.2 Down-mix Mechanism</a> and <a href="#processing-downmixmatrix">§ 9.5 Down-mix Matrix</a> provide example dynamic and static down-mixing matrices for some common layouts that may be used by the IA decoder.</p>
+   <p>An IA sequence may have one or more mix_presentation() specified, each with different mix_target_layout values. In this case, the IA decoder shall select the mix presentation that matches the physical playback layout. If there is no match, the IA decoder should select the closest specified layout and apply up or down-mixing appropriately. Sections <a href="#iacgeneration-scalablechannelaudio-downmixmechanism">§ 10.2.2 Down-mix Mechanism</a> and <a href="#processing-downmixmatrix">§ 9.5 Down-mix Matrix</a> provide example dynamic and static down-mixing matrices for some common layouts that may be used by the IA decoder.</p>
    <p><dfn class="css" data-dfn-for="mix_presentation_obu()" data-dfn-type="value" data-noexport id="valdef-mix_presentation_obu-num_audio_elements">num_audio_elements<a class="self-link" href="#valdef-mix_presentation_obu-num_audio_elements"></a></dfn> shall specify the number of audio elements that are used in this mix presentation to generate the final output audio signal for playback.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="audio_element_friendly_label">audio_element_friendly_label<a class="self-link" href="#audio_element_friendly_label"></a></dfn> shall specify a human-friendly label to describe the referenced audio element.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="audio_element_id_ref">audio_element_id_ref<a class="self-link" href="#audio_element_id_ref"></a></dfn> shall be the obu_id specified in obu header of audio element obu specifying the audio element that is used in this mix presentation.</p>
@@ -2990,7 +2990,7 @@ class ambisonics_projection_config() {
    <p>This section defines codec specific information for Codec_Specific_Info and Substream.</p>
    <ul>
     <li data-md>
-     <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="codec_specific_info">Codec_Specific_Info</dfn> shall be composed of <a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id">Codec_ID</a> and <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config">Decoder_Config()</a>. Codec_ID shall indicate the codec which has been used to generate a given substream within IA bitstream and Decder_Config() shall indicate the decoding parameters which are applied to the substream within IA bitstream.</p>
+     <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="codec_specific_info">Codec_Specific_Info</dfn> shall be composed of <a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id">Codec_ID</a> and <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config">Decoder_Config()</a>. Codec_ID shall indicate the codec which has been used to generate a given substream within IA sequence and Decder_Config() shall indicate the decoding parameters which are applied to the substream within IA sequence.</p>
    </ul>
    <p>For legacy codecs, Decoder_Config() shall be exactly the same information as the conventional file parser feeds to the codec decoders for decoding of the substream. For future codecs, Decoder_Config() shall include all of decoding parameters which are required to decode Substreams.</p>
    <ul>
@@ -3414,8 +3414,8 @@ class ambisonics_projection_config() {
    <p>Parsers shall support the structures required by the <code><a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑤⑧">iso6</a></code> brand and MAY support structures required by further ISOBMFF structural brands.</p>
    <h3 class="heading settled" data-level="7.2" id="isobmff-singletrack"><span class="secno">7.2. </span><span class="content">ISOBMFF IAC Encapsulation with single track</span><a class="self-link" href="#isobmff-singletrack"></a></h3>
    <p>This section describes the basic data structures used to signal encapsulation of IA sequence in <a data-link-type="biblio" href="#biblio-isobmff">[ISOBMFF]</a> containers.</p>
-   <h4 class="heading settled" data-level="7.2.1" id="isobmff-singletrack-iabitstream"><span class="secno">7.2.1. </span><span class="content">Requirement of IA bitstream</span><a class="self-link" href="#isobmff-singletrack-iabitstream"></a></h4>
-   <p>IA bitstream shall comply with the bitstream which is specified in [#profiles-simple] or [#profiles-base] for eacapsulation of ISOBMFF with single track.</p>
+   <h4 class="heading settled" data-level="7.2.1" id="isobmff-singletrack-iabitstream"><span class="secno">7.2.1. </span><span class="content">Requirement of IA sequence</span><a class="self-link" href="#isobmff-singletrack-iabitstream"></a></h4>
+   <p>IA sequence shall comply with the bitstream which is specified in [#profiles-simple] or [#profiles-base] for eacapsulation of ISOBMFF with single track.</p>
    <h4 class="heading settled" data-level="7.2.2" id="encapsulation-scheme--isobmff-singletrack-basicencapsulationscheme"><span class="secno">7.2.2. </span><span class="content">Encapsulation Scheme ### {isobmff-singletrack-basicencapsulationscheme}</span><a class="self-link" href="#encapsulation-scheme--isobmff-singletrack-basicencapsulationscheme"></a></h4>
    <p>During encapsulation process, OBUs of IA bistream are encapsulated into <a data-link-type="biblio" href="#biblio-isobmff">[ISOBMFF]</a> as follows:</p>
    <ul>
@@ -3477,7 +3477,7 @@ Quantity:          One or more.
    <p>Both <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑥⑥">channelcount</a> and <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑥⑦">samplerate</a> fields of AudioSampleEntry shall be ignored.</p>
    <p>version and profile_version shall be the same as the ones in start_code_obu.</p>
    <h4 class="heading settled" data-level="7.2.4" id="codecspecificbox-section"><span class="secno">7.2.4. </span><span class="content">Codec Specific Box</span><a class="self-link" href="#codecspecificbox-section"></a></h4>
-   <p>This section describes a <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="codec-specific-box">codec specific box</dfn> for the decoding parameters, which is defined by codec_id of audio_substream_config(), to decode one single substream of IA bitstream. <code>aiac</code> shall contain only one single codec specific box regardless of the number of substreams in IA bitstream. So, the codec specific box is applied to all of substreams in sample data.</p>
+   <p>This section describes a <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="codec-specific-box">codec specific box</dfn> for the decoding parameters, which is defined by codec_id of audio_substream_config(), to decode one single substream of IA sequence. <code>aiac</code> shall contain only one single codec specific box regardless of the number of substreams in IA sequence. So, the codec specific box is applied to all of substreams in sample data.</p>
    <h5 class="heading settled" data-level="7.2.4.1" id="codecspecificbox-opus"><span class="secno">7.2.4.1. </span><span class="content">OPUS Specific Box</span><a class="self-link" href="#codecspecificbox-opus"></a></h5>
    <p>This shal be <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-⑥⑧">OpusSpecificBox</a> (<a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-⑥⑨">dOps</a>) for <a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-⑦⓪">opus</a> audiosampleentry which is specified in <a data-link-type="biblio" href="#biblio-opus-in-isobmff">[OPUS-IN-ISOBMFF]</a>.</p>
 <pre class="def">Box Type:  <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="dops">dOps</dfn>
@@ -3492,7 +3492,7 @@ Quantity:  One
    <p>It shall be the same as the semantics in <a data-link-type="biblio" href="#biblio-opus-in-isobmff">[OPUS-IN-ISOBMFF]</a> except followings:</p>
    <ul>
     <li data-md>
-     <p><a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-⑦④">OutputChannelCount</a> should be set to 2. <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-⑦⑤">OutputChannelCount</a> can be ignored because the real value can be determined from the IA_Static_Meta_OBU and from the <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6716#" id="termref-for-⑦⑥">opus packet</a> header.</p>
+     <p><a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-⑦④">OutputChannelCount</a> should be set to 2. <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-⑦⑤">OutputChannelCount</a> can be ignored because the real value can be determined from the Audio Element OBU and from the <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6716#" id="termref-for-⑦⑥">opus packet</a> header.</p>
     <li data-md>
      <p>In case of channel_audio_layer > 1, <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-⑦⑦">OutputGain</a> shall be set to 0.</p>
     <li data-md>
@@ -3531,7 +3531,7 @@ Quantity:  One of more
      <p><a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑧⑨">SampleGroupDescriptionEntry</a> shall be one or more audio_element_obu and followed by zero or more mix_presentation_obu with OBU syntax.</p>
    </ul>
    <h5 class="heading settled" data-level="7.2.6.2" id="iasamplegroup-demixing"><span class="secno">7.2.6.2. </span><span class="content">Demixing Info Sample Group</span><a class="self-link" href="#iasamplegroup-demixing"></a></h5>
-   <p>During encapsulation process, parameter_block_obu for demixing_info shall be discarded from IA bitstream. A new sample group for demixing_info() shall be defined by using <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨⓪">sgpd</a>' and <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨①">sbgp</a> boxes with following requirements:</p>
+   <p>During encapsulation process, parameter_block_obu for demixing_info shall be discarded from IA sequence. A new sample group for demixing_info() shall be defined by using <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨⓪">sgpd</a>' and <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨①">sbgp</a> boxes with following requirements:</p>
    <ul>
     <li data-md>
      <p><a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨②">grouping_type</a> shall be set to <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="demi">demi</dfn>.</p>
@@ -3600,17 +3600,17 @@ Quantity:  One of more
 </pre>
    <h2 class="heading settled" data-level="8" id="isobmff-decapsulation"><span class="secno">8. </span><span class="content">ISOBMFF IAC Decapsulation</span><a class="self-link" href="#isobmff-decapsulation"></a></h2>
    <h3 class="heading settled" data-level="8.1" id="isobmff-decapsulation-singletrack"><span class="secno">8.1. </span><span class="content">ISOBMFF IAC Decapsulation with single track</span><a class="self-link" href="#isobmff-decapsulation-singletrack"></a></h3>
-   <p>This section provides a guideline for IAC parser to reconstruct IA bitstreams from IAC file.</p>
-   <p>When IAC parser feeds the reconstructed IA bitstreams to IAC-OBU parser, descriptor OBUs shall be placed at the first and followed by Temoral Units.</p>
-   <p>Below figure shows the mirroring process of the encapsulation scheme of IA bitstream specified in <a href="#isobmff">§ 7 ISOBMFF IAC Encapsulation</a>.</p>
+   <p>This section provides a guideline for IAC parser to reconstruct IA sequences from IAC file.</p>
+   <p>When IAC parser feeds the reconstructed IA sequences to IAC-OBU parser, descriptor OBUs shall be placed at the first and followed by Temoral Units.</p>
+   <p>Below figure shows the mirroring process of the encapsulation scheme of IA sequence specified in <a href="#isobmff">§ 7 ISOBMFF IAC Encapsulation</a>.</p>
    <center><img height="294" src="images/IAC Decapsulation Guideline.png" style="width:100%; height:auto;" width="1652"></center>
    <center>
     <figcaption>IAC Decapsulation Guideline</figcaption>
    </center>
-   <p>During decapsulation process, IAC file is decapsulated into IA bitstreams which conform to <a href="#obu-syntax">§ 4 Open Bitstream Unit (OBU) Syntax and Semantics</a> as follows:</p>
+   <p>During decapsulation process, IAC file is decapsulated into IA sequences which conform to <a href="#obu-syntax">§ 4 Open Bitstream Unit (OBU) Syntax and Semantics</a> as follows:</p>
    <ul>
     <li data-md>
-     <p>Step1: Reconstruction of descriptor OBUs (one Start Code OBU, followed by one Codec Config OBU, folowed by one or more Audio Element OBUs and followed by zero or more Mix Presentation OBUs) for the ith IA bitstream.</p>
+     <p>Step1: Reconstruction of descriptor OBUs (one Start Code OBU, followed by one Codec Config OBU, folowed by one or more Audio Element OBUs and followed by zero or more Mix Presentation OBUs) for the ith IA sequence.</p>
      <ul>
       <li data-md>
        <p>[Step1-1] Start Code OBU: take version and profile_version fields from <code>aiac</code> sample entry.</p>
@@ -3622,7 +3622,7 @@ Quantity:  One of more
        <p>[Step1-4] Figure out the offset (i1) and number (im) of Samples, which the ith SampleGroupDescriptionEntry is applied to, from the SampleGroup.</p>
      </ul>
     <li data-md>
-     <p>Step2: Reconstructing of the jth Temporal Unit of the ith IA Bitstream (j = i1, i2, …, im)</p>
+     <p>Step2: Reconstructing of the jth Temporal Unit of the ith IA sequence (j = i1, i2, …, im)</p>
      <ul>
       <li data-md>
        <p>[Step2-1] Prepare Sync_OBU with obu_type = OBU_IA_Sync.</p>
@@ -3636,7 +3636,7 @@ Quantity:  One of more
        <p>[Step2-3] Place Sync_OBU at the front of the result of Step2-2 without gap to reconstruct the jth Temporal Unit.</p>
      </ul>
     <li data-md>
-     <p>Step3: Place descriptor OBUs and followed by Temporal Units in order (j = i1, i2, …, im) without gap to reconstruct the ith IA bitstream.</p>
+     <p>Step3: Place descriptor OBUs and followed by Temporal Units in order (j = i1, i2, …, im) without gap to reconstruct the ith IA sequence.</p>
    </ul>
    <p><a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id①⓪">codec_id</a> and <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config⑤">decoder_config()</a> for IAC-OPUS is generated as follows:</p>
    <ul>
@@ -3655,7 +3655,7 @@ Quantity:  One of more
      <p><a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config⑦">decoder_config()</a> is generated from <a data-link-type="dfn" href="https://www.iso.org/standard/55688.html#" id="termref-for-①⓪④">DecoderConfigDescriptor()</a> of <a data-link-type="dfn" href="#esds" id="ref-for-esds">esds</a> box.</p>
    </ul>
    <h2 class="heading settled" data-level="9" id="processing"><span class="secno">9. </span><span class="content">IAC processing</span><a class="self-link" href="#processing"></a></h2>
-   <p>This section provides a guideline for IA decoding for a given <a data-link-type="dfn" href="#ia-bitstream" id="ref-for-ia-bitstream">IA bitstream</a>.</p>
+   <p>This section provides a guideline for IA decoding for a given <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence">IA sequence</a>.</p>
    <p>IA decoding can be done by using the combination of following decoding processing.</p>
    <ul>
     <li data-md>
@@ -3678,7 +3678,7 @@ Quantity:  One of more
    <p>IA decoder is composed of OBU parser, Codec decoder, Audio Element Renderer and Post-processor as depicted in below figure.</p>
    <ul>
     <li data-md>
-     <p>OBU parser shall depacketize IA bitstream to output one or more substreams with one or more Decoder_Config() but one decoder_config() per audio element, descriptors and parameters.</p>
+     <p>OBU parser shall depacketize IA sequence to output one or more substreams with one or more Decoder_Config() but one decoder_config() per audio element, descriptors and parameters.</p>
     <li data-md>
      <p>Codec decoder for each substream shall ouptput decoded channels.</p>
     <li data-md>
@@ -3707,7 +3707,7 @@ Quantity:  One of more
    <p>Below figure shows the decoding flowchart of Ambisonics decoding.</p>
    <ul>
     <li data-md>
-     <p>OBU parser shall output the substreams for the scene-based audio element in IA bitstream.</p>
+     <p>OBU parser shall output the substreams for the scene-based audio element in IA sequence.</p>
      <ul>
       <li data-md>
        <p>OBU parser shall output <a data-link-type="dfn" href="#channel_mapping" id="ref-for-channel_mapping">channel_mapping</a> or <a data-link-type="dfn" href="#demixing_matrix" id="ref-for-demixing_matrix">demixing_matrix</a> according to <a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode">ambisonics_mode</a> to Channel_Mapping/Demixing_Matrix module</p>
@@ -3989,7 +3989,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
 .TV application: Television with built-in speakers such as LCD/OLED slim TV.
 .Mobile application: Handheld devices with built-in speakers such as smartphone, tablet etc..</p>
    <h3 class="heading settled" data-level="9.5" id="processing-downmixmatrix"><span class="secno">9.5. </span><span class="content">Down-mix Matrix</span><a class="self-link" href="#processing-downmixmatrix"></a></h3>
-   <h4 class="heading settled" data-level="9.5.1" id="processing-downmixmatrix-static"><span class="secno">9.5.1. </span><span class="content">Static Down-mix Matrix {#processing-downmixmatrix-static}</span><a class="self-link" href="#processing-downmixmatrix-static"></a></h4>
+   <h4 class="heading settled" data-level="9.5.1" id="processing-downmixmatrix-static"><span class="secno">9.5.1. </span><span class="content">Static Down-mix Matrix</span><a class="self-link" href="#processing-downmixmatrix-static"></a></h4>
    <p>This section recommends static down-mix matrices.</p>
    <p>IAC players need to support any valid channel layout, even if the number of channels does not match the physically connected audio hardware. Players need to perform channel mixing to increase or reduce the number of channels as needed.</p>
    <p>Implementations can use the matrices below to implement down-mixing from the output channel audio, which are known to give acceptable results for stereo, 5.1ch, 7.1ch and 3.1.2ch.</p>
@@ -4063,7 +4063,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
     <li data-md>
      <p>Input file format: .wav file (Linear PCM, simply called as PCM)</p>
    </ul>
-   <p>For a given input audio and user inputs, IA encoder shall output <a data-link-type="dfn" href="#ia-bitstream" id="ref-for-ia-bitstream①">IA bitstream</a> which conforms to <a href="#obu-syntax">§ 4 Open Bitstream Unit (OBU) Syntax and Semantics</a>.</p>
+   <p>For a given input audio and user inputs, IA encoder shall output <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence①">IA sequence</a> which conforms to <a href="#obu-syntax">§ 4 Open Bitstream Unit (OBU) Syntax and Semantics</a>.</p>
    <p>Input audio shall be one of followings:</p>
    <ul>
     <li data-md>
@@ -4125,7 +4125,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
        </ul>
      </ul>
     <li data-md>
-     <p>OBU packetizer packetize descriptors, parameter blocks and audio frames by OBU, and outputs IA bitstream.</p>
+     <p>OBU packetizer packetize descriptors, parameter blocks and audio frames by OBU, and outputs IA sequence.</p>
      <ul>
       <li data-md>
        <p>Temporal unit generator generates temporal unit for each frame from audio frame OBUs and parameter block OBUs (if present).</p>
@@ -4245,7 +4245,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
            </ul>
          </ul>
         <li data-md>
-         <p>Parameter blocks can be composed of <a data-link-type="dfn" href="#demixing_info" id="ref-for-demixing_info④">demixing_info()</a> and <a data-link-type="dfn" href="#recon_gain_info" id="ref-for-recon_gain_info⑤">recon_gain_info()</a>. When <a data-link-type="dfn" href="#recon_gain_is_present_flag" id="ref-for-recon_gain_is_present_flag①">recon_gain_is_present_flag</a> = 0 for all ChannelGroup, recon_gain_info shall not present in IA bitstream.</p>
+         <p>Parameter blocks can be composed of <a data-link-type="dfn" href="#demixing_info" id="ref-for-demixing_info④">demixing_info()</a> and <a data-link-type="dfn" href="#recon_gain_info" id="ref-for-recon_gain_info⑤">recon_gain_info()</a>. When <a data-link-type="dfn" href="#recon_gain_is_present_flag" id="ref-for-recon_gain_is_present_flag①">recon_gain_is_present_flag</a> = 0 for all ChannelGroup, recon_gain_info shall not present in IA sequence.</p>
          <ul>
           <li data-md>
            <p><a data-link-type="dfn" href="#dmixp_mode" id="ref-for-dmixp_mode">dmixp_mode</a> of demixing_info for the kth frame shall be set to indicate (α(k), β(k), γ(k), δ(k)) and w_idx_offset(k). Where w_idx_offset(k) = 1 or -1.</p>
@@ -4306,13 +4306,13 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
        </ul>
      </ul>
     <li data-md>
-     <p>OBU Packetizer outputs IA Bitstream which is composed of OBUs for descriptor OBUs and followed by OBUs for temporal units.</p>
+     <p>OBU Packetizer outputs IA sequence which is composed of OBUs for descriptor OBUs and followed by OBUs for temporal units.</p>
    </ul>
    <center><img height="551" src="images/IA Encoding Flowchart for Channel Audio Format.png" style="width:80%; height:auto;" width="800"></center>
    <center>
     <figcaption>IA Encoding Flowchart for Scalable Channel Audio</figcaption>
    </center>
-   <p>Following sections, <a href="#iacgeneration-scalablechannelaudio-downmixparameter">§ 10.2.1 Down-mix parameter and Loudness</a>, <a href="#iacgeneration-scalablechannelaudio-downmixmechanism">§ 10.2.2 Down-mix Mechanism</a>, <a href="#iacgeneration-scalablechannelaudio-channellayoutgenerationrule">§ 10.2.3 Channel Layout Generation Rule</a>, <a href="#iacgeneration-scalablechannelaudio-recongaingeneration">§ 10.2.4 Recon Gain Generation</a> and <a href="#iacgeneration-scalablechannelaudio-channelgroupgenerationrule">§ 10.2.5 ChannelGroup Generation Rule</a> do not needed for non-scalable channel audio (i.e., when Channel_Audio_Layer of IA_Static_Meta is set to 1).</p>
+   <p>Following sections, <a href="#iacgeneration-scalablechannelaudio-downmixparameter">§ 10.2.1 Down-mix parameter and Loudness</a>, <a href="#iacgeneration-scalablechannelaudio-downmixmechanism">§ 10.2.2 Down-mix Mechanism</a>, <a href="#iacgeneration-scalablechannelaudio-channellayoutgenerationrule">§ 10.2.3 Channel Layout Generation Rule</a>, <a href="#iacgeneration-scalablechannelaudio-recongaingeneration">§ 10.2.4 Recon Gain Generation</a> and <a href="#iacgeneration-scalablechannelaudio-channelgroupgenerationrule">§ 10.2.5 ChannelGroup Generation Rule</a> do not needed for non-scalable channel audio (i.e., when <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⓪">num_layers</a> specified in <a data-link-type="dfn" href="#scalable_channel_layout_config" id="ref-for-scalable_channel_layout_config①">scalable_channel_layout_config()</a> is set to 1).</p>
    <h4 class="heading settled" data-level="10.2.1" id="iacgeneration-scalablechannelaudio-downmixparameter"><span class="secno">10.2.1. </span><span class="content">Down-mix parameter and Loudness</span><a class="self-link" href="#iacgeneration-scalablechannelaudio-downmixparameter"></a></h4>
    <p>This section describes how to generate down-mix parameters and loudness level for a given channel audio and a given list of channel layouts for scalability.</p>
    <p>Below figure shows a block diagram for down-mix parameter and loudness module including down-mixer.</p>
@@ -4391,7 +4391,7 @@ T2toTF2 enc.: Ltf3 = Ltf2 + w(k) x δ(k) x Ls5 and Rtf3 = Rtf2 + w(k) x δ(k) x 
     <li data-md>
      <p>CL #i is one of <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout⑦">loudspeaker_layouts</a> supported in this specification.</p>
    </ul>
-   <p>Down-mix paths, which conform to the above rule, shall be only allowed for scalable channel audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⓪">num_layers</a> > 1 as depicted in below figure.</p>
+   <p>Down-mix paths, which conform to the above rule, shall be only allowed for scalable channel audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①①">num_layers</a> > 1 as depicted in below figure.</p>
    <center><img height="716" src="images/Down-mix Path.png" style="width:90%; height:auto;" width="792"></center>
    <center>
     <figcaption>IA Down-mix Path</figcaption>
@@ -4482,9 +4482,9 @@ Recon_Gain for D_Rtb4:
    <p>//To Do: Fill in how to generate element_mix_config() for scene-based audio element</p>
    <p>//To Do: Fill in how to generate element_mix_config() for channel-based audio element</p>
    <h4 class="heading settled" data-level="10.2.7" id="iacgeneration-multipleaudioelements"><span class="secno">10.2.7. </span><span class="content">Multiple Audio Elements Encoding</span><a class="self-link" href="#iacgeneration-multipleaudioelements"></a></h4>
-   <p>This section provide a guideline to generate IA bitstream having multiple audio elements</p>
+   <p>This section provide a guideline to generate IA sequence having multiple audio elements</p>
    <h5 class="heading settled" data-level="10.2.7.1" id="iacgeneration-multipleaudioelements-onecodec"><span class="secno">10.2.7.1. </span><span class="content">Multiple Audio Elements with One Codec Config</span><a class="self-link" href="#iacgeneration-multipleaudioelements-onecodec"></a></h5>
-   <p>This section provides a way how to generate IA bitstream having multiple audio elements with the same codec config OBU. However, the result shall comply with the base profile of IA bitstream.</p>
+   <p>This section provides a way how to generate IA sequence having multiple audio elements with the same codec config OBU. However, the result shall comply with the base profile of IA sequence.</p>
    <p>Step1: Descriptor OBUs are generated as follows:</p>
    <ul>
     <li data-md>
@@ -4507,7 +4507,7 @@ Recon_Gain for D_Rtb4:
     <li data-md>
      <p>It may have the immediately preceding temporal delimiter OBU for each audio element,</p>
    </ul>
-   <p>Step3: Generate IA bitstream which start descritpr OBUs and followed by temporal units in order.</p>
+   <p>Step3: Generate IA sequence which start descritpr OBUs and followed by temporal units in order.</p>
    <h5 class="heading settled" data-level="10.2.7.2" id="iacgeneration-multipleaudioelements-multiplecodec"><span class="secno">10.2.7.2. </span><span class="content">Multiple Audio Elements with Multiple Codec Config</span><a class="self-link" href="#iacgeneration-multipleaudioelements-multiplecodec"></a></h5>
    <p>Step1: Descriptor OBUs are generated as follows:</p>
    <ul>
@@ -4531,7 +4531,7 @@ Recon_Gain for D_Rtb4:
     <li data-md>
      <p>It may have the immediately preceding temporal delimiter OBU for each audio element,</p>
    </ul>
-   <p>Step3: Generate IA bitstream which start descritpr OBUs and followed by Temporal Units in order.</p>
+   <p>Step3: Generate IA sequence which start descritpr OBUs and followed by Temporal Units in order.</p>
    <h4 class="heading settled" data-level="10.2.8" id="iacgeneration-postprocessing"><span class="secno">10.2.8. </span><span class="content">Post Processing</span><a class="self-link" href="#iacgeneration-postprocessing"></a></h4>
    <p>This section provides a guideline to generate algorithms for post processing.</p>
    <h5 class="heading settled" data-level="10.2.8.1" id="iacgeneration-postprocessing-drc"><span class="secno">10.2.8.1. </span><span class="content">Loudness Config</span><a class="self-link" href="#iacgeneration-postprocessing-drc"></a></h5>
@@ -4744,12 +4744,12 @@ Recon_Gain for D_Rtb4:
    <li><a href="#esds">esds</a><span>, in § 7.2.4.2</span>
    <li><a href="#extension_header_size">extension_header_size</a><span>, in § 4.1.2</span>
    <li><a href="#gamma">gamma</a><span>, in § 4.2.3</span>
-   <li><a href="#ia-bitstream">IA bitstream</a><span>, in § 2</span>
    <li><a href="#iac">IAC</a><span>, in § 2</span>
    <li><a href="#ia_code">ia_code</a><span>, in § 4.1.5</span>
    <li><a href="#iagd">iagd</a><span>, in § 7.2.6.1</span>
    <li><a href="#ia-sample">IA Sample</a><span>, in § 7.2.5</span>
    <li><a href="#iasampleentry">IASampleEntry</a><span>, in § 7.2.3</span>
+   <li><a href="#ia-sequence">IA sequence</a><span>, in § 2</span>
    <li><a href="#loudness">loudness</a><span>, in § 4.2.1</span>
    <li><a href="#loudspeaker_layout">loudspeaker_layout</a><span>, in § 4.2.1</span>
    <li><a href="#mix_bus_config">mix_bus_config()</a><span>, in § 4.1.8</span>
@@ -5516,11 +5516,11 @@ Recon_Gain for D_Rtb4:
    <dt id="biblio-ai-cad-mixing">[AI-CAD-Mixing]
    <dd><a href="https://www.aes.org/e-lib/browse.cfm?elib=21489"><cite>AI 3D immersive audio codec based on content-adaptive dynamic down-mixing and up-mixing framework</cite></a>. Paper. URL: <a href="https://www.aes.org/e-lib/browse.cfm?elib=21489">https://www.aes.org/e-lib/browse.cfm?elib=21489</a>
   </dl>
-  <aside class="dfn-panel" data-for="ia-bitstream">
-   <b><a href="#ia-bitstream">#ia-bitstream</a></b><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="ia-sequence">
+   <b><a href="#ia-sequence">#ia-sequence</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-ia-bitstream">9. IAC processing</a>
-    <li><a href="#ref-for-ia-bitstream①">10. IAC Generation Process</a>
+    <li><a href="#ref-for-ia-sequence">9. IAC processing</a>
+    <li><a href="#ref-for-ia-sequence①">10. IAC Generation Process</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="audio-substream">
@@ -5645,6 +5645,7 @@ Recon_Gain for D_Rtb4:
    <b><a href="#scalable_channel_layout_config">#scalable_channel_layout_config</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-scalable_channel_layout_config">4.2.1. Scalable Channel Layout Config Syntax and Semantics</a>
+    <li><a href="#ref-for-scalable_channel_layout_config①">10.2. Scalable Channel Audio Encoding</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="ambisonics_config">
@@ -5693,8 +5694,8 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-num_layers③">5.3. IA Enhanced Profile</a>
     <li><a href="#ref-for-num_layers④">9.2. Scalable Channel Audio decoding</a>
     <li><a href="#ref-for-num_layers⑤">9.2.2. De-mixer</a>
-    <li><a href="#ref-for-num_layers⑥">10.2. Scalable Channel Audio Encoding</a> <a href="#ref-for-num_layers⑦">(2)</a> <a href="#ref-for-num_layers⑧">(3)</a> <a href="#ref-for-num_layers⑨">(4)</a>
-    <li><a href="#ref-for-num_layers①⓪">10.2.3. Channel Layout Generation Rule</a>
+    <li><a href="#ref-for-num_layers⑥">10.2. Scalable Channel Audio Encoding</a> <a href="#ref-for-num_layers⑦">(2)</a> <a href="#ref-for-num_layers⑧">(3)</a> <a href="#ref-for-num_layers⑨">(4)</a> <a href="#ref-for-num_layers①⓪">(5)</a>
+    <li><a href="#ref-for-num_layers①①">10.2.3. Channel Layout Generation Rule</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="channel_audio_layer_config">
