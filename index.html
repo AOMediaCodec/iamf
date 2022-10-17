@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version b0de3432c, updated Thu Oct 13 09:16:59 2022 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iac/" rel="canonical">
-  <meta content="a3cfc0e44dc2e191f3945f3a831e6f696788431a" name="document-revision">
+  <meta content="e25445ae47dbb9d7f70352c96dfc6c52a073e572" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -2602,7 +2602,7 @@ Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
    <p><dfn class="css" data-dfn-for="mix_presentation_obu()" data-dfn-type="value" data-noexport id="valdef-mix_presentation_obu-num_audio_elements">num_audio_elements<a class="self-link" href="#valdef-mix_presentation_obu-num_audio_elements"></a></dfn> shall specify the number of audio elements that are used in this mix presentation to generate the final output audio signal for playback.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="audio_element_friendly_label">audio_element_friendly_label<a class="self-link" href="#audio_element_friendly_label"></a></dfn> shall specify a human-friendly label to describe the referenced audio element.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="audio_element_id_ref">audio_element_id_ref<a class="self-link" href="#audio_element_id_ref"></a></dfn> shall be the obu_id specified in obu header of audio element obu specifying the audio element that is used in this mix presentation.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="rendering_config">rendering_config()</dfn> is a class that provides the metadata required for rendering the referenced audio element.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="rendering_config">rendering_config()<a class="self-link" href="#rendering_config"></a></dfn> is a class that provides the metadata required for rendering the referenced audio element.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="element_mix_config">element_mix_config()</dfn> is a class that provides the metadata required for applying any processing to the referenced and rendered audio element before being summed with other processed audio elements.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="mix_loudness_info">mix_loudness_info()<a class="self-link" href="#mix_loudness_info"></a></dfn> is a class that provides the loudness information and statistics for the final output audio signal.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="mix_bus_config">mix_bus_config()<a class="self-link" href="#mix_bus_config"></a></dfn> is a class that provides the metadata required for applying any post-processing to the mixed audio signal to generate the final output audio signal for playback.</p>
@@ -2893,71 +2893,12 @@ class ambisonics_projection_config() {
    <left><img height="94" src="images/Recon_Gain_Flags.png" style="width:100%; height:auto;" width="800"></left>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="recon_gain">recon_gain</dfn> shall indicate the gain value to be applied to the channel, which is indicated by <a data-link-type="dfn" href="#recon_gain_flags" id="ref-for-recon_gain_flags">recon_gain_flags</a>, after decoding of the following associated frames.</p>
    <h4 class="heading settled" data-level="4.2.5" id="syntax-rendering-config"><span class="secno">4.2.5. </span><span class="content">Rendering Config Syntax and Semantics</span><a class="self-link" href="#syntax-rendering-config"></a></h4>
-   <p class="issue" id="issue-2971ee71"><a class="self-link" href="#issue-2971ee71"></a> Need to review the matrix-based rendering mechanisms.</p>
-   <p><a data-link-type="dfn" href="#rendering_config" id="ref-for-rendering_config">rendering_config()</a> provides a rendering matrix to be applied to the audio element.</p>
-   <p>The matrix shall be composed of <a data-link-type="dfn" href="#targetchannelcount" id="ref-for-targetchannelcount">targetChannelCount</a> x <a data-link-type="dfn" href="#basechannelcount" id="ref-for-basechannelcount">baseChannelCount</a>.</p>
-   <ul>
-    <li data-md>
-     <p><a data-link-type="dfn" href="#targetchannelcount" id="ref-for-targetchannelcount①">targetChannelCount</a> is the nubmer of rows and <a data-link-type="dfn" href="#basechannelcount" id="ref-for-basechannelcount①">baseChannelCount</a> is the number of columns.</p>
-    <li data-md>
-     <p>The order of rows shall indicate the order of channels specified in <a data-link-type="dfn" href="#mix_target_layout" id="ref-for-mix_target_layout">mix_target_layout</a>.</p>
-    <li data-md>
-     <p>The order of columns shall indicate the order of channels specified in <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout②">loudspeaker_layout</a> for channel-based audio element.</p>
-    <li data-md>
-     <p>The order of columns shall indicate the order of ACN for scene-based audio element.</p>
-   </ul>
    <p><b>Syntax</b></p>
 <pre>class rendering_config() {
-  unsigned int (2) rendering_mode;
-  unsigned int (6) reserved;
-  if (rendering_mode == 0) {
-    //No rendering
-  }
-  else if (rendering_mode == 1){
-    for (i = 1; i &lt;= targetChannelCount; i++) {
-      for (j = 1; j &lt;= baseChannelCount; j++) {
-        signed int (16) rendering_coefficient;
-      }
-    }
-  }
-  else if (rendering_mode == 2){
-    leb() num_nonzero_rows;
-    for (i = 1; i &lt;= num_nonzero_rows; i++) {
-      leb() row_index(i);
-      leb() num_nonzero_coefficients;
-      for (j = 1; j &lt;= num_nonzero_coefficients; j++) {
-        leb() column_index(j)
-        signed int (16) rendering_coefficient;
-      }
-    }
-  }
-
+  // TODO
 }
 </pre>
    <p><b>Semantics</b></p>
-   <p><b>redering_mode</b> shall indicate a rendering mode which is applied to the audio element.</p>
-   <ul>
-    <li data-md>
-     <p>0: No rendering</p>
-    <li data-md>
-     <p>1: Matrix-based rendering with high density coefficients</p>
-    <li data-md>
-     <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="targetchannelcount">targetChannelCount</dfn> is the number of channels which are implied from <a data-link-type="dfn" href="#mix_target_layout" id="ref-for-mix_target_layout①">mix_target_layout</a> specified in this mix presentation obu.</p>
-    <li data-md>
-     <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="basechannelcount">baseChannelCount</dfn> is the number of channels for the audio element.</p>
-    <li data-md>
-     <p>2: Matrix-based rendering with low density coefficients</p>
-    <li data-md>
-     <p>It shall be <a data-link-type="dfn" href="#targetchannelcount" id="ref-for-targetchannelcount②">targetChannelCount</a> x <a data-link-type="dfn" href="#basechannelcount" id="ref-for-basechannelcount②">baseChannelCount</a> matrix.</p>
-    <li data-md>
-     <p>3: reserved</p>
-   </ul>
-   <p><dfn data-dfn-type="dfn" data-noexport id="rendering_coefficient">rendering_coefficient<a class="self-link" href="#rendering_coefficient"></a></dfn> is a value in dBs. It shall be stored in a 16-bit, signed, two’s complement fixed-point value with 8 fractional bits (i.e. Q7.8 in <a data-link-type="biblio" href="#biblio-q-format">[Q-Format]</a>).</p>
-   <p>This value of -128 dB shall indicate the real number 0.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="num_nonzero_rows">num_nonzero_rows<a class="self-link" href="#num_nonzero_rows"></a></dfn> is the nubmer of rows, each of rows has at least one non-zero coefficient.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="row_index-i">row_index(i)<a class="self-link" href="#row_index-i"></a></dfn> is the row number of the ith row which has at least one non-zero coefficient, in <a data-link-type="dfn" href="#targetchannelcount" id="ref-for-targetchannelcount③">targetChannelCount</a> x <a data-link-type="dfn" href="#basechannelcount" id="ref-for-basechannelcount③">baseChannelCount</a> matrix.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="num_nonzero_coefficients">num_nonzero_coefficients<a class="self-link" href="#num_nonzero_coefficients"></a></dfn> is the nubmer of non-zero coefficients of row_index(i).</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="column_index-j">column_index(j)<a class="self-link" href="#column_index-j"></a></dfn> is the column number of the jth non-zero coefficient of the given row_index(i).</p>
    <h4 class="heading settled" data-level="4.2.6" id="syntax-element-mix-config"><span class="secno">4.2.6. </span><span class="content">Element Mix Config Syntax and Semantics</span><a class="self-link" href="#syntax-element-mix-config"></a></h4>
    <p class="issue" id="issue-a91f7be4"><a class="self-link" href="#issue-a91f7be4"></a> Need to review the mix mechanisms.</p>
    <p><a data-link-type="dfn" href="#element_mix_config" id="ref-for-element_mix_config">element_mix_config()</a> provides a gain value to be applied to the audio element.</p>
@@ -2976,7 +2917,7 @@ class ambisonics_projection_config() {
 }
 </pre>
    <p><b>Semantics</b></p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="mix_loudness">mix_loudness<a class="self-link" href="#mix_loudness"></a></dfn> shall indicate the loudness value of the mixed channels, for the <a data-link-type="dfn" href="#mix_target_layout" id="ref-for-mix_target_layout②">mix_target_layout</a>, from the audio elements which are specified in the mix_presentation_obu(). It is stored in fixed-point value with 8 fractional bits (i.e. Q7.8 in <a data-link-type="biblio" href="#biblio-q-format">[Q-Format]</a>) and the value should be <a data-link-type="dfn" href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#" id="termref-for-②④">LKFS</a> based on <a data-link-type="biblio" href="#biblio-itu1770-4">[ITU1770-4]</a>, so it shall be to represent zero or negative value.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="mix_loudness">mix_loudness<a class="self-link" href="#mix_loudness"></a></dfn> shall indicate the loudness value of the mixed channels, for the <a data-link-type="dfn" href="#mix_target_layout" id="ref-for-mix_target_layout">mix_target_layout</a>, from the audio elements which are specified in the mix_presentation_obu(). It is stored in fixed-point value with 8 fractional bits (i.e. Q7.8 in <a data-link-type="biblio" href="#biblio-q-format">[Q-Format]</a>) and the value should be <a data-link-type="dfn" href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#" id="termref-for-②④">LKFS</a> based on <a data-link-type="biblio" href="#biblio-itu1770-4">[ITU1770-4]</a>, so it shall be to represent zero or negative value.</p>
    <h4 class="heading settled" data-level="4.2.8" id="syntax-mix-bus-config"><span class="secno">4.2.8. </span><span class="content">Mix Bus Config Syntax and Semantics</span><a class="self-link" href="#syntax-mix-bus-config"></a></h4>
    <p><b>Syntax</b></p>
 <pre>class mix_bus_config() {
@@ -2984,9 +2925,9 @@ class ambisonics_projection_config() {
 }
 </pre>
    <p>class drc_config() {
+  // TODO
 }</p>
    <p><b>Semantics</b></p>
-   <p class="note" role="note"><span>NOTE:</span> drc_config() has an empty payload.</p>
    <h3 class="heading settled" data-level="4.3" id="codec-specific"><span class="secno">4.3. </span><span class="content">Codec Specific</span><a class="self-link" href="#codec-specific"></a></h3>
    <p>This section defines codec specific information for Codec_Specific_Info and Substream.</p>
    <ul>
@@ -3735,7 +3676,7 @@ Quantity:  One of more
    <center>
     <figcaption>Scalable Channel Audio Decoding Flowchart</figcaption>
    </center>
-   <p>For a given loudspeaker layout (i.e. CL #i) among the list of <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout③">loudspeaker_layout</a> in scalable channel layout config,</p>
+   <p>For a given loudspeaker layout (i.e. CL #i) among the list of <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout②">loudspeaker_layout</a> in scalable channel layout config,</p>
    <ul>
     <li data-md>
      <p>OBU Parser shall get substreams for ChannelGroup #1 ~ ChannelGroup #i and pass them to Codec decoder with <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config⑧">Decoder_Config()</a>.</p>
@@ -4056,7 +3997,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
     <li data-md>
      <p>Ambiosnics format: It shall conform to <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-①⓪⑥">ChannelMappingFamily</a> = 2 or 3 of <a data-link-type="biblio" href="#biblio-rfc8486">[RFC8486]</a>.</p>
     <li data-md>
-     <p>Channel Audio format: It shall conform to <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout④">loudspeaker_layout</a> specified in channel_audio_layer_config().</p>
+     <p>Channel Audio format: It shall conform to <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout③">loudspeaker_layout</a> specified in channel_audio_layer_config().</p>
     <li data-md>
      <p>Input Smapling Rate: 48000hz</p>
     <li data-md>
@@ -4081,7 +4022,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
     <li data-md>
      <p>Ambisonics mode to indicate if <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-①⓪⑦">ChannelMappingFamily</a> = 2 or 3 of <a data-link-type="biblio" href="#biblio-rfc8486">[RFC8486]</a>.</p>
     <li data-md>
-     <p>List of channel layouts to be supported for scalable channel audio: it shall conform to <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout⑤">loudspeaker_layout</a>.</p>
+     <p>List of channel layouts to be supported for scalable channel audio: it shall conform to <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout④">loudspeaker_layout</a>.</p>
    </ul>
    <p>IA encoding can be done by using the combination of following generation processing.</p>
    <ul>
@@ -4232,7 +4173,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
            <p>Channel_Audio Layer Config() shall be set to as follows:</p>
            <ul>
             <li data-md>
-             <p><a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout⑥">loudspeaker_layout</a> shall be set to the ith list of channel layouts for the ith ChannelGroup.</p>
+             <p><a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout⑤">loudspeaker_layout</a> shall be set to the ith list of channel layouts for the ith ChannelGroup.</p>
             <li data-md>
              <p><a data-link-type="dfn" href="#output_gain_is_present_flag" id="ref-for-output_gain_is_present_flag">output_gain_is_present_flag</a> shall set to 1 for the ith ChannelGroup if attenuation is applied to the mixed channels of the ith ChannelGroup. Otherwise it shall be set to 0 for the ith ChannelGroup.</p>
             <li data-md>
@@ -4394,7 +4335,7 @@ T2toTF2 enc.: Ltf3 = Ltf2 + w(k) x δ(k) x Ls5 and Rtf3 = Rtf2 + w(k) x δ(k) x 
     <li data-md>
      <p>Si ≤ Si+1 and Wi ≤ Wi+1 and Ti ≤ Ti+1 except Si = Si+1 and Wi = Wi+1 and Ti = Ti+1 for i = n-1, n-2, …, 1. Where ith Channel Layout CL #i = Si.Wi.Ti.</p>
     <li data-md>
-     <p>CL #i is one of <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout⑦">loudspeaker_layouts</a> supported in this specification.</p>
+     <p>CL #i is one of <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout⑥">loudspeaker_layouts</a> supported in this specification.</p>
    </ul>
    <p>Down-mix paths, which conform to the above rule, shall be only allowed for scalable channel audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①①">num_layers</a> > 1 as depicted in below figure.</p>
    <center><img height="716" src="images/Down-mix Path.png" style="width:90%; height:auto;" width="792"></center>
@@ -4724,7 +4665,6 @@ Recon_Gain for D_Rtb4:
    <li><a href="#audio-frames">audio frames</a><span>, in § 6.1</span>
    <li><a href="#audio-substream">Audio substream</a><span>, in § 3.1</span>
    <li><a href="#audio_substream_id">audio_substream_id</a><span>, in § 4.1.7</span>
-   <li><a href="#basechannelcount">baseChannelCount</a><span>, in § 4.2.5</span>
    <li><a href="#beta">beta</a><span>, in § 4.2.3</span>
    <li><a href="#channel_audio_layer_config">channel_audio_layer_config()</a><span>, in § 4.2.1</span>
    <li><a href="#channelgroup">ChannelGroup</a><span>, in § 4.2.1</span>
@@ -4734,7 +4674,6 @@ Recon_Gain for D_Rtb4:
    <li><a href="#codec-specific-box">codec specific box</a><span>, in § 7.2.4</span>
    <li><a href="#codec_specific_info">Codec_Specific_Info</a><span>, in § 4.3</span>
    <li><a href="#coded_frame_size">coded_frame_size</a><span>, in § 4.1.10</span>
-   <li><a href="#column_index-j">column_index(j)</a><span>, in § 4.2.5</span>
    <li><a href="#coupled-channels">Coupled channels</a><span>, in § 10</span>
    <li><a href="#coupled_substream_count">coupled_substream_count</a><span>, in § 4.2.2</span>
    <li><a href="#decoder_config">decoder_config()</a><span>, in § 4.1.6</span>
@@ -4773,8 +4712,6 @@ Recon_Gain for D_Rtb4:
      <li><a href="#valdef-mix_presentation_obu-num_audio_elements">value for mix_presentation_obu()</a><span>, in § 4.1.8</span>
     </ul>
    <li><a href="#num_layers">num_layers</a><span>, in § 4.2.1</span>
-   <li><a href="#num_nonzero_coefficients">num_nonzero_coefficients</a><span>, in § 4.2.5</span>
-   <li><a href="#num_nonzero_rows">num_nonzero_rows</a><span>, in § 4.2.5</span>
    <li><a href="#num_parameters">num_parameters</a><span>, in § 4.1.7</span>
    <li><a href="#num_samples_per_frame">num_samples_per_frame</a><span>, in § 4.1.6</span>
    <li><a href="#num_samples_to_trim_at_end">num_samples_to_trim_at_end</a><span>, in § 4.1.2</span>
@@ -4810,10 +4747,8 @@ Recon_Gain for D_Rtb4:
    <li><a href="#recon_gain_flags">recon_gain_flags</a><span>, in § 4.2.4</span>
    <li><a href="#recon_gain_info">recon_gain_info()</a><span>, in § 4.2.4</span>
    <li><a href="#recon_gain_is_present_flag">recon_gain_is_present_flag</a><span>, in § 4.2.1</span>
-   <li><a href="#rendering_coefficient">rendering_coefficient</a><span>, in § 4.2.5</span>
    <li><a href="#rendering_config">rendering_config()</a><span>, in § 4.1.8</span>
    <li><a href="#roll_distance">roll_distance</a><span>, in § 4.1.6</span>
-   <li><a href="#row_index-i">row_index(i)</a><span>, in § 4.2.5</span>
    <li><a href="#s1to2-de-mixer">S1to2 de-mixer</a><span>, in § 9.2.2</span>
    <li><a href="#s2to3-de-mixer">S2to3 de-mixer</a><span>, in § 9.2.2</span>
    <li><a href="#s3to5-de-mixer">S3to5 de-mixer</a><span>, in § 9.2.2</span>
@@ -4827,7 +4762,6 @@ Recon_Gain for D_Rtb4:
    <li><a href="#substream_count">substream_count</a><span>, in § 4.2.2</span>
    <li><a href="#sync-obu">Sync OBU</a><span>, in § 3.2.3</span>
    <li><a href="#t2to4-de-mixer">T2to4 de-mixer</a><span>, in § 9.2.2</span>
-   <li><a href="#targetchannelcount">targetChannelCount</a><span>, in § 4.2.5</span>
    <li><a href="#temporal-unit">temporal unit</a><span>, in § 6.1</span>
    <li><a href="#tf2tot2-de-mixer">TF2toT2 de-mixer</a><span>, in § 9.2.2</span>
    <li><a href="#v">V</a><span>, in § 7.4</span>
@@ -5663,14 +5597,7 @@ Recon_Gain for D_Rtb4:
   <aside class="dfn-panel" data-for="mix_target_layout">
    <b><a href="#mix_target_layout">#mix_target_layout</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-mix_target_layout">4.2.5. Rendering Config Syntax and Semantics</a> <a href="#ref-for-mix_target_layout①">(2)</a>
-    <li><a href="#ref-for-mix_target_layout②">4.2.7. Mix Loudness Info Syntax and Semantics</a>
-   </ul>
-  </aside>
-  <aside class="dfn-panel" data-for="rendering_config">
-   <b><a href="#rendering_config">#rendering_config</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-rendering_config">4.2.5. Rendering Config Syntax and Semantics</a>
+    <li><a href="#ref-for-mix_target_layout">4.2.7. Mix Loudness Info Syntax and Semantics</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="element_mix_config">
@@ -5715,11 +5642,10 @@ Recon_Gain for D_Rtb4:
    <ul>
     <li><a href="#ref-for-loudspeaker_layout">4.2.1. Scalable Channel Layout Config Syntax and Semantics</a>
     <li><a href="#ref-for-loudspeaker_layout①">4.2.3. Demixing Info Syntax and Semantics</a>
-    <li><a href="#ref-for-loudspeaker_layout②">4.2.5. Rendering Config Syntax and Semantics</a>
-    <li><a href="#ref-for-loudspeaker_layout③">9.2. Scalable Channel Audio decoding</a>
-    <li><a href="#ref-for-loudspeaker_layout④">10. IAC Generation Process</a> <a href="#ref-for-loudspeaker_layout⑤">(2)</a>
-    <li><a href="#ref-for-loudspeaker_layout⑥">10.2. Scalable Channel Audio Encoding</a>
-    <li><a href="#ref-for-loudspeaker_layout⑦">10.2.3. Channel Layout Generation Rule</a>
+    <li><a href="#ref-for-loudspeaker_layout②">9.2. Scalable Channel Audio decoding</a>
+    <li><a href="#ref-for-loudspeaker_layout③">10. IAC Generation Process</a> <a href="#ref-for-loudspeaker_layout④">(2)</a>
+    <li><a href="#ref-for-loudspeaker_layout⑤">10.2. Scalable Channel Audio Encoding</a>
+    <li><a href="#ref-for-loudspeaker_layout⑥">10.2.3. Channel Layout Generation Rule</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="714ch">
@@ -5838,18 +5764,6 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-recon_gain②">10.2. Scalable Channel Audio Encoding</a> <a href="#ref-for-recon_gain③">(2)</a>
     <li><a href="#ref-for-recon_gain④">10.2.1. Down-mix parameter and Loudness</a>
     <li><a href="#ref-for-recon_gain⑤">10.2.4. Recon Gain Generation</a>
-   </ul>
-  </aside>
-  <aside class="dfn-panel" data-for="targetchannelcount">
-   <b><a href="#targetchannelcount">#targetchannelcount</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-targetchannelcount">4.2.5. Rendering Config Syntax and Semantics</a> <a href="#ref-for-targetchannelcount①">(2)</a> <a href="#ref-for-targetchannelcount②">(3)</a> <a href="#ref-for-targetchannelcount③">(4)</a>
-   </ul>
-  </aside>
-  <aside class="dfn-panel" data-for="basechannelcount">
-   <b><a href="#basechannelcount">#basechannelcount</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-basechannelcount">4.2.5. Rendering Config Syntax and Semantics</a> <a href="#ref-for-basechannelcount①">(2)</a> <a href="#ref-for-basechannelcount②">(3)</a> <a href="#ref-for-basechannelcount③">(4)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="codec_specific_info">
