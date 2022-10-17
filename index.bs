@@ -841,7 +841,7 @@ class channel_audio_layer_config(i) {
 
 When an audio element is composed of G(r) number of substreams, scalable channel audio for the audio element shall be layered into [=num_layers=] = r number of ChannelGroups.
 - The order of ChannelGroups in each temporal unit shall be same as the order of channel_audio_layer_config()s in scalable_channel_layout_config().
-- <dfn noexport>ChannelGroup</dfn> is a set of substreams which is able to provide a spatial resolution of audio contents by itself or which is able to provide an enhanced spatial resolution of audio contents by combining with the preceding ChannelGroups within the [=audio frames=].
+- <dfn noexport>ChannelGroup</dfn> is a set of substreams which is able to provide a spatial resolution of audio contents by itself or which is able to provide an enhanced spatial resolution of audio contents by combining with the preceding ChannelGroups within the audio frames.
 - ChannelGroup #q consists of G(q)-G(q-1) number of substreams. Where, q = 1, 2, ..., r and G(0) = 0.
 - IA frame shall be a set of audio_frame_obus with the same sync offsets of the single audio element for scalable channel audio. Each of them shall come from each substream.
 - Every IA frame shall have the same number of audio_frame_obus.
@@ -1660,7 +1660,7 @@ ISSUE: We need to add specific boxes for FLAC and LPCM.
 ### IA Sample Format ### {#iasampleformat}
 
 For tracks using the [=IASampleEntry=], an <dfn noexport>IA Sample</dfn> has the following constraints:
-- The one sample data shall be a sequence of OBUs forming an access unit.
+- The one sample data shall be the remained OBUs of each temporal unit after processing of {#isobmff-singletrack-basicencapsulationscheme}.
 
 ### IA Sample Group ### {#iasamplegroup}
 
