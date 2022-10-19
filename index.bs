@@ -492,6 +492,10 @@ This section specifies the OBU payload of OBU_IA_Codec_Config.
 class codec_config_obu() {
   leb128() codec_config_id;
   codec_config();
+  leb128() num_audio_elements;
+  for (i = 0; i < num_audio_elements; i++) {
+    leb128() audio_element_id;
+  }
 }
 
 class codec_config() {
@@ -521,6 +525,10 @@ For ISOBMFF encapsulation, it shall be the same as the [=boxtype=] of its AduioS
 <dfn noexport>roll_distance</dfn> is a signed integer that gives the number of frames that need to be decoded in order for a frame to be decoded correctly. A negative value indicates the number of frames before the frame to be decoded corrently.
 - It shall be set to -1 for IAC-AAC-LC and -R (R = 4 when the frame size = 960) for IAC-OPUS. IAC-FLAC may ignore this field. Where, R is the smallest integer greater than or equal to 3840 divided by the frame size. 
 
+<dfn value noexport for="codec_config_obu()">num_audio_elements</dfn> shall specify the number of audio elements that refer to this codec config.
+
+<dfn value noexport for="codec_config_obu()">audio_element_id</dfn> shall specify the unique ID associated with the specific audio element that refers to this codec config.
+
 ### Audio Element OBU Syntax and Semantics ### {#obu-audioelement}
 
 This section specifies the OBU payload of OBU_IA_Audio_Element.
@@ -532,8 +540,6 @@ class audio_element_obu() {
   leb128() audio_element_id;
   unsigned int (3) audio_element_type;
   unsigned int (5) reserved;
-
-  leb128() codec_config_id;
 
   leb128() num_substreams;
   for (i = 0; i < num_substreams; i++) {
@@ -568,8 +574,6 @@ audio_element_type: The type of audio representation.
    1    : SCENE_BASED
   2~7   : Reserved
 </pre>
-
-<dfn value noexport for="audio_element_obu()">codec_config_id</dfn> shall specify the unique ID associated with the specific codec config used for the audio substreams referenced in this audio element.
 
 <dfn noexport>num_substreams</dfn> shall specify the number of audio substreams that are used to reconstruct this audio element.
 
