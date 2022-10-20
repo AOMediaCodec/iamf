@@ -194,6 +194,8 @@ url: https://xiph.org/flac/format.html; spec: FLAC; type: property;
 
 All of syntax elements shall conform to [=Syntatic Description Laguage=] specified in [[!MP4-Systems]] unless it is explicitly described in the specification.
 
+### Data types ### {#convention-data-types}
+
  <b>leb128()</b> <b>syntaxName</b>
  
  <b>leb128()</b> indicates the type of an unsigned integer. It indicates the following unsigned integer <b>syntaxName</b> shall be encoded by [=leb128()=] specified in [[!AV1-Convention]].
@@ -213,7 +215,24 @@ All of syntax elements shall conform to [=Syntatic Description Laguage=] specifi
  <b>syntaxName</b> is a human readable label whose byte representation shall consists of <b>two-letter primary language subtags</b> and <b>two-letter region subtags</b> which are connected by hyphen("-") and followed by <b>label</b>.
  
  Where, <b>two-letter primary language subtags</b> and <b>two-letter region subtags</b> shall conform to [[!BCP47]].
- 
+
+### Function templates ### {#convention-function-templates}
+
+When the <b>template</b> keyword is used to decorate the <b>class</b> declaration, it indicates that the code is a template with a placeholder type that can be reused by other classes. Only classes that use the template shall be present in the bitstream; the template itself shall not be present in the bitstream. Classes that use a function template shall pass a data type that is specified in either [[!MP4-Systems]] or [[#convention-data-types]].
+
+<b>Example</b>
+
+```
+template <class T>
+class Foo {
+  T t;
+}
+
+class Bar {
+  Foo<int> f;
+}
+```
+
 ## Mathemetical functions ## {#mathmeticalfunctions}
  
  <b>Clip3(x, y, z)</b>
@@ -654,7 +673,7 @@ An IA sequence may have one or more mix_presentation() specified, each with diff
 
 This section specifies the OBU payload of OBU_IA_Parameter_Block.
 
-The metadata specified in this OBU defines the parameter values for an algorithm for an indicated duration, including any animation of the parameter values over this duration. The metadata shall be used in conjunction with a corresponding parameter definition and parameter data specification. The parameter definition shall be specified based on [=ParamDefinition()=]. The parameter data shall provide the values to apply in each parameter block. These shall be specified using the [=AnimatedParameterData()=] template if parameter animation is supported.
+The metadata specified in this OBU defines the parameter values for an algorithm for an indicated duration, including any animation of the parameter values over this duration. The metadata shall be used in conjunction with a corresponding parameter definition and parameter data specification. The parameter definition shall be specified based on [=ParamDefinition()=]. The parameter data shall provide the values to apply in each parameter block. These shall be specified using the [=AnimatedParameterData()=] function template if parameter animation is supported.
 
 <b>Syntax</b>
 
@@ -665,21 +684,21 @@ class parameter_block_obu() {
   leb128() num_segments;
   leb128() constant_segment_interval;
 
-  leb128() param_definition = get_param_definition_type(parameter_id);
+  leb128() param_definition_type = get_param_definition_type(parameter_id);
 
   for (i = 0; i < num_segments; i++) {
     if (constant_segment_interval == 0) {
       leb128() segment_interval;
     }
 
-    if (param_definition == PARAMETER_DEFINITION_MIX_GAIN) {
+    if (param_definition_type == PARAMETER_DEFINITION_MIX_GAIN) {
       leb128() animation_type;
       mix_gain_parameter_data(animation_type);
     }
-    if (param_definition == PARAMETER_DEFINITION_DEMIXING_INFO) {
+    if (param_definition_type == PARAMETER_DEFINITION_DEMIXING_INFO) {
       demixing_info_parameter_data();
     }
-    if (param_definition == PARAMETER_DEFINITION_RECON_GAIN_INFO) {
+    if (param_definition_type == PARAMETER_DEFINITION_RECON_GAIN_INFO) {
       recon_gain_info_parameter_data();
     }
   }
@@ -700,7 +719,7 @@ class parameter_block_obu() {
 
 <table class = "def">
 <tr>
-  <th>param_definition</th><th>Parameter definition type</th><th>Parameter definition</th>
+  <th>param_definition_type</th><th>Parameter definition type</th><th>Parameter definition</th>
 </tr>
 <tr>
   <td>0</td><td>PARAMETER_DEFINITION_MIX_GAIN</td><td>MixGainParamDefinition</td>
@@ -713,7 +732,7 @@ class parameter_block_obu() {
 </tr>
 </table>
 
-NOTE: param_definition is not coded in the bitstream but is inferred at run time based on parameter_id.
+NOTE: param_definition_type is not coded in the bitstream but is inferred at run time based on parameter_id.
 
 <dfn noexport>segment_interval</dfn> shall specify the interval for the given segment.
 
@@ -727,10 +746,10 @@ animation_type : Animation Type
 
 In the case where animation_type is equal to BEZIER, parameters for the linear and quadratic Bezier curves may be defined in this version of the specification.
 
-Classes that take animation_type as an input argument shall use the <dfn noexport>AnimatedParameterData()</dfn> template function.
+Classes that take animation_type as an input argument shall use the <dfn noexport>AnimatedParameterData()</dfn> function template.
 
 ```
-template <typename T>
+template <class T>
 class AnimatedParameterData(animation_type) {
   if (animation_type == STEP) {
     T start_point_value;
@@ -754,12 +773,12 @@ class AnimatedParameterData(animation_type) {
 
 #### Parameter Definition Syntax and Semantics #### {#parameter-definition}
 
-Parameter definition classes shall inherit from the <dfn noexport>ParamDefinition()</dfn> class. They may optionally further provide default parameter values, which are applied when there are no parameter blocks available.
+Parameter definition classes shall inherit from the abstract <dfn noexport>ParamDefinition()</dfn> class. They may optionally further provide default parameter values, which are applied when there are no parameter blocks available.
 
 <b>Syntax</b>
 
 ```
-class ParamDefinition() {
+abstract class ParamDefinition() {
   leb128() parameter_id;
   leb128() time_base;
 }
@@ -1030,7 +1049,7 @@ If ambisonics_mode is equal to PROJECTION, this shall indicate that the Ambisoni
 <b>Syntax</b>
 
 ```
-class DemixingInfoParamDefinition : ParamDefinition {
+class DemixingInfoParamDefinition extends ParamDefinition() {
 }
 
 class demixing_info_parameter_data() {
@@ -1063,7 +1082,7 @@ class demixing_info_parameter_data() {
 <b>Syntax</b>
 
 ```
-class ReconGainInfoParamDefinition : ParamDefinition {
+class ReconGainInfoParamDefinition extends ParamDefinition() {
 }
 
 class recon_gain_info_parameter_data() {
@@ -1120,7 +1139,7 @@ class element_mix_config() {
 <b>Syntax</b>
 
 ```
-class MixGainParamDefinition : ParamDefinition() {
+class MixGainParamDefinition extends ParamDefinition() {
   signed int (16) default_mix_gain;
 }
 
@@ -1134,7 +1153,7 @@ class mix_gain_parameter_data(animation_type) {
 <dfn noexport>default_mix_gain</dfn> shall specify the default mix gain value to apply when there are no mix gain parameter blocks provided. This value is expressed in dB and shall be applied to all channels in the rendered audio element. It is stored as a 16-bit, signed, two's complement fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]).
 
 
-<dfn noexport>param_data</dfn> shall use the AnimatedParameterData template function. Each of the values defined within this instance (start_point_value, end_point_value and control_point_value) shall be expressed in dB and shall be applied to all channels in the rendered audio element. They are stored as 16-bit, signed, two's complement fixed-point values with 8 fractional bits (i.e. Q7.9 in [[!Q-Format]]).
+<dfn noexport>param_data</dfn> shall use the AnimatedParameterData function template. Each of the values defined within this instance (start_point_value, end_point_value and control_point_value) shall be expressed in dB and shall be applied to all channels in the rendered audio element. They are stored as 16-bit, signed, two's complement fixed-point values with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]).
 
 ### Mix Loudness Info Syntax and Semantics ### {#syntax-mix-loudness-info}
 
