@@ -832,9 +832,9 @@ obu_data_type : Type of OBU data
 
 If reinitialize_decoder = 0, the decoder shall not be reinitialized before decoding the audio frames after the gap. This may be used in the case where it is preferable for the decoder to fill the gap with silence instead.
 
-If reinitialize_decoder = 1, the decoder shall be reinitialized before decoding the audio frames after the gap. If a roll_distance is specified in the relevant Codec Config OBU, it is applicable after reinitializing the decoder.
+If reinitialize_decoder = 1, the decoder shall be reinitialized before decoding the audio frames after the gap. If a pre-skip is specified in the relevant Codec Config OBU, it is applicable after reinitializing the decoder.
 
-For this version of the specification, the value of reinitialize_decoder shall be set to 0.
+For this version of the specification, the value of reinitialize_decoder shall be set to 0. If a value of 1 is seen, the IA sequence shall be rejected as invalid.
 
 <dfn value noexport for="sync_obu()">reserved</dfn> shall be set to 0. Reserved units are for future use and shall be ignored by an IAC-OBU parser.
 
@@ -2354,3 +2354,5 @@ A gap may further occur if there is a period of time between the end of all subs
 ## A gap due to packet loss
 
 In the case where a gap is not signalled by the Sync OBUs, any unexpected absence of audio frames shall be interpreted as packet loss. The IAC parser is unable to guarantee the correctness of following OBUs received until the next set of Descriptor OBUs.
+
+In this version of the specification, gaps in the audio substreams are not supported so if a gap is encountered, it can always be interpreted as packet loss.
