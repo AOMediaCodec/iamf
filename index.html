@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version afdea9b3f, updated Fri Oct 21 14:30:36 2022 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iac/" rel="canonical">
-  <meta content="a6308e1c64e0cd170944a71ce4d75e74131aa68f" name="document-revision">
+  <meta content="4453b102145d2a64c9dc0e253b763c55e4029834" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -2019,10 +2019,11 @@ dfn > a.self-link::before      { content: "#"; }
         <li><a href="#syntax-ambisonics-config"><span class="secno">4.2.2</span> <span class="content">Ambisonics Config Syntax and Semantics</span></a>
         <li><a href="#syntax-demixing-info"><span class="secno">4.2.3</span> <span class="content">Demixing Info Syntax and Semantics</span></a>
         <li><a href="#syntax-recon-gain-info"><span class="secno">4.2.4</span> <span class="content">Recon Gain Info Syntax and Semantics</span></a>
-        <li><a href="#syntax-rendering-config"><span class="secno">4.2.5</span> <span class="content">Rendering Config Syntax and Semantics</span></a>
-        <li><a href="#syntax-element-mix-config"><span class="secno">4.2.6</span> <span class="content">Element Mix Config Syntax and Semantics</span></a>
-        <li><a href="#syntax-mix-loudness-info"><span class="secno">4.2.7</span> <span class="content">Mix Loudness Info Syntax and Semantics</span></a>
-        <li><a href="#syntax-mix-bus-config"><span class="secno">4.2.8</span> <span class="content">Mix Bus Config Syntax and Semantics</span></a>
+        <li><a href="#syntax-mix-target-layout"><span class="secno">4.2.5</span> <span class="content">Mix Target Layout Syntax and Semantics</span></a>
+        <li><a href="#syntax-rendering-config"><span class="secno">4.2.6</span> <span class="content">Rendering Config Syntax and Semantics</span></a>
+        <li><a href="#syntax-element-mix-config"><span class="secno">4.2.7</span> <span class="content">Element Mix Config Syntax and Semantics</span></a>
+        <li><a href="#syntax-mix-loudness-info"><span class="secno">4.2.8</span> <span class="content">Mix Loudness Info Syntax and Semantics</span></a>
+        <li><a href="#syntax-mix-bus-config"><span class="secno">4.2.9</span> <span class="content">Mix Bus Config Syntax and Semantics</span></a>
        </ol>
       <li>
        <a href="#codec-specific"><span class="secno">4.3</span> <span class="content">Codec Specific</span></a>
@@ -2541,6 +2542,12 @@ class codec_config() {
 <pre>class mix_presentation_obu() {
   leb128() mix_presentation_id;
   string mix_presentation_friendly_label;
+  unsigned int (1) mix_target_layout_flag;
+  unsigned int (3) reserved;
+
+  if (mix_target_layout_flag) {
+    mix_target_layout();
+  }
 
   leb128() num_audio_elements;
   for (i = 0; i &lt; num_audio_elements; i++) {
@@ -2557,25 +2564,17 @@ class codec_config() {
    <p><b>Semantics</b></p>
    <p><dfn data-dfn-type="dfn" data-noexport id="mix_presentation_id">mix_presentation_id<a class="self-link" href="#mix_presentation_id"></a></dfn> shall indicate a unique ID in an IA bitstream for a given mix presentation.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="mix_presentation_friendly_label">mix_presentation_friendly_label<a class="self-link" href="#mix_presentation_friendly_label"></a></dfn> shall specify a human-friendly label to describe this mix presentation.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="mix_target_layout">mix_target_layout</dfn> shall specify the target playback layout that all referenced audio elements shall be rendered for.</p>
-<pre class="def">Mix Target Layout (4 bits) :  Channel Layout  : Loudspeaker Location Ordering
-            0000           :       Mono       : C
-            0001           :      Stereo      : L/R
-            0010           :      5.1ch       : L/C/R/Ls/Rs/LFE
-            0011           :     5.1.2ch      : L/C/R/Ls/Rs/Ltf/Rtf/LFE
-            0100           :     5.1.4ch      : L/C/R/Ls/Rs/Ltf/Rtf/Ltr/Rtr/LFE
-            0101           :      7.1ch       : L/C/R/Lss/Rss/Lrs/Rrs/LFE
-            0110           :     7.1.2ch      : L/C/R/Lss/Rss/Lrs/Rrs/Ltf/Rtf/LFE
-            0111           :     7.1.4ch      : L/C/R/Lss/Rss/Lrs/Rrs/Ltf/Rtf/Ltb/Rtb/LFE
-            1000           :     3.1.2ch      : L/C/R//Ltf/Rtf/LFE
-           others          :     reserved     :
-</pre>
-<pre>Where, C: Center, L: Left, R: Right, Ls: Left Surround, Lss: Left Side Surround, 
-Rs: Right Surround, Rss: Right Side Surround, 
-Ltf: Left Top Front, Rtf: Right Top Front, Ltr: Left Top Rear, Rtr: Right Top Rear, 
-Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
-</pre>
-   <p>An IA sequence may have one or more mix_presentation() specified, each with different mix_target_layout values. In this case, the IA decoder shall select the mix presentation that matches the physical playback layout. If there is no match, the IA decoder should select the closest specified layout and apply up or down-mixing appropriately. Sections <a href="#iacgeneration-scalablechannelaudio-downmixmechanism">§ 10.2.2 Down-mix Mechanism</a> and <a href="#processing-downmixmatrix">§ 9.5 Down-mix Matrix</a> provide example dynamic and static down-mixing matrices for some common layouts that may be used by the IA decoder.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="mix_target_layout_flag">mix_target_layout_flag<a class="self-link" href="#mix_target_layout_flag"></a></dfn> shall specify if this mix presentation was created for specific target loudspeaker layout. A value of 0 shall indicate that there is no specific target layout, while a value of 1 shall indicate that there is a specific target layout.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="mix_target_layout">mix_target_layout()</dfn> is a class that specifies the target playback layout that all referenced audio elements shall be rendered for.</p>
+   <p>An IA sequence may have one or more mix presentations specified, each with a different mix target layout. The IA parser shall select the appropriate target layout according to the following rules, in order:</p>
+   <ol>
+    <li data-md>
+     <p>The IA parser shall first attempt to select the mix presentation that matches the physical playback layout.</p>
+    <li data-md>
+     <p>If there is no match, the IA parser shall select the mix presentation with mix_target_layout_flag = 0. In this case, the renderer specified in rendering_config() shall render the physical playback layout appropriately.</p>
+    <li data-md>
+     <p>If there is no mix presentation with mix_target_layout_flag = 0, the IA parser shall select the mix presentation with the closest specified layout to the physical layout. The renderer specified in rendering_config() shall first render the layout specified by mix_target_layout() and then apply up or down-mixing appropriately. Sections <a href="#iacgeneration-scalablechannelaudio-downmixmechanism">§ 10.2.2 Down-mix Mechanism</a> and <a href="#processing-downmixmatrix">§ 9.5 Down-mix Matrix</a> provide example dynamic and static down-mixing matrices for some common layouts that may be used.</p>
+   </ol>
    <p><dfn class="css" data-dfn-for="mix_presentation_obu()" data-dfn-type="value" data-noexport id="valdef-mix_presentation_obu-num_audio_elements">num_audio_elements<a class="self-link" href="#valdef-mix_presentation_obu-num_audio_elements"></a></dfn> shall specify the number of audio elements that are used in this mix presentation to generate the final output audio signal for playback.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="audio_element_friendly_label">audio_element_friendly_label<a class="self-link" href="#audio_element_friendly_label"></a></dfn> shall specify a human-friendly label to describe the referenced audio element.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_element_id">audio_element_id</dfn> shall indicate the unique ID associated with a specific audio element that is used in this mix presentation.</p>
@@ -2907,14 +2906,94 @@ class ambisonics_projection_config() {
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="recon_gain_flags">recon_gain_flags</dfn> shall indicate the channels which recon_gain is applied to.</p>
    <left><img height="94" src="images/Recon_Gain_Flags.png" style="width:100%; height:auto;" width="800"></left>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="recon_gain">recon_gain</dfn> shall indicate the gain value to be applied to the channel, which is indicated by <a data-link-type="dfn" href="#recon_gain_flags" id="ref-for-recon_gain_flags">recon_gain_flags</a>, after decoding of the following associated frames.</p>
-   <h4 class="heading settled" data-level="4.2.5" id="syntax-rendering-config"><span class="secno">4.2.5. </span><span class="content">Rendering Config Syntax and Semantics</span><a class="self-link" href="#syntax-rendering-config"></a></h4>
+   <h4 class="heading settled" data-level="4.2.5" id="syntax-mix-target-layout"><span class="secno">4.2.5. </span><span class="content">Mix Target Layout Syntax and Semantics</span><a class="self-link" href="#syntax-mix-target-layout"></a></h4>
+   <p>The mix target layout specifies the list of physical loudspeaker positions according to <a data-link-type="biblio" href="#biblio-itu2051-3">[ITU2051-3]</a>.</p>
+   <p><b>Syntax</b></p>
+<pre>class mix_target_layout() {
+  unsigned int (1) target_layout_type;
+
+  if (target_layout_type == LOUDSPEAKERS) {
+    unsigned int (1) is_sp_label;
+    if (is_sp_label) {
+      unsigned int (6) num_loudspeakers;
+      for (i = 0; i &lt; num_loudspeakers; i++) {
+	unsigned int (3) layer_name;
+	unsigned int (1) sign;
+	unsigned int (4) azimuth;
+      }
+    } else {
+      unsigned int (4) sound_system;
+      unsigned int (2) reserved;
+    }
+  }
+
+  if (target_layout_type == BINAURAL) {
+    unsigned int (7) reserved;
+  }
+}
+</pre>
+   <p><b>Semantics</b></p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="target_layout_type">target_layout_type<a class="self-link" href="#target_layout_type"></a></dfn> shall specify the type of target layout.</p>
+<pre class="def">target_layout_type : Target layout type
+         0         : LOUDSPEAKERS
+         1         : BINAURAL
+</pre>
+   <p><dfn data-dfn-type="dfn" data-noexport id="is_sp_label">is_sp_label<a class="self-link" href="#is_sp_label"></a></dfn> shall indicate if the layout is defined using the SP label or the Sound System convention of <a data-link-type="biblio" href="#biblio-itu2051-3">[ITU2051-3]</a>.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="num_loudspeakers">num_loudspeakers<a class="self-link" href="#num_loudspeakers"></a></dfn> shall specify the number of loudspeakers.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="layer_name">layer_name<a class="self-link" href="#layer_name"></a></dfn> shall specify the layer name.</p>
+<pre class="def">layer_name : Layer name
+     0     : M
+     1     : U
+     2     : UH
+     3     : T
+     4     : B
+     5     : LFE1
+     6     : LFE2
+     7     : Reserved
+</pre>
+   <p><dfn data-dfn-type="dfn" data-noexport id="sign">sign<a class="self-link" href="#sign"></a></dfn> shall specify the sign, to be used in conjunction with the azimuth value.</p>
+<pre class="def">sign : Sign
+ 0   : +
+ 1   : -
+</pre>
+   <p><dfn data-dfn-type="dfn" data-noexport id="azimuth">azimuth<a class="self-link" href="#azimuth"></a></dfn> shall specify the azimuth expressed in degrees, to be used in conjunction with the sign value.</p>
+<pre class="def">azimuth : Azimuth
+   0    : 000
+   1    : 022
+   2    : 030
+   3    : 045
+   4    : 060
+   5    : 090
+   6    : 110
+   7    : 135
+   8    : 180
+   9    : SC
+ 10~15  : Reserved
+</pre>
+   <p>If the value of sign is positive (+), this shall indicate that the azimuth angle is rotated to the left when facing the front.</p>
+   <p>If the combination of sign and azimuth values is equal to +SC or -SC, this shall indicate a loudspeaker at the left or right edge of the screen, respectively.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="sound_system">sound_system<a class="self-link" href="#sound_system"></a></dfn> shall specify the sound system.</p>
+<pre class="def">sound_system : Sound system
+     0       : A
+     1       : B
+     2       : C
+     3       : D
+     4       : E
+     5       : F
+     6       : G
+     7       : H
+     8       : I
+     9       : J
+   10~15     : Reserved
+</pre>
+   <h4 class="heading settled" data-level="4.2.6" id="syntax-rendering-config"><span class="secno">4.2.6. </span><span class="content">Rendering Config Syntax and Semantics</span><a class="self-link" href="#syntax-rendering-config"></a></h4>
    <p><b>Syntax</b></p>
 <pre>class rendering_config() {
   // TODO
 }
 </pre>
    <p><b>Semantics</b></p>
-   <h4 class="heading settled" data-level="4.2.6" id="syntax-element-mix-config"><span class="secno">4.2.6. </span><span class="content">Element Mix Config Syntax and Semantics</span><a class="self-link" href="#syntax-element-mix-config"></a></h4>
+   <h4 class="heading settled" data-level="4.2.7" id="syntax-element-mix-config"><span class="secno">4.2.7. </span><span class="content">Element Mix Config Syntax and Semantics</span><a class="self-link" href="#syntax-element-mix-config"></a></h4>
    <p class="issue" id="issue-a91f7be4"><a class="self-link" href="#issue-a91f7be4"></a> Need to review the mix mechanisms.</p>
    <p><a data-link-type="dfn" href="#element_mix_config" id="ref-for-element_mix_config">element_mix_config()</a> provides a gain value to be applied to the audio element.</p>
    <p><b>Syntax</b></p>
@@ -2925,15 +3004,15 @@ class ambisonics_projection_config() {
    <p><b>Semantics</b></p>
    <p><dfn data-dfn-type="dfn" data-noexport id="mix_gain">mix_gain<a class="self-link" href="#mix_gain"></a></dfn> is a value in dBs. For mixing of the audio element, this gain shall be applied to all of channels of the audio element.</p>
    <p>It shall be stored in a 16-bit, signed, two’s complement fixed-point value with 8 fractional bits (i.e. Q7.8 in <a data-link-type="biblio" href="#biblio-q-format">[Q-Format]</a>).</p>
-   <h4 class="heading settled" data-level="4.2.7" id="syntax-mix-loudness-info"><span class="secno">4.2.7. </span><span class="content">Mix Loudness Info Syntax and Semantics</span><a class="self-link" href="#syntax-mix-loudness-info"></a></h4>
+   <h4 class="heading settled" data-level="4.2.8" id="syntax-mix-loudness-info"><span class="secno">4.2.8. </span><span class="content">Mix Loudness Info Syntax and Semantics</span><a class="self-link" href="#syntax-mix-loudness-info"></a></h4>
    <p><b>Syntax</b></p>
 <pre>class mix_loudness_info() {
   signed int (16) mix_loudness
 }
 </pre>
    <p><b>Semantics</b></p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="mix_loudness">mix_loudness<a class="self-link" href="#mix_loudness"></a></dfn> shall indicate the loudness value of the mixed channels, for the <a data-link-type="dfn" href="#mix_target_layout" id="ref-for-mix_target_layout">mix_target_layout</a>, from the audio elements which are specified in the mix_presentation_obu(). It is stored in fixed-point value with 8 fractional bits (i.e. Q7.8 in <a data-link-type="biblio" href="#biblio-q-format">[Q-Format]</a>) and the value should be <a data-link-type="dfn" href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#" id="termref-for-②④">LKFS</a> based on <a data-link-type="biblio" href="#biblio-itu1770-4">[ITU1770-4]</a>, so it shall be to represent zero or negative value.</p>
-   <h4 class="heading settled" data-level="4.2.8" id="syntax-mix-bus-config"><span class="secno">4.2.8. </span><span class="content">Mix Bus Config Syntax and Semantics</span><a class="self-link" href="#syntax-mix-bus-config"></a></h4>
+   <p><dfn data-dfn-type="dfn" data-noexport id="mix_loudness">mix_loudness<a class="self-link" href="#mix_loudness"></a></dfn> shall indicate the loudness value of the mixed channels, for the <a data-link-type="dfn" href="#mix_target_layout" id="ref-for-mix_target_layout">mix_target_layout()</a>, from the audio elements which are specified in the mix_presentation_obu(). It is stored in fixed-point value with 8 fractional bits (i.e. Q7.8 in <a data-link-type="biblio" href="#biblio-q-format">[Q-Format]</a>) and the value should be <a data-link-type="dfn" href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#" id="termref-for-②④">LKFS</a> based on <a data-link-type="biblio" href="#biblio-itu1770-4">[ITU1770-4]</a>, so it shall be to represent zero or negative value.</p>
+   <h4 class="heading settled" data-level="4.2.9" id="syntax-mix-bus-config"><span class="secno">4.2.9. </span><span class="content">Mix Bus Config Syntax and Semantics</span><a class="self-link" href="#syntax-mix-bus-config"></a></h4>
    <p><b>Syntax</b></p>
 <pre>class mix_bus_config() {
   drc_config();
@@ -3786,7 +3865,7 @@ Ltf = Ltf3 - w(k) x (L2 - 0.707 x C - L5) and Rtf = Rtf3 - w(k) x (R2 - 0.707 x 
    <p>//To Do: Fill in rendering method for channel-based audio element if any</p>
    <h4 class="heading settled" data-level="9.3.2" id="processing-mixpresentation-mixing"><span class="secno">9.3.2. </span><span class="content">Mixing for Audio Elements</span><a class="self-link" href="#processing-mixpresentation-mixing"></a></h4>
    <p>This section provide a guideline by the element_mix_config() which is specified in mix presentation OBU.</p>
-   <p>When the output channel audio of scene-based audio element or channel-based audio element does not match with the loudspeaker layout which is indicated by mix_target_layout in mix presentation OBU.</p>
+   <p>When the output channel audio of scene-based audio element or channel-based audio element does not match with the loudspeaker layout which is indicated by mix_target_layout() in mix presentation OBU.</p>
    <p>Down-mixing matrics, which are specified in <a href="#processing-downmixmatrix">§ 9.5 Down-mix Matrix</a>, are recommended for down-mixing of the output channel audio.</p>
    <p>When multiple audio elements are mixed into one channel audio:</p>
    <ul>
@@ -4665,6 +4744,7 @@ Recon_Gain for D_Rtb4:
      <li><a href="#audio_substream_id">definition of</a><span>, in § 4.1.7</span>
      <li><a href="#valdef-audio_frame_obu_with_no_id-audio_substream_id">value for audio_frame_obu_with_no_id()</a><span>, in § 4.1.10</span>
     </ul>
+   <li><a href="#azimuth">azimuth</a><span>, in § 4.2.5</span>
    <li><a href="#beta">beta</a><span>, in § 4.2.3</span>
    <li><a href="#channel_audio_layer_config">channel_audio_layer_config()</a><span>, in § 4.2.1</span>
    <li><a href="#channelgroup">ChannelGroup</a><span>, in § 4.2.1</span>
@@ -4700,17 +4780,20 @@ Recon_Gain for D_Rtb4:
    <li><a href="#ia-sample">IA Sample</a><span>, in § 7.2.5</span>
    <li><a href="#iasampleentry">IASampleEntry</a><span>, in § 7.2.3</span>
    <li><a href="#ia-sequence">IA sequence</a><span>, in § 2</span>
+   <li><a href="#is_sp_label">is_sp_label</a><span>, in § 4.2.5</span>
+   <li><a href="#layer_name">layer_name</a><span>, in § 4.2.5</span>
    <li><a href="#loudness">loudness</a><span>, in § 4.2.1</span>
    <li><a href="#loudspeaker_layout">loudspeaker_layout</a><span>, in § 4.2.1</span>
    <li><a href="#mix_bus_config">mix_bus_config()</a><span>, in § 4.1.8</span>
-   <li><a href="#mix_gain">mix_gain</a><span>, in § 4.2.6</span>
-   <li><a href="#mix_loudness">mix_loudness</a><span>, in § 4.2.7</span>
+   <li><a href="#mix_gain">mix_gain</a><span>, in § 4.2.7</span>
+   <li><a href="#mix_loudness">mix_loudness</a><span>, in § 4.2.8</span>
    <li><a href="#mix_loudness_info">mix_loudness_info()</a><span>, in § 4.1.8</span>
    <li><a href="#mix_presentation_friendly_label">mix_presentation_friendly_label</a><span>, in § 4.1.8</span>
    <li><a href="#mix_presentation_id">mix_presentation_id</a><span>, in § 4.1.8</span>
    <li><a href="#mix-presentation-obu">Mix Presentation OBU</a><span>, in § 3.2.1</span>
    <li><a href="#mix-presentations">Mix presentations</a><span>, in § 3.1</span>
-   <li><a href="#mix_target_layout">mix_target_layout</a><span>, in § 4.1.8</span>
+   <li><a href="#mix_target_layout">mix_target_layout()</a><span>, in § 4.1.8</span>
+   <li><a href="#mix_target_layout_flag">mix_target_layout_flag</a><span>, in § 4.1.8</span>
    <li><a href="#non-coupled-substream">non-coupled substream</a><span>, in § 10</span>
    <li>
     num_audio_elements
@@ -4719,6 +4802,7 @@ Recon_Gain for D_Rtb4:
      <li><a href="#valdef-mix_presentation_obu-num_audio_elements">value for mix_presentation_obu()</a><span>, in § 4.1.8</span>
     </ul>
    <li><a href="#num_layers">num_layers</a><span>, in § 4.2.1</span>
+   <li><a href="#num_loudspeakers">num_loudspeakers</a><span>, in § 4.2.5</span>
    <li><a href="#num_obu_ids">num_obu_ids</a><span>, in § 4.1.12</span>
    <li><a href="#num_parameters">num_parameters</a><span>, in § 4.1.7</span>
    <li><a href="#num_samples_per_frame">num_samples_per_frame</a><span>, in § 4.1.6</span>
@@ -4771,12 +4855,15 @@ Recon_Gain for D_Rtb4:
    <li><a href="#sample_rate">sample_rate</a><span>, in § 4.3.4</span>
    <li><a href="#sample_siz">sample_siz</a><span>, in § 4.3.4</span>
    <li><a href="#scalable_channel_layout_config">scalable_channel_layout_config()</a><span>, in § 4.1.7</span>
+   <li><a href="#sign">sign</a><span>, in § 4.2.5</span>
    <li><a href="#smoothing_duration">smoothing_duration</a><span>, in § 4.1.9</span>
+   <li><a href="#sound_system">sound_system</a><span>, in § 4.2.5</span>
    <li><a href="#start-code-obu">Start Code OBU</a><span>, in § 3.2.1</span>
    <li><a href="#stereo">Stereo</a><span>, in § 4.2.1</span>
    <li><a href="#substream_count">substream_count</a><span>, in § 4.2.2</span>
    <li><a href="#sync-obu">Sync OBU</a><span>, in § 3.2.2</span>
    <li><a href="#t2to4-de-mixer">T2to4 de-mixer</a><span>, in § 9.2.2</span>
+   <li><a href="#target_layout_type">target_layout_type</a><span>, in § 4.2.5</span>
    <li><a href="#temporal-delimiter-obu">Temporal Delimiter OBU</a><span>, in § 3.2.2</span>
    <li><a href="#tf2tot2-de-mixer">TF2toT2 de-mixer</a><span>, in § 9.2.2</span>
    <li><a href="#v">V</a><span>, in § 7.4</span>
@@ -5018,7 +5105,7 @@ Recon_Gain for D_Rtb4:
    <a href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#">https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#termref-for-">4.2.1. Scalable Channel Layout Config Syntax and Semantics</a>
-    <li><a href="#termref-for-">4.2.7. Mix Loudness Info Syntax and Semantics</a>
+    <li><a href="#termref-for-">4.2.8. Mix Loudness Info Syntax and Semantics</a>
     <li><a href="#termref-for-">10.2. Scalable Channel Audio Encoding</a> <a href="#termref-for-">(2)</a>
     <li><a href="#termref-for-">10.2.1. Down-mix parameter and Loudness</a>
    </ul>
@@ -5596,7 +5683,7 @@ Recon_Gain for D_Rtb4:
   <aside class="dfn-panel" data-for="mix_target_layout">
    <b><a href="#mix_target_layout">#mix_target_layout</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-mix_target_layout">4.2.7. Mix Loudness Info Syntax and Semantics</a>
+    <li><a href="#ref-for-mix_target_layout">4.2.8. Mix Loudness Info Syntax and Semantics</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="audio_element_id">
@@ -5610,7 +5697,7 @@ Recon_Gain for D_Rtb4:
   <aside class="dfn-panel" data-for="element_mix_config">
    <b><a href="#element_mix_config">#element_mix_config</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-element_mix_config">4.2.6. Element Mix Config Syntax and Semantics</a>
+    <li><a href="#ref-for-element_mix_config">4.2.7. Element Mix Config Syntax and Semantics</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="duration">
