@@ -1487,9 +1487,9 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version b0de3432c, updated Thu Oct 13 09:16:59 2022 -0700" name="generator">
+  <meta content="Bikeshed version afdea9b3f, updated Fri Oct 21 14:30:36 2022 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iac/" rel="canonical">
-  <meta content="ec6a802d58b810722d37c1e3df80dea9925f46d6" name="document-revision">
+  <meta content="a6308e1c64e0cd170944a71ce4d75e74131aa68f" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -1778,6 +1778,14 @@ a.self-link:hover {
 .heading > a.self-link {
     font-size: 83%;
 }
+.example > a.self-link,
+.note > a.self-link,
+.issue > a.self-link {
+    /* These blocks are overflow:auto, so positioning outside
+       doesn't work. */
+    left: auto;
+    right: 0;
+}
 li > a.self-link {
     left: calc(-1 * (3.5rem - 26px) - 2em);
 }
@@ -1983,7 +1991,6 @@ dfn > a.self-link::before      { content: "#"; }
        <ol class="toc">
         <li><a href="#descriptors"><span class="secno">3.2.1</span> <span class="content">Descriptors</span></a>
         <li><a href="#data"><span class="secno">3.2.2</span> <span class="content">Data</span></a>
-        <li><a href="#logistics"><span class="secno">3.2.3</span> <span class="content">Logistics</span></a>
        </ol>
      </ol>
     <li>
@@ -2036,8 +2043,14 @@ dfn > a.self-link::before      { content: "#"; }
     <li>
      <a href="#standalone"><span class="secno">6</span> <span class="content">Standalone IAC Representation</span></a>
      <ol class="toc">
-      <li><a href="#iabitstream-definition"><span class="secno">6.1</span> <span class="content">Immersive Audio Bitstream Definition</span></a>
-      <li><a href="#bitstream-packing"><span class="secno">6.2</span> <span class="content">Bitstream Packing</span></a>
+      <li>
+       <a href="#standalone-obu-sequence-order"><span class="secno">6.1</span> <span class="content">OBU Sequence Order</span></a>
+       <ol class="toc">
+        <li><a href="#standalone-descriptor-obus"><span class="secno">6.1.1</span> <span class="content">Descriptor OBUs</span></a>
+        <li><a href="#standalone-data-obus"><span class="secno">6.1.2</span> <span class="content">Data OBUs</span></a>
+        <li><a href="#standalone-obu-sequence-refreshes"><span class="secno">6.1.3</span> <span class="content">Refreshing Descriptor OBUs</span></a>
+       </ol>
+      <li><a href="#standalone-synchronizing-data-obus"><span class="secno">6.2</span> <span class="content">Synchronizing Data OBUs</span></a>
      </ol>
     <li>
      <a href="#isobmff"><span class="secno">7</span> <span class="content">ISOBMFF IAC Encapsulation</span></a>
@@ -2135,6 +2148,13 @@ dfn > a.self-link::before      { content: "#"; }
        </ol>
      </ol>
     <li><a href="#iacconsumption"><span class="secno">11</span> <span class="content">Consumption of IAC bitstream</span></a>
+    <li>
+     <a href="#annex-a-audio-substream-gaps"><span class="secno">12</span> <span class="content">Annex A: Audio Substream Gaps</span></a>
+     <ol class="toc">
+      <li><a href="#a-gap-within-an-audio-substream"><span class="secno">12.1</span> <span class="content">A gap within an audio substream</span></a>
+      <li><a href="#a-gap-between-two-audio-substreams"><span class="secno">12.2</span> <span class="content">A gap between two audio substreams</span></a>
+      <li><a href="#a-gap-due-to-packet-loss"><span class="secno">12.3</span> <span class="content">A gap due to packet loss</span></a>
+     </ol>
     <li><a href="#conformance"><span class="secno"></span> <span class="content"> Conformance</span></a>
     <li>
      <a href="#index"><span class="secno"></span> <span class="content">Index</span></a>
@@ -2215,7 +2235,7 @@ dfn > a.self-link::before      { content: "#"; }
    <p>The IA sequence includes one or more audio elements, each of which consists of one or more audio substreams. The IA sequence further include mix presentations and parameters.</p>
    <ul>
     <li data-md>
-     <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio-substream">Audio substream</dfn> is the actual audio signal, which may be encoded with any compatible audio codec.</p>
+     <p><dfn data-dfn-type="dfn" data-noexport id="audio-substream">Audio substream<a class="self-link" href="#audio-substream"></a></dfn> is the actual audio signal, which may be encoded with any compatible audio codec.</p>
     <li data-md>
      <p><dfn data-dfn-type="dfn" data-noexport id="audio-element">Audio element<a class="self-link" href="#audio-element"></a></dfn> is the 3D representation of the audio signals, and are constructed from one or more audio substreams and the metadata describing them. The audio substreams associated with one audio element use the same audio codec.</p>
     <li data-md>
@@ -2243,28 +2263,72 @@ dfn > a.self-link::before      { content: "#"; }
    </ul>
    <h4 class="heading settled" data-level="3.2.2" id="data"><span class="secno">3.2.2. </span><span class="content">Data</span><a class="self-link" href="#data"></a></h4>
    <p>The data OBUs contain the actual time-varying data that is required in the generation of the final audio output.</p>
+   <p>The IA bitstream supports the description of multiple audio substreams and algorithms, which may have different metadata update rates to each other. The update rate for the audio substreams and audio elements is governed by the frame rates of the audio codec used. Since a single bitstream may support multiple codecs, this may lead to multiple different frame rates. The algorithms for rendering and mixing may have parameters that update at different rates to each other and to the audio frame rates. Therefore, the IA bitstream contains information to facilitate the synchronization of the different audio frames and parameters.</p>
    <ul>
-    <li data-md>
-     <p><dfn data-dfn-type="dfn" data-noexport id="parameter-block-obu">Parameter Block OBU<a class="self-link" href="#parameter-block-obu"></a></dfn> provides the time-varying parameter values for an algorithm used in any of the decoding, reconstruction, rendering or mixing steps.</p>
     <li data-md>
      <p><dfn data-dfn-type="dfn" data-noexport id="audio-frame-obu">Audio Frame OBU<a class="self-link" href="#audio-frame-obu"></a></dfn> provides the raw coded audio frame for an audio substream.</p>
     <li data-md>
-     <p>Temporal Unit consists of one or more Audio Frame OBUs with the same sync offset (which comes from the same audio element) and followed by zero or more Parameter Block OBUs.</p>
-     <ul>
-      <li data-md>
-       <p>It may have the immediately preceding Temporal Delimiter OBU. If present, every Temoral Unit has Temporal Delimiter OBU.</p>
-     </ul>
+     <p><dfn data-dfn-type="dfn" data-noexport id="parameter-block-obu">Parameter Block OBU<a class="self-link" href="#parameter-block-obu"></a></dfn> provides the time-varying parameter values for an algorithm used in any of the decoding, reconstruction, rendering or mixing steps.</p>
+    <li data-md>
+     <p><dfn data-dfn-type="dfn" data-noexport id="sync-obu">Sync OBU<a class="self-link" href="#sync-obu"></a></dfn> provides relative timestamp offsets to synchronize audio frames and parameter blocks.</p>
+    <li data-md>
+     <p><dfn data-dfn-type="dfn" data-noexport id="temporal-delimiter-obu">Temporal Delimiter OBU<a class="self-link" href="#temporal-delimiter-obu"></a></dfn> identifies the temporal units.</p>
    </ul>
-   <h4 class="heading settled" data-level="3.2.3" id="logistics"><span class="secno">3.2.3. </span><span class="content">Logistics</span><a class="self-link" href="#logistics"></a></h4>
-   <p>The IA bitstream supports the description of multiple audio substreams and algorithms, which may have different metadata update rates to each other. The update rate for the audio substreams and audio elements is governed by the frame rates of the audio codec used. Since a single bitstream may support multiple codecs, this may lead to multiple different frame rates. The algorithms for rendering and mixing may have parameters that update at different rates to each other and to the audio frame rates.</p>
-   <p>Therefore, the IA bitstream contains information to facilitate the synchronization of the different IA metadata. The synchronizing information in each metadata indicates the offset from a reference point and the duration for which it is valid.</p>
+   <p>The below figure shows the linking scheme among <a data-link-type="dfn" href="#obu_id" id="ref-for-obu_id">obu_id</a>s in obu_header and ids in obu payload.</p>
+   <center><img height="1071" src="images/ID Linking Example.png" style="width:100%; height:auto;" width="1496"></center>
+   <center>
+    <figcaption>ID Linking Scheme</figcaption>
+   </center>
+   <p>In the above figure,</p>
    <ul>
     <li data-md>
-     <p><dfn data-dfn-type="dfn" data-noexport id="sync-obu">Sync OBU<a class="self-link" href="#sync-obu"></a></dfn> defines reference points in the bitstream, which used to synchronize the data OBUs with each other.</p>
+     <p>codec config obu is saying that there are two audio elements (audio_element_id = 11 and 12) which are coded by using the codec_config() in the obu.</p>
+     <ul>
+      <li data-md>
+       <p>The audio element having audio_element_id = 11 is linked to the audio element obu having audio_element_id = 11.</p>
+       <ul>
+        <li data-md>
+         <p>The audio element obu is saying that there are two substreams (substream_id = 31 and 32) which composing of this audio element.</p>
+         <ul>
+          <li data-md>
+           <p>The audio substream having substream_id = 31 is linked to the audio frame obus having id = 31.</p>
+          <li data-md>
+           <p>The audio substream having substream_id = 32 is linked to the audio frame obus having id = 32.</p>
+         </ul>
+        <li data-md>
+         <p>The audio element obu is saying that there are one parameter block (parameter_id = 71) for demixing_info() which is applied to the audio element.</p>
+         <ul>
+          <li data-md>
+           <p>The parameter block having parameter_id = 71 is linked to the parameter block obu having parameter_id = 71.</p>
+         </ul>
+        <li data-md>
+         <p>IAC decoders applies the parameter block to the audio substreams after decoding by substream decoders.</p>
+       </ul>
+      <li data-md>
+       <p>The audio element having audio_element_id = 12 is linked to the audio element obu having obu_id = 12.</p>
+       <ul>
+        <li data-md>
+         <p>The audio element obu is saying that there are one substream (substream_id = 33) which composing of this audio element.</p>
+         <ul>
+          <li data-md>
+           <p>The audio substream having substream_id = 33 is linked to the audio frame obus having id = 33.</p>
+         </ul>
+        <li data-md>
+         <p>Substream decoder do decoding the substream.</p>
+       </ul>
+     </ul>
+    <li data-md>
+     <p>mix presentation obu is saying that there are two audio elements (audio_element_id = 11 and 12) which need to be mixed.</p>
+     <ul>
+      <li data-md>
+       <p>The audio element having audio_element_id = 11 and the audio element having audio_element_id = 12 are mixed after decoding each of them.</p>
+      <li data-md>
+       <p>Then IAC decoders may do process loudness and drc controls by using mix_loudness_info() and drc_config().</p>
+     </ul>
    </ul>
    <h2 class="heading settled" data-level="4" id="obu-syntax"><span class="secno">4. </span><span class="content">Open Bitstream Unit (OBU) Syntax and Semantics</span><a class="self-link" href="#obu-syntax"></a></h2>
    <h3 class="heading settled" data-level="4.1" id="top-level-syntax"><span class="secno">4.1. </span><span class="content">Top Level OBU Syntax and Semantics</span><a class="self-link" href="#top-level-syntax"></a></h3>
-   <p>The IA sequence uses the OBU syntax. IA bitstream shall be composed of descriptor OBUs and followed by one or more temporal units. Sync OBUs may be present between two adjacent temporal units or between descriptor OBUs and following temporal unit</p>
+   <p>The IA bitstream uses the OBU syntax.</p>
    <p>This section specifies the top-level OBU syntax elements and their semantics.</p>
    <h4 class="heading settled" data-level="4.1.1" id="audio-obu"><span class="secno">4.1.1. </span><span class="content">Audio OBU Syntax and Semantics</span><a class="self-link" href="#audio-obu"></a></h4>
    <p><b>Syntax</b></p>
@@ -2281,14 +2345,16 @@ dfn > a.self-link::before      { content: "#"; }
     mix_presentation_obu();
   else if (obu_type == OBU_IA_Parameter_Block)
     parameter_block_obu();
-  else if (obu_type == OBU_IA_Audio_Frame)
-    audio_frame_obu();
   else if (obu_type == OBU_IA_Temporal_Delimiter)
     temporal_delimiter_obu();
   else if (obu_type == OBU_IA_Sync)
     sync_obu();
-  else
-    reserved_obu()
+  else if (obu_type == OBU_IA_Audio_Frame)
+    audio_frame_obu_with_no_id();
+  else if (obu_type >= 9 and &lt;= 30)
+    audio_frame_obu(obu_type - 9);
+  else if (obu_type == 6 or 7)
+    reserved_obu();
 
   byte_alignment():
 }
@@ -2299,148 +2365,59 @@ dfn > a.self-link::before      { content: "#"; }
    <h4 class="heading settled" data-level="4.1.2" id="obu-header"><span class="secno">4.1.2. </span><span class="content">OBU Header Syntax and Semantics</span><a class="self-link" href="#obu-header"></a></h4>
    <p><b>Syntax</b></p>
 <pre>class obu_header() {
-  unsigned int (4) obu_type;
-  unsigned int (1) obu_id_flag;
-  unsigned int (1) obu_sync_flag;
-  unsigned int (1) obu_duration_flag;
-  unsigned int (1) obu_counter_flag;
-  unsigned int (2) obu_trimming_status;
+  unsigned int (5) obu_type;
+  unsigned int (1) obu_redundant_copy;
+  unsigned int (1) obu_trimming_status_flag;
   unsigned int (1) obu_extension_flag;
-  unsigned int (5) obu_reserved_5bit;
-
+  unsigned int (1) reserved;
   leb128() obu_size;
 
-  if (obu_id_flag == 1)
-    leb128() obu_id;
-  if (obu_sync_flag == 1)
-    sleb128() obu_sync;
-  if (obu_duration_flag == 1)
-    leb128() obu_duration;
-  if (obu_counter_flag == 1)
-    leb128() obu_counter;
-  if (obu_trimming_status == 1)
+  if (obu_trimming_status_flag) {
     leb128() num_samples_to_trim_at_end;
-  if (obu_trimming_status == 2)
     leb128() num_samples_to_trim_at_start;
+  }
   if (obu_extension_flag == 1)
     leb128() extension_header_size;
 }
 </pre>
    <p><b>Semantics</b></p>
    <p>OBUs are structured with a header and a payload.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="obu_type">obu_type<a class="self-link" href="#obu_type"></a></dfn> specifies the type of data structure contained in the OBU payload.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="obu_type">obu_type</dfn> specifies the type of data structure contained in the OBU payload.</p>
 <pre class="def">obu_type: Name of obu_type
    0    : OBU_IA_Codec_Config
    1    : OBU_IA_Audio_Element
    2    : OBU_IA_Mix_Presentation
    3    : OBU_IA_Parameter_Block
-   4    : OBU_IA_Audio_Frame
-   5    : OBU_IA_Temporal_Delimiter
-   6    : OBU_IA_Sync
-  7~14  : Reserved
-   15   : OBU_IA_Start_Code
+   4    : OBU_IA_Temporal_Delimiter
+   5    : OBU_IA_Sync
+  6~7   : Reserved
+   8    : OBU_IA_Audio_Frame
+  9~30  : OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21
+   31   : OBU_IA_Start_Code
 </pre>
-   <p><dfn data-dfn-type="dfn" data-noexport id="obu_id_flag">obu_id_flag<a class="self-link" href="#obu_id_flag"></a></dfn> indicates whether <a data-link-type="dfn" href="#obu_id" id="ref-for-obu_id">obu_id</a> field presents or not. If it set to 0, <a data-link-type="dfn" href="#obu_id" id="ref-for-obu_id①">obu_id</a> field shall not be present. Otherwise, <a data-link-type="dfn" href="#obu_id" id="ref-for-obu_id②">obu_id</a> field shall be present.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="obu_sync_flag">obu_sync_flag<a class="self-link" href="#obu_sync_flag"></a></dfn> indicates whether <a data-link-type="dfn" href="#obu_sync" id="ref-for-obu_sync">obu_sync</a> field presents or not. If it set to 0, <a data-link-type="dfn" href="#obu_sync" id="ref-for-obu_sync①">obu_sync</a> field shall not be present. Otherwise, <a data-link-type="dfn" href="#obu_sync" id="ref-for-obu_sync②">obu_sync</a> field shall be present.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="obu_duration_flag">obu_duration_flag<a class="self-link" href="#obu_duration_flag"></a></dfn> indicates whether <a data-link-type="dfn" href="#obu_duration" id="ref-for-obu_duration">obu_duration</a> field presents or not. If it set to 0, <a data-link-type="dfn" href="#obu_duration" id="ref-for-obu_duration①">obu_duration</a> field shall not be present. Otherwise, <a data-link-type="dfn" href="#obu_duration" id="ref-for-obu_duration②">obu_duration</a> field shall be present.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="obu_counter_flag">obu_counter_flag<a class="self-link" href="#obu_counter_flag"></a></dfn> indicates whether <a data-link-type="dfn" href="#obu_counter" id="ref-for-obu_counter">obu_counter</a> field presents or not. If it set to 0, <a data-link-type="dfn" href="#obu_counter" id="ref-for-obu_counter①">obu_counter</a> field shall not be present. Otherwise, <a data-link-type="dfn" href="#obu_counter" id="ref-for-obu_counter②">obu_counter</a> field shall be present.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="obu_trimming_status">obu_trimming_status<a class="self-link" href="#obu_trimming_status"></a></dfn> indicates whether this OBU has audio samples to be trimmed or not.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="obu_redundant_copy">obu_redundant_copy<a class="self-link" href="#obu_redundant_copy"></a></dfn> indicates whether this OBU is a redundant copy of the previous OBU in the IA sequence with the same obu_type. A value of 1 indicates that it is a redundant copy, while a value of 0 indicates that it is not.</p>
+   <p>It shall always be set to 0 for the following obu_type values:</p>
    <ul>
     <li data-md>
-     <p>0: Shall indicate that this OBU has no samples to be trimmed. No field shall present</p>
+     <p>OBU_IA_Temporal_Delimiter</p>
     <li data-md>
-     <p>1: Shall indicate that this OBU has audio samples to be trimmed at end of the audio frame. <a data-link-type="dfn" href="#num_samples_to_trim_at_end" id="ref-for-num_samples_to_trim_at_end">num_samples_to_trim_at_end</a> field shall present.</p>
+     <p>OBU_IA_Sync</p>
     <li data-md>
-     <p>2: Shall indicate that this OBU has audio samples to be trimmed at start of the audio frame. <a data-link-type="dfn" href="#num_samples_to_trim_at_start" id="ref-for-num_samples_to_trim_at_start">num_samples_to_trim_at_start</a> field shall present.</p>
+     <p>OBU_IA_Audio_Frame</p>
     <li data-md>
-     <p>3: All of audio samples of this OBU shall be trimmed. No field present</p>
+     <p>OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21</p>
+    <li data-md>
+     <p>OBU_IA_Start_Code</p>
    </ul>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="obu_extension_flag">obu_extension_flag</dfn> indicates whether <a data-link-type="dfn" href="#extension_header_size" id="ref-for-extension_header_size">extension_header_size</a> field presents or not. If it set to 0, <a data-link-type="dfn" href="#extension_header_size" id="ref-for-extension_header_size①">extension_header_size</a> field shall not be present. Otherwise, <a data-link-type="dfn" href="#extension_header_size" id="ref-for-extension_header_size②">extension_header_size</a> field shall be present.</p>
-   <p>This flag shall be set to 0 for the current version of the specification (i.e. version = 0). The IAC-OBU parse, which conformants to the current version of the specification, shall be able to parse this flag and <a data-link-type="dfn" href="#extension_header_size" id="ref-for-extension_header_size③">extension_header_size</a>.</p>
-   <p class="note" role="note"><span>NOTE:</span> For a future version of specification may use this flag to have extension header field by setting <a data-link-type="dfn" href="#obu_extension_flag" id="ref-for-obu_extension_flag">obu_extension_flag</a> = 1 and setting the size of extended header to <a data-link-type="dfn" href="#extension_header_size" id="ref-for-extension_header_size④">extension_header_size</a>.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="obu_size">obu_size<a class="self-link" href="#obu_size"></a></dfn> shall indicate the size in bytes of the OBU not including the bytes within obu_header of the preceding fields, i.e. obu_type, the various OBU flags and obu_reserved_7bit.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="obu_id">obu_id</dfn> indicates a unique ID according to the obu_type.</p>
-   <ul>
-    <li data-md>
-     <p>If obu_type = OBU_IA_Codec_Config, then it shall indicate a unique ID (i.e. codec_config_id) in IA bitstream for a given codec config.</p>
-    <li data-md>
-     <p>If obu_type = OBU_IA_Audio_Element, then it shall indicate a unique ID (i.e. audio_element_id) in IA bitstream for a given audio element. It shall be same as <a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id">audio_element_id</a> which is mapped to the audio element in codec_config_obu.</p>
-    <li data-md>
-     <p>If obu_type = OBU_IA_Mix_Presentation, then it shall indicate a unique ID (i.e. mix_presentation_id) in IA bitstream for a given mix presentation.</p>
-    <li data-md>
-     <p>If obu_type = OBU_IA_Parameter_Block, then it shall indicate a unique ID (i.e. parameter_id or mix) in IA bitstream for a given parameter. It shall be same as <a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id">parameter_id</a> which is mapped to the parameter in audio_element_obu.</p>
-    <li data-md>
-     <p>If obu_type = OBU_IA_Audio_Frame, then it shall indicate a unique ID (i.e. audio_substream_id) in IA bitstream for a given substream. Therefore, all of audio_frame_obus of the same substream shall have the same obu_id.</p>
-   </ul>
-   <p>The below figure shows the linking scheme among <a data-link-type="dfn" href="#obu_id" id="ref-for-obu_id③">obu_id</a>s in obu_header and ids in obu payload.</p>
-   <center><img height="1071" src="images/ID Linking Example.png" style="width:100%; height:auto;" width="1496"></center>
-   <center>
-    <figcaption>ID Linking Scheme</figcaption>
-   </center>
-   <p>In the above figure,</p>
-   <ul>
-    <li data-md>
-     <p>codec config obu is saying that there are two audio elements (audio_element_id = 11 and 12) which are coded by using the codec_config() in the obu.</p>
-     <ul>
-      <li data-md>
-       <p>The audio element having audio_element_id = 11 is linked to the audio element obu having obu_id = 11.</p>
-       <ul>
-        <li data-md>
-         <p>The audio element obu is saying that there are two substreams (substream_id = 31 and 32) which composing of this audio element.</p>
-         <ul>
-          <li data-md>
-           <p>The audio substream having substream_id = 31 is linked to the audio frame obus having obu_id = 31.</p>
-          <li data-md>
-           <p>The audio substream having substream_id = 32 is linked to the audio frame obus having obu_id = 32.</p>
-         </ul>
-        <li data-md>
-         <p>The audio element obu is saying that there are one parameter block (parameter_id = 71) for demixing_info() which is applied to the audio element.</p>
-         <ul>
-          <li data-md>
-           <p>The parameter block having parameter_id = 71 is linked to the parameter block obu having obu_id = 71.</p>
-         </ul>
-        <li data-md>
-         <p>IAC decoders applies the parameter block to the audio substreams after decoding by substream decoders.</p>
-       </ul>
-      <li data-md>
-       <p>The audio element having audio_element_id = 12 is linked to the audio element obu having obu_id = 12.</p>
-       <ul>
-        <li data-md>
-         <p>The audio element obu is saying that there are one substream (substream_id 33) which composing of this audio element.</p>
-         <ul>
-          <li data-md>
-           <p>The audio substream having substream_id = 33 is linked to the audio frame obus having obu_id = 33.</p>
-         </ul>
-        <li data-md>
-         <p>Substream decoder do decoding the substream.</p>
-       </ul>
-     </ul>
-    <li data-md>
-     <p>mix presentation obu is saying that there are two audio elements (audio_element_id = 11 and 12) which need to be mixed.</p>
-     <ul>
-      <li data-md>
-       <p>The audio element having audio_element_id = 11 and the audio element having audio_element_id = 12 are mixed after decoding each of them.</p>
-      <li data-md>
-       <p>Then IAC decoders may do process loudness and drc controls by using mix_loudness_info() and drc_config().</p>
-     </ul>
-   </ul>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="obu_sync">obu_sync</dfn> shall indicate the offset from a reference point in the IA bitstream for which the OBU is valid and applicable. The reference point used depends on the IA Profile (See Profiles Section).</p>
-   <ul>
-    <li data-md>
-     <p>If the sampling rate of audio elements and parameter blocks are same, then the offset shall indicate the number of audio samples at the sampling rate. Otherwise, the offset shall indicate the number of audio samples at 48000hz.</p>
-   </ul>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="obu_duration">obu_duration</dfn> shall indicate the duration for which the OBU is valid and applicable. This field shall only be valid when obu_type = OBU_IA_Parameter_Block.</p>
-   <ul>
-    <li data-md>
-     <p>If the parameter block obu is applied to an audio element, the duration shall indicate the number of audio samples at the sampling rate of the audio element.</p>
-    <li data-md>
-     <p>If the parameter block obu is applied to an mixed audio by a mix presentation obu, the duration shall indiate the number of audio samples at 48000khz.</p>
-   </ul>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="obu_counter">obu_counter</dfn> shall increment when its payload is different to the previous OBU of the same obu_type. If the payload is identical to the previous OBU of the same obu_type, i.e. it was redundantly copied or repeated in the bitstream, the value of obu_counter shall remain unchanged.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="obu_trimming_status_flag">obu_trimming_status_flag</dfn> indicates whether this OBU has audio samples to be trimmed or not. If it is set to 1, the <a data-link-type="dfn" href="#num_samples_to_trim_at_start" id="ref-for-num_samples_to_trim_at_start">num_samples_to_trim_at_start</a> and <a data-link-type="dfn" href="#num_samples_to_trim_at_end" id="ref-for-num_samples_to_trim_at_end">num_samples_to_trim_at_end</a> fields shall be present.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="obu_extension_flag">obu_extension_flag</dfn> indicates whether the <a data-link-type="dfn" href="#extension_header_size" id="ref-for-extension_header_size">extension_header_size</a> field shall be present. If it set to 0, the <a data-link-type="dfn" href="#extension_header_size" id="ref-for-extension_header_size①">extension_header_size</a> field shall not be present. Otherwise, the <a data-link-type="dfn" href="#extension_header_size" id="ref-for-extension_header_size②">extension_header_size</a> field shall be present.</p>
+   <p>This flag shall be set to 0 for the current version of the specification (i.e. version = 0). An IAC-OBU parser which is conformant with the current version of the specification shall be able to parse this flag and <a data-link-type="dfn" href="#extension_header_size" id="ref-for-extension_header_size③">extension_header_size</a>.</p>
+   <p class="note" role="note"><span>NOTE:</span> A future version of specification may use this flag to specify an extension header field by setting <a data-link-type="dfn" href="#obu_extension_flag" id="ref-for-obu_extension_flag">obu_extension_flag</a> = 1 and setting the size of extended header to <a data-link-type="dfn" href="#extension_header_size" id="ref-for-extension_header_size④">extension_header_size</a>.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="obu_size">obu_size<a class="self-link" href="#obu_size"></a></dfn> shall indicate the size in bytes of the OBU not including the bytes within the obu_header of the preceding fields, i.e. obu_type, obu_trimming_status_flag and obu_extension_flag.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_samples_to_trim_at_start">num_samples_to_trim_at_start</dfn> shall indicate the number of samples that needs to be trimmed from the start of the samples in this Audio Frame OBU.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_samples_to_trim_at_end">num_samples_to_trim_at_end</dfn> shall indicate the number of samples that needs to be trimmed from the end of the samples in this Audio Frame OBU.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="extension_header_size">extension_header_size</dfn> shall indicate the size in bytes of the extension header including this field.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="obu_reserved_5bit">obu_reserved_5bit<a class="self-link" href="#obu_reserved_5bit"></a></dfn> shall be set to 0. Reserved units are for future use and shall be ignored by an IAC-OBU parser.</p>
+   <p><dfn class="css" data-dfn-for="obu_header()" data-dfn-type="value" data-noexport id="valdef-obu_header-reserved">reserved<a class="self-link" href="#valdef-obu_header-reserved"></a></dfn> shall be set to 0. Reserved units are for future use and shall be ignored by an IAC-OBU parser.</p>
    <h4 class="heading settled" data-level="4.1.3" id="obu-bytealignment"><span class="secno">4.1.3. </span><span class="content">Byte Alignment Syntax and Semantics</span><a class="self-link" href="#obu-bytealignment"></a></h4>
    <p><b>Syntax</b></p>
 <pre>class byte_alignment() {
@@ -2454,7 +2431,7 @@ dfn > a.self-link::before      { content: "#"; }
    <p>The reserved OBU allows the extension of this specification with additional OBU types in a way that allows IAC-OBU parsers compliant to this version of specification to ignore them.</p>
    <h4 class="heading settled" data-level="4.1.5" id="obu-startcode"><span class="secno">4.1.5. </span><span class="content">Start Code OBU Syntax and Semantics</span><a class="self-link" href="#obu-startcode"></a></h4>
    <p>This section specifies obu payload of OBU_IA_Start_Code.</p>
-   <p>For this obu, the obu header (3 bytes) shall be set to 0xF07F06.</p>
+   <p>For this obu, the obu header (2 bytes) shall be set to 0xF006.</p>
    <p><b>Syntax</b></p>
 <pre>class start_code_obu() {
   unsigned int (32) ia_code;
@@ -2463,16 +2440,15 @@ dfn > a.self-link::before      { content: "#"; }
 }
 </pre>
    <p><b>Semantics</b></p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="ia_code">ia_code<a class="self-link" href="#ia_code"></a></dfn> shall be a ‘four-character code’ (4CC) to identify the start of the IA sequence. It shall be <a class="property css" data-link-type="property">aiac</a>.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="ia_code">ia_code</dfn> shall be a ‘four-character code’ (4CC) to identify the start of the IA bitstream. It shall be <a class="property css" data-link-type="property">iamf</a>.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="version">version</dfn> shall indicate the version of an IA sequence. It shall be set to 0 for this version of the specification. Implementations should treat IA sequences where the MSB four bits of the version number match that of a recognized specification as backwards compatible with that specification. That is, the version number can be split into "major" and "minor" version sub-fields, with changes to the minor sub-field (in the LSB four bits) signaling compatible changes. For example, an implementation of this specification should accept any stream with a version number of ’15’ or less, and should assume any stream with a version number ’16’ or
 greater is incompatible.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="profile_version">profile_version</dfn> shall indicate the profile of an IA sequence. The MSB four bits shall indicate the profile of an IA sequence. Implementations should treat IA sequences where the MSB four bits of the version number match that of a recognized profile as backwards compatible with that specification. That is, the version number can be split into "profile major" and "profile minor" version sub-fields, with changes to the minor sub-field (in the LSB four bits) signaling compatible changes with the profile major version. The semantic of this field shall be only valid when the MSB four bits of <a data-link-type="dfn" href="#version" id="ref-for-version">version</a> = 0.</p>
    <h4 class="heading settled" data-level="4.1.6" id="obu-codecconfig"><span class="secno">4.1.6. </span><span class="content">Codec Config OBU Syntax and Semantics</span><a class="self-link" href="#obu-codecconfig"></a></h4>
-   <p class="note" role="note"><span>NOTE:</span> This section is udpated to specify one Codec Config OBU per one codec config.</p>
-   <p>This section specifies obu payload of OBU_IA_Codec_Config.</p>
-   <p>For this obu, all of obu_sync_flag, obu_duration_flag and obu_counter_flag shall be set to 0.</p>
+   <p>This section specifies the OBU payload of OBU_IA_Codec_Config.</p>
    <p><b>Syntax</b></p>
 <pre>class codec_config_obu() {
+  leb128() codec_config_id;
   codec_config();
   leb128() num_audio_elements;
   for (i = 0; i &lt; num_audio_elements; i++) {
@@ -2488,6 +2464,7 @@ class codec_config() {
 }
 </pre>
    <p><b>Semantics</b></p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="codec_config_id">codec_config_id<a class="self-link" href="#codec_config_id"></a></dfn> shall indicate a unique ID in an IA bitstream for a given codec config.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="codec_id">codec_id</dfn> shall be a ‘four-character code’ (4CC) to identify the codec used to generate the audio substreams. It shall be <a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-⑤">opus</a> for IAC-OPUS, <a class="property css" data-link-type="property" href="https://www.iso.org/standard/79110.html#" id="termref-for-⑥">mp4a</a> for IAC-AAC-LC, <a class="property css" data-link-type="property" href="https://xiph.org/flac/format.html" id="termref-for-⑦">fLaC</a> for IAC-FLAC and <a class="property css" data-link-type="property">lpcm</a> for IAC-LPCM.</p>
    <p>For ISOBMFF encapsulation, it shall be the same as the <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑧">boxtype</a> of its AduioSampleEntry if exist.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="decoder_config">decoder_config()</dfn> specifies the set of codec parameters required to decode an audio substream for the given codec_id. It shall be byte aligned.</p>
@@ -2505,15 +2482,15 @@ class codec_config() {
    <p><dfn data-dfn-type="dfn" data-noexport id="roll_distance">roll_distance<a class="self-link" href="#roll_distance"></a></dfn> is a signed integer that gives the number of frames that need to be decoded in order for a frame to be decoded correctly. A negative value indicates the number of frames before the frame to be decoded corrently.</p>
    <ul>
     <li data-md>
-     <p>It shall be set to -1 for IAC-AAC-LC and -4 (when the frame size = 960) for IAC-OPUS. IAC-FLAC may ignore this field.</p>
+     <p>It shall be set to -1 for IAC-AAC-LC and -R (R = 4 when the frame size = 960) for IAC-OPUS. IAC-FLAC may ignore this field. Where, R is the smallest integer greater than or equal to 3840 divided by the frame size.</p>
    </ul>
-   <p><dfn class="css" data-dfn-for="codec_config_obu()" data-dfn-type="value" data-noexport id="valdef-codec_config_obu-num_audio_elements">num_audio_elements<a class="self-link" href="#valdef-codec_config_obu-num_audio_elements"></a></dfn> shall specify the number of audio elements that are applying the codec_config() in this OBU.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_element_id">audio_element_id</dfn> shall specify the unique ID of the audio element that is applying the codec_config() in this OBU.</p>
+   <p><dfn class="css" data-dfn-for="codec_config_obu()" data-dfn-type="value" data-noexport id="valdef-codec_config_obu-num_audio_elements">num_audio_elements<a class="self-link" href="#valdef-codec_config_obu-num_audio_elements"></a></dfn> shall specify the number of audio elements that refer to this codec config.</p>
+   <p><dfn class="css" data-dfn-for="codec_config_obu()" data-dfn-type="value" data-noexport id="valdef-codec_config_obu-audio_element_id">audio_element_id<a class="self-link" href="#valdef-codec_config_obu-audio_element_id"></a></dfn> shall specify the unique ID associated with the specific audio element that refers to this codec config.</p>
    <h4 class="heading settled" data-level="4.1.7" id="obu-audioelement"><span class="secno">4.1.7. </span><span class="content">Audio Element OBU Syntax and Semantics</span><a class="self-link" href="#obu-audioelement"></a></h4>
-   <p>This section specifies obu payload of OBU_IA_Audio_Element.</p>
-   <p>For this obu, both of obu_sync_flag and obu_duratrion_flag shall be set to 0.</p>
+   <p>This section specifies the OBU payload of OBU_IA_Audio_Element.</p>
    <p><b>Syntax</b></p>
 <pre>class audio_element_obu() {
+  leb128() audio_element_id;
   unsigned int (3) audio_element_type;
   unsigned int (5) reserved;
 
@@ -2538,6 +2515,7 @@ class codec_config() {
 }
 </pre>
    <p><b>Semantics</b></p>
+   <p><dfn class="css" data-dfn-for="audio_element_obu()" data-dfn-type="value" data-noexport id="valdef-audio_element_obu-audio_element_id">audio_element_id<a class="self-link" href="#valdef-audio_element_obu-audio_element_id"></a></dfn> shall indicate a unique ID in an IA bitstream for a given audio element. A Codec Config OBU that refers to that audio element shall use the same value for its <a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id">audio_element_id</a> field.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="audio_element_type">audio_element_type<a class="self-link" href="#audio_element_type"></a></dfn> shall specify the audio representation of this audio element which is constructed from one or more audio substreams.</p>
 <pre class="def">audio_element_type: The type of audio representation.
    0    : CHANNEL_BASED
@@ -2545,9 +2523,9 @@ class codec_config() {
   2~7   : Reserved
 </pre>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_substreams">num_substreams</dfn> shall specify the number of audio substreams that are used to reconstruct this audio element.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="audio_substream_id">audio_substream_id<a class="self-link" href="#audio_substream_id"></a></dfn> shall specify the unique ID of the audio substream that is used to reconstruct this audio element.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_substream_id">audio_substream_id</dfn> shall specify the unique ID associated with the audio substream that is used to reconstruct this audio element.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="num_parameters">num_parameters<a class="self-link" href="#num_parameters"></a></dfn> shall specify the number of parameters that are used by the algorithms specified in this audio element.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="parameter_id">parameter_id</dfn> shall be a unique ID in IA bitstream for a parameter that is used by the algorithm specified in this audio element. It shall be same as obu_id of parameter_block_obu for the following parameter_name.</p>
+   <p><dfn class="css" data-dfn-for="audio_element_obu()" data-dfn-type="value" data-noexport id="valdef-audio_element_obu-parameter_id">parameter_id<a class="self-link" href="#valdef-audio_element_obu-parameter_id"></a></dfn> shall be the unique ID associated with a parameter that is used by the algorithm specified in this audio element.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="parameter_name">parameter_name<a class="self-link" href="#parameter_name"></a></dfn> shall specify the name of the parameter.</p>
 <pre class="def">parameter_name : Parameter name.
        0       : SCALABLE_CHANNEL_LAYOUT_DEMIXING_INFO
@@ -2557,19 +2535,17 @@ class codec_config() {
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="scalable_channel_layout_config">scalable_channel_layout_config()</dfn> is a class that provides the metadata required for combining the substreams identified here in order to reconstruct a scalable channel layout.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="ambisonics_config">ambisonics_config()</dfn> is a class that provides the metadata required for combining the substreams identified here in order to reconstruct an Ambisonics layout.</p>
    <h4 class="heading settled" data-level="4.1.8" id="obu-mixpresentation"><span class="secno">4.1.8. </span><span class="content">Mix Presentation OBU Syntax and Semantics</span><a class="self-link" href="#obu-mixpresentation"></a></h4>
-   <p>This section specifies obu payload of OBU_IA_Mix_Presentation.</p>
-   <p>For this obu, both of obu_sync_flag and obu_duratrion_flag shall be set to 0.</p>
-   <p>The metadata in mix_presentation() specifies how to render and process one or more audio elements. The processed audio elements shall then be summed to generate a single mixed audio signal. Finally, any additional processing specified in the mix_bus_config() metadata shall be applied to the single mixed audio signal in order to generate the final output audio for playback.</p>
+   <p>This section specifies the OBU payload of OBU_IA_Mix_Presentation.</p>
+   <p>The metadata in mix_presentation() specifies how to render and process one or more audio elements. The processed audio elements shall then be summed to generate a mixed audio signal. Finally, any additional processing specified by the mix_bus_config() shall be applied to the mixed audio signal in order to generate the final output audio for playback.</p>
    <p><b>Syntax</b></p>
 <pre>class mix_presentation_obu() {
+  leb128() mix_presentation_id;
   string mix_presentation_friendly_label;
-  unsigned int (4) mix_target_layout;
-  unsigned int (4) reserved;
 
   leb128() num_audio_elements;
   for (i = 0; i &lt; num_audio_elements; i++) {
     string audio_element_friendly_label;
-    leb128() audio_element_id_ref;
+    leb128() audio_element_id;
     rendering_config();
     element_mix_config();
   }
@@ -2579,6 +2555,7 @@ class codec_config() {
 }
 </pre>
    <p><b>Semantics</b></p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="mix_presentation_id">mix_presentation_id<a class="self-link" href="#mix_presentation_id"></a></dfn> shall indicate a unique ID in an IA bitstream for a given mix presentation.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="mix_presentation_friendly_label">mix_presentation_friendly_label<a class="self-link" href="#mix_presentation_friendly_label"></a></dfn> shall specify a human-friendly label to describe this mix presentation.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="mix_target_layout">mix_target_layout</dfn> shall specify the target playback layout that all referenced audio elements shall be rendered for.</p>
 <pre class="def">Mix Target Layout (4 bits) :  Channel Layout  : Loudspeaker Location Ordering
@@ -2601,7 +2578,7 @@ Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
    <p>An IA sequence may have one or more mix_presentation() specified, each with different mix_target_layout values. In this case, the IA decoder shall select the mix presentation that matches the physical playback layout. If there is no match, the IA decoder should select the closest specified layout and apply up or down-mixing appropriately. Sections <a href="#iacgeneration-scalablechannelaudio-downmixmechanism">§ 10.2.2 Down-mix Mechanism</a> and <a href="#processing-downmixmatrix">§ 9.5 Down-mix Matrix</a> provide example dynamic and static down-mixing matrices for some common layouts that may be used by the IA decoder.</p>
    <p><dfn class="css" data-dfn-for="mix_presentation_obu()" data-dfn-type="value" data-noexport id="valdef-mix_presentation_obu-num_audio_elements">num_audio_elements<a class="self-link" href="#valdef-mix_presentation_obu-num_audio_elements"></a></dfn> shall specify the number of audio elements that are used in this mix presentation to generate the final output audio signal for playback.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="audio_element_friendly_label">audio_element_friendly_label<a class="self-link" href="#audio_element_friendly_label"></a></dfn> shall specify a human-friendly label to describe the referenced audio element.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="audio_element_id_ref">audio_element_id_ref<a class="self-link" href="#audio_element_id_ref"></a></dfn> shall be the obu_id specified in obu header of audio element obu specifying the audio element that is used in this mix presentation.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_element_id">audio_element_id</dfn> shall indicate the unique ID associated with a specific audio element that is used in this mix presentation.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="rendering_config">rendering_config()<a class="self-link" href="#rendering_config"></a></dfn> is a class that provides the metadata required for rendering the referenced audio element.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="element_mix_config">element_mix_config()</dfn> is a class that provides the metadata required for applying any processing to the referenced and rendered audio element before being summed with other processed audio elements.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="mix_loudness_info">mix_loudness_info()<a class="self-link" href="#mix_loudness_info"></a></dfn> is a class that provides the loudness information and statistics for the final output audio signal.</p>
@@ -2611,6 +2588,8 @@ Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
    <p>The metadata specified in this OBU defines the parameters for an algorithm for an indicated duration, including any animation of the parameter values over this duration.</p>
    <p><b>Syntax</b></p>
 <pre>class parameter_block_obu() {
+  leb128() parameter_id;
+  leb128() duration;
   leb128() parameter_type;
 
   if (parameter_type == CONSTANT) {
@@ -2628,10 +2607,18 @@ Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
   if (parameter_type == PROCEDURAL) {
   }
 
-  param_config(obu_id);
+  param_config(parameter_id);
 }
 </pre>
    <p><b>Semantics</b></p>
+   <p><dfn class="css" data-dfn-for="parameter_block_obu()" data-dfn-type="value" data-noexport id="valdef-parameter_block_obu-parameter_id">parameter_id<a class="self-link" href="#valdef-parameter_block_obu-parameter_id"></a></dfn> shall indicate the unique ID that is associated with a specific parameter description. All parameter blocks that provide data for that parameter description shall have the same parameter_id.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="duration">duration</dfn> shall specify the duration for which this parameter block is valid and applicable.</p>
+   <ul>
+    <li data-md>
+     <p>If this parameter block is applied to an audio element, the duration shall indicate the number of audio samples at the sampling rate of the audio element.</p>
+    <li data-md>
+     <p>If the parameter block is applied to a mixed audio signal associated with a mix presentation, the duration shall indiate the number of audio samples at the sampling rate of the mix presentation.</p>
+   </ul>
    <p><dfn data-dfn-type="dfn" data-noexport id="parameter_type">parameter_type<a class="self-link" href="#parameter_type"></a></dfn> shall specify the type of parameter.</p>
 <pre class="def">parameter_type : Parameter type.
        0       : CONSTANT
@@ -2659,37 +2646,65 @@ Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
    </ul>
    <p><dfn data-dfn-type="dfn" data-noexport id="param_config">param_config()<a class="self-link" href="#param_config"></a></dfn> is a class that provides the actual parameter values and any additional metadata that may be required by the algorithm to specify how the parameter values are applied to the audio samples. This will be different for each algorithm.</p>
    <h4 class="heading settled" data-level="4.1.10" id="obu-audioframe"><span class="secno">4.1.10. </span><span class="content">Audio Frame OBU Syntax and Semantics</span><a class="self-link" href="#obu-audioframe"></a></h4>
-   <p>This section specifies obu payload of OBU_IA_Audio_Frame.</p>
-   <p>For this obu, both of obu_duratrion_flag and obu_counter_flag shall be set to 0.</p>
+   <p>This section specifies OBU payloads of OBU_IA_Audio_Frame and OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21.</p>
+   <p>The first 22 audio substreams in an IA sequence may use the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21, which have predefined audio substream IDs associated with them. This avoids the need to manually specify an audio_substream_id.</p>
    <p><b>Syntax</b></p>
-<pre>class audio_frame_obu() {
+<pre>class audio_frame_obu_with_no_id() {
+  leb128() audio_substream_id;
+  audio_frame_obu(audio_substream_id);
+}
+</pre>
+<pre>class audio_frame_obu(audio_substream_id) {
   unsigned int (8*coded_frame_size) audio_frame();
 }
 </pre>
    <p><b>Semantics</b></p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="coded_frame_size">coded_frame_size<a class="self-link" href="#coded_frame_size"></a></dfn> is the size of <a data-link-type="dfn" href="#audio_frame" id="ref-for-audio_frame">audio_frame()</a> in byte units.</p>
+   <p><dfn class="css" data-dfn-for="audio_frame_obu_with_no_id()" data-dfn-type="value" data-noexport id="valdef-audio_frame_obu_with_no_id-audio_substream_id">audio_substream_id<a class="self-link" href="#valdef-audio_frame_obu_with_no_id-audio_substream_id"></a></dfn> shall indicate a unique ID in an IA bitstream for a given substream. All Audio Frame OBUs of the same substream shall have the same audio_substream_id.</p>
+   <p>This value must be greater or equal to 22, in order to avoid collision with the reserved IDs for the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="coded_frame_size">coded_frame_size<a class="self-link" href="#coded_frame_size"></a></dfn> is the size of <a data-link-type="dfn" href="#audio_frame" id="ref-for-audio_frame">audio_frame()</a> in bytes.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_frame">audio_frame()</dfn> is the raw coded audio data for the frame. It shall be <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6716#" id="termref-for-⑨">opus packet</a> of <a data-link-type="biblio" href="#biblio-rfc6716">[RFC6716]</a> for IAC-OPUS, <a data-link-type="dfn" href="https://www.iso.org/standard/43345.html#" id="termref-for-①⓪">raw_data_block()</a> of <a data-link-type="biblio" href="#biblio-aac">[AAC]</a> for IAC-AAC-LC and <a data-link-type="dfn" href="https://xiph.org/flac/format.html" id="termref-for-①①">FRAME</a> of <a data-link-type="biblio" href="#biblio-flac">[FLAC]</a> for IAC-FLAC.</p>
    <p>For IAC-LPCM, <a data-link-type="dfn" href="#audio_frame" id="ref-for-audio_frame①">audio_frame()</a> shall be LPCM samples. When more than one byte is used to represent a LPCM sample, the byte order shall be in little endian.</p>
+   <p>For this version of the specification, all audio frames for a given substream must be gapless.</p>
    <h4 class="heading settled" data-level="4.1.11" id="obu-temporaldelimiter"><span class="secno">4.1.11. </span><span class="content">Temporal Delimiter OBU Syntax and Semantics</span><a class="self-link" href="#obu-temporaldelimiter"></a></h4>
-   <p>This section specifies temporal delimiter obu.</p>
-   <p>For this obu, all of obu_sync_flag, obu_duratrion_flag, obu_counter_flag and obu_trimming_status shall be set to 0.</p>
+   <p>This section specifies the OBU payload of OBU_IA_Temporal_Delimiter.</p>
    <p><b>Syntax</b></p>
 <pre>class temporal_delimiter_obu() {
 }
 </pre>
-   <p class="note" role="note"><span>NOTE:</span> Temporal delimiter obu has an empty payload.</p>
+   <p class="note" role="note"><span>NOTE:</span> The Temporal Delimiter OBU has an empty payload.</p>
    <h4 class="heading settled" data-level="4.1.12" id="obu-sync"><span class="secno">4.1.12. </span><span class="content">Sync OBU Syntax and Semantics</span><a class="self-link" href="#obu-sync"></a></h4>
-   <p>This section specifies obu payload of OBU_IA_Sync.</p>
-   <p>For this obu, obu_sync_flag shall be set to 1 and all of obu_id_flag, obu_duratrion_flag and obu_counter_flag shall be set to 0.</p>
-   <ul>
-    <li data-md>
-     <p>obu_sync shall indicate the sync_offset from a reference point in the IA bitstream. Where, sync_offset shall indicate the number of audio samples at the sampling rate, 48000hz.</p>
-   </ul>
+   <p>This section specifies the OBU payload of OBU_IA_Sync.</p>
    <p><b>Syntax</b></p>
 <pre>class sync_obu() {
+  leb128() global_offset;
+  leb128() num_obu_ids;
+  for (i = 0; i &lt; num_obu_ids; i++) {
+    leb128() obu_id;
+    unsigned int (1) obu_data_type;
+    unsigned int (1) reinitialize_decoder;
+    unsigned int (6) reserved;
+    sleb128() relative_offset;
+  }
+  leb128() concatenation_rule;
 }
 </pre>
-   <p class="note" role="note"><span>NOTE:</span> sync_obu() has the empty payload</p>
+   <p><b>Semantics</b></p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="global_offset">global_offset</dfn> shall specify the offset that is applied to all substreams and parameters specified in this Sync OBU, in addition to their individual relative offsets.</p>
+   <p>For this version of the specification, the value of global_offset shall be set to 0.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="num_obu_ids">num_obu_ids<a class="self-link" href="#num_obu_ids"></a></dfn> shall specify the number of substream and parameter IDs that this Sync OBU specifies the offset for.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="obu_id">obu_id</dfn> shall specify the unique ID associated with the substream or parameter that is being referred to.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="obu_data_type">obu_data_type<a class="self-link" href="#obu_data_type"></a></dfn> shall specify the type of data that is being referred to.</p>
+<pre class="def">obu_data_type : Type of OBU data
+      0       : SUBSTREAM
+      1       : PARAMETER
+</pre>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="reinitialize_decoder">reinitialize_decoder</dfn> shall be used to specify the behaviour of a decoder when encountering gaps in the audio substream, where the gap shall be identified as described in <a href="#standalone-synchronizing-data-obus">§ 6.2 Synchronizing Data OBUs</a>. If obu_data_type does not equal SUBSTREAM, an IAC-OBU parser shall ignore this field.</p>
+   <p>If reinitialize_decoder = 0, the decoder shall not be reinitialized before decoding the audio frames after the gap. This may be used in the case where it is preferable for the decoder to fill the gap with silence instead.</p>
+   <p>If reinitialize_decoder = 1, the decoder shall be reinitialized before decoding the audio frames after the gap. If a pre-skip is specified in the relevant Codec Config OBU, it is applicable after reinitializing the decoder.</p>
+   <p>For this version of the specification, the value of reinitialize_decoder shall be set to 0. If a value of 1 is seen, the IA sequence shall be rejected as invalid.</p>
+   <p><dfn class="css" data-dfn-for="sync_obu()" data-dfn-type="value" data-noexport id="valdef-sync_obu-reserved">reserved<a class="self-link" href="#valdef-sync_obu-reserved"></a></dfn> shall be set to 0. Reserved units are for future use and shall be ignored by an IAC-OBU parser.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="relative_offset">relative_offset<a class="self-link" href="#relative_offset"></a></dfn> is the offset that is applied to the first audio frame or parameter block with the referenced obu_id that comes after this Sync OBU. It describes the position of audio and parameters in a local frame of reference. The local frame of reference is unique for each Sync OBU.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="concatenation_rule">concatenation_rule<a class="self-link" href="#concatenation_rule"></a></dfn> shall specify the type of concatenation rule that is applied to position the audio frames and parameters that happened after a Sync OBU with respect to the timeline before the Sync OBU. A value of 0 shall indicate that Concatenation Rule 1 specified in <a href="#standalone-synchronizing-data-obus">§ 6.2 Synchronizing Data OBUs</a> shall be used, while a value of 1 shall indicate that Concatenation Rule 2 shall be used.</p>
    <h3 class="heading settled" data-level="4.2" id="syntax-detailed"><span class="secno">4.2. </span><span class="content">Detailed OBU Syntax and Semantics</span><a class="self-link" href="#syntax-detailed"></a></h3>
    <h4 class="heading settled" data-level="4.2.1" id="syntax-scalable-channel-layout-config"><span class="secno">4.2.1. </span><span class="content">Scalable Channel Layout Config Syntax and Semantics</span><a class="self-link" href="#syntax-scalable-channel-layout-config"></a></h4>
    <p><a data-link-type="dfn" href="#scalable_channel_layout_config" id="ref-for-scalable_channel_layout_config">scalable_channel_layout_config()</a> contains information regarding the configuration of scalable channel audio.</p>
@@ -2722,7 +2737,7 @@ class channel_audio_layer_config(i) {
     <li data-md>
      <p>The order of ChannelGroups in each temporal unit shall be same as the order of channel_audio_layer_config()s in scalable_channel_layout_config().</p>
     <li data-md>
-     <p><dfn data-dfn-type="dfn" data-noexport id="channelgroup">ChannelGroup<a class="self-link" href="#channelgroup"></a></dfn> is a set of substreams which is able to provide a spatial resolution of audio contents by itself or which is able to provide an enhanced spatial resolution of audio contents by combining with the preceding ChannelGroups within the <a data-link-type="dfn" href="#audio-frames" id="ref-for-audio-frames">audio frames</a>.</p>
+     <p><dfn data-dfn-type="dfn" data-noexport id="channelgroup">ChannelGroup<a class="self-link" href="#channelgroup"></a></dfn> is a set of substreams which is able to provide a spatial resolution of audio contents by itself or which is able to provide an enhanced spatial resolution of audio contents by combining with the preceding ChannelGroups within the audio frames.</p>
     <li data-md>
      <p>ChannelGroup #q consists of G(q)-G(q-1) number of substreams. Where, q = 1, 2, ..., r and G(0) = 0.</p>
     <li data-md>
@@ -3128,111 +3143,149 @@ class ambisonics_projection_config() {
      <p>IA decoder which is conformant to this profile shall be able to synchronize two or more audio elements with different frame sizes.</p>
    </ul>
    <h2 class="heading settled" data-level="6" id="standalone"><span class="secno">6. </span><span class="content">Standalone IAC Representation</span><a class="self-link" href="#standalone"></a></h2>
-   <p class="issue" id="issue-1bc87b5c"><a class="self-link" href="#issue-1bc87b5c"></a> Needs a lot more details.</p>
-   <ul>
-    <li data-md>
-     <p>Global descriptors come first. This includes:</p>
-     <ul>
-      <li data-md>
-       <p>Start Code OBU</p>
-     </ul>
-    <li data-md>
-     <p>Codec config OBU</p>
-    <li data-md>
-     <p>Audio Element OBU</p>
-    <li data-md>
-     <p>Mix Presentation OBU</p>
-    <li data-md>
-     <p>Followed by a series of:</p>
-    <li data-md>
-     <p>Sync OBU</p>
-    <li data-md>
-     <p>Audio Frame OBUs, synced relative to the previous Sync OBU.</p>
-    <li data-md>
-     <p>Optionally, Parameter Block OBUs, synced relative to the previous Sync OBU</p>
-   </ul>
-   <p>Global descriptors to be repeated frequently as needed to enable joining mid-stream. This must be followed by parameter OBUs that redundantly copy previous parameter OBUs that are still valid for the time after the global descriptors. I.e. decoders joining mid-stream that encounters a Start Code OBU knows that it will receive information in the next OBUs that give it complete information to start decoding following audio frames.</p>
-   <p>Sync OBUs may be placed as frequently as needed in the bitstream.</p>
-   <p>Parameter blocks may be placed as frequently as needed in the bitstream.</p>
-   <p class="issue" id="issue-3ce92e36"><a class="self-link" href="#issue-3ce92e36"></a> TODO: need to include more information about packing order of OBUs, timing and synchronizing the OBUs.</p>
-   <p class="issue" id="issue-ea3737b1"><a class="self-link" href="#issue-ea3737b1"></a> Below is copy-pasted from old version ("Immersive Audio Bitstream Definition"). TODO: refactor and update.</p>
-   <h3 class="heading settled" data-level="6.1" id="iabitstream-definition"><span class="secno">6.1. </span><span class="content">Immersive Audio Bitstream Definition</span><a class="self-link" href="#iabitstream-definition"></a></h3>
-   <p>An immersive audio (IA) sequence shall include one or more audio elements, each of which shall consist of one or more audio substreams. IA sequence shall start with IA_Stream_Indicator and followed by a sequence of IA bitstreams.</p>
-   <p>Each IA bitstream shall be self-decodable and shall be composed of one single global descriptors and followed by one or more <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit">temporal unit</a>s.</p>
-   <ul>
-    <li data-md>
-     <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="temporal-unit">temporal unit</dfn> shall be composed of <a data-link-type="dfn" href="#audio-frames" id="ref-for-audio-frames①">audio frames</a> and followed by zero or more parameter blocks.</p>
-    <li data-md>
-     <p>Where, <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio-frames">audio frames</dfn> is a set of one or more audio substream frames with the same frame size and the same sync offsets, which come from the same audio element.</p>
-   </ul>
-   <p>There can be two types of IA bitstreams. The first is an IA bitstream with one single frame size and the second is an IA bitstream with two or more different frame sizes. The conceptual diagrams are shown in the two figures below.</p>
-   <center><img height="422" src="images/Immersive Audio Bitstream with one single frame size (before OBU packing).png" style="width:100%; height:auto;" width="1839"></center>
-   <center>
-    <figcaption>Immersive Audio Bitstream with one single frame size (before OBU packing).</figcaption>
-   </center>
-   <p>In the first type of IA bitstream with one single frame size, all <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream">audio substreams</a> in the same IA bitstream shall have the same audio_substream_config().</p>
-   <p>After OBU packing, temporal_delimiter_obu may be present at the front of every temporal unit to indicate the start of the temporal unit. If present, it shall be present at the front of every temporal unit.</p>
-   <p>In this case, <a data-link-type="dfn" href="#audio-frames" id="ref-for-audio-frames②">audio frames</a> depicted in the diagram above is a set of audio substream frames with the same sync offsets.</p>
-   <ul>
-    <li data-md>
-     <p><a data-link-type="dfn" href="#audio-frames" id="ref-for-audio-frames③">Audio frames</a> #i is composed of Ni number of frames, each of them is frame #i of each substream. Where, i = 1, 2, ..., k.</p>
-   </ul>
-   <center><img height="761" src="images/Immersive Audio Bitstream with two frame sizes (before OBU packing).png" style="width:100%; height:auto;" width="2454"></center>
-   <center>
-    <figcaption>Immersive Audio Bitstream with two frame sizes (before OBU packing).</figcaption>
-   </center>
-   <p>In the second type of IA bitstream with two or more frame sizes, the audio substreams in the same IA bitstream may have different audio_substream_config() with different <a data-link-type="dfn" href="#num_samples_per_frame" id="ref-for-num_samples_per_frame">num_samples_per_frame</a>.</p>
-   <p>The diagram above depicts an example case where there are two frame sizes in the same IA bitstream. In this case, <a data-link-type="dfn" href="#audio-frames" id="ref-for-audio-frames④">audio frames</a> is a set of audio substream frames with the same sync offsets and the same frame size.</p>
-   <ul>
-    <li data-md>
-     <p><a data-link-type="dfn" href="#audio-frames" id="ref-for-audio-frames⑤">Audio frames</a> #i1 for frame size 1 is composed of Ni1 number of frames, each of them is frame #i1 of each substream. Where, i1 = 1, 2, ..., k1.</p>
-    <li data-md>
-     <p><a data-link-type="dfn" href="#audio-frames" id="ref-for-audio-frames⑥">Audio frames</a> #i2 for frame size 2 is composed of Ni2 number of frames, each of them is frame #i2 of each substream. Where, i2 = 1, 2, ..., k2.</p>
-   </ul>
-   <h3 class="heading settled" data-level="6.2" id="bitstream-packing"><span class="secno">6.2. </span><span class="content">Bitstream Packing</span><a class="self-link" href="#bitstream-packing"></a></h3>
-   <p>All metadata within an IA bitstream contains synchronization information that includes the sync offset and the duration for which it is valid. This is used when determining the order in which the metadata is packed in the bitstream.</p>
-   <ul>
-    <li data-md>
-     <p>The global and update metadata, and audio substreams, should be packed chronologically according to their sync offset.</p>
-    <li data-md>
-     <p>If there are multiple metadata and audio substreams with the same sync offset, they should be packed in the following order:</p>
-     <ol>
-      <li data-md>
-       <p>Global metadata</p>
-      <li data-md>
-       <p>Update metadata</p>
-      <li data-md>
-       <p>Audio substreams</p>
-     </ol>
-    <li data-md>
-     <p>Within a sequence of metadata or audio substreams with the same sync offset, ordering does not matter if they have associated IDs.</p>
-   </ul>
-   <p>As an illustrative example, consider a bitstream that contains the following:</p>
+   <p>This section details the order in which the OBUs shall be sequenced in a standalone IAC representation. It further specifies how the Data OBUs shall be synchronized, with the aid of the Sync OBUs.</p>
+   <h3 class="heading settled" data-level="6.1" id="standalone-obu-sequence-order"><span class="secno">6.1. </span><span class="content">OBU Sequence Order</span><a class="self-link" href="#standalone-obu-sequence-order"></a></h3>
+   <h4 class="heading settled" data-level="6.1.1" id="standalone-descriptor-obus"><span class="secno">6.1.1. </span><span class="content">Descriptor OBUs</span><a class="self-link" href="#standalone-descriptor-obus"></a></h4>
+    A set of Descriptor OBUs shall be placed at the beginning of the bitstream in the following order: 
    <ol>
     <li data-md>
-     <p>Two substreams, one coded with Codec A and the second coded with Codec B.</p>
-     <ul>
-      <li data-md>
-       <p>Codec A has a frame size of 20 ms.</p>
-      <li data-md>
-       <p>Codec B has a frame size of 30 ms.</p>
-     </ul>
+     <p>One Start Code OBU</p>
     <li data-md>
-     <p>Three parameters with different update rates.</p>
-     <ul>
-      <li data-md>
-       <p>Parameter A has an update rate of 10 ms.</p>
-      <li data-md>
-       <p>Parameter B has an update rate of 40 ms.</p>
-      <li data-md>
-       <p>Parameter C has a variable update rate.</p>
-     </ul>
+     <p>All Mix Presentation OBUs</p>
+    <li data-md>
+     <p>All Audio Element OBUs</p>
+    <li data-md>
+     <p>All Codec Config OBUs</p>
    </ol>
-   <p>The figure below shows the metadata and substreams, and the bitstream packing for this example.</p>
-   <center><img src="images/bitstream_packing.svg" style="width: 100%; height: 100%;"></center>
+   <h4 class="heading settled" data-level="6.1.2" id="standalone-data-obus"><span class="secno">6.1.2. </span><span class="content">Data OBUs</span><a class="self-link" href="#standalone-data-obus"></a></h4>
+   <p>One Sync OBU is placed immediately after the Descriptor OBUs. This is followed by a sequence of Audio Frame OBUs, Parameter Block OBUs, one or more additional Sync OBUs and one or more Temporal Delimiter OBUs, according to the rules below:</p>
+   <ul>
+    <li data-md>
+     <p>Audio Frame OBUs and Parameter Block OBUs must be ordered by their implied timestamp in the timeline, and may be interleaved.</p>
+    <li data-md>
+     <p>If there are multiple Audio Frame OBUs that have the same implied start timestamp, they must be grouped by audio elements.</p>
+    <li data-md>
+     <p>A new Sync OBU may be inserted anywhere in the sequence of data OBUs, as frequently as needed.</p>
+    <li data-md>
+     <p>Between two Sync OBUs, a sequence of audio frames or parameter blocks must be gapless.</p>
+    <li data-md>
+     <p>If an Audio Frame OBU or Parameter Block OBU has a substream or parameter ID that is not defined in the most recent Sync OBU, it must not appear in the bitstream, until a new Sync OBU is provided that specifies them.</p>
+    <li data-md>
+     <p>A Temporal Delimiter OBU may be inserted at the beginning of a temporal unit, defined as a set of contiguous audio frames with the same duration from all substreams.</p>
+    <li data-md>
+     <p>If Temporal Delimiter OBUs are present, they must be inserted at the beginning of every temporal unit.</p>
+   </ul>
+   <p>Additionally, the following constraints apply to the Audio Frame and Parameter Block OBUs:</p>
+   <ul>
+    <li data-md>
+     <p>Audio Frame OBUs must be provided non-redundantly, such that for each substream, there shall not be two audio frames that are overlapping in time.</p>
+    <li data-md>
+     <p>Parameter Block OBUs may be provided redundantly, such that they contain the same data as a previously provided Parameter Block OBU for the same time region.</p>
+    <li data-md>
+     <p>Redundant Parameter Block OBUs do not need to be ordered by their implied timestamp in the timeline. The implied timestamp should be inferred from the initial non-redundant version.</p>
+    <li data-md>
+     <p>Non-redundant Parameter Block OBUs must not provide data for overlapping time regions.</p>
+   </ul>
+   <h4 class="heading settled" data-level="6.1.3" id="standalone-obu-sequence-refreshes"><span class="secno">6.1.3. </span><span class="content">Refreshing Descriptor OBUs</span><a class="self-link" href="#standalone-obu-sequence-refreshes"></a></h4>
+   <p>The above describes the full sequence of OBUs for a given set of descriptor OBUs and their associated data OBUs. If the IAC configuration changes, a new set of descriptor OBUs is required. In that case, a new sequence of the complete set of descriptor OBUs, a Sync OBU and their corresponding data OBUs shall follow, in the same order as described above.</p>
+   <p>The descriptor OBUs may additionally be repeated redundantly and as frequently as necessary.</p>
+   <p>If there is set of descriptor OBUs placed mid-stream, there may be parameter blocks that came before them which are still valid and applicable for the duration after the descriptor OBUs. In this case, these parameter blocks must be redundantly copied and placed after the first Sync OBU that follows the descriptor OBUs. This ensures that any receiver joining mid-stream and encountering a set of descriptor OBU is guaranteed to be able to receive the complete set of metadata that is applicable to all audio frames that come after.</p>
+   <h3 class="heading settled" data-level="6.2" id="standalone-synchronizing-data-obus"><span class="secno">6.2. </span><span class="content">Synchronizing Data OBUs</span><a class="self-link" href="#standalone-synchronizing-data-obus"></a></h3>
+   <p>The audio frames and parameter data provided in the Data OBUs may be asynchronous; different audio substreams may have different audio frame sizes, parameter blocks may have different durations from the audio frames, or there may be gaps in a parameter’s timeline. This section details how these Data OBUs may be synchronized, based on their duration and the information provided in the Sync OBUs.</p>
+   <p>The Sync OBU contains two pieces of information that apply to all substream and parameters that follow it:</p>
+   <p>1) a relative offset for each of the substreams and parameters, and</p>
+   <p>2) a global offset.</p>
+   <p>The relative offsets describe how the substreams and parameters are positioned within a local frame of reference, which is unique for each Sync OBU. For example, the Sync OBU given below indicates that Substream 1 has a start timestamp that is 15 units before Substream 2, 10 units after Parameter 1, and 25 units before Parameter 2.</p>
+   <table class="def">
+    <tbody>
+     <tr>
+      <th>ID (name)
+      <th>Relative offset
+     <tr>
+      <td>N/A (Global offset)
+      <td>0
+     <tr>
+      <td>1 (Substream 1)
+      <td>-5
+     <tr>
+      <td>2 (Substream 2)
+      <td>+10
+     <tr>
+      <td>3 (Parameter 1)
+      <td>-15
+     <tr>
+      <td>4 (Parameter 2)
+      <td>+20
+   </table>
+   <p>Within a Sync OBU, only the relative information between the relative offsets is meaningful for positioning it within the global frame of reference, where the method of positioning is described further below. This is not affected by any constant shift in the relative offsets. As such, each Sync OBU can have any number of variants, as long as there is a constant difference between the two variants (see the example below). This removes any restrictions on how the absolute values of the relative offsets are selected. For example, some implementations may wish to always set the relative offset of an arbitrarily selected substream or parameter to 0.</p>
+   <table class="def">
+    <tbody>
+     <tr>
+      <th>ID (name)
+      <th>Relative offset (variant 1)
+      <th>Relative offset (variant 2)
+     <tr>
+      <td>N/A (Global offset)
+      <td>0
+      <td>0
+     <tr>
+      <td>1 (Substream 1)
+      <td>-5
+      <td>+10
+     <tr>
+      <td>2 (Substream 2)
+      <td>+40
+      <td>+55
+     <tr>
+      <td>3 (Parameter 1)
+      <td>-15
+      <td>0
+     <tr>
+      <td>4 (Parameter 2)
+      <td>+20
+      <td>+35
+   </table>
+   <p>The global offset defines an additional offset that is applied to all substreams and parameters, and can be used to express intentional gaps between the substreams and parameters associated with two Sync OBUs.</p>
+   <p>The local frame of reference can be positioned in a global frame of reference by using one of the two concatenation rules provided below. These rules specify how two timelines associated with different Sync OBUs shall be aligned.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="concatenation-rule-1">Concatenation Rule 1<a class="self-link" href="#concatenation-rule-1"></a></dfn></p>
+   <p>Ignoring the global offset, the new timeline after a Sync OBU is shifted as early as possible such that the earliest substream or parameter in the new timeline concatenates with its counterpart in the previous timeline. Then, the global offset is applied to additionally shift the new timeline.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="concatenation-rule-2">Concatenation Rule 2<a class="self-link" href="#concatenation-rule-2"></a></dfn></p>
+   <p>Ignoring the global offset, the new timeline after a Sync OBU is shifted as early as possible such that the earliest substream in the new timeline concatenates with the latest substream in the old timeline. Then, the global offset is applied to additionally shift the new timeline.</p>
+   <p class="issue" id="issue-cbf9874b"><a class="self-link" href="#issue-cbf9874b"></a> Choose if this applies to 1) all audio substreams + params, or to 2) audio substreams only. Option 1) can lead to audio gaps. 2) can lead to overlapping params. See https://github.com/AOMediaCodec/iac/issues/102</p>
+   <p>The algorithm below may be used to implement the concatenation rules.</p>
+<pre>// Timestamp at the end of the most recent frame before the Sync OBU, for a
+// given substream or parameter ID.
+end_timestamp[ID];
+
+// Offset specified by the new Sync OBU.
+relative_offset[ID];
+
+if (concatenation_rule_1) {
+  // The timestamp for the “zero offset” is computed by applying relativ
+  // offsets to the end timestamps, and seeing which one comes latest in time.
+  timestamp_for_zero_offset =
+    max(end_timestamp[ID] - relative_offset[ID] for each ID)
+    + global_offset;
+}
+
+if (concatenation_rule_2) {
+  timestamp_for_zero_offset =
+    max(end_timestamp[ID]) - min(relative_offset[ID])
+    + global_offset;
+}
+
+// Find the timestamp of each substream and parameter relative to the new
+// “zero”.
+For each ID:
+  next_start_timestamp[ID] = timestamp_for_zero_offset + relative_offset[ID]
+</pre>
+   <p>The example below illustrates three examples of how the same timeline after (orange and blue) is aligned with different previous timelines (white) when using Concatenation Rule 1.</p>
+   <center><img height="2040" src="images/sync_obu_concat_rule.png" style="width:100%; height:auto;" width="2226"></center>
    <center>
-    <figcaption>Example of how substreams and parameter metadata with different update rates should be packed in the bitstream.</figcaption>
+    <figcaption>Aligning timelines before and after a Sync OBU using the concatenation rule.</figcaption>
    </center>
+   <p class="issue" id="issue-90dd8878"><a class="self-link" href="#issue-90dd8878"></a> Add a similar diagram for Concat Rule 2 when its corresponding issue is resolved.</p>
+   <p>Since the Data OBUs between two Sync OBUs must be gapless, the remainder of the timeline can be inferred from the durations of the audio frames and parameter blocks. The duration of an audio frame is specified by the <a data-link-type="dfn" href="#num_samples_per_frame" id="ref-for-num_samples_per_frame">num_samples_per_frame</a> field in its corresponding Codec Config OBU, while the duration of a parameter block is specified in its <a data-link-type="dfn" href="#duration" id="ref-for-duration">duration</a> field.</p>
    <h2 class="heading settled" data-level="7" id="isobmff"><span class="secno">7. </span><span class="content">ISOBMFF IAC Encapsulation</span><a class="self-link" href="#isobmff"></a></h2>
    <h3 class="heading settled" data-level="7.1" id="brands"><span class="secno">7.1. </span><span class="content">General Requirements &amp; Brands</span><a class="self-link" href="#brands"></a></h3>
    <p>A file conformant to this specification satisfies the following:</p>
@@ -3269,12 +3322,14 @@ class ambisonics_projection_config() {
        <p>roll_distance shall be stored as <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑥①">AudioPreRollEntry</a> having <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑥②">grouping_type</a>, <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑥③">prol</a>.</p>
      </ul>
     <li data-md>
-     <p>Audio Element OBUs and Mix Presentation OBUs (with OBU syntax) shall be stored as a new sample group having <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑥④">grouping_type</a>, <a data-link-type="dfn" href="#iagd" id="ref-for-iagd">iagd</a>.</p>
+     <p>Mix Presentation OBUs and Audio Element OBUs (with OBU syntax) shall be stored as a new sample group having <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑥④">grouping_type</a>, <a data-link-type="dfn" href="#iagd" id="ref-for-iagd">iagd</a>.</p>
+    <li data-md>
+     <p>Sync OBU: parse the input timeline using the Sync OBU information and construct a PTRO box that describes the relative offsets for each parameter block.</p>
     <li data-md>
      <p>Each temporal unit:</p>
      <ul>
       <li data-md>
-       <p>Temporal delimiter OBU: shall be discarded if present.</p>
+       <p>Temporal Delimiter OBU: shall be discarded if present.</p>
       <li data-md>
        <p>Parameter Block OBU for demixing_info() (with OBU syntax) shall be stored as a new sample group having <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑥⑤">grouping_type</a>, <a data-link-type="dfn" href="#demi" id="ref-for-demi">demi</a>.</p>
       <li data-md>
@@ -3286,9 +3341,9 @@ class ambisonics_projection_config() {
       <li data-md>
        <p>Select one substream.</p>
       <li data-md>
-       <p>If obu_trimming_flag of the first Audio Frame OBU of the subsgtream is set to 2, keep parsing following Audio Frame OBUs of the substream until meets the Audio Frame OBU having obu_trimming_flag =  0, 1 or 11 and sum num_samples_to_trim_at_start. Then reflect the result of the summation to <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑥⑥">edts</a>.</p>
+       <p>If <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag">obu_trimming_status_flag</a> of the first Audio Frame OBU of the subsgtream is set to 1, keep parsing following Audio Frame OBUs of the substream until meets the Audio Frame OBU having <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag①">obu_trimming_status_flag</a> =  0 and sum <a data-link-type="dfn" href="#num_samples_to_trim_at_start" id="ref-for-num_samples_to_trim_at_start①">num_samples_to_trim_at_start</a>. Then reflect the result of the summation to <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑥⑥">edts</a>.</p>
       <li data-md>
-       <p>If obu_trimming_flag of the last Audio Frame OBU of the substream is set to 1, then reflect num_samples_to_trim_at_end to 'stts.</p>
+       <p>If <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag②">obu_trimming_status_flag</a> of the last Audio Frame OBU of the substream is set to 1, then reflect num_samples_to_trim_at_end to 'stts.</p>
      </ul>
    </ul>
    <center><img height="243" src="images/IAC Encapsulation Guideline.png" style="width:100%; height:auto;" width="1653"></center>
@@ -3349,31 +3404,31 @@ Quantity:  One of more
    <p>It shall be the same as the semantics in <a class="property css" data-link-type="property" href="https://www.iso.org/standard/79110.html#" id="termref-for-⑧⑤">esds</a> except followings:</p>
    <ul>
     <li data-md>
-     <p><a data-link-type="dfn" href="https://www.iso.org/standard/76383.html#" id="termref-for-⑧⑥">channelConfiguration</a> field should be set to 2. The real value can be implied from the audio_element_obu.</p>
+     <p><a data-link-type="dfn" href="https://www.iso.org/standard/76383.html#" id="termref-for-⑧⑥">channelConfiguration</a> field should be set to 2. The real value can be implied from the Audio Element OBU.</p>
    </ul>
    <p class="issue" id="issue-6e3e7c3b"><a class="self-link" href="#issue-6e3e7c3b"></a> We need to add specific boxes for FLAC and LPCM.</p>
    <h4 class="heading settled" data-level="7.2.5" id="iasampleformat"><span class="secno">7.2.5. </span><span class="content">IA Sample Format</span><a class="self-link" href="#iasampleformat"></a></h4>
    <p>For tracks using the <a data-link-type="dfn" href="#iasampleentry" id="ref-for-iasampleentry①">IASampleEntry</a>, an <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="ia-sample">IA Sample</dfn> has the following constraints:</p>
    <ul>
     <li data-md>
-     <p>The one sample data shall be a sequence of OBUs forming an access unit.</p>
+     <p>The one sample data shall be the remained OBUs of each temporal unit after processing of {#isobmff-singletrack-basicencapsulationscheme}.</p>
    </ul>
    <h4 class="heading settled" data-level="7.2.6" id="iasamplegroup"><span class="secno">7.2.6. </span><span class="content">IA Sample Group</span><a class="self-link" href="#iasamplegroup"></a></h4>
    <h5 class="heading settled" data-level="7.2.6.1" id="iasamplegroup-globaldescriptor"><span class="secno">7.2.6.1. </span><span class="content">Global Descriptor Sample Group</span><a class="self-link" href="#iasamplegroup-globaldescriptor"></a></h5>
-   <p>During encapsulation process, global descriptor shall be discarded from IA bistream. A new sample group for global descriptor shall be defined by using <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑧⑦">sgpd</a> and <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑧⑧">sbgp</a> boxes with following requirements:</p>
+   <p>During encapsulation process, global descriptors shall be discarded from IA bistream. A new sample group for global descriptors shall be defined by using <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑧⑦">sgpd</a> and <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑧⑧">sbgp</a> boxes with following requirements:</p>
    <ul>
     <li data-md>
      <p><a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑧⑨">grouping_type</a> shall be set to <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="iagd">iagd</dfn>.</p>
     <li data-md>
-     <p><a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨⓪">SampleGroupDescriptionEntry</a> shall be one or more audio_element_obu and followed by zero or more mix_presentation_obu with OBU syntax.</p>
+     <p><a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨⓪">SampleGroupDescriptionEntry</a> shall be Mix Presentation OBUs and followed by Audio Element OBUs with OBU syntax.</p>
    </ul>
    <h5 class="heading settled" data-level="7.2.6.2" id="iasamplegroup-demixing"><span class="secno">7.2.6.2. </span><span class="content">Demixing Info Sample Group</span><a class="self-link" href="#iasamplegroup-demixing"></a></h5>
-   <p>During encapsulation process, parameter_block_obu for demixing_info shall be discarded from IA sequence. A new sample group for demixing_info() shall be defined by using <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨①">sgpd</a>' and <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨②">sbgp</a> boxes with following requirements:</p>
+   <p>During encapsulation process, Parameter Block OBU for demixing_info shall be discarded from IA bitstream. A new sample group for demixing_info() shall be defined by using <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨①">sgpd</a> and <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨②">sbgp</a> boxes with following requirements:</p>
    <ul>
     <li data-md>
      <p><a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨③">grouping_type</a> shall be set to <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="demi">demi</dfn>.</p>
     <li data-md>
-     <p>Each <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨④">SampleGroupDescriptionEntry</a> shall be parameter_block_obu for demixing_info (with OBU syntax).</p>
+     <p>Each <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨④">SampleGroupDescriptionEntry</a> shall be Parameter Block OBU for demixing_info with OBU syntax.</p>
    </ul>
    <h3 class="heading settled" data-level="7.3" id="CommonEncryption"><span class="secno">7.3. </span><span class="content">Common Encryption</span><a class="self-link" href="#CommonEncryption"></a></h3>
     TBA 
@@ -3447,14 +3502,14 @@ Quantity:  One of more
    <p>During decapsulation process, IAC file is decapsulated into IA sequences which conform to <a href="#obu-syntax">§ 4 Open Bitstream Unit (OBU) Syntax and Semantics</a> as follows:</p>
    <ul>
     <li data-md>
-     <p>Step1: Reconstruction of descriptor OBUs (one Start Code OBU, followed by one Codec Config OBU, folowed by one or more Audio Element OBUs and followed by zero or more Mix Presentation OBUs) for the ith IA sequence.</p>
+     <p>Step1: Reconstruction of descriptor OBUs (one Start Code OBU, one Codec Config OBU, one or more Mix Presentation OBUs and one or more Audio Element OBUs) for the ith IA sequence.</p>
      <ul>
       <li data-md>
-       <p>[Step1-1] Start Code OBU: take version and profile_version fields from <code>aiac</code> sample entry.</p>
+       <p>[Step1-1] Start Code OBU: take version and profile_version fields from <code>aiac</code> sample entry and packetize it with <a data-link-type="dfn" href="#ia_code" id="ref-for-ia_code">ia_code</a> and the pre-fixed header value (i.e. 0xF006) by OBU.</p>
       <li data-md>
        <p>[Step1-2] Codec Config OBU: generate <a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id⑨">codec_id</a> and <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config④">decoder_config()</a> from CodecSpecificBox of <code>aiac</code> sample entry, num_samples_per_frame from <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨⑥">stts</a> box and take roll_distance from <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨⑦">AudioPreRollEntry</a>, and packetize it by OBU with obu_type = OBU_IA_Codec_Config.</p>
       <li data-md>
-       <p>[Step1-3] Audio Element OBUs and Mix Presentation OBUs: take the ith SampleGroupDescriptionEntry as it is in SampleGroup with grouping_type, <a data-link-type="dfn" href="#iagd" id="ref-for-iagd①">iagd</a>.</p>
+       <p>[Step1-3] Mix Presentation OBUs and Audio Element OBUs: take the ith SampleGroupDescriptionEntry as it is in SampleGroup with grouping_type, <a data-link-type="dfn" href="#iagd" id="ref-for-iagd①">iagd</a>.</p>
       <li data-md>
        <p>[Step1-4] Figure out the offset (i1) and number (im) of Samples, which the ith SampleGroupDescriptionEntry is applied to, from the SampleGroup.</p>
      </ul>
@@ -3606,7 +3661,7 @@ Quantity:  One of more
    <p>To apply the gain, an implementation MUST use the following:</p>
 <pre>Sample *= pow(10, Output_Gain(j) / (20.0*256))
 </pre>
-   <p>Where, Output_Gain(j) is the raw 16-bit value for jth layer which is specified in channel audio layer config.</p>
+   <p>Where, Output_Gain(j) is the raw 16-bit value for jth layer which is specified in <a data-link-type="dfn" href="#channel_audio_layer_config" id="ref-for-channel_audio_layer_config">channel_audio_layer_config()</a>.</p>
    <h4 class="heading settled" data-level="9.2.2" id="processing-scalablechannelaudio-demixer"><span class="secno">9.2.2. </span><span class="content">De-mixer</span><a class="self-link" href="#processing-scalablechannelaudio-demixer"></a></h4>
    <p>For scalable channel audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers⑤">num_layers</a> > 1, some channels of <a data-link-type="dfn" href="#down-mixed-audio" id="ref-for-down-mixed-audio">down-mixed audio</a> for CL #i are delivered as is but the rest are mixed with other channels for CL #i-1.</p>
    <p>De-mixer module reconstructs the rest of the down-mixed audio for CL #i from the mixed channels, which is passed by Gain module, and its relevant non-mixed channels using its relevant demixing parameters.</p>
@@ -3748,7 +3803,7 @@ Ltf = Ltf3 - w(k) x (L2 - 0.707 x C - L5) and Rtf = Rtf3 - w(k) x (R2 - 0.707 x 
    <p>//To Do: Fill in the text based on element_mix_config()</p>
    <h3 class="heading settled" data-level="9.4" id="processing-post"><span class="secno">9.4. </span><span class="content">Post Processing</span><a class="self-link" href="#processing-post"></a></h3>
    <h4 class="heading settled" data-level="9.4.1" id="processing-post-loudness"><span class="secno">9.4.1. </span><span class="content">Loudness Normalization</span><a class="self-link" href="#processing-post-loudness"></a></h4>
-   <p>Loudness normalization is done by adjusting a loudness level to -24 LKFS based on the loudness value of the target channel layout (i.e. CL #i) which is signaled in <a data-link-type="dfn" href="#channel_audio_layer_config" id="ref-for-channel_audio_layer_config">Channel_Audio_Layer_Config()</a> or the loudness value in mix presentation OBU.</p>
+   <p>Loudness normalization is done by adjusting a loudness level to -24 LKFS based on the loudness value of the target channel layout (i.e. CL #i) which is signaled in <a data-link-type="dfn" href="#channel_audio_layer_config" id="ref-for-channel_audio_layer_config①">Channel_Audio_Layer_Config()</a> or the loudness value in mix presentation OBU.</p>
    <p>Real implementations for <a href="#processing-post-loudness">§ 9.4.1 Loudness Normalization</a>, <a href="#processing-post-drc">§ 9.4.2 DRC Control</a> and <a href="#processing-post-limiter">§ 9.4.3 Limiter</a> are soly dependent on implementers (i.e., out of scope of this specification) unless mix presentation OBU provide algorithms for those. This specification only recommends the principles for the former.</p>
    <h4 class="heading settled" data-level="9.4.2" id="processing-post-drc"><span class="secno">9.4.2. </span><span class="content">DRC Control</span><a class="self-link" href="#processing-post-drc"></a></h4>
    <p>In this specification, DRC control can be guided by a pre-defined DRC or by the algorithm specified in mix presentation OBU.</p>
@@ -3933,14 +3988,14 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
       <li data-md>
        <p>It outputs one or more ChannelGroups for channel-based audio element.</p>
       <li data-md>
-       <p>It outputs descritpors which are composed of one Start Code, one Codec Config, one Audio Element config, zero or more Mix Presentation config.</p>
+       <p>It outputs descritpors which are composed of one Start Code, one Codec Config, one Audio Element config, one or more Mix Presentation config.</p>
       <li data-md>
        <p>It may output paramete blocks</p>
        <ul>
         <li data-md>
-         <p>For channel-based audio element with num_layers = 1, it may output parameter blocks for demixing info.</p>
+         <p>For channel-based audio element with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers⑥">num_layers</a> = 1, it may output parameter blocks for demixing info.</p>
         <li data-md>
-         <p>For channel-based audio element with num_layers > 1, it outputs parameter blocks for demixing info and recon_gain_info.</p>
+         <p>For channel-based audio element with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers⑦">num_layers</a> > 1, it outputs parameter blocks for demixing info and recon_gain_info.</p>
         <li data-md>
          <p>It may further output parameter blocks for post processing such as Loudness and DRC control.</p>
        </ul>
@@ -4033,7 +4088,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
      <p>Pre-processor outputs one or more ChannelGroups, desriptors and parameter blocks. It is composed of Down-mix parameter generator, Down-mixer, Loudness, ChannelGroup generator, Attenation and Meta generator.</p>
      <ul>
       <li data-md>
-       <p>For non-scalable channel audio (i.e. <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers⑥">num_layers</a> = 1):</p>
+       <p>For non-scalable channel audio (i.e. <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers⑧">num_layers</a> = 1):</p>
        <ul>
         <li data-md>
          <p>Parameter blocks for recon_gain_info is not be generated.</p>
@@ -4049,26 +4104,26 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
       <li data-md>
        <p>Loudness module should output the loudness level (<a data-link-type="dfn" href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#" id="termref-for-①①⓪">LKFS</a>) of each down-mixed audio based on <a data-link-type="biblio" href="#biblio-itu1770-4">[ITU1770-4]</a>.</p>
       <li data-md>
-       <p>ChannelGroup generator shall transform the input channel audio to ChannelGroups for scalable channel audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers⑦">num_layers</a> > 1 scalability by using the down-mix parameters and the list of channel layouts.</p>
+       <p>ChannelGroup generator shall transform the input channel audio to ChannelGroups for scalable channel audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers⑨">num_layers</a> > 1 scalability by using the down-mix parameters and the list of channel layouts.</p>
       <li data-md>
        <p>Attenuation module shall apply a gain to the transformed ChannelGroups to prevent clipping.</p>
       <li data-md>
-       <p>Meta generator shall generates descriptors, and parameter blocks for each frame.</p>
+       <p>Meta generator generates descriptors, and parameter blocks for each frame.</p>
        <ul>
         <li data-md>
          <p>descriptors shall be set to as follows:</p>
          <ul>
           <li data-md>
-           <p><a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers⑧">num_layers</a> shall be set to the number of channel layouts.</p>
+           <p><a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⓪">num_layers</a> shall be set to the number of channel layouts.</p>
           <li data-md>
-           <p>Channel_Audio Layer Config() shall be set to as follows:</p>
+           <p><a data-link-type="dfn" href="#channel_audio_layer_config" id="ref-for-channel_audio_layer_config②">channel_audio_layer_config()</a> shall be set to as follows:</p>
            <ul>
             <li data-md>
              <p><a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout⑤">loudspeaker_layout</a> shall be set to the ith list of channel layouts for the ith ChannelGroup.</p>
             <li data-md>
              <p><a data-link-type="dfn" href="#output_gain_is_present_flag" id="ref-for-output_gain_is_present_flag">output_gain_is_present_flag</a> shall set to 1 for the ith ChannelGroup if attenuation is applied to the mixed channels of the ith ChannelGroup. Otherwise it shall be set to 0 for the ith ChannelGroup.</p>
             <li data-md>
-             <p><a data-link-type="dfn" href="#recon_gain_is_present_flag" id="ref-for-recon_gain_is_present_flag">recon_gain_is_present_flag</a> shall be set to 1 for the ith ChannelGroup if the preceding ChannelGroups has one or more mixed channels from the down-mixed audio for the ith channel layout. Otherwise, it shall be set to 0 for the ith ChannelGroup. Especially, when <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers⑨">num_layers</a> = 1, this flag shall be set to 0.</p>
+             <p><a data-link-type="dfn" href="#recon_gain_is_present_flag" id="ref-for-recon_gain_is_present_flag">recon_gain_is_present_flag</a> shall be set to 1 for the ith ChannelGroup if the preceding ChannelGroups has one or more mixed channels from the down-mixed audio for the ith channel layout. Otherwise, it shall be set to 0 for the ith ChannelGroup. Especially, when <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①①">num_layers</a> = 1, this flag shall be set to 0.</p>
             <li data-md>
              <p><a data-link-type="dfn" href="#substream_count" id="ref-for-substream_count②">substream_count</a> shall be set to the nubmer of substreams composing of the ith ChannelGroup.</p>
             <li data-md>
@@ -4149,7 +4204,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
    <center>
     <figcaption>IA Encoding Flowchart for Scalable Channel Audio</figcaption>
    </center>
-   <p>Following sections, <a href="#iacgeneration-scalablechannelaudio-downmixparameter">§ 10.2.1 Down-mix parameter and Loudness</a>, <a href="#iacgeneration-scalablechannelaudio-downmixmechanism">§ 10.2.2 Down-mix Mechanism</a>, <a href="#iacgeneration-scalablechannelaudio-channellayoutgenerationrule">§ 10.2.3 Channel Layout Generation Rule</a>, <a href="#iacgeneration-scalablechannelaudio-recongaingeneration">§ 10.2.4 Recon Gain Generation</a> and <a href="#iacgeneration-scalablechannelaudio-channelgroupgenerationrule">§ 10.2.5 ChannelGroup Generation Rule</a> do not needed for non-scalable channel audio (i.e., when <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⓪">num_layers</a> specified in <a data-link-type="dfn" href="#scalable_channel_layout_config" id="ref-for-scalable_channel_layout_config①">scalable_channel_layout_config()</a> is set to 1).</p>
+   <p>Following sections, <a href="#iacgeneration-scalablechannelaudio-downmixparameter">§ 10.2.1 Down-mix parameter and Loudness</a>, <a href="#iacgeneration-scalablechannelaudio-downmixmechanism">§ 10.2.2 Down-mix Mechanism</a>, <a href="#iacgeneration-scalablechannelaudio-channellayoutgenerationrule">§ 10.2.3 Channel Layout Generation Rule</a>, <a href="#iacgeneration-scalablechannelaudio-recongaingeneration">§ 10.2.4 Recon Gain Generation</a> and <a href="#iacgeneration-scalablechannelaudio-channelgroupgenerationrule">§ 10.2.5 ChannelGroup Generation Rule</a> do not needed for non-scalable channel audio (i.e., when <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①②">num_layers</a> specified in <a data-link-type="dfn" href="#scalable_channel_layout_config" id="ref-for-scalable_channel_layout_config①">scalable_channel_layout_config()</a> is set to 1).</p>
    <h4 class="heading settled" data-level="10.2.1" id="iacgeneration-scalablechannelaudio-downmixparameter"><span class="secno">10.2.1. </span><span class="content">Down-mix parameter and Loudness</span><a class="self-link" href="#iacgeneration-scalablechannelaudio-downmixparameter"></a></h4>
    <p>This section describes how to generate down-mix parameters and loudness level for a given channel audio and a given list of channel layouts for scalability.</p>
    <p>Below figure shows a block diagram for down-mix parameter and loudness module including down-mixer.</p>
@@ -4228,7 +4283,7 @@ T2toTF2 enc.: Ltf3 = Ltf2 + w(k) x δ(k) x Ls5 and Rtf3 = Rtf2 + w(k) x δ(k) x 
     <li data-md>
      <p>CL #i is one of <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout⑥">loudspeaker_layouts</a> supported in this specification.</p>
    </ul>
-   <p>Down-mix paths, which conform to the above rule, shall be only allowed for scalable channel audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①①">num_layers</a> > 1 as depicted in below figure.</p>
+   <p>Down-mix paths, which conform to the above rule, shall be only allowed for scalable channel audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①③">num_layers</a> > 1 as depicted in below figure.</p>
    <center><img height="716" src="images/Down-mix Path.png" style="width:90%; height:auto;" width="792"></center>
    <center>
     <figcaption>IA Down-mix Path</figcaption>
@@ -4319,9 +4374,9 @@ Recon_Gain for D_Rtb4:
    <p>//To Do: Fill in how to generate element_mix_config() for scene-based audio element</p>
    <p>//To Do: Fill in how to generate element_mix_config() for channel-based audio element</p>
    <h4 class="heading settled" data-level="10.2.7" id="iacgeneration-multipleaudioelements"><span class="secno">10.2.7. </span><span class="content">Multiple Audio Elements Encoding</span><a class="self-link" href="#iacgeneration-multipleaudioelements"></a></h4>
-   <p>This section provide a guideline to generate IA sequence having multiple audio elements</p>
+   <p>This section provide a guideline to generate IA sequence having multiple audio elements from two IA simple or base profiles.</p>
    <h5 class="heading settled" data-level="10.2.7.1" id="iacgeneration-multipleaudioelements-onecodec"><span class="secno">10.2.7.1. </span><span class="content">Multiple Audio Elements with One Codec Config</span><a class="self-link" href="#iacgeneration-multipleaudioelements-onecodec"></a></h5>
-   <p>This section provides a way how to generate IA sequence having multiple audio elements with the same codec config OBU. However, the result shall comply with the base profile of IA sequence.</p>
+   <p>This section provides a way how to generate IA sequence having multiple audio elements from two IA simple profiles with the same codec config OBU. However, the result shall comply with the base profile of IA bitstream.</p>
    <p>Step1: Descriptor OBUs are generated as follows:</p>
    <ul>
     <li data-md>
@@ -4333,19 +4388,36 @@ Recon_Gain for D_Rtb4:
     <li data-md>
      <p>update num_audio_elements and audio_element_id</p>
     <li data-md>
-     <p>Audio Element OBUs: just take all of them</p>
+     <p>Mix Presentation OBUs: just take all of them and generate ones which are used after mixing of multiple audio elements if needed except following:</p>
     <li data-md>
-     <p>Mix Presentation OBUs: just take all of them and generate ones which are used after mixing of multiple audio elements if needed.</p>
+     <p><a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id①">audio_element_id</a>s are updated to be aligned according to Codec Config OBU.</p>
+    <li data-md>
+     <p>Audio Element OBUs: just take all of them except followings:</p>
+    <li data-md>
+     <p><a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id②">audio_element_id</a>s are updated to be aligned according to Mix Presentation OBUs.</p>
+    <li data-md>
+     <p><a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id">audio_substream_id</a>s are updated to be unique in all of Audio Element OBUs.</p>
+    <li data-md>
+     <p>{{"audio_element_obu()"/parameter_id]s are updaetd to be unique in all of Audio Element OBUs.</p>
    </ul>
-   <p>Step2: ith Frame is generated as follows:</p>
+   <p>Step2: ith temporal unit is generated as follows:</p>
    <ul>
     <li data-md>
-     <p>just take all of temporal units for ith frames from each audio element and keep the order of temporal units as the order of audio element OBUs in descritor OBUs.</p>
+     <p>Just take all of temporal units for ith frames from each audio element and keep the order of temporal units as the order of audio element OBUs in descritor OBUs except following:</p>
     <li data-md>
-     <p>It may have the immediately preceding temporal delimiter OBU for each audio element,</p>
+     <p><a data-link-type="dfn" href="#obu_type" id="ref-for-obu_type">obu_types</a>s are updated to be aligned according to <a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id③">audio_element_id</a>s specified in Audio Element OBUs.</p>
+    <li data-md>
+     <p>{{"parameter_block_obu()"/parameter_id]s in Parameter Block OBUs are updaed to be aligned according to {{"audio_element_obu()"/parameter_id]s in Audio Element OBUs.</p>
+    <li data-md>
+     <p>Add Sync OBU in front of ith temporal unit if needed.</p>
+    <li data-md>
+     <p>New Sync OBU is generated based on Sync OBUs of each IA sequence and updated <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id①">audio_substream_id</a>s and {{"parameter_block_obu()"/parameter_id]s.</p>
+    <li data-md>
+     <p>It may have the immediately preceding temporal delimiter OBU for each temporal unit.</p>
    </ul>
    <p>Step3: Generate IA sequence which start descritpr OBUs and followed by temporal units in order.</p>
    <h5 class="heading settled" data-level="10.2.7.2" id="iacgeneration-multipleaudioelements-multiplecodec"><span class="secno">10.2.7.2. </span><span class="content">Multiple Audio Elements with Multiple Codec Config</span><a class="self-link" href="#iacgeneration-multipleaudioelements-multiplecodec"></a></h5>
+   <p>This section provides a way how to generate IA bitstream having multiple audio elements from two IA simple or base profiles with the different codec config OBUs. However, the result shall comply with the enhanced profile of IA bitstream.</p>
    <p>Step1: Descriptor OBUs are generated as follows:</p>
    <ul>
     <li data-md>
@@ -4353,18 +4425,28 @@ Recon_Gain for D_Rtb4:
     <li data-md>
      <p>Codec Config OBU: if some of multiple Codec Config OBUs are same, then merge multiple Codec Config OBUs into one Codec Config OBU, and take each of the others.</p>
     <li data-md>
-     <p>Audio Element OBUs: just take all of them</p>
+     <p>Update <a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id④">audio_element_id</a>s to be unique in all of Codec Config OBUs.</p>
     <li data-md>
-     <p>Mix Presentation OBUs: just take all of them and generate ones which are used after mixing of multiple audio elements if needed.</p>
+     <p>Mix Presentation OBUs: just take all of them and generate ones which are used after mixing of multiple audio elements if needed except following:</p>
+    <li data-md>
+     <p><a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id⑤">audio_element_id</a>s are updated to be aligned according to Codec Config OBU.</p>
+    <li data-md>
+     <p>Audio Element OBUs: just take all of them except followings:</p>
+    <li data-md>
+     <p><a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id⑥">audio_element_id</a>s are updated to be aligned according to Mix Presentation OBUs.</p>
+    <li data-md>
+     <p><a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id②">audio_substream_id</a>s are updated to be unique in all of Audio Element OBUs.</p>
+    <li data-md>
+     <p>{{"audio_element_obu()"/parameter_id]s are updaetd to be unique in all of Audio Element OBUs.</p>
    </ul>
    <p>Step2: Data OBUs are generated as follows:</p>
    <ul>
     <li data-md>
-     <p>place Temporal Units from multiple audio elements in timing order.</p>
+     <p>Place Temporal Units from multiple audio elements in timing order.</p>
     <li data-md>
-     <p>add Sync OBU in front of Temporal Unit, frequently.</p>
+     <p>Add Sync OBU in front of Temporal Unit, frequently.</p>
     <li data-md>
-     <p>set sync offsets of parameter block OBUs and audio frame OBUs based on the sync_offset of the immediately preceding Sync OBU.</p>
+     <p>New Sync OBU is generated based on Sync OBUs from each IA sequence and updated <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id③">audio_substream_id</a>s and {{"parameter_block_obu()"/parameter_id]s.</p>
     <li data-md>
      <p>It may have the immediately preceding temporal delimiter OBU for each audio element,</p>
    </ul>
@@ -4379,6 +4461,24 @@ Recon_Gain for D_Rtb4:
    <p>//To Do: Fill in how to generate drc_config()</p>
    <h2 class="heading settled" data-level="11" id="iacconsumption"><span class="secno">11. </span><span class="content">Consumption of IAC bitstream</span><a class="self-link" href="#iacconsumption"></a></h2>
    <p class="issue" id="issue-4d4ba7fc"><a class="self-link" href="#issue-4d4ba7fc"></a> TODO. Fill in example workflows.</p>
+   <h2 class="heading settled" data-level="12" id="annex-a-audio-substream-gaps"><span class="secno">12. </span><span class="content">Annex A: Audio Substream Gaps</span><a class="self-link" href="#annex-a-audio-substream-gaps"></a></h2>
+   <p>This annex describes a number of scenarios where a gap may exist in the audio signals, where a gap is defined as no audio frames for some period of time.</p>
+   <h3 class="heading settled" data-level="12.1" id="a-gap-within-an-audio-substream"><span class="secno">12.1. </span><span class="content">A gap within an audio substream</span><a class="self-link" href="#a-gap-within-an-audio-substream"></a></h3>
+   <p>A gap within an audio substream may be expressed via the Sync OBU offsets. A decoder encountering such a gap may either:</p>
+   <ol>
+    <li data-md>
+     <p>insert silent audio frames in the gap without reinitializing, or</p>
+    <li data-md>
+     <p>reinitialize before decoding the audio frames after the gap.</p>
+   </ol>
+   <p>The appropriate behaviour in this case is signalled via the <a data-link-type="dfn" href="#reinitialize_decoder" id="ref-for-reinitialize_decoder">reinitialize_decoder</a> field in the Sync OBU.</p>
+   <p>In this version of the specification, gaps within an audio substream are not supported.</p>
+   <h3 class="heading settled" data-level="12.2" id="a-gap-between-two-audio-substreams"><span class="secno">12.2. </span><span class="content">A gap between two audio substreams</span><a class="self-link" href="#a-gap-between-two-audio-substreams"></a></h3>
+   <p>A gap may occur if there is a period of time between the end of one substream and the start of another. Such a gap may be expressed via the Sync OBU offsets. Similar to the case of a gap within an audio substream, the behaviour of the decoder is determined by the <a data-link-type="dfn" href="#reinitialize_decoder" id="ref-for-reinitialize_decoder①">reinitialize_decoder</a> field in the Sync OBU.</p>
+   <p>A gap may further occur if there is a period of time between the end of all substreams and the start of another. This case may be expressed by setting a non-zero value for the <a data-link-type="dfn" href="#global_offset" id="ref-for-global_offset">global_offset</a> field in the Sync OBU.</p>
+   <h3 class="heading settled" data-level="12.3" id="a-gap-due-to-packet-loss"><span class="secno">12.3. </span><span class="content">A gap due to packet loss</span><a class="self-link" href="#a-gap-due-to-packet-loss"></a></h3>
+   <p>In the case where a gap is not signalled by the Sync OBUs, any unexpected absence of audio frames shall be interpreted as packet loss. The IAC parser is unable to guarantee the correctness of following OBUs received until the next set of Descriptor OBUs.</p>
+   <p>In this version of the specification, gaps in the audio substreams are not supported so if a gap is encountered, it can always be interpreted as packet loss.</p>
   </main>
   <div data-fill-with="conformance">
    <h2 class="no-ref no-num heading settled" id="conformance"><span class="content"> Conformance</span><a class="self-link" href="#conformance"></a></h2>
@@ -4547,24 +4647,37 @@ Recon_Gain for D_Rtb4:
    <li><a href="#ambisonics_mode">ambisonics_mode</a><span>, in § 4.2.2</span>
    <li><a href="#audio-element">Audio element</a><span>, in § 3.1</span>
    <li><a href="#audio_element_friendly_label">audio_element_friendly_label</a><span>, in § 4.1.8</span>
-   <li><a href="#audio_element_id">audio_element_id</a><span>, in § 4.1.6</span>
-   <li><a href="#audio_element_id_ref">audio_element_id_ref</a><span>, in § 4.1.8</span>
+   <li>
+    audio_element_id
+    <ul>
+     <li><a href="#audio_element_id">definition of</a><span>, in § 4.1.8</span>
+     <li><a href="#valdef-audio_element_obu-audio_element_id">value for audio_element_obu()</a><span>, in § 4.1.7</span>
+     <li><a href="#valdef-codec_config_obu-audio_element_id">value for codec_config_obu()</a><span>, in § 4.1.6</span>
+    </ul>
    <li><a href="#audio-element-obu">Audio Element OBU</a><span>, in § 3.2.1</span>
    <li><a href="#audio_element_type">audio_element_type</a><span>, in § 4.1.7</span>
    <li><a href="#audio_frame">audio_frame()</a><span>, in § 4.1.10</span>
    <li><a href="#audio-frame-obu">Audio Frame OBU</a><span>, in § 3.2.2</span>
-   <li><a href="#audio-frames">audio frames</a><span>, in § 6.1</span>
    <li><a href="#audio-substream">Audio substream</a><span>, in § 3.1</span>
-   <li><a href="#audio_substream_id">audio_substream_id</a><span>, in § 4.1.7</span>
+   <li>
+    audio_substream_id
+    <ul>
+     <li><a href="#audio_substream_id">definition of</a><span>, in § 4.1.7</span>
+     <li><a href="#valdef-audio_frame_obu_with_no_id-audio_substream_id">value for audio_frame_obu_with_no_id()</a><span>, in § 4.1.10</span>
+    </ul>
    <li><a href="#beta">beta</a><span>, in § 4.2.3</span>
    <li><a href="#channel_audio_layer_config">channel_audio_layer_config()</a><span>, in § 4.2.1</span>
    <li><a href="#channelgroup">ChannelGroup</a><span>, in § 4.2.1</span>
    <li><a href="#channel_mapping">channel_mapping</a><span>, in § 4.2.2</span>
+   <li><a href="#codec_config_id">codec_config_id</a><span>, in § 4.1.6</span>
    <li><a href="#codec-config-obu">Codec Config OBU</a><span>, in § 3.2.1</span>
    <li><a href="#codec_id">codec_id</a><span>, in § 4.1.6</span>
    <li><a href="#codec-specific-box">codec specific box</a><span>, in § 7.2.4</span>
    <li><a href="#codec_specific_info">Codec_Specific_Info</a><span>, in § 4.3</span>
    <li><a href="#coded_frame_size">coded_frame_size</a><span>, in § 4.1.10</span>
+   <li><a href="#concatenation_rule">concatenation_rule</a><span>, in § 4.1.12</span>
+   <li><a href="#concatenation-rule-1">Concatenation Rule 1</a><span>, in § 6.2</span>
+   <li><a href="#concatenation-rule-2">Concatenation Rule 2</a><span>, in § 6.2</span>
    <li><a href="#coupled-channels">Coupled channels</a><span>, in § 10</span>
    <li><a href="#coupled_substream_count">coupled_substream_count</a><span>, in § 4.2.2</span>
    <li><a href="#decoder_config">decoder_config()</a><span>, in § 4.1.6</span>
@@ -4575,10 +4688,12 @@ Recon_Gain for D_Rtb4:
    <li><a href="#dmixp_mode">dmixp_mode</a><span>, in § 4.2.3</span>
    <li><a href="#dops">dOps</a><span>, in § 7.2.4.1</span>
    <li><a href="#down-mixed-audio">down-mixed audio</a><span>, in § 10.2.2</span>
+   <li><a href="#duration">duration</a><span>, in § 4.1.9</span>
    <li><a href="#element_mix_config">element_mix_config()</a><span>, in § 4.1.8</span>
    <li><a href="#esds">esds</a><span>, in § 7.2.4.2</span>
    <li><a href="#extension_header_size">extension_header_size</a><span>, in § 4.1.2</span>
    <li><a href="#gamma">gamma</a><span>, in § 4.2.3</span>
+   <li><a href="#global_offset">global_offset</a><span>, in § 4.1.12</span>
    <li><a href="#iac">IAC</a><span>, in § 2</span>
    <li><a href="#ia_code">ia_code</a><span>, in § 4.1.5</span>
    <li><a href="#iagd">iagd</a><span>, in § 7.2.6.1</span>
@@ -4592,6 +4707,7 @@ Recon_Gain for D_Rtb4:
    <li><a href="#mix_loudness">mix_loudness</a><span>, in § 4.2.7</span>
    <li><a href="#mix_loudness_info">mix_loudness_info()</a><span>, in § 4.1.8</span>
    <li><a href="#mix_presentation_friendly_label">mix_presentation_friendly_label</a><span>, in § 4.1.8</span>
+   <li><a href="#mix_presentation_id">mix_presentation_id</a><span>, in § 4.1.8</span>
    <li><a href="#mix-presentation-obu">Mix Presentation OBU</a><span>, in § 3.2.1</span>
    <li><a href="#mix-presentations">Mix presentations</a><span>, in § 3.1</span>
    <li><a href="#mix_target_layout">mix_target_layout</a><span>, in § 4.1.8</span>
@@ -4603,23 +4719,18 @@ Recon_Gain for D_Rtb4:
      <li><a href="#valdef-mix_presentation_obu-num_audio_elements">value for mix_presentation_obu()</a><span>, in § 4.1.8</span>
     </ul>
    <li><a href="#num_layers">num_layers</a><span>, in § 4.2.1</span>
+   <li><a href="#num_obu_ids">num_obu_ids</a><span>, in § 4.1.12</span>
    <li><a href="#num_parameters">num_parameters</a><span>, in § 4.1.7</span>
    <li><a href="#num_samples_per_frame">num_samples_per_frame</a><span>, in § 4.1.6</span>
    <li><a href="#num_samples_to_trim_at_end">num_samples_to_trim_at_end</a><span>, in § 4.1.2</span>
    <li><a href="#num_samples_to_trim_at_start">num_samples_to_trim_at_start</a><span>, in § 4.1.2</span>
    <li><a href="#num_substreams">num_substreams</a><span>, in § 4.1.7</span>
-   <li><a href="#obu_counter">obu_counter</a><span>, in § 4.1.2</span>
-   <li><a href="#obu_counter_flag">obu_counter_flag</a><span>, in § 4.1.2</span>
-   <li><a href="#obu_duration">obu_duration</a><span>, in § 4.1.2</span>
-   <li><a href="#obu_duration_flag">obu_duration_flag</a><span>, in § 4.1.2</span>
+   <li><a href="#obu_data_type">obu_data_type</a><span>, in § 4.1.12</span>
    <li><a href="#obu_extension_flag">obu_extension_flag</a><span>, in § 4.1.2</span>
-   <li><a href="#obu_id">obu_id</a><span>, in § 4.1.2</span>
-   <li><a href="#obu_id_flag">obu_id_flag</a><span>, in § 4.1.2</span>
-   <li><a href="#obu_reserved_5bit">obu_reserved_5bit</a><span>, in § 4.1.2</span>
+   <li><a href="#obu_id">obu_id</a><span>, in § 4.1.12</span>
+   <li><a href="#obu_redundant_copy">obu_redundant_copy</a><span>, in § 4.1.2</span>
    <li><a href="#obu_size">obu_size</a><span>, in § 4.1.2</span>
-   <li><a href="#obu_sync">obu_sync</a><span>, in § 4.1.2</span>
-   <li><a href="#obu_sync_flag">obu_sync_flag</a><span>, in § 4.1.2</span>
-   <li><a href="#obu_trimming_status">obu_trimming_status</a><span>, in § 4.1.2</span>
+   <li><a href="#obu_trimming_status_flag">obu_trimming_status_flag</a><span>, in § 4.1.2</span>
    <li><a href="#obu_type">obu_type</a><span>, in § 4.1.2</span>
    <li><a href="#output_channel_count">output_channel_count</a><span>, in § 4.2.2</span>
    <li><a href="#output_gain">output_gain</a><span>, in § 4.2.1</span>
@@ -4627,7 +4738,12 @@ Recon_Gain for D_Rtb4:
    <li><a href="#output_gain_is_present_flag">output_gain_is_present_flag</a><span>, in § 4.2.1</span>
    <li><a href="#param_config">param_config()</a><span>, in § 4.1.9</span>
    <li><a href="#parameter-block-obu">Parameter Block OBU</a><span>, in § 3.2.2</span>
-   <li><a href="#parameter_id">parameter_id</a><span>, in § 4.1.7</span>
+   <li>
+    parameter_id
+    <ul>
+     <li><a href="#valdef-audio_element_obu-parameter_id">value for audio_element_obu()</a><span>, in § 4.1.7</span>
+     <li><a href="#valdef-parameter_block_obu-parameter_id">value for parameter_block_obu()</a><span>, in § 4.1.9</span>
+    </ul>
    <li><a href="#parameter_name">parameter_name</a><span>, in § 4.1.7</span>
    <li><a href="#parameters">Parameters</a><span>, in § 3.1</span>
    <li><a href="#parameter_sample_rate">parameter_sample_rate</a><span>, in § 4.1.9</span>
@@ -4638,7 +4754,15 @@ Recon_Gain for D_Rtb4:
    <li><a href="#recon_gain_flags">recon_gain_flags</a><span>, in § 4.2.4</span>
    <li><a href="#recon_gain_info">recon_gain_info()</a><span>, in § 4.2.4</span>
    <li><a href="#recon_gain_is_present_flag">recon_gain_is_present_flag</a><span>, in § 4.2.1</span>
+   <li><a href="#reinitialize_decoder">reinitialize_decoder</a><span>, in § 4.1.12</span>
+   <li><a href="#relative_offset">relative_offset</a><span>, in § 4.1.12</span>
    <li><a href="#rendering_config">rendering_config()</a><span>, in § 4.1.8</span>
+   <li>
+    reserved
+    <ul>
+     <li><a href="#valdef-obu_header-reserved">value for obu_header()</a><span>, in § 4.1.2</span>
+     <li><a href="#valdef-sync_obu-reserved">value for sync_obu()</a><span>, in § 4.1.12</span>
+    </ul>
    <li><a href="#roll_distance">roll_distance</a><span>, in § 4.1.6</span>
    <li><a href="#s1to2-de-mixer">S1to2 de-mixer</a><span>, in § 9.2.2</span>
    <li><a href="#s2to3-de-mixer">S2to3 de-mixer</a><span>, in § 9.2.2</span>
@@ -4651,9 +4775,9 @@ Recon_Gain for D_Rtb4:
    <li><a href="#start-code-obu">Start Code OBU</a><span>, in § 3.2.1</span>
    <li><a href="#stereo">Stereo</a><span>, in § 4.2.1</span>
    <li><a href="#substream_count">substream_count</a><span>, in § 4.2.2</span>
-   <li><a href="#sync-obu">Sync OBU</a><span>, in § 3.2.3</span>
+   <li><a href="#sync-obu">Sync OBU</a><span>, in § 3.2.2</span>
    <li><a href="#t2to4-de-mixer">T2to4 de-mixer</a><span>, in § 9.2.2</span>
-   <li><a href="#temporal-unit">temporal unit</a><span>, in § 6.1</span>
+   <li><a href="#temporal-delimiter-obu">Temporal Delimiter OBU</a><span>, in § 3.2.2</span>
    <li><a href="#tf2tot2-de-mixer">TF2toT2 de-mixer</a><span>, in § 9.2.2</span>
    <li><a href="#v">V</a><span>, in § 7.4</span>
    <li><a href="#version">version</a><span>, in § 4.1.5</span>
@@ -5354,10 +5478,16 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-ia-sequence①">10. IAC Generation Process</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="audio-substream">
-   <b><a href="#audio-substream">#audio-substream</a></b><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="obu_type">
+   <b><a href="#obu_type">#obu_type</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-audio-substream">6.1. Immersive Audio Bitstream Definition</a>
+    <li><a href="#ref-for-obu_type">10.2.7.1. Multiple Audio Elements with One Codec Config</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="obu_trimming_status_flag">
+   <b><a href="#obu_trimming_status_flag">#obu_trimming_status_flag</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-obu_trimming_status_flag">7.2.2. Encapsulation Scheme ### {isobmff-singletrack-basicencapsulationscheme}</a> <a href="#ref-for-obu_trimming_status_flag①">(2)</a> <a href="#ref-for-obu_trimming_status_flag②">(3)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="obu_extension_flag">
@@ -5366,34 +5496,11 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-obu_extension_flag">4.1.2. OBU Header Syntax and Semantics</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="obu_id">
-   <b><a href="#obu_id">#obu_id</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-obu_id">4.1.2. OBU Header Syntax and Semantics</a> <a href="#ref-for-obu_id①">(2)</a> <a href="#ref-for-obu_id②">(3)</a> <a href="#ref-for-obu_id③">(4)</a>
-   </ul>
-  </aside>
-  <aside class="dfn-panel" data-for="obu_sync">
-   <b><a href="#obu_sync">#obu_sync</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-obu_sync">4.1.2. OBU Header Syntax and Semantics</a> <a href="#ref-for-obu_sync①">(2)</a> <a href="#ref-for-obu_sync②">(3)</a>
-   </ul>
-  </aside>
-  <aside class="dfn-panel" data-for="obu_duration">
-   <b><a href="#obu_duration">#obu_duration</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-obu_duration">4.1.2. OBU Header Syntax and Semantics</a> <a href="#ref-for-obu_duration①">(2)</a> <a href="#ref-for-obu_duration②">(3)</a>
-   </ul>
-  </aside>
-  <aside class="dfn-panel" data-for="obu_counter">
-   <b><a href="#obu_counter">#obu_counter</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-obu_counter">4.1.2. OBU Header Syntax and Semantics</a> <a href="#ref-for-obu_counter①">(2)</a> <a href="#ref-for-obu_counter②">(3)</a>
-   </ul>
-  </aside>
   <aside class="dfn-panel" data-for="num_samples_to_trim_at_start">
    <b><a href="#num_samples_to_trim_at_start">#num_samples_to_trim_at_start</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-num_samples_to_trim_at_start">4.1.2. OBU Header Syntax and Semantics</a>
+    <li><a href="#ref-for-num_samples_to_trim_at_start①">7.2.2. Encapsulation Scheme ### {isobmff-singletrack-basicencapsulationscheme}</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="num_samples_to_trim_at_end">
@@ -5406,6 +5513,12 @@ Recon_Gain for D_Rtb4:
    <b><a href="#extension_header_size">#extension_header_size</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-extension_header_size">4.1.2. OBU Header Syntax and Semantics</a> <a href="#ref-for-extension_header_size①">(2)</a> <a href="#ref-for-extension_header_size②">(3)</a> <a href="#ref-for-extension_header_size③">(4)</a> <a href="#ref-for-extension_header_size④">(5)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="ia_code">
+   <b><a href="#ia_code">#ia_code</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-ia_code">8.1. ISOBMFF IAC Decapsulation with single track</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="version">
@@ -5451,13 +5564,7 @@ Recon_Gain for D_Rtb4:
   <aside class="dfn-panel" data-for="num_samples_per_frame">
    <b><a href="#num_samples_per_frame">#num_samples_per_frame</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-num_samples_per_frame">6.1. Immersive Audio Bitstream Definition</a>
-   </ul>
-  </aside>
-  <aside class="dfn-panel" data-for="audio_element_id">
-   <b><a href="#audio_element_id">#audio_element_id</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-audio_element_id">4.1.2. OBU Header Syntax and Semantics</a>
+    <li><a href="#ref-for-num_samples_per_frame">6.2. Synchronizing Data OBUs</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="num_substreams">
@@ -5466,10 +5573,11 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-num_substreams">4.2.2. Ambisonics Config Syntax and Semantics</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="parameter_id">
-   <b><a href="#parameter_id">#parameter_id</a></b><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="audio_substream_id">
+   <b><a href="#audio_substream_id">#audio_substream_id</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-parameter_id">4.1.2. OBU Header Syntax and Semantics</a>
+    <li><a href="#ref-for-audio_substream_id">10.2.7.1. Multiple Audio Elements with One Codec Config</a> <a href="#ref-for-audio_substream_id①">(2)</a>
+    <li><a href="#ref-for-audio_substream_id②">10.2.7.2. Multiple Audio Elements with Multiple Codec Config</a> <a href="#ref-for-audio_substream_id③">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="scalable_channel_layout_config">
@@ -5491,10 +5599,24 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-mix_target_layout">4.2.7. Mix Loudness Info Syntax and Semantics</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="audio_element_id">
+   <b><a href="#audio_element_id">#audio_element_id</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-audio_element_id">4.1.7. Audio Element OBU Syntax and Semantics</a>
+    <li><a href="#ref-for-audio_element_id①">10.2.7.1. Multiple Audio Elements with One Codec Config</a> <a href="#ref-for-audio_element_id②">(2)</a> <a href="#ref-for-audio_element_id③">(3)</a>
+    <li><a href="#ref-for-audio_element_id④">10.2.7.2. Multiple Audio Elements with Multiple Codec Config</a> <a href="#ref-for-audio_element_id⑤">(2)</a> <a href="#ref-for-audio_element_id⑥">(3)</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="element_mix_config">
    <b><a href="#element_mix_config">#element_mix_config</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-element_mix_config">4.2.6. Element Mix Config Syntax and Semantics</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="duration">
+   <b><a href="#duration">#duration</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-duration">6.2. Synchronizing Data OBUs</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="parameter_sample_rate">
@@ -5509,6 +5631,25 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-audio_frame">4.1.10. Audio Frame OBU Syntax and Semantics</a> <a href="#ref-for-audio_frame①">(2)</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="global_offset">
+   <b><a href="#global_offset">#global_offset</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-global_offset">12.2. A gap between two audio substreams</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="obu_id">
+   <b><a href="#obu_id">#obu_id</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-obu_id">3.2.2. Data</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="reinitialize_decoder">
+   <b><a href="#reinitialize_decoder">#reinitialize_decoder</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-reinitialize_decoder">12.1. A gap within an audio substream</a>
+    <li><a href="#ref-for-reinitialize_decoder①">12.2. A gap between two audio substreams</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="num_layers">
    <b><a href="#num_layers">#num_layers</a></b><b>Referenced in:</b>
    <ul>
@@ -5518,14 +5659,17 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-num_layers③">5.3. IA Enhanced Profile</a>
     <li><a href="#ref-for-num_layers④">9.2. Scalable Channel Audio decoding</a>
     <li><a href="#ref-for-num_layers⑤">9.2.2. De-mixer</a>
-    <li><a href="#ref-for-num_layers⑥">10.2. Scalable Channel Audio Encoding</a> <a href="#ref-for-num_layers⑦">(2)</a> <a href="#ref-for-num_layers⑧">(3)</a> <a href="#ref-for-num_layers⑨">(4)</a> <a href="#ref-for-num_layers①⓪">(5)</a>
-    <li><a href="#ref-for-num_layers①①">10.2.3. Channel Layout Generation Rule</a>
+    <li><a href="#ref-for-num_layers⑥">10. IAC Generation Process</a> <a href="#ref-for-num_layers⑦">(2)</a>
+    <li><a href="#ref-for-num_layers⑧">10.2. Scalable Channel Audio Encoding</a> <a href="#ref-for-num_layers⑨">(2)</a> <a href="#ref-for-num_layers①⓪">(3)</a> <a href="#ref-for-num_layers①①">(4)</a> <a href="#ref-for-num_layers①②">(5)</a>
+    <li><a href="#ref-for-num_layers①③">10.2.3. Channel Layout Generation Rule</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="channel_audio_layer_config">
    <b><a href="#channel_audio_layer_config">#channel_audio_layer_config</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-channel_audio_layer_config">9.4.1. Loudness Normalization</a>
+    <li><a href="#ref-for-channel_audio_layer_config">9.2.1. Gain</a>
+    <li><a href="#ref-for-channel_audio_layer_config①">9.4.1. Loudness Normalization</a>
+    <li><a href="#ref-for-channel_audio_layer_config②">10.2. Scalable Channel Audio Encoding</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="loudspeaker_layout">
@@ -5661,19 +5805,6 @@ Recon_Gain for D_Rtb4:
    <b><a href="#codec_specific_info">#codec_specific_info</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-codec_specific_info">4.1.6. Codec Config OBU Syntax and Semantics</a> <a href="#ref-for-codec_specific_info①">(2)</a> <a href="#ref-for-codec_specific_info②">(3)</a> <a href="#ref-for-codec_specific_info③">(4)</a>
-   </ul>
-  </aside>
-  <aside class="dfn-panel" data-for="temporal-unit">
-   <b><a href="#temporal-unit">#temporal-unit</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-temporal-unit">6.1. Immersive Audio Bitstream Definition</a>
-   </ul>
-  </aside>
-  <aside class="dfn-panel" data-for="audio-frames">
-   <b><a href="#audio-frames">#audio-frames</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-audio-frames">4.2.1. Scalable Channel Layout Config Syntax and Semantics</a>
-    <li><a href="#ref-for-audio-frames①">6.1. Immersive Audio Bitstream Definition</a> <a href="#ref-for-audio-frames②">(2)</a> <a href="#ref-for-audio-frames③">(3)</a> <a href="#ref-for-audio-frames④">(4)</a> <a href="#ref-for-audio-frames⑤">(5)</a> <a href="#ref-for-audio-frames⑥">(6)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="iasampleentry">
