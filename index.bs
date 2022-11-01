@@ -7,7 +7,7 @@ Editor: Felicia Lim, Google, flim@google.com
 Repository: AOMediaCodec/iac
 Shortname: iac
 URL: https://aomediacodec.github.io/iac/
-Date: 2022-10-24
+Date: 2022-10-31
 Abstract: This document specifies an immersive audio (IA) architecture and model, a standalone IA sequence format and an [[!ISOBMFF]]-based IA container format.
 </pre>
 
@@ -192,7 +192,9 @@ url: https://xiph.org/flac/format.html; spec: FLAC; type: property;
 
 ## Syntax Description ## {#convention-syntaxstructure}
 
-All of syntax elements shall conform to [=Syntatic Description Laguage=] specified in [[!MP4-Systems]] unless it is explicitly described in the specification.
+All of syntax elements shall conform to [=Syntatic Description Language=] specified in [[!MP4-Systems]] unless it is explicitly described in the specification.
+
+### Data types ### {#convention-data-types}
 
  <b>leb128()</b> <b>syntaxName</b>
  
@@ -213,7 +215,24 @@ All of syntax elements shall conform to [=Syntatic Description Laguage=] specifi
  <b>syntaxName</b> is a human readable label whose byte representation shall consists of <b>two-letter primary language subtags</b> and <b>two-letter region subtags</b> which are connected by hyphen("-") and followed by <b>label</b>.
  
  Where, <b>two-letter primary language subtags</b> and <b>two-letter region subtags</b> shall conform to [[!BCP47]].
- 
+
+### Function templates ### {#convention-function-templates}
+
+When the <b>template</b> keyword is used to decorate the <b>class</b> declaration, it indicates that the code is a template with a placeholder type that can be reused by other classes. Only classes that use the template shall be present in the bitstream; the template itself shall not be present in the bitstream. Classes that use a function template shall pass a data type that is specified in either [[!MP4-Systems]] or [[#convention-data-types]].
+
+<b>Example</b>
+
+```
+template <class T>
+class Foo {
+  T t;
+}
+
+class Bar {
+  Foo<int> f;
+}
+```
+
 ## Mathemetical functions ## {#mathmeticalfunctions}
  
  <b>Clip3(x, y, z)</b>
@@ -664,9 +683,9 @@ An IA sequence may have one or more mix presentations specified, each with a dif
 
 ### Parameter Block OBU Syntax and Semantics ### {#obu-parameterblock}
 
-This section specifies obu payload of OBU_IA_Parameter_Block.
+This section specifies the OBU payload of OBU_IA_Parameter_Block.
 
-The metadata specified in this OBU defines the parameters for an algorithm for an indicated duration, including any animation of the parameter values over this duration.
+The metadata specified in this OBU defines the parameter values for an algorithm for an indicated duration, including any animation of the parameter values over this duration. The metadata shall be used in conjunction with a corresponding parameter definition and parameter data specification. The parameter definition shall be specified based on [=ParamDefinition()=]. The parameter data shall provide the values to apply in each parameter block. These shall be specified using the [=AnimatedParameterData()=] function template if parameter animation is supported.
 
 <b>Syntax</b>
 
@@ -674,64 +693,114 @@ The metadata specified in this OBU defines the parameters for an algorithm for a
 class parameter_block_obu() {
   leb128() parameter_id;
   leb128() duration;
-  leb128() parameter_type;
+  leb128() num_segments;
+  leb128() constant_segment_interval;
 
-  if (parameter_type == CONSTANT) {
+  leb128() param_definition_type = get_param_definition_type(parameter_id);
+
+  for (i = 0; i < num_segments; i++) {
+    if (constant_segment_interval == 0) {
+      leb128() segment_interval;
+    }
+
+    if (param_definition_type == PARAMETER_DEFINITION_MIX_GAIN) {
+      leb128() animation_type;
+      mix_gain_parameter_data(animation_type);
+    }
+    if (param_definition_type == PARAMETER_DEFINITION_DEMIXING_INFO) {
+      demixing_info_parameter_data();
+    }
+    if (param_definition_type == PARAMETER_DEFINITION_RECON_GAIN_INFO) {
+      recon_gain_info_parameter_data();
+    }
   }
-
-  if (parameter_type == STEP) {
-    leb128() parameter_sample_rate;
-  }
-
-  if (parameter_type == LINEAR or EXPONENTIAL) {
-    leb128() parameter_sample_rate;
-    leb128() smoothing_duration;
-  }
-
-  if (parameter_type == PROCEDURAL) {
-  }
-
-  param_config(parameter_id);
 }
 ```
 
 <b>Semantics</b>
 
-<dfn value noexport for="parameter_block_obu()">parameter_id</dfn> shall indicate the unique ID that is associated with a specific parameter description. All parameter blocks that provide data for that parameter description shall have the same parameter_id.
+<dfn value noexport for="parameter_block_obu()">parameter_id</dfn> shall indicate the unique ID that is associated with a specific parameter definition. All parameter blocks that provide data for that parameter definition shall have the same parameter_id.
 
-<dfn noexport>duration</dfn> shall specify the duration for which this parameter block is valid and applicable.
+<dfn noexport>duration</dfn> shall specify the duration for which this parameter block is valid and applicable. The duration shall be expressed as the number of ticks at the rate indicated by the time_base specified in the corresponding parameter definition.
 
- - If this parameter block is applied to an audio element, the duration shall indicate the number of audio samples at the sampling rate of the audio element.
+<dfn noexport>num_segments</dfn> shall specify the number of different sets of parameter values specified in this parameter block, where each set describes a different segment of the timeline, contiguously.
 
- - If the parameter block is applied to a mixed audio signal associated with a mix presentation, the duration shall indiate the number of audio samples at the sampling rate of the mix presentation.
+<dfn noexport>constant_segment_interval</dfn> shall specify the interval of each segment, in the case where all segments have equal intervals. If all segments do not have equal intervals, the value of constant_segment_interval shall be set to 0. This value shall be expressed as the number of ticks at the rate indicated by the time base specified in the corresponding parameter definition.
 
+<dfn noexport>get_param_definition_type()</dfn> is a run-time function that shall map the parameter_id to its registered parameter definition type. All parameter definition types described in this version of the specification are listed in the table below, along with their associated parameter definitions.
 
-<dfn noexport>parameter_type</dfn> shall specify the type of parameter.
+<table class = "def">
+<tr>
+  <th>param_definition_type</th><th>Parameter definition type</th><th>Parameter definition</th>
+</tr>
+<tr>
+  <td>0</td><td>PARAMETER_DEFINITION_MIX_GAIN</td><td>MixGainParamDefinition</td>
+</tr>
+<tr>
+  <td>0</td><td>PARAMETER_DEFINITION_DEMIXING_INFO</td><td>DemixingInfoParamDefinition</td>
+</tr>
+<tr>
+  <td>0</td><td>PARAMETER_DEFINITION_RECON_GAIN_INFO</td><td>ReconGainInfoParamDefinition</td>
+</tr>
+</table>
+
+NOTE: param_definition_type is not coded in the bitstream but is inferred at run time based on parameter_id.
+
+<dfn noexport>segment_interval</dfn> shall specify the interval for the given segment.
+
+<dfn noexport>animation_type</dfn> shall specify the how the parameter values in this parameter block shall be animated.
 
 <pre class = "def">
-parameter_type : Parameter type.
-       0       : CONSTANT
-       1       : STEP
-       2       : LINEAR
-       3       : EXPONENTIAL
-       4       : PROCEDURAL
+animation_type : Animation Type
+       0       : STEP
+       1       : BEZIER
 </pre>
 
-If parameter_type is equal to CONSTANT, this shall indicate that a single parameter value is provided, and is intended to be applied to the audio samples.
+In the case where animation_type is equal to BEZIER, parameters for the linear and quadratic Bezier curves may be defined in this version of the specification.
 
-If parameter_type is equal to STEP, LINEAR or EXPONENTIAL, this shall indicate that a series of parameter values will be provided as a 1D signal, and are intended to be applied to the audio samples. The rate at which these values are provided does not need to match the audio sample rate.
- - If parameter_type is equal to STEP, the parameters shall be applied immediately with no smoothing from the previous parameter values.
- - If parameter_type is equal to LINEAR, the parameter values shall be linearly interpolated from the previous parameter values over a duration specified by smoothing_duration.
- - If parameter_type is equal to EXPONENTIAL, the parameter values shall be interpolated from the previous parameter values following an exponentially decaying curve over a duration specified by smoothing_duration.
+Classes that take animation_type as an input argument shall use the <dfn noexport>AnimatedParameterData()</dfn> function template.
 
-If parameter_type is equal to PROCEDURAL, this shall indicate that the parameter values provided are intended to parameterize some function, which also governs how the resulting values are applied to the audio samples.
+```
+template <class T>
+class AnimatedParameterData(animation_type) {
+  if (animation_type == STEP) {
+    T start_point_value;
+  }
+  if (animation_type == BEZIER) {
+    T start_point_value;
+    T end_point_value;
+    T control_point_value;
+    unsigned int (8) control_point_relative_time;
+  }
+}
+```
 
-<dfn noexport>parameter_sample_rate</dfn> shall specify the rate at which the parameters are provided. This value may be different from the audio sample rate.
+<dfn noexport>start_point_value</dfn> shall specify the parameter value that is applied at the start of the segment.
 
-<dfn noexport>smoothing_duration</dfn> shall specify the duration over which the parameter is interpolated from its previous value.
- - The duration shall be the number of samples at the sampling rate which is indicated by [=parameter_sample_rate=].
+<dfn noexport>end_point_value</dfn> shall specify the parameter value that is applied at the end of the segment.
 
-<dfn noexport>param_config()</dfn> is a class that provides the actual parameter values and any additional metadata that may be required by the algorithm to specify how the parameter values are applied to the audio samples. This will be different for each algorithm.
+<dfn noexport>control_point_value</dfn> shall specify the parameter value of the middle control point of a quadratic Bezier curve, i.e. its y-axis value. If this animation implements a linear Bezier curve, control_point_value shall be ignored by the IA parser.
+
+<dfn noexport>control_point_relative_time</dfn> shall specify the time of the middle control point of a quadratic Bezier curve, i.e. its x-axis value. This value is expressed as a fraction of the parameter segment interval with valid values in the range of 0 and 1, inclusively. A value equal to 0 or 1 shall indicate that this animation implements a linear Bezier curve, in which case control_point_value shall be ignored by the IA parser. It is stored as an 8-bit, unsigned, fixed-point value with 8 fractional bits (i.e. Q0.8 in [Q-Format]).
+
+#### Parameter Definition Syntax and Semantics #### {#parameter-definition}
+
+Parameter definition classes shall inherit from the abstract <dfn noexport>ParamDefinition()</dfn> class. They may optionally further provide default parameter values, which are applied when there are no parameter blocks available.
+
+<b>Syntax</b>
+
+```
+abstract class ParamDefinition() {
+  leb128() parameter_id;
+  leb128() time_base;
+}
+```
+
+<b>Semantics</b>
+
+<dfn value noexport for="ParamDefinition()">parameter_id</dfn> shall indicate the unique ID in an IA bitstream for a given parameter.
+
+<dfn value noexport for="ParamDefinition()">time_base</dfn> shall specify the time base used by this parameter, expressed as seconds per tick. Time-related fields associated with this parameter, such as durations and intervals, shall be expressed in the number of ticks.
 
 ### Audio Frame OBU Syntax and Semantics ### {#obu-audioframe}
 
