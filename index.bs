@@ -1290,7 +1290,7 @@ class decoder_config(lpcm) {
 
 <dfn noexport>sample_rate</dfn> shall indicate the sample rate of the input audio in Hz.
 
-<dfn noexport>sample_siz</dfn> shall indicate the size of a PCM sample in bit units.
+<dfn noexport>sample_size</dfn> shall indicate the size of a PCM sample in bit units.
 
 Substream format shall be the LPCM audio samples for the frame size.
 
@@ -1547,13 +1547,13 @@ This section describes the basic data structures used to signal encapsulation of
 IA sequence shall comply with the bitstream which is specified in [#profiles-simple] or [#profiles-base] for eacapsulation of ISOBMFF with single track.
 
 
-### Encapsulation Scheme ### {isobmff-singletrack-basicencapsulationscheme}
+### Encapsulation Scheme ### {#isobmff-singletrack-basicencapsulationscheme}
 
-During encapsulation process, OBUs of IA bistream are encapsulated into [[!ISOBMFF]] as follows:
+During encapsulation process, OBUs of IA sequence are encapsulated into [[!ISOBMFF]] as follows:
 - Start Code OBU: version and profile version fields shall be moved to IASampleEntry.
 - Codec Config OBU: 
 	- codec_id and decoder_config() shall move to IASampleEntry.
-	- num_samples_per_frame shall mmove to 'stts'.
+	- num_samples_per_frame shall move to 'stts'.
 	- roll_distance shall be stored as [=AudioPreRollEntry=] having [=grouping_type=], 'prol'.
 - Mix Presentation OBUs and Audio Element OBUs (with OBU syntax) shall be stored as a new sample group having [=grouping_type=], [=iagd=].
 - Sync OBU: parse the input timeline using the Sync OBU information and construct a PTRO box that describes the relative offsets for each parameter block.
@@ -2107,7 +2107,7 @@ The IA encoder is composed of Pre-processor, Codec encoder and OBU packetizer.
 - Pre-processor outputs one or more ChannelGroups, descriptors and optional parameter blocks based on the input audios and user inputs.
 	- It outputs one single ChannelGroup for scene-based audio element.
 	- It outputs one or more ChannelGroups for channel-based audio element.
-	- It outputs descritpors which are composed of one Start Code, one Codec Config, one Audio Element config, one or more Mix Presentation config. 
+	- It outputs descriptors which are composed of one Start Code, one Codec Config, one Audio Element config, one or more Mix Presentation config. 
 	- It may output paramete blocks
 		- For channel-based audio element with [=num_layers=] = 1, it may output parameter blocks for demixing info.
 		- For channel-based audio element with [=num_layers=] > 1, it outputs parameter blocks for demixing info and recon_gain_info.
@@ -2372,17 +2372,17 @@ Step1: Descriptor OBUs are generated as follows:
  - Audio Element OBUs: just take all of them except followings:
   - [=audio_element_id=]s are updated to be aligned according to Mix Presentation OBUs.
  	- [=audio_substream_id=]s are updated to be unique in all of Audio Element OBUs. 
- 	- {{"audio_element_obu()"/parameter_id]s are updaetd to be unique in all of Audio Element OBUs.
+ 	- {{"audio_element_obu()"/parameter_id]s are updated to be unique in all of Audio Element OBUs.
 
 Step2: ith temporal unit is generated as follows:
- - Just take all of temporal units for ith frames from each audio element and keep the order of temporal units as the order of audio element OBUs in descritor OBUs except following:
+ - Just take all of temporal units for ith frames from each audio element and keep the order of temporal units as the order of audio element OBUs in descriptor OBUs except following:
  	- [=obu_types=]s are updated to be aligned according to [=audio_element_id=]s specified in Audio Element OBUs.
- 	- {{"parameter_block_obu()"/parameter_id]s in Parameter Block OBUs are updaed to be aligned according to {{"audio_element_obu()"/parameter_id]s in Audio Element OBUs.
+ 	- {{"parameter_block_obu()"/parameter_id]s in Parameter Block OBUs are updated to be aligned according to {{"audio_element_obu()"/parameter_id]s in Audio Element OBUs.
  - Add Sync OBU in front of ith temporal unit if needed.
  	- New Sync OBU is generated based on Sync OBUs of each IA sequence and updated [=audio_substream_id=]s and {{"parameter_block_obu()"/parameter_id]s.
  - It may have the immediately preceding temporal delimiter OBU for each temporal unit.
 
-Step3: Generate IA sequence which start descritpr OBUs and followed by temporal units in order.
+Step3: Generate IA sequence which start descriptor OBUs and followed by temporal units in order.
 
 #### Multiple Audio Elements with Multiple Codec Config #### {#iacgeneration-multipleaudioelements-multiplecodec}
 
@@ -2397,7 +2397,7 @@ Step1: Descriptor OBUs are generated as follows:
  - Audio Element OBUs: just take all of them except followings:
   - [=audio_element_id=]s are updated to be aligned according to Mix Presentation OBUs.
  	- [=audio_substream_id=]s are updated to be unique in all of Audio Element OBUs. 
- 	- {{"audio_element_obu()"/parameter_id]s are updaetd to be unique in all of Audio Element OBUs.
+ 	- {{"audio_element_obu()"/parameter_id]s are updated to be unique in all of Audio Element OBUs.
 
 Step2: Data OBUs are generated as follows:
  - Place Temporal Units from multiple audio elements in timing order.
@@ -2405,7 +2405,7 @@ Step2: Data OBUs are generated as follows:
  	- New Sync OBU is generated based on Sync OBUs from each IA sequence and updated [=audio_substream_id=]s and {{"parameter_block_obu()"/parameter_id]s.
  - It may have the immediately preceding temporal delimiter OBU for each audio element,
 
-Step3: Generate IA sequence which start descritpr OBUs and followed by Temporal Units in order.
+Step3: Generate IA sequence which start descriptor OBUs and followed by Temporal Units in order.
 
 ### Post Processing ### {#iacgeneration-postprocessing}
 
