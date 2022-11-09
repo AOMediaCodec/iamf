@@ -1484,7 +1484,7 @@ One Sync OBU is placed immediately after the Descriptor OBUs. This is followed b
 Additionally, the following constraints apply to the Audio Frame and Parameter Block OBUs:
 
 - Audio Frame OBUs must be provided non-redundantly, such that for each substream, there shall not be two audio frames that are overlapping in time.
-- Parameter Block OBUs may be provided redundantly, such that they contain the same data as a previously provided Parameter Block OBU for the same time region.
+- Parameter Block OBUs may be provided redundantly, such that they contain the same data as a previously provided Parameter Block OBU for the same time region. In this case, the "obu_redundant_copy" field in the OBU header shall be set to 1.
 - Redundant Parameter Block OBUs do not need to be ordered by their implied timestamp in the timeline. The implied timestamp should be inferred from the initial non-redundant version.
 - Non-redundant Parameter Block OBUs must not provide data for overlapping time regions.
 
@@ -1492,7 +1492,7 @@ Additionally, the following constraints apply to the Audio Frame and Parameter B
 
 The above describes the full sequence of OBUs for a given set of descriptor OBUs and their associated data OBUs. If the IAC configuration changes, a new set of descriptor OBUs is required. In that case, a new sequence of the complete set of descriptor OBUs, a Sync OBU and their corresponding data OBUs shall follow, in the same order as described above.
 
-The descriptor OBUs may additionally be repeated redundantly and as frequently as necessary.
+The descriptor OBUs may additionally be repeated redundantly and as frequently as necessary. In this case, the "obu_redundant_copy" field in the OBU header of each of the descriptor OBUs shall be set to 1.
 
 If there is set of descriptor OBUs placed mid-stream, there may be parameter blocks that came before them which are still valid and applicable for the duration after the descriptor OBUs. In this case, these parameter blocks must be redundantly copied and placed after the first Sync OBU that follows the descriptor OBUs. This ensures that any receiver joining mid-stream and encountering a set of descriptor OBU is guaranteed to be able to receive the complete set of metadata that is applicable to all audio frames that come after.
 
