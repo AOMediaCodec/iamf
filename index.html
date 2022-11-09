@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 63e66730b, updated Tue Oct 25 12:35:05 2022 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iac/" rel="canonical">
-  <meta content="0c29ec36293b812fcecca6941a2114b958d46882" name="document-revision">
+  <meta content="a8fd41299d35e331f817dd93d944953654375958" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -3322,7 +3322,7 @@ class mix_gain_parameter_data(animation_type) {
     <li data-md>
      <p>Audio Frame OBUs must be provided non-redundantly, such that for each substream, there shall not be two audio frames that are overlapping in time.</p>
     <li data-md>
-     <p>Parameter Block OBUs may be provided redundantly, such that they contain the same data as a previously provided Parameter Block OBU for the same time region.</p>
+     <p>Parameter Block OBUs may be provided redundantly, such that they contain the same data as a previously provided Parameter Block OBU for the same time region. In this case, the "obu_redundant_copy" field in the OBU header shall be set to 1.</p>
     <li data-md>
      <p>Redundant Parameter Block OBUs do not need to be ordered by their implied timestamp in the timeline. The implied timestamp should be inferred from the initial non-redundant version.</p>
     <li data-md>
@@ -3330,7 +3330,7 @@ class mix_gain_parameter_data(animation_type) {
    </ul>
    <h4 class="heading settled" data-level="6.1.3" id="standalone-obu-sequence-refreshes"><span class="secno">6.1.3. </span><span class="content">Refreshing Descriptor OBUs</span><a class="self-link" href="#standalone-obu-sequence-refreshes"></a></h4>
    <p>The above describes the full sequence of OBUs for a given set of descriptor OBUs and their associated data OBUs. If the IAC configuration changes, a new set of descriptor OBUs is required. In that case, a new sequence of the complete set of descriptor OBUs, a Sync OBU and their corresponding data OBUs shall follow, in the same order as described above.</p>
-   <p>The descriptor OBUs may additionally be repeated redundantly and as frequently as necessary.</p>
+   <p>The descriptor OBUs may additionally be repeated redundantly and as frequently as necessary. In this case, the "obu_redundant_copy" field in the OBU header of each of the descriptor OBUs shall be set to 1.</p>
    <p>If there is set of descriptor OBUs placed mid-stream, there may be parameter blocks that came before them which are still valid and applicable for the duration after the descriptor OBUs. In this case, these parameter blocks must be redundantly copied and placed after the first Sync OBU that follows the descriptor OBUs. This ensures that any receiver joining mid-stream and encountering a set of descriptor OBU is guaranteed to be able to receive the complete set of metadata that is applicable to all audio frames that come after.</p>
    <h3 class="heading settled" data-level="6.2" id="standalone-synchronizing-data-obus"><span class="secno">6.2. </span><span class="content">Synchronizing Data OBUs</span><a class="self-link" href="#standalone-synchronizing-data-obus"></a></h3>
    <p>The audio frames and parameter data provided in the Data OBUs may be asynchronous; different audio substreams may have different audio frame sizes, parameter blocks may have different durations from the audio frames, or there may be gaps in a parameter’s timeline. This section details how these Data OBUs may be synchronized, based on their duration and the information provided in the Sync OBUs.</p>
