@@ -528,7 +528,7 @@ class codec_config() {
 
 <dfn noexport>codec_id</dfn> shall be a ‘four-character code’ (4CC) to identify the codec used to generate the audio substreams. It shall be 'opus' for IAC-OPUS, 'mp4a' for IAC-AAC-LC, 'fLaC' for IAC-FLAC and 'lpcm' for IAC-LPCM.
 
-For ISOBMFF encapsulation, it shall be the same as the [=boxtype=] of its AduioSampleEntry if exist. 
+For ISOBMFF encapsulation, it shall be the same as the [=boxtype=] of its AudioSampleEntry if exist. 
 
 <dfn noexport>decoder_config()</dfn> specifies the set of codec parameters required to decode an audio substream for the given codec_id. It shall be byte aligned.
 - The codec_id and decoder_config() for IAC-OPUS shall conform to [=Codec_Specific_Info=] of [[#iac-opus-specific]]
@@ -1626,7 +1626,7 @@ This section describes the basic data structures used to signal encapsulation of
 
 ### Requirement of IA sequence ### {#isobmff-singletrack-iasequence}
 
-IA sequence shall comply with the bitstream which is specified in [#profiles-simple] or [#profiles-base] for eacapsulation of ISOBMFF with single track.
+IA sequence shall comply with the bitstream which is specified in [#profiles-simple] or [#profiles-base] for encapsulation of ISOBMFF with single track.
 
 
 ### Encapsulation Scheme ### {#isobmff-singletrack-basicencapsulationscheme}
@@ -1645,7 +1645,7 @@ During encapsulation process, OBUs of IA sequence are encapsulated into [[!ISOBM
 	- Remained OBUs of each temporal unit shall be stored as one sample data without gap among OBUs.
 - Audio Frame OBUs:
 	- Select one substream. 
-	- If [=obu_trimming_status_flag=] of the first Audio Frame OBU of the subsgtream is set to 1, keep parsing following Audio Frame OBUs of the substream until meets the Audio Frame OBU having [=obu_trimming_status_flag=] =  0 and sum [=num_samples_to_trim_at_start=]. Then reflect the result of the summation to 'edts'.
+	- If [=obu_trimming_status_flag=] of the first Audio Frame OBU of the substream is set to 1, keep parsing following Audio Frame OBUs of the substream until meets the Audio Frame OBU having [=obu_trimming_status_flag=] =  0 and sum [=num_samples_to_trim_at_start=]. Then reflect the result of the summation to 'edts'.
 	- If [=obu_trimming_status_flag=] of the last Audio Frame OBU of the substream is set to 1, then reflect num_samples_to_trim_at_end to 'stts.
 	
 
