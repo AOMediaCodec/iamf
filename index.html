@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 63e66730b, updated Tue Oct 25 12:35:05 2022 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iac/" rel="canonical">
-  <meta content="59d394a8e437746aa5d0cff2ac6d1d8cfcebeadd" name="document-revision">
+  <meta content="d043372fb7d113a50db09c37fcc13877e53b46a9" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -2489,7 +2489,7 @@ class codec_config() {
    <p><b>Semantics</b></p>
    <p><dfn data-dfn-type="dfn" data-noexport id="codec_config_id">codec_config_id<a class="self-link" href="#codec_config_id"></a></dfn> shall indicate a unique ID in an IA sequence for a given codec config.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="codec_id">codec_id</dfn> shall be a ‘four-character code’ (4CC) to identify the codec used to generate the audio substreams. It shall be <a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-⑥">opus</a> for IAC-OPUS, <a class="property css" data-link-type="property" href="https://www.iso.org/standard/79110.html#" id="termref-for-⑦">mp4a</a> for IAC-AAC-LC, <a class="property css" data-link-type="property" href="https://xiph.org/flac/format.html" id="termref-for-⑧">fLaC</a> for IAC-FLAC and <a class="property css" data-link-type="property">lpcm</a> for IAC-LPCM.</p>
-   <p>For ISOBMFF encapsulation, it shall be the same as the <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨">boxtype</a> of its AduioSampleEntry if exist.</p>
+   <p>For ISOBMFF encapsulation, it shall be the same as the <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨">boxtype</a> of its AudioSampleEntry if exist.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="decoder_config">decoder_config()</dfn> specifies the set of codec parameters required to decode an audio substream for the given codec_id. It shall be byte aligned.</p>
    <ul>
     <li data-md>
@@ -3447,7 +3447,7 @@ For each ID:
    <h3 class="heading settled" data-level="7.2" id="isobmff-singletrack"><span class="secno">7.2. </span><span class="content">ISOBMFF IAC Encapsulation with single track</span><a class="self-link" href="#isobmff-singletrack"></a></h3>
    <p>This section describes the basic data structures used to signal encapsulation of IA sequence in <a data-link-type="biblio" href="#biblio-isobmff">[ISOBMFF]</a> containers.</p>
    <h4 class="heading settled" data-level="7.2.1" id="isobmff-singletrack-iasequence"><span class="secno">7.2.1. </span><span class="content">Requirement of IA sequence</span><a class="self-link" href="#isobmff-singletrack-iasequence"></a></h4>
-   <p>IA sequence shall comply with the bitstream which is specified in [#profiles-simple] or [#profiles-base] for eacapsulation of ISOBMFF with single track.</p>
+   <p>IA sequence shall comply with the bitstream which is specified in [#profiles-simple] or [#profiles-base] for encapsulation of ISOBMFF with single track.</p>
    <h4 class="heading settled" data-level="7.2.2" id="isobmff-singletrack-basicencapsulationscheme"><span class="secno">7.2.2. </span><span class="content">Encapsulation Scheme</span><a class="self-link" href="#isobmff-singletrack-basicencapsulationscheme"></a></h4>
    <p>During encapsulation process, OBUs of IA sequence are encapsulated into <a data-link-type="biblio" href="#biblio-isobmff">[ISOBMFF]</a> as follows:</p>
    <ul>
@@ -3483,7 +3483,7 @@ For each ID:
       <li data-md>
        <p>Select one substream.</p>
       <li data-md>
-       <p>If <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag">obu_trimming_status_flag</a> of the first Audio Frame OBU of the subsgtream is set to 1, keep parsing following Audio Frame OBUs of the substream until meets the Audio Frame OBU having <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag①">obu_trimming_status_flag</a> =  0 and sum <a data-link-type="dfn" href="#num_samples_to_trim_at_start" id="ref-for-num_samples_to_trim_at_start①">num_samples_to_trim_at_start</a>. Then reflect the result of the summation to <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑥⑦">edts</a>.</p>
+       <p>If <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag">obu_trimming_status_flag</a> of the first Audio Frame OBU of the substream is set to 1, keep parsing following Audio Frame OBUs of the substream until meets the Audio Frame OBU having <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag①">obu_trimming_status_flag</a> =  0 and sum <a data-link-type="dfn" href="#num_samples_to_trim_at_start" id="ref-for-num_samples_to_trim_at_start①">num_samples_to_trim_at_start</a>. Then reflect the result of the summation to <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑥⑦">edts</a>.</p>
       <li data-md>
        <p>If <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag②">obu_trimming_status_flag</a> of the last Audio Frame OBU of the substream is set to 1, then reflect num_samples_to_trim_at_end to 'stts.</p>
      </ul>
