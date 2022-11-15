@@ -1,5 +1,6 @@
-# iac
-Official specification of the AOM group for the Immersive Audio Container
+# iamf
+
+Official specification of the AOM group for the Immersive Audio Media and Formats
 
 The specification is written using a special syntax (mixing markup and markdown) 
 to enable generation of cross-references, syntax highlighting, etc. The file
