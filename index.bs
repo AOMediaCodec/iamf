@@ -896,9 +896,9 @@ For this version of the specification, the value of reinitialize_decoder shall b
 
 <dfn value noexport for="sync_obu()">reserved</dfn> shall be set to 0. Reserved units are for future use and shall be ignored by an IAC-OBU parser.
 
-<dfn noexport>relative_offset</dfn> is the offset that is applied to the first audio frame or parameter block with the referenced obu_id that comes after this Sync OBU to position the first audio frame or parameter block with respect to the timeline generated before this Sync OBU. In other words, it is the offset from the timeline of Substreams generated from the previous Sync OBU.
+<dfn noexport>relative_offset</dfn> is the offset to position the first audio frame (before trimming) or parameter block with the referenced obu_id that comes after this Sync OBU with respect to the timeline generated before this Sync OBU. If this Sync OBU is the first one, it is the offset from 0. Otherwise, it is the offset from the end of the timeline of Substreams generated from the previous Sync OBU.
 
-The offset shall be indicated in the number of ticks at the time_base specified in the corresponding substream or parameter definition.
+The offset shall be indicated in the number of ticks at the time_base specified in the corresponding substream or parameter definition. 
 
 IA encoder and decoder operations related to this field are specified in [[#standalone-synchronizing-data-obus]].
 
