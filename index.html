@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 63e66730b, updated Tue Oct 25 12:35:05 2022 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="a997123838e43967273420b10f4832f40b259512" name="document-revision">
+  <meta content="e448589d6f38875a5c2bde13525bbb9359deeb8e" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -1982,9 +1982,14 @@ dfn > a.self-link::before      { content: "#"; }
        <a href="#convention-syntaxstructure"><span class="secno">1.1</span> <span class="content">Syntax Description</span></a>
        <ol class="toc">
         <li><a href="#convention-data-types"><span class="secno">1.1.1</span> <span class="content">Data types</span></a>
-        <li><a href="#convention-function-templates"><span class="secno">1.1.2</span> <span class="content">Function templates</span></a>
        </ol>
-      <li><a href="#mathmeticalfunctions"><span class="secno">1.2</span> <span class="content">Mathemetical functions</span></a>
+      <li>
+       <a href="#convention-function"><span class="secno">1.2</span> <span class="content">Function</span></a>
+       <ol class="toc">
+        <li><a href="#convention-function-templates"><span class="secno">1.2.1</span> <span class="content">Function templates</span></a>
+        <li><a href="#convention-function-mathematical"><span class="secno">1.2.2</span> <span class="content">Mathemetical functions</span></a>
+        <li><a href="#convention-function-utf8"><span class="secno">1.2.3</span> <span class="content">Function UTF-8 Encoding</span></a>
+       </ol>
      </ol>
     <li><a href="#introduction"><span class="secno">2</span> <span class="content">Introduction</span></a>
     <li>
@@ -2196,10 +2201,11 @@ dfn > a.self-link::before      { content: "#"; }
    <p><b>sleb128()</b> indicates the type of an signed integer. It indicates the following signed integer <b>syntaxName</b> shall be encoded by <a data-link-type="dfn" href="https://aomedia.org/av1/specification/conventions/" id="termref-for-③">leb128()</a> specified in <a data-link-type="biblio" href="#biblio-av1-convention">[AV1-Convention]</a>.</p>
    <p><b>syntaxName</b> is an signed integer which is encoded by <a data-link-type="dfn" href="https://aomedia.org/av1/specification/conventions/" id="termref-for-④">leb128()</a> specified in <a data-link-type="biblio" href="#biblio-av1-convention">[AV1-Convention]</a>.</p>
    <p><b>string</b> <b>syntaxName</b></p>
-   <p><b>string</b> indicates the type of a string with that its size in bits is 8 x the number of bytes by byte representation of <b>syntaxName</b>.</p>
-   <p><b>syntaxName</b> is a human readable label whose byte representation shall consists of <b>two-letter primary language subtags</b> and <b>two-letter region subtags</b> which are connected by hyphen("-") and followed by <b>label</b>.</p>
+   <p><b>string</b> indicates the type of a string with ring which is terminated by null of one byte (i.e. 0x00).</p>
+   <p><b>syntaxName</b> is a human readable label whose byte representation shall consists of <b>two-letter primary language subtags</b> and <b>two-letter region subtags</b> which are connected by hyphen("-"), and followed by bytes representation of <a data-link-type="dfn" href="#utf-8_enc-label" id="ref-for-utf-8_enc-label">UTF-8_Enc(label)</a>.</p>
    <p>Where, <b>two-letter primary language subtags</b> and <b>two-letter region subtags</b> shall conform to <a data-link-type="biblio" href="#biblio-bcp47">[BCP47]</a>.</p>
-   <h4 class="heading settled" data-level="1.1.2" id="convention-function-templates"><span class="secno">1.1.2. </span><span class="content">Function templates</span><a class="self-link" href="#convention-function-templates"></a></h4>
+   <h3 class="heading settled" data-level="1.2" id="convention-function"><span class="secno">1.2. </span><span class="content">Function</span><a class="self-link" href="#convention-function"></a></h3>
+   <h4 class="heading settled" data-level="1.2.1" id="convention-function-templates"><span class="secno">1.2.1. </span><span class="content">Function templates</span><a class="self-link" href="#convention-function-templates"></a></h4>
    <p>When the <b>template</b> keyword is used to decorate the <b>class</b> declaration, it indicates that the code is a template with a placeholder type that can be reused by other classes. Only classes that use the template shall be present in the bitstream; the template itself shall not be present in the bitstream. Classes that use a function template shall pass a data type that is specified in either <a data-link-type="biblio" href="#biblio-mp4-systems">[MP4-Systems]</a> or <a href="#convention-data-types">§ 1.1.1 Data types</a>.</p>
    <p><b>Example</b></p>
 <pre>template &lt;class T>
@@ -2211,9 +2217,12 @@ class Bar {
   Foo&lt;int> f;
 }
 </pre>
-   <h3 class="heading settled" data-level="1.2" id="mathmeticalfunctions"><span class="secno">1.2. </span><span class="content">Mathemetical functions</span><a class="self-link" href="#mathmeticalfunctions"></a></h3>
+   <h4 class="heading settled" data-level="1.2.2" id="convention-function-mathematical"><span class="secno">1.2.2. </span><span class="content">Mathemetical functions</span><a class="self-link" href="#convention-function-mathematical"></a></h4>
    <p><b>Clip3(x, y, z)</b></p>
    <p>It shall conform to <a data-link-type="dfn" href="https://aomedia.org/av1/specification/conventions/" id="termref-for-⑤">Clip3</a> specified in <a data-link-type="biblio" href="#biblio-av1-convention">[AV1-Convention]</a>.</p>
+   <h4 class="heading settled" data-level="1.2.3" id="convention-function-utf8"><span class="secno">1.2.3. </span><span class="content">Function UTF-8 Encoding</span><a class="self-link" href="#convention-function-utf8"></a></h4>
+   <p><b>UTF-8_Enc(label)</b></p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="utf-8_enc-label" values>UTF-8_Enc(label)</dfn> is byted represenation of the encoded <b>label</b>, which is UTF-8 string as defined in <a data-link-type="biblio" href="#biblio-rfc3629">[RFC3629]</a>, null terminated.</p>
    <h2 class="heading settled" data-level="2" id="introduction"><span class="secno">2. </span><span class="content">Introduction</span><a class="self-link" href="#introduction"></a></h2>
    <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="ia-sequence">IA sequence</dfn> is a bitstream to represent immersive audio for presentation on a wide range of devices in both dynamic streaming and offline applications. These applications include internet audio streaming, multicasting/broadcasting services, file download, gaming, communication, virtual and augmented reality, and others. In these applications, audio may be played back on a wide range of devices, e.g. headsets, mobile phones, tablets, TVs, sound bars, home theater systems and big screen.</p>
    <p>The bitstream comprises a number of coded audio substreams and the metadata that describes how to decode, render and mix the substreams to generate an audio signal for playback. The bitstream format itself is codec-agnostic; any supported audio codec may be used to code the audio substreams.</p>
@@ -4935,6 +4944,7 @@ Recon_Gain for D_Rtb4:
    <li><a href="#temporal-delimiter-obu">Temporal Delimiter OBU</a><span>, in § 3.2.2</span>
    <li><a href="#tf2tot2-de-mixer">TF2toT2 de-mixer</a><span>, in § 9.2.2</span>
    <li><a href="#valdef-paramdefinition-time_base">time_base</a><span>, in § 4.1.9.1</span>
+   <li><a href="#utf-8_enc-label">UTF-8_Enc(label)</a><span>, in § 1.2.3</span>
    <li><a href="#v">V</a><span>, in § 7.4</span>
    <li><a href="#version">version</a><span>, in § 4.1.5</span>
    <li><a href="#w">w</a><span>, in § 4.2.3</span>
@@ -4962,14 +4972,14 @@ Recon_Gain for D_Rtb4:
    <a href="https://aomedia.org/av1/specification/conventions/">https://aomedia.org/av1/specification/conventions/</a><b>Referenced in:</b>
    <ul>
     <li><a href="#termref-for-">1.1.1. Data types</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
-    <li><a href="#termref-for-">1.2. Mathemetical functions</a>
+    <li><a href="#termref-for-">1.2.2. Mathemetical functions</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
    <a href="https://aomedia.org/av1/specification/conventions/">https://aomedia.org/av1/specification/conventions/</a><b>Referenced in:</b>
    <ul>
     <li><a href="#termref-for-">1.1.1. Data types</a> <a href="#termref-for-">(2)</a> <a href="#termref-for-">(3)</a> <a href="#termref-for-">(4)</a>
-    <li><a href="#termref-for-">1.2. Mathemetical functions</a>
+    <li><a href="#termref-for-">1.2.2. Mathemetical functions</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-">
@@ -5627,6 +5637,8 @@ Recon_Gain for D_Rtb4:
    <dd><a href="https://en.wikipedia.org/wiki/Q_(number_format)"><cite>Q (number format)</cite></a>. Best Practice. URL: <a href="https://en.wikipedia.org/wiki/Q_(number_format)">https://en.wikipedia.org/wiki/Q_(number_format)</a>
    <dt id="biblio-rfc2119">[RFC2119]
    <dd>S. Bradner. <a href="https://datatracker.ietf.org/doc/html/rfc2119"><cite>Key words for use in RFCs to Indicate Requirement Levels</cite></a>. March 1997. Best Current Practice. URL: <a href="https://datatracker.ietf.org/doc/html/rfc2119">https://datatracker.ietf.org/doc/html/rfc2119</a>
+   <dt id="biblio-rfc3629">[RFC3629]
+   <dd>F. Yergeau. <a href="https://www.rfc-editor.org/rfc/rfc3629"><cite>UTF-8, a transformation format of ISO 10646</cite></a>. November 2003. Internet Standard. URL: <a href="https://www.rfc-editor.org/rfc/rfc3629">https://www.rfc-editor.org/rfc/rfc3629</a>
    <dt id="biblio-rfc6381">[RFC6381]
    <dd>R. Gellens; D. Singer; P. Frojdh. <a href="https://www.rfc-editor.org/rfc/rfc6381"><cite>The 'Codecs' and 'Profiles' Parameters for "Bucket" Media Types</cite></a>. August 2011. Proposed Standard. URL: <a href="https://www.rfc-editor.org/rfc/rfc6381">https://www.rfc-editor.org/rfc/rfc6381</a>
    <dt id="biblio-rfc6716">[RFC6716]
@@ -5641,6 +5653,12 @@ Recon_Gain for D_Rtb4:
    <dt id="biblio-ai-cad-mixing">[AI-CAD-Mixing]
    <dd><a href="https://www.aes.org/e-lib/browse.cfm?elib=21489"><cite>AI 3D immersive audio codec based on content-adaptive dynamic down-mixing and up-mixing framework</cite></a>. Paper. URL: <a href="https://www.aes.org/e-lib/browse.cfm?elib=21489">https://www.aes.org/e-lib/browse.cfm?elib=21489</a>
   </dl>
+  <aside class="dfn-panel" data-for="utf-8_enc-label">
+   <b><a href="#utf-8_enc-label">#utf-8_enc-label</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-utf-8_enc-label">1.1.1. Data types</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="ia-sequence">
    <b><a href="#ia-sequence">#ia-sequence</a></b><b>Referenced in:</b>
    <ul>
