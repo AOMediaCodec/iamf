@@ -1619,7 +1619,7 @@ Since the Data OBUs between two Sync OBUs must be gapless, the remainder of the 
 
 A file conformant to this specification satisfies the following:
 - It shall conform to the normative requirements of [[!ISOBMFF]]
-- It shall have the <dfn value export for="ISOBMFF Brand">aiac</dfn> brand among the compatible brands array of the FileTypeBox
+- It shall have the <dfn value export for="ISOBMFF Brand">iamf</dfn> brand among the compatible brands array of the FileTypeBox
 - It shall contain at least one track using an [=IASampleEntry=]
 - It SHOULD indicate a structural ISOBMFF brand among the compatible brands array of the FileTypeBox, such as 'iso6'
 - It MAY indicate other brands not specified in this specification provided that the associated requirements do not conflict with those given in this specification
@@ -1663,7 +1663,7 @@ During encapsulation process, OBUs of IA sequence are encapsulated into [[!ISOBM
 ### IA Sample Entry ### {#iasampleentry-section}
 
 <pre class="def">
-	Sample Entry Type: <dfn value export for="IASampleEntry">aiac</dfn>
+	Sample Entry Type: <dfn value export for="IASampleEntry">iamf</dfn>
 	Container:         Sample Description Box ('stsd')
 	Mandatory:         Yes
 	Quantity:          One or more.
@@ -1675,7 +1675,7 @@ The <dfn noexport>IASampleEntry</dfn> identifies that the track contains [=IA Sa
 <b>Syntax</b>
 
 ```
-class IASampleEntry extends AudioSampleEntry('aiac') {
+class IASampleEntry extends AudioSampleEntry('iamf') {
   unsigned int (8) version;
   unsigned int (8) profile_version;
   CodecSpecificBox config;
@@ -1693,7 +1693,7 @@ version and profile_version shall be the same as the ones in start_code_obu.
 
 ### Codec Specific Box ### {#codecspecificbox-section}
 
-This section describes a <dfn noexport>codec specific box</dfn> for the decoding parameters, which is defined by codec_id of audio_substream_config(), to decode one single substream of IA sequence. <code>aiac</code> shall contain only one single codec specific box regardless of the number of substreams in IA sequence. So, the codec specific box is applied to all of substreams in sample data.
+This section describes a <dfn noexport>codec specific box</dfn> for the decoding parameters, which is defined by codec_id of audio_substream_config(), to decode one single substream of IA sequence. <code>iamf</code> shall contain only one single codec specific box regardless of the number of substreams in IA sequence. So, the codec specific box is applied to all of substreams in sample data.
 
 #### OPUS Specific Box #### {#codecspecificbox-opus}
 
@@ -1701,7 +1701,7 @@ This shal be [=OpusSpecificBox=] ('dOps') for 'opus' audiosampleentry which is s
 
 <pre class="def">
 	Box Type:  <dfn export>dOps</dfn>
-	Container: IA Sample Entry ('aiac')
+	Container: IA Sample Entry ('iamf')
 	Mandatory: Yes
 	Quantity:  One
 </pre>
@@ -1727,7 +1727,7 @@ This shall be [=ESDBox=] ('esds') for 'mp4a' which is specified in [[!MP4]].
 
 <pre class="def">
 	Box Type:  <dfn export>esds</dfn>
-	Container: IA Sample Entry ('aiac')
+	Container: IA Sample Entry ('iamf')
 	Mandatory: Yes
 	Quantity:  One of more
 </pre>
@@ -1774,25 +1774,25 @@ DASH and other applications require defined values for the 'Codecs' parameter sp
 - For IAC-OPUS
 
 ```
-	aiac.IAC-specific-needs.Opus
+	iamf.IAC-specific-needs.Opus
 ```
 
 - For IAC-AAC-LC
 
 ```
-	aiac.IAC-specific-needs.mp4a.40.2
+	iamf.IAC-specific-needs.mp4a.40.2
 ```
 
 - For IAC-FLAC
 
 ```
-	aiac.IAC-specific-needs.fLaC
+	iamf.IAC-specific-needs.fLaC
 ```
 
 - For IAC-LPCM
 
 ```
-	aiac.IAC-specific-needs.lpcm
+	iamf.IAC-specific-needs.lpcm
 ```
 
 <b>IAC-specific-needs</b> shall be <b>V.PV</b> as follows:
@@ -1807,13 +1807,13 @@ For example, for this version of the specification
 - The codecs parameter string of IAC-OPUS for the simple profile:
 
 ```
-	aiac.0000.0000.Opus
+	iamf.0000.0000.Opus
 ```
 
 - The codecs parameter string of IAC-AAC-LC for the base profile:
 
 ```
-	aiac.0000.0100.mp4a.40.2
+	iamf.0000.0100.mp4a.40.2
 ```
 
 # ISOBMFF IAC Decapsulation # {#isobmff-decapsulation}
@@ -1832,8 +1832,8 @@ Below figure shows the mirroring process of the encapsulation scheme of IA seque
 
 During decapsulation process, IAC file is decapsulated into IA sequences which conform to [[#obu-syntax]] as follows:
 - Step1: Reconstruction of descriptor OBUs (one Start Code OBU, one Codec Config OBU, one or more Mix Presentation OBUs and one or more Audio Element OBUs) for the ith IA sequence.
-	- [Step1-1] Start Code OBU: take version and profile_version fields from <code>aiac</code> sample entry and packetize it with [=ia_code=] and the pre-fixed header value (i.e. 0xF006) by OBU.
-	- [Step1-2] Codec Config OBU: generate [=codec_id=] and [=decoder_config()=] from CodecSpecificBox of <code>aiac</code> sample entry, num_samples_per_frame from 'stts' box and take roll_distance from [=AudioPreRollEntry=], and packetize it by OBU with obu_type = OBU_IA_Codec_Config.
+	- [Step1-1] Start Code OBU: take version and profile_version fields from <code>iamf</code> sample entry and packetize it with [=ia_code=] and the pre-fixed header value (i.e. 0xF006) by OBU.
+	- [Step1-2] Codec Config OBU: generate [=codec_id=] and [=decoder_config()=] from CodecSpecificBox of <code>iamf</code> sample entry, num_samples_per_frame from 'stts' box and take roll_distance from [=AudioPreRollEntry=], and packetize it by OBU with obu_type = OBU_IA_Codec_Config.
 	- [Step1-3] Mix Presentation OBUs and Audio Element OBUs: take the ith SampleGroupDescriptionEntry as it is in SampleGroup with grouping_type, [=iagd=].
 	- [Step1-4] Figure out the offset (i1) and number (im) of Samples, which the ith SampleGroupDescriptionEntry is applied to, from the SampleGroup.
 - Step2: Reconstructing of the jth Temporal Unit of the ith IA sequence (j = i1, i2, …, im)
