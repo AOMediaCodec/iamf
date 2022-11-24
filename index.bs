@@ -578,18 +578,32 @@ class audio_element_obu() {
   
   leb128() num_parameters;
   for (i = 0; i < num_parameters; i++) {
-    leb128() parameter_id;
-    leb128() parameter_name;
+    leb128() param_definition_type;
+    if (param_definition_type == PARAMETER_DEFINITION_DEMIXING_INFO) {
+        DemixingParamDefinition();
+    }
+    if (param_definition_type == PARAMETER_DEFINITION_RECON_GAIN_INFO) {
+        ReconGainParamDefinition();
+    }
   }
 
   if (audio_element_type == CHANNEL_BASED) {
     scalable_channel_layout_config();
   } else if (audio_element_type == SCENE_BASED) {
     ambisonics_config();
-  }
-  
-  
+  }  
 }
+```
+
+```
+class DemixingParamDefintion() extends ParamDefintion() {
+}
+```
+
+```
+class ReconGainParamDefintion() extends ParamDefintion() {
+}
+
 ```
 
 <b>Semantics</b>
@@ -613,18 +627,46 @@ audio_element_type: The type of audio representation.
 
 <dfn value noexport for="audio_element_obu()">parameter_id</dfn> shall be the unique ID associated with a parameter that is used by the algorithm specified in this audio element.
 
-<dfn noexport>parameter_name</dfn> shall specify the name of the parameter.
+<dfn noexport>param_definition_type</dfn> specifies the type of the parameter definition. All parameter definition types described in this version of the specification are listed in the table below, along with their associated parameter definitions.
 
-<pre class = "def">
-parameter_name : Parameter name.
-       0       : SCALABLE_CHANNEL_LAYOUT_DEMIXING_INFO
-       1       : SCALABLE_CHANNEL_LAYOUT_RECON_GAIN_INFO
-   the others  : reserved
-</pre>
+<table class = "def">
+<tr>
+  <th>param_definition_type</th><th>Parameter definition type</th><th>Parameter definition</th>
+</tr>
+<tr>
+  <td>0</td><td>PARAMETER_DEFINITION_MIX_GAIN</td><td>MixGainParamDefinition</td>
+</tr>
+<tr>
+  <td>1</td><td>PARAMETER_DEFINITION_DEMIXING_INFO</td><td>DemixingInfoParamDefinition</td>
+</tr>
+<tr>
+  <td>2</td><td>PARAMETER_DEFINITION_RECON_GAIN_INFO</td><td>ReconGainInfoParamDefinition</td>
+</tr>
+</table>
+
 
 <dfn noexport>scalable_channel_layout_config()</dfn> is a class that provides the metadata required for combining the substreams identified here in order to reconstruct a scalable channel layout.
 
 <dfn noexport>ambisonics_config()</dfn> is a class that provides the metadata required for combining the substreams identified here in order to reconstruct an Ambisonics layout.
+
+#### Parameter Definition Syntax and Semantics #### {#parameter-definition}
+
+Parameter definition classes shall inherit from the abstract <dfn noexport>ParamDefinition()</dfn> class.
+
+<b>Syntax</b>
+
+```
+abstract class ParamDefinition() {
+  leb128() parameter_id;
+  leb128() time_base;
+}
+```
+
+<b>Semantics</b>
+
+<dfn value noexport for="ParamDefinition()">parameter_id</dfn> shall indicate the unique ID in an IA bitstream for a given parameter.
+
+<dfn value noexport for="ParamDefinition()">time_base</dfn> shall specify the time base used by this parameter, expressed as ticks per second. Time-related fields associated with this parameter, such as durations and intervals, shall be expressed in the number of ticks.
 
 
 ### Mix Presentation OBU Syntax and Semantics ### {#obu-mixpresentation}
@@ -712,7 +754,7 @@ class parameter_block_obu() {
   leb128() num_segments;
   leb128() constant_segment_interval;
 
-  leb128() param_definition_type = get_param_definition_type(parameter_id);
+  param_definition_type = get_param_definition_type(parameter_id);
 
   for (i = 0; i < num_segments; i++) {
     if (constant_segment_interval == 0) {
@@ -743,24 +785,9 @@ class parameter_block_obu() {
 
 <dfn noexport>constant_segment_interval</dfn> shall specify the interval of each segment, in the case where all segments except the last segment have equal intervals. If all segments except the last segment do not have equal intervals, the value of constant_segment_interval shall be set to 0. 
 
-<dfn noexport>get_param_definition_type()</dfn> is a run-time function that shall map the parameter_id to its registered parameter definition type. All parameter definition types described in this version of the specification are listed in the table below, along with their associated parameter definitions.
+<dfn noexport>get_param_definition_type()</dfn> is a run-time function to get the parameter definition type mapped to the parameter_id. 
 
-<table class = "def">
-<tr>
-  <th>param_definition_type</th><th>Parameter definition type</th><th>Parameter definition</th>
-</tr>
-<tr>
-  <td>0</td><td>PARAMETER_DEFINITION_MIX_GAIN</td><td>MixGainParamDefinition</td>
-</tr>
-<tr>
-  <td>0</td><td>PARAMETER_DEFINITION_DEMIXING_INFO</td><td>DemixingInfoParamDefinition</td>
-</tr>
-<tr>
-  <td>0</td><td>PARAMETER_DEFINITION_RECON_GAIN_INFO</td><td>ReconGainInfoParamDefinition</td>
-</tr>
-</table>
-
-NOTE: param_definition_type is not coded in the bitstream but is inferred at run time based on parameter_id.
+Audio Element OBU and/or Mix Presentation OBU shall map a parameter_id to the parameter defintion type. So, IA decoders can know the definition type mapped to the parameter_id.
 
 <dfn noexport>segment_interval</dfn> shall specify the interval for the given segment.
 
@@ -804,25 +831,6 @@ class AnimatedParameterData(animation_type) {
 <dfn noexport>control_point_value</dfn> shall specify the parameter value of the middle control point of a quadratic Bezier curve, i.e. its y-axis value. If this animation implements a linear Bezier curve, control_point_value shall be ignored by the IA parser.
 
 <dfn noexport>control_point_relative_time</dfn> shall specify the time of the middle control point of a quadratic Bezier curve, i.e. its x-axis value. This value is expressed as a fraction of the parameter segment interval with valid values in the range of 0 and 1, inclusively. A value equal to 0 or 1 shall indicate that this animation implements a linear Bezier curve, in which case control_point_value shall be ignored by the IA parser. It is stored as an 8-bit, unsigned, fixed-point value with 8 fractional bits (i.e. Q0.8 in [Q-Format]).
-
-#### Parameter Definition Syntax and Semantics #### {#parameter-definition}
-
-Parameter definition classes shall inherit from the abstract <dfn noexport>ParamDefinition()</dfn> class. They may optionally further provide default parameter values, which are applied when there are no parameter blocks available.
-
-<b>Syntax</b>
-
-```
-abstract class ParamDefinition() {
-  leb128() parameter_id;
-  leb128() time_base;
-}
-```
-
-<b>Semantics</b>
-
-<dfn value noexport for="ParamDefinition()">parameter_id</dfn> shall indicate the unique ID in an IA sequence for a given parameter.
-
-<dfn value noexport for="ParamDefinition()">time_base</dfn> shall specify the time base used by this parameter, expressed as seconds per tick. Time-related fields associated with this parameter, such as durations and intervals, shall be expressed in the number of ticks.
 
 ### Audio Frame OBU Syntax and Semantics ### {#obu-audioframe}
 
@@ -1301,31 +1309,46 @@ class rendering_config() {
 
 ```
 class element_mix_config() {
-  MixGainParamDefinition mix_gain;
+  leb128() mix_gain_type;
+  if (mix_gain_type == DEFAULT) {
+    signed int (16) default_mix_gain;
+  }
+  if (mix_gain_type = MIX_GAIN_PARAMETER_DATA) {
+    MixGainParamDefinition();
+  }
+}
+```
+
+```
+class MixGainParamDefinition extends ParamDefinition() {
 }
 ```
 
 <b>Semantics</b>
 
-<dfn noexport>mix_gain</dfn> provides the parameter definition for the gain value that is applied to all channels of the rendered audio element signal. The parameter definition is provided by MixGainParamDefinition() and the corresponding parameter data to be provided in parameter blocks is specified in mix_gain_parameter_data().
+<dfn noexport>mix_gain_type</dfn> specifies the type of mix gain as described in the table below. The value 0 indicates that there shall be no mix gain parameter blocks provided and the value 1 indicates that there shall be mix gain parameter blocks provided.
+ 
+<pre class = "def">
+mix_gain_type : Mix Gain Type
+       0      : DEFAULT
+       1      : MIX_GAIN_PARAMETER_DATA
+</pre>
 
-#### Mix Gain Parameter Definition and Data Syntax and Semantics #### {#syntax-mix-gain-param}
+<dfn noexport>default_mix_gain</dfn> shall specify the default mix gain value to apply when there are no mix gain parameter blocks provided. This value is expressed in dB and shall be applied to all channels in the rendered audio element. It is stored as a 16-bit, signed, two's complement fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]).
+
+<dfn noexport>MixGainParamDefinition()</dfn> is a class that provides the parameter definition for the mix gain parameter data.
+
+#### Mix Gain Parameter Data Syntax and Semantics #### {#syntax-mix-gain-param}
 
 <b>Syntax</b>
 
 ```
-class MixGainParamDefinition extends ParamDefinition() {
-  signed int (16) default_mix_gain;
-}
-
 class mix_gain_parameter_data(animation_type) {
   AnimatedParameterData<signed int (16)> param_data;
 }
 ```
 
 <b>Semantics</b>
-
-<dfn noexport>default_mix_gain</dfn> shall specify the default mix gain value to apply when there are no mix gain parameter blocks provided. This value is expressed in dB and shall be applied to all channels in the rendered audio element. It is stored as a 16-bit, signed, two's complement fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]).
 
 <dfn noexport>param_data</dfn> shall use the AnimatedParameterData function template. Each of the values defined within this instance (start_point_value, end_point_value and control_point_value) shall be expressed in dB and shall be applied to all channels in the rendered audio element. They are stored as 16-bit, signed, two's complement fixed-point values with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]).
 
