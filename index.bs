@@ -97,8 +97,13 @@ url: https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.2051-3-202205-I!!PDF-E
 	text: Loudspeaker configuration for Sound System B (0+5+0)
 	text: Loudspeaker configuration for Sound System C (2+5+0)
 	text: Loudspeaker configuration for Sound System D (4+5+0)
+	text: Loudspeaker configuration for Sound System E (4+5+1)
+	text: Loudspeaker configuration for Sound System F (3+7+0)
+	text: Loudspeaker configuration for Sound System G (4+9+0)
+	text: Loudspeaker configuration for Sound System H (9+10+3)
 	text: Loudspeaker configuration for Sound System I (0+7+0)
 	text: Loudspeaker configuration for Sound System J (4+7+0)
+	text: SP Label
 
 url: https://en.wikipedia.org/wiki/Q_(number_format); spec: Q-Format; type: dfn;
 	text:
@@ -632,12 +637,9 @@ The metadata in mix_presentation() specifies how to render and process one or mo
 class mix_presentation_obu() {
   leb128() mix_presentation_id;
   string mix_presentation_friendly_label;
-  unsigned int (1) mix_target_layout_flag;
-  unsigned int (3) reserved;
+  unsigned int (2) mix_target_layout_type;
 
-  if (mix_target_layout_flag) {
-    mix_target_layout();
-  }
+  mix_target_layout(mix_target_layout_type);
 
   leb128() num_audio_elements;
   for (i = 0; i < num_audio_elements; i++) {
@@ -658,7 +660,15 @@ class mix_presentation_obu() {
 
 <dfn noexport>mix_presentation_friendly_label</dfn> shall specify a human-friendly label to describe this mix presentation.
 
-<dfn noexport>mix_target_layout_flag</dfn> shall specify if this mix presentation was created for specific target loudspeaker layout. A value of 0 shall indicate that there is no specific target layout, while a value of 1 shall indicate that there is a specific target layout.
+<dfn noexport>mix_target_layout_type</dfn> specifies a target layout type for this mix presentation. A value of 0 shall indicate no specific target layout, a value of 1 shall indicate that the target layout is defined using the [=SP Label=] of [[!ITU2051-3]], a value of 2 shall indicate that the target layout is defined using the sound system convention of [[!ITU2051-3]] and a value of 3 shall indicate that the target layout is binaural.
+
+<pre class = "def">
+mix_target_layout_type : Mix Target layout type
+           0           : NOT_DEFINED
+           1           : LOUDSPEAKERS_SP_LABEL
+           2           : LOUDSPEAKERS_SS_CONVENTION
+           3           : BINAURAL
+</pre>
 
 <dfn noexport>mix_target_layout()</dfn> is a class that specifies the target playback layout that all referenced audio elements shall be rendered for.
 
@@ -666,9 +676,9 @@ An IA sequence may have one or more mix presentations specified, each with a dif
 
 1. The IA parser shall first attempt to select the mix presentation that matches the physical playback layout.
 
-2. If there is no match, the IA parser shall select the mix presentation with mix_target_layout_flag = 0. In this case, the renderer specified in rendering_config() shall render the physical playback layout appropriately.
+2. If there is no match, the IA parser shall select the mix presentation with [=mix_target_layout_type=] = 0. In this case, the renderer specified in rendering_config() shall render the physical playback layout appropriately.
 
-3. If there is no mix presentation with mix_target_layout_flag = 0, the IA parser shall select the mix presentation with the closest specified layout to the physical layout. The renderer specified in rendering_config() shall first render the layout specified by mix_target_layout() and then apply up or down-mixing appropriately. Sections [[#iacgeneration-scalablechannelaudio-downmixmechanism]] and [[#processing-downmixmatrix]] provide example dynamic and static down-mixing matrices for some common layouts that may be used.
+3. If there is no mix presentation with [=mix_target_layout_type=] = 0, the IA parser should select the mix presentation with the closest specified layout to the physical layout. The renderer specified in rendering_config() shall first render the layout specified by mix_target_layout() and then apply up or down-mixing appropriately. Sections [[#iacgeneration-scalablechannelaudio-downmixmechanism]] and [[#processing-downmixmatrix]] provide example dynamic and static down-mixing matrices for some common layouts that may be used.
 
 <dfn value noexport for ="mix_presentation_obu()">num_audio_elements</dfn> shall specify the number of audio elements that are used in this mix presentation to generate the final output audio signal for playback.
 
@@ -1139,103 +1149,113 @@ The mix target layout specifies the list of physical loudspeaker positions accor
 <b>Syntax</b>
 
 ```
-class mix_target_layout() {
-  unsigned int (1) target_layout_type;
-
-  if (target_layout_type == LOUDSPEAKERS) {
-    unsigned int (1) is_sp_label;
-    if (is_sp_label) {
-      unsigned int (6) num_loudspeakers;
-      for (i = 0; i < num_loudspeakers; i++) {
-	unsigned int (3) layer_name;
-	unsigned int (1) sign;
-	unsigned int (4) azimuth;
-      }
-    } else {
-      unsigned int (4) sound_system;
-      unsigned int (2) reserved;
+class mix_target_layout(mix_target_layout_type) {
+  if (mix_target_layout_type == LOUDSPEAKERS_SP_LABEL) {
+    unsigned int (6) num_loudspeakers;
+    for (i = 0; i < num_loudspeakers; i++) {
+      unsigned int (8) sp_label;
     }
+  } 
+  else if (mix_target_layout_type == LOUDSPEAKERS_SS_CONVENTION) {
+    unsigned int (4) sound_system;
+    unsigned int (2) reserved;
   }
-
-  if (target_layout_type == BINAURAL) {
-    unsigned int (7) reserved;
+  else if (mix_target_layout_type == BINAURAL or NOT_DEFINED) {
+    unsigned int (6) reserved;
   }
 }
 ```
 
 <b>Semantics</b>
 
-<dfn noexport>target_layout_type</dfn> shall specify the type of target layout.
-
-<pre class = "def">
-target_layout_type : Target layout type
-         0         : LOUDSPEAKERS
-         1         : BINAURAL
-</pre>
-
-<dfn noexport>is_sp_label</dfn> shall indicate if the layout is defined using the SP label or the Sound System convention of [[!ITU2051-3]].
 
 <dfn noexport>num_loudspeakers</dfn> shall specify the number of loudspeakers.
 
-<dfn noexport>layer_name</dfn> shall specify the layer name.
+<dfn noexport>sp_label</dfn> shall define the [=SP Label=] as specified in [[!ITU2051-3]].
 
-<pre class = "def">
-layer_name : Layer name
-     0     : M
-     1     : U
-     2     : UH
-     3     : T
-     4     : B
-     5     : LFE1
-     6     : LFE2
-     7     : Reserved
-</pre>
 
-<dfn noexport>sign</dfn> shall specify the sign, to be used in conjunction with the azimuth value.
+<style>
+.col_border {
+  border-left: 1px solid var(--def-border);
+}
+</style>
 
-<pre class = "def">
-sign : Sign
- 0   : +
- 1   : -
-</pre>
+<table class="def">
+<tr>
+  <th>sp_label</th><th>SP label</th><th class="col_border">sp_label</th><<th>SP label</th><th class="col_border">sp_label</th><th>SP label</th>
+</tr>
+<tr>
+  <td>0</td><td>M+000</td><td class="col_border">18</td><td>U+000</td><td class="col_border">36</td><td>B+000</td>
+</tr>
+<tr>
+  <td>1</td><td>M+022</td><td class="col_border">19</td><td>U+022</td><td class="col_border">37</td><td>B+022</td>
+</tr>
+<tr>
+  <td>2</td><td>M-022</td><td class="col_border">20</td><td>U-022</td><td class="col_border">38</td><td>B-022</td>
+</tr>
+<tr>
+  <td>3</td><td>M+SC</td><td class="col_border">21</td><td>U+030</td><td class="col_border">39</td><td>B+030</td>
+</tr>
+<tr>
+  <td>4</td><td>M-SC</td><td class="col_border">22</td><td>U-030</td><td class="col_border">40</td><td>B-030</td>
+</tr>
+<tr>
+  <td>5</td><td>M+030</td><td class="col_border">23</td><td>U+045</td><td class="col_border">41</td><td>B+045</td>
+</tr>
+<tr>
+  <td>6</td><td>M-030</td><td class="col_border">24</td><td>U-045</td><td class="col_border">42</td><td>B-045</td>
+</tr>
+<tr>
+  <td>7</td><td>M+045</td><td class="col_border">25</td><td>U+060</td><td class="col_border">43</td><td>B+060</td>
+</tr>
+<tr>
+  <td>8</td><td>M-045</td><td class="col_border">26</td><td>U-060</td><td class="col_border">44</td><td>B-060</td>
+</tr>
+<tr>
+  <td>9</td><td>M+060</td><td class="col_border">27</td><td>U+090</td><td class="col_border">45</td><td>B+090</td>
+</tr>
+<tr>
+  <td>10</td><td>M-060</td><td class="col_border">28</td><td>U-090</td><td class="col_border">46</td><td>B-090</td>
+</tr>
+<tr>
+  <td>11</td><td>M+090</td><td class="col_border">29</td><td>U+110</td><td class="col_border">47</td><td>B+110</td>
+</tr>
+<tr>
+  <td>12</td><td>M-090</td><td class="col_border">30</td><td>U-110</td><td class="col_border">48</td><td>B-110</td>
+</tr>
+<tr>
+  <td>13</td><td>M+110</td><td class="col_border">31</td><td>U+135</td><td class="col_border">49</td><td>B+135</td>
+</tr>
+<tr>
+  <td>14</td><td>M-110</td><td class="col_border">32</td><td>U-135</td><td class="col_border">50</td><td>B-135</td>
+</tr>
+<tr>
+  <td>15</td><td>M+135</td><td class="col_border">33</td><td>U+180</td><td class="col_border">51</td><td>B+180</td>
+</tr>
+<tr>
+  <td>16</td><td>M-135</td><td class="col_border">34</td><td>UH+180</td><td class="col_border">52</td><td>LFE1</td>
+</tr>
+<tr>
+  <td>17</td><td>M+180</td><td class="col_border">35</td><td>T+000</td><td class="col_border">53</td><td>LFE2</td>
+</tr>
+<tr>
+  <td></td><td></td><td class="col_border"></td><td></td><td class="col_border">54 ~ 256</td><td>Reserved</td>
+</tr>
+</table>
 
-<dfn noexport>azimuth</dfn> shall specify the azimuth expressed in degrees, to be used in conjunction with the sign value.
 
-<pre class = "def">
-azimuth : Azimuth
-   0    : 000
-   1    : 022
-   2    : 030
-   3    : 045
-   4    : 060
-   5    : 090
-   6    : 110
-   7    : 135
-   8    : 180
-   9    : SC
- 10~15  : Reserved
-</pre>
-
-If the value of sign is positive (+), this shall indicate that the azimuth angle is rotated to the left when facing the front.
-
-If the combination of sign and azimuth values is equal to +SC or -SC, this shall indicate a loudspeaker at the left or right edge of the screen, respectively.
-
-<dfn noexport>sound_system</dfn> shall specify the sound system.
-
-<pre class = "def">
-sound_system : Sound system
-     0       : A
-     1       : B
-     2       : C
-     3       : D
-     4       : E
-     5       : F
-     6       : G
-     7       : H
-     8       : I
-     9       : J
-   10~15     : Reserved
-</pre>
+<dfn noexport>sound_system</dfn> shall specify the sound system A to J as specified in [[!ITU2051-3]] as follows:
+ - 0: It shall indicate [=Loudspeaker configuration for Sound System A (0+2+0)=]
+ - 1: It shall indicate [=Loudspeaker configuration for Sound System B (0+5+0)=]
+ - 2: It shall indicate [=Loudspeaker configuration for Sound System C (2+5+0)=]
+ - 3: It shall indicate [=Loudspeaker configuration for Sound System D (4+5+0)=]
+ - 4: It shall indicate [=Loudspeaker configuration for Sound System E (4+5+1)=]
+ - 5: It shall indicate [=Loudspeaker configuration for Sound System F (3+7+0)=]
+ - 6: It shall indicate [=Loudspeaker configuration for Sound System G (4+9+0)=]
+ - 7: It shall indicate [=Loudspeaker configuration for Sound System H (9+10+3)=]
+ - 8: It shall indicate [=Loudspeaker configuration for Sound System I (0+7+0)=]
+ - 9: It shall indicate [=Loudspeaker configuration for Sound System J (4+7+0)=]
+ - 10 ~ 15: Reserved
 
 ### Rendering Config Syntax and Semantics ### {#syntax-rendering-config}
 
