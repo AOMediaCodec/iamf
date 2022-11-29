@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 63e66730b, updated Tue Oct 25 12:35:05 2022 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="152f31b34f0e5b120c2f69ebc52c16f93f3e0da5" name="document-revision">
+  <meta content="18233eaf208bc2a133cdd2f97dd4230e4aebd59f" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -3180,10 +3180,14 @@ class mix_gain_parameter_data(animation_type) {
     <li data-md>
      <p><a data-link-type="dfn" href="#profile_version" id="ref-for-profile_version">profile_version</a> shall be set to 0 for this version of specification.</p>
     <li data-md>
-     <p><a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①">num_layers</a> shall be set to 1 for channel-based audio element (i.e. non-scalable channel audio)</p>
+     <p><a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①">num_layers</a> shall be set to 1 or up to 6 for Channel-based audio element (i.e. scalable channel audio).</p>
      <ul>
       <li data-md>
-       <p>In this case, OBU_IA_Parameter_Block including demixing_info() may be present in the IA sequence.</p>
+       <p>In this case, <a data-link-type="dfn" href="#demixing_info" id="ref-for-demixing_info">demixing_info()</a> and <a data-link-type="dfn" href="#recon_gain_info" id="ref-for-recon_gain_info">recon_gain_info()</a> may be present in the IA sequence.</p>
+      <li data-md>
+       <p>In case of simple scalable channel audio (e.g. mono for layer 1 &amp; stereo for layer 2), demixing_info() and recon_gain_info() shall not be present in the bitstream.</p>
+      <li data-md>
+       <p>When num_layers = 1, OBU_IA_Parameter_Block including demixing_info() may be present in the IA sequence and IA decoders may use the demixing_info() for dynamic down-mixing.</p>
      </ul>
     <li data-md>
      <p>All audio frames shall have aligned frame boundaries.</p>
@@ -3219,9 +3223,11 @@ class mix_gain_parameter_data(animation_type) {
      <p><a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②">num_layers</a> shall be set to 1 or up to 6 for Channel-based audio element (i.e. scalable channel audio)</p>
      <ul>
       <li data-md>
-       <p>In this case, <a data-link-type="dfn" href="#demixing_info" id="ref-for-demixing_info">demixing_info()</a> and <a data-link-type="dfn" href="#recon_gain_info" id="ref-for-recon_gain_info">recon_gain_info()</a> may be present in the IA sequence.</p>
+       <p>In this case, <a data-link-type="dfn" href="#demixing_info" id="ref-for-demixing_info①">demixing_info()</a> and <a data-link-type="dfn" href="#recon_gain_info" id="ref-for-recon_gain_info①">recon_gain_info()</a> may be present in the IA sequence.</p>
       <li data-md>
        <p>In case of simple scalable channel audio (e.g. mono for layer 1 &amp; stereo for layer 2), demixing_info() and recon_gain_info() shall not be present in the bitstream.</p>
+      <li data-md>
+       <p>When num_layers = 1, OBU_IA_Parameter_Block including demixing_info() may be present in the IA sequence and IA decoders may use the demixing_info() for dynamic down-mixing.</p>
      </ul>
     <li data-md>
      <p>All audio frames shall have aligned frame boundaries.</p>
@@ -3269,9 +3275,9 @@ class mix_gain_parameter_data(animation_type) {
      <p><a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers③">num_layers</a> shall be set to 1 or up to 6 for Channel-based audio element (i.e. scalable channel audio)</p>
      <ul>
       <li data-md>
-       <p>In this case, <a data-link-type="dfn" href="#demixing_info" id="ref-for-demixing_info①">demixing_info()</a> and <a data-link-type="dfn" href="#recon_gain_info" id="ref-for-recon_gain_info①">recon_gain_info()</a> may be present.</p>
+       <p>In this case, <a data-link-type="dfn" href="#demixing_info" id="ref-for-demixing_info②">demixing_info()</a> and <a data-link-type="dfn" href="#recon_gain_info" id="ref-for-recon_gain_info②">recon_gain_info()</a> may be present.</p>
       <li data-md>
-       <p>In case of simple scalable channel audio (e.g. mono for layer 1 &amp; stereo for layer 2), <a data-link-type="dfn" href="#demixing_info" id="ref-for-demixing_info②">demixing_info()</a> and <a data-link-type="dfn" href="#recon_gain_info" id="ref-for-recon_gain_info②">recon_gain_info()</a> shall not be present.</p>
+       <p>In case of simple scalable channel audio (e.g. mono for layer 1 &amp; stereo for layer 2), <a data-link-type="dfn" href="#demixing_info" id="ref-for-demixing_info③">demixing_info()</a> and <a data-link-type="dfn" href="#recon_gain_info" id="ref-for-recon_gain_info③">recon_gain_info()</a> shall not be present.</p>
      </ul>
    </ul>
    <p>Capabilities of the IA parser, decoder and processor:</p>
@@ -3899,7 +3905,7 @@ Ltf = Ltf3 - w(k) x (L2 - 0.707 x C - L5) and Rtf = Rtf3 - w(k) x (R2 - 0.707 x 
    <p><a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain">Recon_Gain</a> shall be only applied to all of audio samples of the de-mixed channels from De-mixer module.</p>
    <ul>
     <li data-md>
-     <p><a data-link-type="dfn" href="#recon_gain_info" id="ref-for-recon_gain_info③">Recon_Gain_Info()</a> indicates each channel of CL #i which Recon_Gain needs to be applied to and provides Recon_Gain value for each frame of the channel.</p>
+     <p><a data-link-type="dfn" href="#recon_gain_info" id="ref-for-recon_gain_info④">Recon_Gain_Info()</a> indicates each channel of CL #i which Recon_Gain needs to be applied to and provides Recon_Gain value for each frame of the channel.</p>
      <ul>
       <li data-md>
        <p>Sample (k,i) *= Smoothed_Recon_Gain (k,i), where k is the frame index and i is the sample index of the frame.</p>
@@ -4288,7 +4294,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
            </ul>
          </ul>
         <li data-md>
-         <p>Parameter blocks can be composed of <a data-link-type="dfn" href="#demixing_info" id="ref-for-demixing_info③">demixing_info()</a> and <a data-link-type="dfn" href="#recon_gain_info" id="ref-for-recon_gain_info④">recon_gain_info()</a>. When <a data-link-type="dfn" href="#recon_gain_is_present_flag" id="ref-for-recon_gain_is_present_flag①">recon_gain_is_present_flag</a> = 0 for all ChannelGroup, recon_gain_info shall not present in IA sequence.</p>
+         <p>Parameter blocks can be composed of <a data-link-type="dfn" href="#demixing_info" id="ref-for-demixing_info④">demixing_info()</a> and <a data-link-type="dfn" href="#recon_gain_info" id="ref-for-recon_gain_info⑤">recon_gain_info()</a>. When <a data-link-type="dfn" href="#recon_gain_is_present_flag" id="ref-for-recon_gain_is_present_flag①">recon_gain_is_present_flag</a> = 0 for all ChannelGroup, recon_gain_info shall not present in IA sequence.</p>
          <ul>
           <li data-md>
            <p><a data-link-type="dfn" href="#dmixp_mode" id="ref-for-dmixp_mode">dmixp_mode</a> of demixing_info for the kth frame shall be set to indicate (α(k), β(k), γ(k), δ(k)) and w_idx_offset(k). Where w_idx_offset(k) = 1 or -1.</p>
@@ -5958,9 +5964,10 @@ Recon_Gain for D_Rtb4:
   <aside class="dfn-panel" data-for="demixing_info">
    <b><a href="#demixing_info">#demixing_info</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-demixing_info">5.2. IA Base Profile</a>
-    <li><a href="#ref-for-demixing_info①">5.3. IA Enhanced Profile</a> <a href="#ref-for-demixing_info②">(2)</a>
-    <li><a href="#ref-for-demixing_info③">10.2. Scalable Channel Audio Encoding</a>
+    <li><a href="#ref-for-demixing_info">5.1. IA Simple Profile</a>
+    <li><a href="#ref-for-demixing_info①">5.2. IA Base Profile</a>
+    <li><a href="#ref-for-demixing_info②">5.3. IA Enhanced Profile</a> <a href="#ref-for-demixing_info③">(2)</a>
+    <li><a href="#ref-for-demixing_info④">10.2. Scalable Channel Audio Encoding</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dmixp_mode">
@@ -5973,10 +5980,11 @@ Recon_Gain for D_Rtb4:
   <aside class="dfn-panel" data-for="recon_gain_info">
    <b><a href="#recon_gain_info">#recon_gain_info</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-recon_gain_info">5.2. IA Base Profile</a>
-    <li><a href="#ref-for-recon_gain_info①">5.3. IA Enhanced Profile</a> <a href="#ref-for-recon_gain_info②">(2)</a>
-    <li><a href="#ref-for-recon_gain_info③">9.2.3. Recon Gain</a>
-    <li><a href="#ref-for-recon_gain_info④">10.2. Scalable Channel Audio Encoding</a>
+    <li><a href="#ref-for-recon_gain_info">5.1. IA Simple Profile</a>
+    <li><a href="#ref-for-recon_gain_info①">5.2. IA Base Profile</a>
+    <li><a href="#ref-for-recon_gain_info②">5.3. IA Enhanced Profile</a> <a href="#ref-for-recon_gain_info③">(2)</a>
+    <li><a href="#ref-for-recon_gain_info④">9.2.3. Recon Gain</a>
+    <li><a href="#ref-for-recon_gain_info⑤">10.2. Scalable Channel Audio Encoding</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="recon_gain_flags">
