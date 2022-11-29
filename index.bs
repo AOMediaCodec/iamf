@@ -519,18 +519,20 @@ This section specifies the OBU payload of OBU_IA_Codec_Config.
 ```
 class codec_config_obu() {
   leb128() codec_config_id;
-  codec_config();
   leb128() num_audio_elements;
   for (i = 0; i < num_audio_elements; i++) {
     leb128() audio_element_id;
   }
+  codec_config();
+
 }
 
 class codec_config() {
   unsigned int (32) codec_id;
-  decoder_config(codec_id);
   leb128() num_samples_per_frame;
   signed int (16) roll_distance;
+  decoder_config(codec_id);
+
 }
 ```
 
@@ -538,24 +540,24 @@ class codec_config() {
 
 <dfn noexport>codec_config_id</dfn> shall indicate a unique ID in an IA sequence for a given codec config.
 
+<dfn value noexport for="codec_config_obu()">num_audio_elements</dfn> shall specify the number of audio elements that refer to this codec config.
+
+<dfn value noexport for="codec_config_obu()">audio_element_id</dfn> shall specify the unique ID associated with the specific audio element that refers to this codec config.
+
 <dfn noexport>codec_id</dfn> shall be a ‘four-character code’ (4CC) to identify the codec used to generate the audio substreams. It shall be 'opus' for IAC-OPUS, 'mp4a' for IAC-AAC-LC, 'fLaC' for IAC-FLAC and 'lpcm' for IAC-LPCM.
 
 For ISOBMFF encapsulation, it shall be the same as the [=boxtype=] of its AudioSampleEntry if exist. 
-
-<dfn noexport>decoder_config()</dfn> specifies the set of codec parameters required to decode an audio substream for the given codec_id. It shall be byte aligned.
-- The codec_id and decoder_config() for IAC-OPUS shall conform to [=Codec_Specific_Info=] of [[#iac-opus-specific]]
-- The codec_id and decoder_config() for IAC-AAC-LC shall conform to [=Codec_Specific_Info=] of [[#iac-aac-lc-specific]].
-- The codec_id and decoder_config() for IAC-FLAC shall conform to [=Codec_Specific_Info=] of [[#iac-flac-specific]]
-- The codec_id and decoder_config() for IAC-LPCM shall conform to [=Codec_Specific_Info=] of [[#iac-lpcm-specific]].
 
 <dfn noexport>num_samples_per_frame</dfn> shall indicate the frame length, in samples, of the raw coded audio provided in by audio_frame_obu().
 
 <dfn noexport>roll_distance</dfn> is a signed integer that gives the number of frames that need to be decoded in order for a frame to be decoded correctly. A negative value indicates the number of frames before the frame to be decoded corrently.
 - It shall be set to -1 for IAC-AAC-LC and -R (R = 4 when the frame size = 960) for IAC-OPUS. IAC-FLAC may ignore this field. Where, R is the smallest integer greater than or equal to 3840 divided by the frame size. 
 
-<dfn value noexport for="codec_config_obu()">num_audio_elements</dfn> shall specify the number of audio elements that refer to this codec config.
-
-<dfn value noexport for="codec_config_obu()">audio_element_id</dfn> shall specify the unique ID associated with the specific audio element that refers to this codec config.
+<dfn noexport>decoder_config()</dfn> specifies the set of codec parameters required to decode an audio substream for the given codec_id. It shall be byte aligned.
+- The codec_id and decoder_config() for IAC-OPUS shall conform to [=Codec_Specific_Info=] of [[#iac-opus-specific]]
+- The codec_id and decoder_config() for IAC-AAC-LC shall conform to [=Codec_Specific_Info=] of [[#iac-aac-lc-specific]].
+- The codec_id and decoder_config() for IAC-FLAC shall conform to [=Codec_Specific_Info=] of [[#iac-flac-specific]]
+- The codec_id and decoder_config() for IAC-LPCM shall conform to [=Codec_Specific_Info=] of [[#iac-lpcm-specific]].
 
 ### Audio Element OBU Syntax and Semantics ### {#obu-audioelement}
 
