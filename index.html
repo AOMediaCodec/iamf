@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 63e66730b, updated Tue Oct 25 12:35:05 2022 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="18233eaf208bc2a133cdd2f97dd4230e4aebd59f" name="document-revision">
+  <meta content="6bdbdebfd14c4e824550cc18ae3e51abd0bca844" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -3450,7 +3450,7 @@ For each ID:
     <li data-md>
      <p>It shall conform to the normative requirements of <a data-link-type="biblio" href="#biblio-isobmff">[ISOBMFF]</a></p>
     <li data-md>
-     <p>It shall have the <dfn class="css" data-dfn-for="ISOBMFF Brand" data-dfn-type="value" data-export id="valdef-isobmff-brand-aiac">aiac<a class="self-link" href="#valdef-isobmff-brand-aiac"></a></dfn> brand among the compatible brands array of the FileTypeBox</p>
+     <p>It shall have the <dfn class="css" data-dfn-for="ISOBMFF Brand" data-dfn-type="value" data-export id="valdef-isobmff-brand-iamf">iamf<a class="self-link" href="#valdef-isobmff-brand-iamf"></a></dfn> brand among the compatible brands array of the FileTypeBox</p>
     <li data-md>
      <p>It shall contain at least one track using an <a data-link-type="dfn" href="#iasampleentry" id="ref-for-iasampleentry">IASampleEntry</a></p>
     <li data-md>
@@ -3508,14 +3508,14 @@ For each ID:
     <figcaption>IAC Encapsulation Scheme</figcaption>
    </center>
    <h4 class="heading settled" data-level="7.2.3" id="iasampleentry-section"><span class="secno">7.2.3. </span><span class="content">IA Sample Entry</span><a class="self-link" href="#iasampleentry-section"></a></h4>
-<pre class="def">Sample Entry Type: <dfn data-dfn-for="IASampleEntry" data-dfn-type="value" data-export id="valdef-iasampleentry-aiac">aiac<a class="self-link" href="#valdef-iasampleentry-aiac"></a></dfn>
+<pre class="def">Sample Entry Type: <dfn data-dfn-for="IASampleEntry" data-dfn-type="value" data-export id="valdef-iasampleentry-iamf">iamf<a class="self-link" href="#valdef-iasampleentry-iamf"></a></dfn>
 Container:         Sample Description Box ('stsd')
 Mandatory:         Yes
 Quantity:          One or more.
 </pre>
    <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="iasampleentry">IASampleEntry</dfn> identifies that the track contains <a data-link-type="dfn" href="#ia-sample" id="ref-for-ia-sample">IA Samples</a>, and uses one single <a data-link-type="dfn" href="#codec-specific-box" id="ref-for-codec-specific-box">codec specific box</a>.</p>
    <p><b>Syntax</b></p>
-<pre>class IASampleEntry extends AudioSampleEntry('aiac') {
+<pre>class IASampleEntry extends AudioSampleEntry('iamf') {
   unsigned int (8) version;
   unsigned int (8) profile_version;
   CodecSpecificBox config;
@@ -3526,11 +3526,11 @@ Quantity:          One or more.
    <p>Both <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑥⑧">channelcount</a> and <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑥⑨">samplerate</a> fields of AudioSampleEntry shall be ignored.</p>
    <p>version and profile_version shall be the same as the ones in start_code_obu.</p>
    <h4 class="heading settled" data-level="7.2.4" id="codecspecificbox-section"><span class="secno">7.2.4. </span><span class="content">Codec Specific Box</span><a class="self-link" href="#codecspecificbox-section"></a></h4>
-   <p>This section describes a <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="codec-specific-box">codec specific box</dfn> for the decoding parameters, which is defined by codec_id of audio_substream_config(), to decode one single substream of IA sequence. <code>aiac</code> shall contain only one single codec specific box regardless of the number of substreams in IA sequence. So, the codec specific box is applied to all of substreams in sample data.</p>
+   <p>This section describes a <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="codec-specific-box">codec specific box</dfn> for the decoding parameters, which is defined by codec_id of audio_substream_config(), to decode one single substream of IA sequence. <code>iamf</code> shall contain only one single codec specific box regardless of the number of substreams in IA sequence. So, the codec specific box is applied to all of substreams in sample data.</p>
    <h5 class="heading settled" data-level="7.2.4.1" id="codecspecificbox-opus"><span class="secno">7.2.4.1. </span><span class="content">OPUS Specific Box</span><a class="self-link" href="#codecspecificbox-opus"></a></h5>
    <p>This shal be <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-⑦⓪">OpusSpecificBox</a> (<a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-⑦①">dOps</a>) for <a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-⑦②">opus</a> audiosampleentry which is specified in <a data-link-type="biblio" href="#biblio-opus-in-isobmff">[OPUS-IN-ISOBMFF]</a>.</p>
 <pre class="def">Box Type:  <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="dops">dOps</dfn>
-Container: IA Sample Entry ('aiac')
+Container: IA Sample Entry ('iamf')
 Mandatory: Yes
 Quantity:  One
 </pre>
@@ -3550,7 +3550,7 @@ Quantity:  One
    <h5 class="heading settled" data-level="7.2.4.2" id="codecspecificbox-mp4a"><span class="secno">7.2.4.2. </span><span class="content">MP4A Specific Box</span><a class="self-link" href="#codecspecificbox-mp4a"></a></h5>
    <p>This shall be <a data-link-type="dfn" href="https://www.iso.org/standard/79110.html#" id="termref-for-⑧①">ESDBox</a> (<a class="property css" data-link-type="property" href="https://www.iso.org/standard/79110.html#" id="termref-for-⑧②">esds</a>) for <a class="property css" data-link-type="property" href="https://www.iso.org/standard/79110.html#" id="termref-for-⑧③">mp4a</a> which is specified in <a data-link-type="biblio" href="#biblio-mp4">[MP4]</a>.</p>
 <pre class="def">Box Type:  <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="esds">esds</dfn>
-Container: IA Sample Entry ('aiac')
+Container: IA Sample Entry ('iamf')
 Mandatory: Yes
 Quantity:  One of more
 </pre>
@@ -3595,25 +3595,25 @@ Quantity:  One of more
     <li data-md>
      <p>For IAC-OPUS</p>
    </ul>
-<pre>aiac.IAC-specific-needs.Opus
+<pre>iamf.IAC-specific-needs.Opus
 </pre>
    <ul>
     <li data-md>
      <p>For IAC-AAC-LC</p>
    </ul>
-<pre>aiac.IAC-specific-needs.mp4a.40.2
+<pre>iamf.IAC-specific-needs.mp4a.40.2
 </pre>
    <ul>
     <li data-md>
      <p>For IAC-FLAC</p>
    </ul>
-<pre>aiac.IAC-specific-needs.fLaC
+<pre>iamf.IAC-specific-needs.fLaC
 </pre>
    <ul>
     <li data-md>
      <p>For IAC-LPCM</p>
    </ul>
-<pre>aiac.IAC-specific-needs.lpcm
+<pre>iamf.IAC-specific-needs.lpcm
 </pre>
    <p><b>IAC-specific-needs</b> shall be <b>V.PV</b> as follows:</p>
    <ul>
@@ -3639,13 +3639,13 @@ Quantity:  One of more
     <li data-md>
      <p>The codecs parameter string of IAC-OPUS for the simple profile:</p>
    </ul>
-<pre>aiac.0000.0000.Opus
+<pre>iamf.0000.0000.Opus
 </pre>
    <ul>
     <li data-md>
      <p>The codecs parameter string of IAC-AAC-LC for the base profile:</p>
    </ul>
-<pre>aiac.0000.0100.mp4a.40.2
+<pre>iamf.0000.0100.mp4a.40.2
 </pre>
    <h2 class="heading settled" data-level="8" id="isobmff-decapsulation"><span class="secno">8. </span><span class="content">ISOBMFF IAC Decapsulation</span><a class="self-link" href="#isobmff-decapsulation"></a></h2>
    <h3 class="heading settled" data-level="8.1" id="isobmff-decapsulation-singletrack"><span class="secno">8.1. </span><span class="content">ISOBMFF IAC Decapsulation with single track</span><a class="self-link" href="#isobmff-decapsulation-singletrack"></a></h3>
@@ -3662,9 +3662,9 @@ Quantity:  One of more
      <p>Step1: Reconstruction of descriptor OBUs (one Start Code OBU, one Codec Config OBU, one or more Mix Presentation OBUs and one or more Audio Element OBUs) for the ith IA sequence.</p>
      <ul>
       <li data-md>
-       <p>[Step1-1] Start Code OBU: take version and profile_version fields from <code>aiac</code> sample entry and packetize it with <a data-link-type="dfn" href="#ia_code" id="ref-for-ia_code">ia_code</a> and the pre-fixed header value (i.e. 0xF006) by OBU.</p>
+       <p>[Step1-1] Start Code OBU: take version and profile_version fields from <code>iamf</code> sample entry and packetize it with <a data-link-type="dfn" href="#ia_code" id="ref-for-ia_code">ia_code</a> and the pre-fixed header value (i.e. 0xF006) by OBU.</p>
       <li data-md>
-       <p>[Step1-2] Codec Config OBU: generate <a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id⑨">codec_id</a> and <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config④">decoder_config()</a> from CodecSpecificBox of <code>aiac</code> sample entry, num_samples_per_frame from <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨⑦">stts</a> box and take roll_distance from <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨⑧">AudioPreRollEntry</a>, and packetize it by OBU with obu_type = OBU_IA_Codec_Config.</p>
+       <p>[Step1-2] Codec Config OBU: generate <a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id⑨">codec_id</a> and <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config④">decoder_config()</a> from CodecSpecificBox of <code>iamf</code> sample entry, num_samples_per_frame from <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨⑦">stts</a> box and take roll_distance from <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨⑧">AudioPreRollEntry</a>, and packetize it by OBU with obu_type = OBU_IA_Codec_Config.</p>
       <li data-md>
        <p>[Step1-3] Mix Presentation OBUs and Audio Element OBUs: take the ith SampleGroupDescriptionEntry as it is in SampleGroup with grouping_type, <a data-link-type="dfn" href="#iagd" id="ref-for-iagd①">iagd</a>.</p>
       <li data-md>
@@ -4793,12 +4793,6 @@ Recon_Gain for D_Rtb4:
    <li><a href="#712ch">7.1.2ch</a><span>, in § 4.2.1</span>
    <li><a href="#714ch">7.1.4ch</a><span>, in § 4.2.1</span>
    <li><a href="#71ch">7.1ch</a><span>, in § 4.2.1</span>
-   <li>
-    aiac
-    <ul>
-     <li><a href="#valdef-iasampleentry-aiac">value for IASampleEntry</a><span>, in § 7.2.3</span>
-     <li><a href="#valdef-isobmff-brand-aiac">value for ISOBMFF Brand</a><span>, in § 7.1</span>
-    </ul>
    <li><a href="#alpha">alpha</a><span>, in § 4.2.3</span>
    <li><a href="#ambisonics_config">ambisonics_config()</a><span>, in § 4.1.7</span>
    <li><a href="#ambisonics_mode">ambisonics_mode</a><span>, in § 4.2.2</span>
@@ -4863,6 +4857,12 @@ Recon_Gain for D_Rtb4:
    <li><a href="#iac">IAC</a><span>, in § 2</span>
    <li><a href="#ia_code">ia_code</a><span>, in § 4.1.5</span>
    <li><a href="#iagd">iagd</a><span>, in § 7.2.6.1</span>
+   <li>
+    iamf
+    <ul>
+     <li><a href="#valdef-iasampleentry-iamf">value for IASampleEntry</a><span>, in § 7.2.3</span>
+     <li><a href="#valdef-isobmff-brand-iamf">value for ISOBMFF Brand</a><span>, in § 7.1</span>
+    </ul>
    <li><a href="#ia-sample">IA Sample</a><span>, in § 7.2.5</span>
    <li><a href="#iasampleentry">IASampleEntry</a><span>, in § 7.2.3</span>
    <li><a href="#ia-sequence">IA sequence</a><span>, in § 2</span>
