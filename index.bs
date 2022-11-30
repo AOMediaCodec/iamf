@@ -964,6 +964,10 @@ When an audio element is composed of G(r) number of substreams, scalable channel
 <center><img src="images/Immersive Audio Bitstream with scalable channel audio (before OBU packing).png" style="width:100%; height:auto;"></center>
 <center><figcaption>Immersive Audio Sequence with scalable channel audio (before OBU packing)</figcaption></center>
 
+The IA decoder shall select one of one or more channel audios provided by scalable channel audio. The IA decoder should select the appropriate channel audio according to the following rules, in order:
+- The IA decoder should first attempt to select the channel audio whose loudspeaker layout matches the physical playback layout.
+- If there is no match, the IA decoder should select the channel audio with the closest specified loudspeaker layout to the physical layout and then apply up or down-mixing appropriately, after decoding and reconstruction of the channel audio. [[#iacgeneration-scalablechannelaudio-downmixmechanism]] and [[#processing-downmixmatrix]] provide example dynamic and static down-mixing matrices for some common layouts that may be used.
+
 <b>Semantics</b>
 
 <dfn noexport>num_layers</dfn> shall indicate the number of ChannelGroups for scalable channel audio. It shall not be set to zero and its maximum number shall be limited to 6.
