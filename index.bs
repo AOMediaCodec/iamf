@@ -1859,12 +1859,12 @@ During decapsulation process, IAC file is decapsulated into IA sequences which c
 	- [Step1-2] Codec Config OBU: generate [=codec_id=] and [=decoder_config()=] from CodecSpecificBox of <code>iamf</code> sample entry, num_samples_per_frame from 'stts' box and take roll_distance from [=AudioPreRollEntry=], and packetize it by OBU with obu_type = OBU_IA_Codec_Config.
 	- [Step1-3] Mix Presentation OBUs and Audio Element OBUs: take the ith SampleGroupDescriptionEntry as it is in SampleGroup with grouping_type, [=iagd=].
 	- [Step1-4] Figure out the offset (i1) and number (im) of Samples, which the ith SampleGroupDescriptionEntry is applied to, from the SampleGroup.
-- Step2: Reconstructing of the jth Temporal Unit of the ith IA sequence (j = i1, i2, …, im)
-	- [Step2-1] Prepare Sync_OBU with obu_type = OBU_IA_Sync.
-	- [Step2-2] If there is the SampleGroup with grouping_type = [=demi=], then take the parameter block OBU for the demixing_info and jth sample. Otherwise, take jth sample as it is.
+- Step2: Prepare Sync_OBU with obu_type = OBU_IA_Sync.
+- Step3: Reconstructing of the jth Temporal Unit of the ith IA sequence (j = i1, i2, …, im)
+	- [Step3-1] If there is the SampleGroup with grouping_type = [=demi=], then take the parameter block OBU for the demixing_info and jth sample. Otherwise, take jth sample as it is.
 		- Parameter block OBU for demixing_info: take the SampleGroupDescriptionEntry as it is, from SampleGrouop with grouping_type = [=demi=], mapped to jth Sample.
-	- [Step2-3] Place Sync_OBU at the front of the result of Step2-2 without gap to reconstruct the jth Temporal Unit.
-- Step3: Place descriptor OBUs and followed by Temporal Units in order (j = i1, i2, …, im) without gap to reconstruct the ith IA sequence.
+	- [Step3-2] Place Sync_OBU at the front of the result of Step2-2 without gap to reconstruct the jth Temporal Unit.
+- Step4: Place descriptor OBUs, followed by Sync OBU, and followed by Temporal Units in order (j = i1, i2, …, im) without gap, to reconstruct the ith IA sequence.
 
 [=codec_id=] and [=decoder_config()=] for IAC-OPUS is generated as follows:
 - The syntax and values shall conform to [=ID Header=] of [[!RFC7845]] with following constraints.
