@@ -735,11 +735,11 @@ class parameter_block_obu() {
 
 <dfn value noexport for="parameter_block_obu()">parameter_id</dfn> shall indicate the unique ID that is associated with a specific parameter definition. All parameter blocks that provide data for that parameter definition shall have the same parameter_id.
 
-<dfn noexport>duration</dfn> shall specify the duration for which this parameter block is valid and applicable. The duration shall be expressed as the number of ticks at the rate indicated by the time_base specified in the corresponding parameter definition.
+<dfn noexport>duration</dfn> shall specify the duration for which this parameter block is valid and applicable. 
 
 <dfn noexport>num_segments</dfn> shall specify the number of different sets of parameter values specified in this parameter block, where each set describes a different segment of the timeline, contiguously.
 
-<dfn noexport>constant_segment_interval</dfn> shall specify the interval of each segment, in the case where all segments have equal intervals. If all segments do not have equal intervals, the value of constant_segment_interval shall be set to 0. This value shall be expressed as the number of ticks at the rate indicated by the time base specified in the corresponding parameter definition.
+<dfn noexport>constant_segment_interval</dfn> shall specify the interval of each segment, in the case where all segments except the last segment have equal intervals. If all segments except the last segment do not have equal intervals, the value of constant_segment_interval shall be set to 0. 
 
 <dfn noexport>get_param_definition_type()</dfn> is a run-time function that shall map the parameter_id to its registered parameter definition type. All parameter definition types described in this version of the specification are listed in the table below, along with their associated parameter definitions.
 
@@ -761,6 +761,12 @@ class parameter_block_obu() {
 NOTE: param_definition_type is not coded in the bitstream but is inferred at run time based on parameter_id.
 
 <dfn noexport>segment_interval</dfn> shall specify the interval for the given segment.
+
+Each value of [=duration=], [=constant_segment_interval=] and [=segment_interval=] shall be expressed as the number of ticks at the rate indicated by the time base specified in the corresponding parameter definition.
+- When it defines <dfn noexport>D</dfn> = the value of [=duration=], <dfn noexport>NS</dfn> = the value of [=num_segments=], <dfn noexport>CSI</dfn> = the value of [=constant_segment_interval=] and <dfn noexport>SI</dfn> = the value of [=segment_interval=].
+	- When [=CSI=] != 0, [=NS=] x [=CSI=] shall be equal to or greater than [=D=].
+		- If [=NS=] x [=CSI=] > [=D=], the actual interval of the last segment shall be [=D=] - ([=NS=] - 1) x [=CSI=].
+	- When [=CSI=] = 0, the summation of all [=SI=]s in this parameter block shall be equal to [=D=].
 
 <dfn noexport>animation_type</dfn> shall specify the how the parameter values in this parameter block shall be animated.
 
