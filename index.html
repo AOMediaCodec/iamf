@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 63e66730b, updated Tue Oct 25 12:35:05 2022 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="678eed575d49aa7a4af43d666e4e7c2511ee28d2" name="document-revision">
+  <meta content="8ce5e009c97cbe2990bf3b70e9b7e62592a48d50" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2919,7 +2919,13 @@ class ambisonics_projection_config() {
 </pre>
    <p>If ambisonics_mode is equal to MONO, this shall indicate that the Ambisonics channels are coded as individual mono substreams.</p>
    <p>If ambisonics_mode is equal to PROJECTION, this shall indicate that the Ambisonics channels are first linearly projected onto another subspace before coding as a mix of coupled stereo and mono substreams.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="output_channel_count">output_channel_count</dfn> shall be the same as <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc8486#" id="termref-for-②③">channel count</a> in [[!RFC8486].</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="output_channel_count">output_channel_count</dfn> shall be the same as <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc8486#" id="termref-for-②③">channel count</a> in [[!RFC8486] with following restrictions:</p>
+   <ul>
+    <li data-md>
+     <p>The allowed numbers of <a data-link-type="dfn" href="#output_channel_count" id="ref-for-output_channel_count">output_channel_count</a> are (1+n)^2, where n = 0, 1, 2, ..., 14.</p>
+    <li data-md>
+     <p>In other words, the scene-based audio element shall not include non-diegetic channels.</p>
+   </ul>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="substream_count">substream_count</dfn> shall specify the number of audio substreams. It must be the same as <a data-link-type="dfn" href="#num_substreams" id="ref-for-num_substreams">num_substreams</a> in its corresponding audio_element().</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="channel_mapping">channel_mapping</dfn> shall be the same as the one for <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②④">ChannelMappingFamily</a> = 2 in <a data-link-type="biblio" href="#biblio-rfc8486">[RFC8486]</a>.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="coupled_substream_count">coupled_substream_count</dfn> shall specify the number of referenced substreams that are coded as coupled stereo channels, where M &lt;= N.</p>
@@ -3881,9 +3887,9 @@ Quantity:  One of more
        <p>OBU parser shall output <a data-link-type="dfn" href="#channel_mapping" id="ref-for-channel_mapping">channel_mapping</a> or <a data-link-type="dfn" href="#demixing_matrix" id="ref-for-demixing_matrix">demixing_matrix</a> according to <a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode">ambisonics_mode</a> to Channel_Mapping/Demixing_Matrix module</p>
      </ul>
     <li data-md>
-     <p>Codec decoder shall output decoded channels (PCM) in the transmission order as many as<a data-link-type="dfn" href="#output_channel_count" id="ref-for-output_channel_count">output_channel_count</a> after decoding of each Substream.</p>
+     <p>Codec decoder shall output decoded channels (PCM) in the transmission order as many as<a data-link-type="dfn" href="#output_channel_count" id="ref-for-output_channel_count①">output_channel_count</a> after decoding of each Substream.</p>
     <li data-md>
-     <p>Channel_Mapping/Demixing_Matrix module shall apply channel_mapping or demixing_matrix according to Ambisonics_Mode to the channels (PCM) and outputs channels as many as <a data-link-type="dfn" href="#output_channel_count" id="ref-for-output_channel_count①">output_channel_count</a> in ACN order.</p>
+     <p>Channel_Mapping/Demixing_Matrix module shall apply channel_mapping or demixing_matrix according to Ambisonics_Mode to the channels (PCM) and outputs channels as many as <a data-link-type="dfn" href="#output_channel_count" id="ref-for-output_channel_count②">output_channel_count</a> in ACN order.</p>
     <li data-md>
      <p>Ambisonics to Channel Format module may convert the output channels to channel audio according to the target loudspeaker layout.</p>
    </ul>
@@ -4338,7 +4344,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
          <p>ambisonics_config is set to as follows:</p>
          <ul>
           <li data-md>
-           <p><a data-link-type="dfn" href="#output_channel_count" id="ref-for-output_channel_count②">output_channel_count</a>, <a data-link-type="dfn" href="#substream_count" id="ref-for-substream_count">substream_count</a> and <a data-link-type="dfn" href="#coupled_substream_count" id="ref-for-coupled_substream_count">coupled_substream_count</a> shall be set to the number of channels for Ambisonics.</p>
+           <p><a data-link-type="dfn" href="#output_channel_count" id="ref-for-output_channel_count③">output_channel_count</a>, <a data-link-type="dfn" href="#substream_count" id="ref-for-substream_count">substream_count</a> and <a data-link-type="dfn" href="#coupled_substream_count" id="ref-for-coupled_substream_count">coupled_substream_count</a> shall be set to the number of channels for Ambisonics.</p>
           <li data-md>
            <p><a data-link-type="dfn" href="#channel_mapping" id="ref-for-channel_mapping①">channel_mapping</a> for <a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode②">ambisonics_mode</a> = 0 is assigned to according to the order of substreams in ChannelGroup.</p>
           <li data-md>
@@ -6107,8 +6113,9 @@ Recon_Gain for D_Rtb4:
   <aside class="dfn-panel" data-for="output_channel_count">
    <b><a href="#output_channel_count">#output_channel_count</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-output_channel_count">9.1. Ambisonics decoding</a> <a href="#ref-for-output_channel_count①">(2)</a>
-    <li><a href="#ref-for-output_channel_count②">10.1. Ambisonics Encoding</a>
+    <li><a href="#ref-for-output_channel_count">4.2.2. Ambisonics Config Syntax and Semantics</a>
+    <li><a href="#ref-for-output_channel_count①">9.1. Ambisonics decoding</a> <a href="#ref-for-output_channel_count②">(2)</a>
+    <li><a href="#ref-for-output_channel_count③">10.1. Ambisonics Encoding</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="substream_count">
