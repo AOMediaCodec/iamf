@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 63e66730b, updated Tue Oct 25 12:35:05 2022 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="819a30ac67777a00ea32d55962e7fb15e4aae450" name="document-revision">
+  <meta content="ae27fac5348abda520a18173c5e73527863dd2d7" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2822,6 +2822,13 @@ class channel_audio_layer_config(i) {
    <center>
     <figcaption>Immersive Audio Sequence with scalable channel audio (before OBU packing)</figcaption>
    </center>
+   <p>The IA decoder shall select one of one or more channel audios provided by scalable channel audio. The IA decoder should select the appropriate channel audio according to the following rules, in order:</p>
+   <ul>
+    <li data-md>
+     <p>The IA decoder should first attempt to select the channel audio whose loudspeaker layout matches the physical playback layout.</p>
+    <li data-md>
+     <p>If there is no match, the IA decoder should select the channel audio with the closest specified loudspeaker layout to the physical layout and then apply up or down-mixing appropriately, after decoding and reconstruction of the channel audio. <a href="#iacgeneration-scalablechannelaudio-downmixmechanism">§ 10.2.2 Down-mix Mechanism</a> and <a href="#processing-downmixmatrix">§ 9.5 Down-mix Matrix</a> provide examples of dynamic and static down-mixing matrices for some common layouts that may be used.</p>
+   </ul>
    <p><b>Semantics</b></p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_layers">num_layers</dfn> shall indicate the number of ChannelGroups for scalable channel audio. It shall not be set to zero and its maximum number shall be limited to 6.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="channel_audio_layer_config">channel_audio_layer_config()</dfn> is a class that provides the information regarding the configuration of ChannelGroup for scalable channel audio. channel_audio_layer_config(i) shall provide information regarding the configuaration of ChannelGroup #i.</p>
