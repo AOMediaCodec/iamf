@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 63e66730b, updated Tue Oct 25 12:35:05 2022 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="39a02e2fc56782a8bc948808c56ce36e5e41e2a5" name="document-revision">
+  <meta content="6eb1a3da98e37a7bece33a4df7b1e4b5ced3a515" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2876,6 +2876,8 @@ Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
     <li data-md>
      <p>1: recon_gain information fields for the ChannelGroup present in Recon_Gain_Info_OBU. In this case, recon_gain_flags and recon_gain fields present.</p>
    </ul>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="substream_count">substream_count</dfn> shall specify the number of audio substreams. It must be the same as <a data-link-type="dfn" href="#num_substreams" id="ref-for-num_substreams">num_substreams</a> in its corresponding audio_element().</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="coupled_substream_count">coupled_substream_count</dfn> shall specify the number of referenced substreams that are coded as coupled stereo channels.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="loudness">loudness</dfn> shall indicate the loudness value of the downmixed channels, for the channel layout which is indicated by loudspeaker_layout, from the original channel audio. It shall be stored in fixed-point value with 8 fractional bits (i.e. Q7.8 in <a data-link-type="biblio" href="#biblio-q-format">[Q-Format]</a>) and should be <a data-link-type="dfn" href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#" id="termref-for-②②">LKFS</a> based on <a data-link-type="biblio" href="#biblio-itu1770-4">[ITU1770-4]</a>, so it shall be to represent zero or negative value.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="output_gain_flags">output_gain_flags</dfn> shall indicate the channels which output_gian is applied to. If a bit set to 1, output_gain shall be applied to the channel. Otherwise, output_gain shall not be applied to the channel.</p>
 <pre class="def">Bit position : Channel Name
@@ -2928,9 +2930,9 @@ class ambisonics_projection_config() {
     <li data-md>
      <p>In other words, the scene-based audio element shall not include non-diegetic channels.</p>
    </ul>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="substream_count">substream_count</dfn> shall specify the number of audio substreams. It must be the same as <a data-link-type="dfn" href="#num_substreams" id="ref-for-num_substreams">num_substreams</a> in its corresponding audio_element().</p>
+   <p><a data-link-type="dfn" href="#substream_count" id="ref-for-substream_count">substream_count</a> shall specify the number of audio substreams. It must be the same as <a data-link-type="dfn" href="#num_substreams" id="ref-for-num_substreams①">num_substreams</a> in its corresponding audio_element().</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="channel_mapping">channel_mapping</dfn> shall be the same as the one for <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②④">ChannelMappingFamily</a> = 2 in <a data-link-type="biblio" href="#biblio-rfc8486">[RFC8486]</a>.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="coupled_substream_count">coupled_substream_count</dfn> shall specify the number of referenced substreams that are coded as coupled stereo channels, where M &lt;= N.</p>
+   <p><a data-link-type="dfn" href="#coupled_substream_count" id="ref-for-coupled_substream_count">coupled_substream_count</a> shall specify the number of referenced substreams that are coded as coupled stereo channels, where M &lt;= N.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="demixing_matrix">demixing_matrix</dfn> shall be the same as the one for <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②⑤">ChannelMappingFamily</a> = 3 in <a data-link-type="biblio" href="#biblio-rfc8486">[RFC8486]</a> except the byte order of each of matrix coefficients shall be converted to big endian.</p>
    <h4 class="heading settled" data-level="4.2.3" id="syntax-demixing-info"><span class="secno">4.2.3. </span><span class="content">Demixing Info Syntax and Semantics</span><a class="self-link" href="#syntax-demixing-info"></a></h4>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="demixing_info">demixing_info()</dfn> specifies demixing parameter mode to be used to reconstruct output channel audio according to its <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout①">loudspeaker_layout</a>.</p>
@@ -4346,7 +4348,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
          <p>ambisonics_config is set to as follows:</p>
          <ul>
           <li data-md>
-           <p><a data-link-type="dfn" href="#output_channel_count" id="ref-for-output_channel_count③">output_channel_count</a>, <a data-link-type="dfn" href="#substream_count" id="ref-for-substream_count">substream_count</a> and <a data-link-type="dfn" href="#coupled_substream_count" id="ref-for-coupled_substream_count">coupled_substream_count</a> shall be set to the number of channels for Ambisonics.</p>
+           <p><a data-link-type="dfn" href="#output_channel_count" id="ref-for-output_channel_count③">output_channel_count</a>, <a data-link-type="dfn" href="#substream_count" id="ref-for-substream_count①">substream_count</a> and <a data-link-type="dfn" href="#coupled_substream_count" id="ref-for-coupled_substream_count①">coupled_substream_count</a> shall be set to the number of channels for Ambisonics.</p>
           <li data-md>
            <p><a data-link-type="dfn" href="#channel_mapping" id="ref-for-channel_mapping①">channel_mapping</a> for <a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode②">ambisonics_mode</a> = 0 is assigned to according to the order of substreams in ChannelGroup.</p>
           <li data-md>
@@ -4355,7 +4357,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
        </ul>
      </ul>
     <li data-md>
-     <p>Codec Enc. outputs substreams as many as the number of channels which is indicated in <a data-link-type="dfn" href="#substream_count" id="ref-for-substream_count①">substream_count</a>.</p>
+     <p>Codec Enc. outputs substreams as many as the number of channels which is indicated in <a data-link-type="dfn" href="#substream_count" id="ref-for-substream_count②">substream_count</a>.</p>
     <li data-md>
      <p>Temporal unit shall be composed of audio frame OBUs for substreams.</p>
      <ul>
@@ -4409,9 +4411,9 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
             <li data-md>
              <p><a data-link-type="dfn" href="#recon_gain_is_present_flag" id="ref-for-recon_gain_is_present_flag">recon_gain_is_present_flag</a> shall be set to 1 for the ith ChannelGroup if the preceding ChannelGroups has one or more mixed channels from the down-mixed audio for the ith channel layout. Otherwise, it shall be set to 0 for the ith ChannelGroup. Especially, when <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①①">num_layers</a> = 1, this flag shall be set to 0.</p>
             <li data-md>
-             <p><a data-link-type="dfn" href="#substream_count" id="ref-for-substream_count②">substream_count</a> shall be set to the nubmer of substreams composing of the ith ChannelGroup.</p>
+             <p><a data-link-type="dfn" href="#substream_count" id="ref-for-substream_count③">substream_count</a> shall be set to the nubmer of substreams composing of the ith ChannelGroup.</p>
             <li data-md>
-             <p><a data-link-type="dfn" href="#coupled_substream_count" id="ref-for-coupled_substream_count①">coupled_substream_count</a> shall be set to the nubmer of coupled substreams among the substreams composing of the ith ChannelGroup.</p>
+             <p><a data-link-type="dfn" href="#coupled_substream_count" id="ref-for-coupled_substream_count②">coupled_substream_count</a> shall be set to the nubmer of coupled substreams among the substreams composing of the ith ChannelGroup.</p>
             <li data-md>
              <p><a data-link-type="dfn" href="#loudness" id="ref-for-loudness">loudness</a> shall be set to the loudness (<a data-link-type="dfn" href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#" id="termref-for-①②④">LKFS</a>) of the down-mixed audio for the ith channel layout for the ith ChannelGroup.</p>
             <li data-md>
@@ -4962,7 +4964,7 @@ Recon_Gain for D_Rtb4:
    <li><a href="#control_point_relative_time">control_point_relative_time</a><span>, in § 4.1.9</span>
    <li><a href="#control_point_value">control_point_value</a><span>, in § 4.1.9</span>
    <li><a href="#coupled-channels">Coupled channels</a><span>, in § 10</span>
-   <li><a href="#coupled_substream_count">coupled_substream_count</a><span>, in § 4.2.2</span>
+   <li><a href="#coupled_substream_count">coupled_substream_count</a><span>, in § 4.2.1</span>
    <li><a href="#decoder_config">decoder_config()</a><span>, in § 4.1.6</span>
    <li><a href="#default_mix_gain">default_mix_gain</a><span>, in § 4.2.7.1</span>
    <li><a href="#delta">delta</a><span>, in § 4.2.3</span>
@@ -5067,7 +5069,7 @@ Recon_Gain for D_Rtb4:
    <li><a href="#start-code-obu">Start Code OBU</a><span>, in § 3.2.1</span>
    <li><a href="#start_point_value">start_point_value</a><span>, in § 4.1.9</span>
    <li><a href="#stereo">Stereo</a><span>, in § 4.2.1</span>
-   <li><a href="#substream_count">substream_count</a><span>, in § 4.2.2</span>
+   <li><a href="#substream_count">substream_count</a><span>, in § 4.2.1</span>
    <li><a href="#sync-obu">Sync OBU</a><span>, in § 3.2.2</span>
    <li><a href="#t2to4-de-mixer">T2to4 de-mixer</a><span>, in § 9.2.2</span>
    <li><a href="#temporal-delimiter-obu">Temporal Delimiter OBU</a><span>, in § 3.2.2</span>
@@ -5944,7 +5946,8 @@ Recon_Gain for D_Rtb4:
   <aside class="dfn-panel" data-for="num_substreams">
    <b><a href="#num_substreams">#num_substreams</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-num_substreams">4.2.2. Ambisonics Config Syntax and Semantics</a>
+    <li><a href="#ref-for-num_substreams">4.2.1. Scalable Channel Layout Config Syntax and Semantics</a>
+    <li><a href="#ref-for-num_substreams①">4.2.2. Ambisonics Config Syntax and Semantics</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="audio_substream_id">
@@ -6087,6 +6090,22 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-recon_gain_is_present_flag">10.2. Scalable Channel Audio Encoding</a> <a href="#ref-for-recon_gain_is_present_flag①">(2)</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="substream_count">
+   <b><a href="#substream_count">#substream_count</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-substream_count">4.2.2. Ambisonics Config Syntax and Semantics</a>
+    <li><a href="#ref-for-substream_count①">10.1. Ambisonics Encoding</a> <a href="#ref-for-substream_count②">(2)</a>
+    <li><a href="#ref-for-substream_count③">10.2. Scalable Channel Audio Encoding</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="coupled_substream_count">
+   <b><a href="#coupled_substream_count">#coupled_substream_count</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-coupled_substream_count">4.2.2. Ambisonics Config Syntax and Semantics</a>
+    <li><a href="#ref-for-coupled_substream_count①">10.1. Ambisonics Encoding</a>
+    <li><a href="#ref-for-coupled_substream_count②">10.2. Scalable Channel Audio Encoding</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="loudness">
    <b><a href="#loudness">#loudness</a></b><b>Referenced in:</b>
    <ul>
@@ -6120,25 +6139,11 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-output_channel_count③">10.1. Ambisonics Encoding</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="substream_count">
-   <b><a href="#substream_count">#substream_count</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-substream_count">10.1. Ambisonics Encoding</a> <a href="#ref-for-substream_count①">(2)</a>
-    <li><a href="#ref-for-substream_count②">10.2. Scalable Channel Audio Encoding</a>
-   </ul>
-  </aside>
   <aside class="dfn-panel" data-for="channel_mapping">
    <b><a href="#channel_mapping">#channel_mapping</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-channel_mapping">9.1. Ambisonics decoding</a>
     <li><a href="#ref-for-channel_mapping①">10.1. Ambisonics Encoding</a> <a href="#ref-for-channel_mapping②">(2)</a>
-   </ul>
-  </aside>
-  <aside class="dfn-panel" data-for="coupled_substream_count">
-   <b><a href="#coupled_substream_count">#coupled_substream_count</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-coupled_substream_count">10.1. Ambisonics Encoding</a>
-    <li><a href="#ref-for-coupled_substream_count①">10.2. Scalable Channel Audio Encoding</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="demixing_matrix">
