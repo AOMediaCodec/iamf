@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 63e66730b, updated Tue Oct 25 12:35:05 2022 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="8ce5e009c97cbe2990bf3b70e9b7e62592a48d50" name="document-revision">
+  <meta content="39a02e2fc56782a8bc948808c56ce36e5e41e2a5" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2487,24 +2487,34 @@ greater is incompatible.</p>
    <p><b>Syntax</b></p>
 <pre>class codec_config_obu() {
   leb128() codec_config_id;
-  codec_config();
   leb128() num_audio_elements;
   for (i = 0; i &lt; num_audio_elements; i++) {
     leb128() audio_element_id;
   }
+  codec_config();
+
 }
 
 class codec_config() {
   unsigned int (32) codec_id;
-  decoder_config(codec_id);
   leb128() num_samples_per_frame;
   signed int (16) roll_distance;
+  decoder_config(codec_id);
+
 }
 </pre>
    <p><b>Semantics</b></p>
    <p><dfn data-dfn-type="dfn" data-noexport id="codec_config_id">codec_config_id<a class="self-link" href="#codec_config_id"></a></dfn> shall indicate a unique ID in an IA sequence for a given codec config.</p>
+   <p><dfn class="css" data-dfn-for="codec_config_obu()" data-dfn-type="value" data-noexport id="valdef-codec_config_obu-num_audio_elements">num_audio_elements<a class="self-link" href="#valdef-codec_config_obu-num_audio_elements"></a></dfn> shall specify the number of audio elements that refer to this codec config.</p>
+   <p><dfn class="css" data-dfn-for="codec_config_obu()" data-dfn-type="value" data-noexport id="valdef-codec_config_obu-audio_element_id">audio_element_id<a class="self-link" href="#valdef-codec_config_obu-audio_element_id"></a></dfn> shall specify the unique ID associated with the specific audio element that refers to this codec config.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="codec_id">codec_id</dfn> shall be a ‘four-character code’ (4CC) to identify the codec used to generate the audio substreams. It shall be <a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-⑥">opus</a> for IAC-OPUS, <a class="property css" data-link-type="property" href="https://www.iso.org/standard/79110.html#" id="termref-for-⑦">mp4a</a> for IAC-AAC-LC, <a class="property css" data-link-type="property" href="https://xiph.org/flac/format.html" id="termref-for-⑧">fLaC</a> for IAC-FLAC and <a class="property css" data-link-type="property">lpcm</a> for IAC-LPCM.</p>
    <p>For ISOBMFF encapsulation, it shall be the same as the <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨">boxtype</a> of its AudioSampleEntry if exist.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_samples_per_frame">num_samples_per_frame</dfn> shall indicate the frame length, in samples, of the raw coded audio provided in by audio_frame_obu().</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="roll_distance">roll_distance<a class="self-link" href="#roll_distance"></a></dfn> is a signed integer that gives the number of frames that need to be decoded in order for a frame to be decoded correctly. A negative value indicates the number of frames before the frame to be decoded corrently.</p>
+   <ul>
+    <li data-md>
+     <p>It shall be set to -1 for IAC-AAC-LC and -R (R = 4 when the frame size = 960) for IAC-OPUS. IAC-FLAC may ignore this field. Where, R is the smallest integer greater than or equal to 3840 divided by the frame size.</p>
+   </ul>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="decoder_config">decoder_config()</dfn> specifies the set of codec parameters required to decode an audio substream for the given codec_id. It shall be byte aligned.</p>
    <ul>
     <li data-md>
@@ -2516,14 +2526,6 @@ class codec_config() {
     <li data-md>
      <p>The codec_id and decoder_config() for IAC-LPCM shall conform to <a data-link-type="dfn" href="#codec_specific_info" id="ref-for-codec_specific_info③">Codec_Specific_Info</a> of <a href="#iac-lpcm-specific">§ 4.3.4 IAC-LPCM Specific</a>.</p>
    </ul>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_samples_per_frame">num_samples_per_frame</dfn> shall indicate the frame length, in samples, of the raw coded audio provided in by audio_frame_obu().</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="roll_distance">roll_distance<a class="self-link" href="#roll_distance"></a></dfn> is a signed integer that gives the number of frames that need to be decoded in order for a frame to be decoded correctly. A negative value indicates the number of frames before the frame to be decoded corrently.</p>
-   <ul>
-    <li data-md>
-     <p>It shall be set to -1 for IAC-AAC-LC and -R (R = 4 when the frame size = 960) for IAC-OPUS. IAC-FLAC may ignore this field. Where, R is the smallest integer greater than or equal to 3840 divided by the frame size.</p>
-   </ul>
-   <p><dfn class="css" data-dfn-for="codec_config_obu()" data-dfn-type="value" data-noexport id="valdef-codec_config_obu-num_audio_elements">num_audio_elements<a class="self-link" href="#valdef-codec_config_obu-num_audio_elements"></a></dfn> shall specify the number of audio elements that refer to this codec config.</p>
-   <p><dfn class="css" data-dfn-for="codec_config_obu()" data-dfn-type="value" data-noexport id="valdef-codec_config_obu-audio_element_id">audio_element_id<a class="self-link" href="#valdef-codec_config_obu-audio_element_id"></a></dfn> shall specify the unique ID associated with the specific audio element that refers to this codec config.</p>
    <h4 class="heading settled" data-level="4.1.7" id="obu-audioelement"><span class="secno">4.1.7. </span><span class="content">Audio Element OBU Syntax and Semantics</span><a class="self-link" href="#obu-audioelement"></a></h4>
    <p>This section specifies the OBU payload of OBU_IA_Audio_Element.</p>
    <p><b>Syntax</b></p>
@@ -5921,6 +5923,12 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-codec_id⑨">8.1. ISOBMFF IAC Decapsulation with single track</a> <a href="#ref-for-codec_id①⓪">(2)</a> <a href="#ref-for-codec_id①①">(3)</a> <a href="#ref-for-codec_id①②">(4)</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="num_samples_per_frame">
+   <b><a href="#num_samples_per_frame">#num_samples_per_frame</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-num_samples_per_frame">6.2. Synchronizing Data OBUs</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="decoder_config">
    <b><a href="#decoder_config">#decoder_config</a></b><b>Referenced in:</b>
    <ul>
@@ -5931,12 +5939,6 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-decoder_config④">8.1. ISOBMFF IAC Decapsulation with single track</a> <a href="#ref-for-decoder_config⑤">(2)</a> <a href="#ref-for-decoder_config⑥">(3)</a> <a href="#ref-for-decoder_config⑦">(4)</a>
     <li><a href="#ref-for-decoder_config⑧">9.2. Scalable Channel Audio decoding</a>
     <li><a href="#ref-for-decoder_config⑨">10.2. Scalable Channel Audio Encoding</a>
-   </ul>
-  </aside>
-  <aside class="dfn-panel" data-for="num_samples_per_frame">
-   <b><a href="#num_samples_per_frame">#num_samples_per_frame</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-num_samples_per_frame">6.2. Synchronizing Data OBUs</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="num_substreams">
