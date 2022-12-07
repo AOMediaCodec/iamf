@@ -609,16 +609,17 @@ audio_element_type: The type of audio representation.
 
 <dfn noexport>audio_substream_id</dfn> shall specify the unique ID associated with the audio substream that is used to reconstruct this audio element.
 
-For a given audio element, the [=audio_substream_id=] associated with the ith substream in all of one or more ChannelGroups for the given audio element shall be listed in the ith in this loop.
- - Where, i = 0, 1, 2, ..., [=num_substreams=].
+Let a particular ChannelGroup's substream be indexed as [<dfn noexport>c</dfn>, <dfn noexport>n_c</dfn>], where
+- [=c=] = [1, ..., C] is the ChannelGroup index and C is the number of ChannelGroups.
+- [=n_c=] = [1, ..., N_c] is the substream index in the c-th ChannelGroup and N_c is the number of substreams in the c-th ChannelGroup.
+- The i-th audio_substream_id maps to a ChannelGroup's substream as follows, where i is the index of the array:
 
-The order of substreams in each ChannelGroup is pre-defined as specified in [[#iacgeneration]] and the definition of ChannelGroup is defined in [[#syntax-scalable-channel-layout-config]]
- - Where, the order of the substreams does not need to be same as the order of Audio Frame OBUs for the given audio element in the IA sequence. But, the order of the Audio Frame OBUs shall be same in every temporal units of the IA sequecne.
+```
+[[1, 1], [1, 2], ..., [1, N_1], [2, 1], [2, 2], ..., [2, N_2], ..., [C, 1], [C, 2], ..., [C, N_c]]
+```
 
-In other words, when [=audio_element_type=] = 0, the order of [=audio_substream_id=]s in this loop shall indicate the order of the substreams in the [=num_layers=] = r number of ChannelGroups for the channel-based audio element and when [=audio_element_type=] = 1, the order of [=audio_substream_id=]s in this loop shall indicate the order of the substreams in the one ChannelGroup for the scene-based audio element.
-- When <dfn noexport>N1</dfn> = the number of substreams in the 1st ChannelGroup, <dfn noexport>N2</dfn> = the number of substreams in the 2nd ChannelGroup, ..., <dfn noexport>Nr</dfn> = the number of substreams in the <b>r</b>th ChannelGroup.
-- [=audio_substream_id=]s in the loop indicate substreams in the r number of ChannelGroups, [1, 1], [1, 2], ..., [1, N1], [2, 1], [2, 2], ..., [2, N2],..., [r, 1], [r, 2], ..., [r, Nr] in order.
- - Where [x, y] means yth substream of xth ChannelGroup.
+A ChannelGroup is defined in [[#iacgeneration]]. The order of the substreams in each ChannelGroup., i.e. the semantics of n_c, is specified in [[#syntax-scalable-channel-layout-config]].
+
 
 <dfn noexport>num_parameters</dfn> shall specify the number of parameters that are used by the algorithms specified in this audio element.
 
