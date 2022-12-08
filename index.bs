@@ -650,26 +650,6 @@ audio_element_type: The type of audio representation.
 
 <dfn noexport>ambisonics_config()</dfn> is a class that provides the metadata required for combining the substreams identified here in order to reconstruct an Ambisonics layout.
 
-#### Parameter Definition Syntax and Semantics #### {#parameter-definition}
-
-Parameter definition classes shall inherit from the abstract <dfn noexport>ParamDefinition()</dfn> class.
-
-<b>Syntax</b>
-
-```
-abstract class ParamDefinition() {
-  leb128() parameter_id;
-  leb128() time_base;
-}
-```
-
-<b>Semantics</b>
-
-<dfn value noexport for="ParamDefinition()">parameter_id</dfn> shall indicate the unique ID in an IA bitstream for a given parameter.
-
-<dfn value noexport for="ParamDefinition()">time_base</dfn> shall specify the time base used by this parameter, expressed as ticks per second. Time-related fields associated with this parameter, such as durations and intervals, shall be expressed in the number of ticks.
-
-
 ### Mix Presentation OBU Syntax and Semantics ### {#obu-mixpresentation}
 
 This section specifies the OBU payload of OBU_IA_Mix_Presentation.
@@ -878,7 +858,6 @@ This value must be greater or equal to 22, in order to avoid collision with the 
 <dfn noexport>audio_frame()</dfn> is the raw coded audio data for the frame. It shall be [=opus packet=] of [[!RFC6716]] for IAC-OPUS, [=raw_data_block()=] of [[!AAC]] for IAC-AAC-LC and [=FRAME=] of [[!FLAC]] for IAC-FLAC.
 
 For IAC-LPCM, [=audio_frame()=] shall be LPCM samples. When more than one byte is used to represent a LPCM sample, the byte order shall be in little endian. 
-
 
 For this version of the specification, all audio frames for a given substream must be gapless.
 
