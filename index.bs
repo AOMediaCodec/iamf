@@ -105,6 +105,12 @@ url: https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.2051-3-202205-I!!PDF-E
 	text: Loudspeaker configuration for Sound System J (4+7+0)
 	text: SP Label
 
+url: https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.2127-0-201906-I!!PDF-E.pdf#; spec: ITU2127-0; type: dfn;
+	text:
+
+url: https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.2076-2-201910-I!!PDF-E.pdf#; spec: ITU2076-2; type: dfn;
+	text:
+
 url: https://en.wikipedia.org/wiki/Q_(number_format); spec: Q-Format; type: dfn;
 	text:
 
@@ -188,8 +194,19 @@ url: https://xiph.org/flac/format.html; spec: FLAC; type: property;
 		"status": "Spec",
 		"publisher": "aomedia.org",
 		"href": "https://aomedia.org/av1/specification/conventions/"
+	},
+	"ITU2076-2": {
+		"title": "Audio Definition Model",
+		"status": "Standard",
+		"publisher": "ITU",
+		"href": "https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.2076-2-201910-I!!PDF-E.pdf"
+	},
+	"ITU2127-0": {
+		"title": "Audio Definition Model renderer for advanced sound systems",
+		"status": "Standard",
+		"publisher": "ITU",
+		"href": "https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.2127-0-201906-I!!PDF-E.pdf"
 	}
-
 }
 </pre>
 
@@ -220,6 +237,26 @@ All of syntax elements shall conform to [=Syntatic Description Language=] specif
  <b>syntaxName</b> is a human readable label whose byte representation shall consists of <b>two-letter primary language subtags</b> and <b>two-letter region subtags</b> which are connected by hyphen("-"), and followed by bytes representation of [=UTF-8_Enc(label)=].
  
  Where, <b>two-letter primary language subtags</b> and <b>two-letter region subtags</b> shall conform to [[!BCP47]].
+
+## Arithmetic Operators ## {#convention-arithmetic-operators}
+
+<table class="def">
+<tr>
+  <td>+</td><td>Addition.</td>
+</tr>
+<tr>
+  <td>-</td><td>Subtraction.</td>
+</tr>
+<tr>
+  <td>*</td><td>Multiplication.</td>
+</tr>
+<tr>
+  <td>floor(x)</td><td>The largest integer that is smaller than or equal to x.</td>
+</tr>
+<tr>
+  <td>sqrt(x)</td><td>The square root of x.</td>
+</tr>
+</table>
 
 ## Function ## {#convention-function}
 
@@ -666,71 +703,143 @@ A ChannelGroup is defined in [[#iacgeneration]]. The order of the substreams in 
 
 This section specifies the OBU payload of OBU_IA_Mix_Presentation.
 
-The metadata in mix_presentation() specifies how to render and process one or more audio elements. The processed audio elements shall then be summed to generate a mixed audio signal. Finally, any additional processing specified by the mix_bus_config() shall be applied to the mixed audio signal in order to generate the final output audio for playback.
+The metadata in mix_presentation() specifies how to render, process and mix one or more audio elements, with details provided in [[#processing-mixpresentation]].
 
+An IA sequence may have one or more mix presentations specified. The IA parser shall select the appropriate mix presentation to process according to the rules specified in [[#processing-mixpresentation-selection]].
+
+A mix presentation may contain one or more sub-mixes. Common use-cases may specify only one sub-mix, which includes all rendered and processed audio elements used in the mix presentation. The use-case for specifying more than one sub-mix arises if an IA multiplexer is merging two or more IA sequences. In this case, it may choose to capture the loudness information from the original IA sequences in multiple sub-mixes, instead of recomputing the loudness information for the final mix.
 
 <b>Syntax</b>
 ```
 class mix_presentation_obu() {
   leb128() mix_presentation_id;
-  string mix_presentation_friendly_label;
-  unsigned int (2) mix_target_layout_type;
+  mix_presentation_annotations();
 
-  mix_target_layout(mix_target_layout_type);
-
-  leb128() num_audio_elements;
-  for (i = 0; i < num_audio_elements; i++) {
-    string audio_element_friendly_label;
-    leb128() audio_element_id;
-    rendering_config();
-    element_mix_config();
+  leb128() num_sub_mixes;
+  for (i = 0; i < num_sub_mixes; i++) {	  
+    leb128() num_audio_elements;
+    for (j = 0; j < num_audio_elements; j++) {
+      leb128() audio_element_id;
+      mix_presentation_element_annotations();
+      rendering_config();
+      element_mix_config();
+    }
+    output_mix_config();
+    layout measured_layout;
+    loudness_info loudness; 
   }
-
-  mix_loudness_info();
-  mix_bus_config();
-}
+}  
 ```
 
 <b>Semantics</b>
 
 <dfn noexport>mix_presentation_id</dfn> shall indicate a unique ID in an IA sequence for a given mix presentation.
 
-<dfn noexport>mix_presentation_friendly_label</dfn> shall specify a human-friendly label to describe this mix presentation.
+<dfn noexport>mix_presentation_annotations()</dfn> is a class that provides informational metadata that an IA parser should refer to when selecting the mix presentation to use. The metadata may also be used by the playback system to display information to the user, but is not used in the rendering or mixing process to generate the final output audio signal.
 
-<dfn noexport>mix_target_layout_type</dfn> specifies a target layout type for this mix presentation. A value of 0 shall indicate no specific target layout, a value of 1 shall indicate that the target layout is defined using the [=SP Label=] of [[!ITU2051-3]], a value of 2 shall indicate that the target layout is defined using the sound system convention of [[!ITU2051-3]] and a value of 3 shall indicate that the target layout is binaural.
 
-<pre class = "def">
-mix_target_layout_type : Mix Target layout type
-           0           : NOT_DEFINED
-           1           : LOUDSPEAKERS_SP_LABEL
-           2           : LOUDSPEAKERS_SS_CONVENTION
-           3           : BINAURAL
-</pre>
-
-<dfn noexport>mix_target_layout()</dfn> is a class that specifies the target playback layout that all referenced audio elements shall be rendered for.
-
-An IA sequence may have one or more mix presentations specified, each with a different mix target layout. The IA parser shall select the appropriate target layout according to the following rules, in order:
-
-1. The IA parser shall first attempt to select the mix presentation that matches the physical playback layout.
-
-2. If there is no match, the IA parser shall select the mix presentation with [=mix_target_layout_type=] = 0. In this case, the renderer specified in rendering_config() shall render the physical playback layout appropriately.
-
-3. If there is no mix presentation with [=mix_target_layout_type=] = 0, the IA parser should select the mix presentation with the closest specified layout to the physical layout. The renderer specified in rendering_config() shall first render the layout specified by mix_target_layout() and then apply up or down-mixing appropriately. Sections [[#iacgeneration-scalablechannelaudio-downmixmechanism]] and [[#processing-downmixmatrix]] provide example dynamic and static down-mixing matrices for some common layouts that may be used.
+<dfn noexport>num_sub_mixes</dfn> specifies the number of sub-mixes for which the loudness information is provided.
 
 <dfn value noexport for ="mix_presentation_obu()">num_audio_elements</dfn> shall specify the number of audio elements that are used in this mix presentation to generate the final output audio signal for playback.
 
-<dfn noexport>audio_element_friendly_label</dfn> shall specify a human-friendly label to describe the referenced audio element.
-
 <dfn noexport>audio_element_id</dfn> shall indicate the unique ID associated with a specific audio element that is used in this mix presentation.
 
-<dfn noexport>rendering_config()</dfn> is a class that provides the metadata required for rendering the referenced audio element.
+<dfn noexport>rendering_config()</dfn> is a class that provides the metadata required for rendering the referenced audio element. 
 
 <dfn noexport>element_mix_config()</dfn> is a class that provides the metadata required for applying any processing to the referenced and rendered audio element before being summed with other processed audio elements.
 
-<dfn noexport>mix_loudness_info()</dfn> is a class that provides the loudness information and statistics for the final output audio signal.
+<dfn noexport>output_mix_config()</dfn> is a class that provides the metadata required for post-processing the mixed audio signal to generate the audio signal for playback.
 
-<dfn noexport>mix_bus_config()</dfn> is a class that provides the metadata required for applying any post-processing to the mixed audio signal to generate the final output audio signal for playback.
+<dfn noexport>measured_layout</dfn> identifies the layout that was used to measure the loudness information provided in this sub-mix.
 
+<dfn value noexport for ="mix_presentation_obu()">loudness</dfn> provides the loudness information for the mixed audio elements. If any of the audio elements are of type scalable channel layout with [=num_layers=] > 1, the loudness information provided here should correspond to the highest layout available.
+
+#### Mix Presentation Annotations Syntax and Semantics #### {#obu-mixpresentation-annotation}
+
+<b>Syntax</b>
+```
+class mix_presentation_annotations() {
+  string mix_presentation_friendly_label;
+  layout authored_layout;
+}
+```
+
+<b>Semantics</b>
+
+<dfn noexport>mix_presentation_friendly_label</dfn> shall specify a human-friendly label to describe this mix presentation.
+
+<dfn noexport>authored_layout</dfn> specifies the playback layout that used for authoring this mix. 
+
+The layout specified in [=authored_layout=] should not be higher than the highest layout among layouts provided by the audio elements. In other words, rendering from an audio element with the highest layout to the [=authored_layout=] should not require an upmix.
+
+NOTE: [=authored_layout=] does not necessarily required to be the same as [=measured_layout=].
+
+#### Mix Presentation Element Annotations Syntax and Semantics #### {#obu-mixpresentation-elementannotation}
+
+<b>Syntax</b>
+```
+class mix_presentation_element_annotations() {
+  string mix_presentation_friendly_label;
+}
+```
+
+<b>Semantics</b>
+
+<dfn noexport>audio_element_friendly_label</dfn> shall specify a human-friendly label to describe the referenced audio element.
+
+#### Output Mix Config Syntax and Semantics #### {#obu-mixpresentation-outputmix}
+
+output_mix_config() provides a gain value to be applied to the mixed audio signal.
+
+<b>Syntax</b>
+
+```
+class output_mix_config() {
+  MixGainParamDefinition output_mix_gain;
+}
+```
+
+<b>Semantics</b>
+
+<dfn noexport>output_mix_gain</dfn> provides the parameter definition for the gain value that is applied to all channels of the mixed audio signal. The parameter definition is provided by MixGainParamDefinition() and the corresponding parameter data to be provided in parameter blocks is specified in mix_gain_parameter_data().
+
+#### Loudness Info Syntax and Semantics #### {#obu-mixpresentation-loudness}
+
+loudness_info() provides loudness information for a given audio signal.
+
+All signed values are stored as signed Q7.8 fixed-point values (in [[!Q-Format]]).
+
+<b>Syntax</b>
+
+```
+class loudness_info() {
+  unsigned int (8) info_type;
+  signed int (16) integrated_loudness;
+  signed int (16) digital_peak;
+
+  if (info_type & 1) {
+    signed int (16) true_peak;
+  }
+}
+```
+
+<b>Semantics</b>
+
+<dfn noexport>info_type</dfn> is a bitmask that specifies the type of optional loudness information provided. The bits are set as follows, where the first bit is the LSB:
+
+<pre class = "def">
+ Bit : Type of information provided
+  0  : True peak
+ 2~8 : Reserved
+</pre>
+
+<dfn noexport>integrated_loudness</dfn> provides the integrated loudness information, specified in [=LKFS=] as defined in [[!ITU1770-4]], and measured according to [[!ITU1770-4]].
+
+<dfn noexport>digital_peak</dfn> specifies the digital (sampled) peak value of the audio signal, specified in dBFS.
+
+<dfn noexport>true_peak</dfn> specifies the true peak of the audio signal, specified in dBFS and measured according to [[!ITU1770-4]].
+
+NOTE: [[!ITU1770-4]] adopts the convention of using the dBov unit for dBFS, where the RMS value of a full-scale square wave is 0 dBov. The same convention is adopted here.
 
 ### Parameter Block OBU Syntax and Semantics ### {#obu-parameterblock}
 
@@ -826,7 +935,11 @@ class AnimatedParameterData(animation_type) {
 
 <dfn noexport>control_point_value</dfn> shall specify the parameter value of the middle control point of a quadratic Bezier curve, i.e. its y-axis value.
 
+<<<<<<< HEAD
 <dfn noexport>control_point_relative_time</dfn> shall specify the time of the middle control point of a quadratic Bezier curve, i.e. its x-axis value. This value is expressed as a fraction of the parameter segment interval with valid values in the range of 0 and 1, inclusively. It is stored as an 8-bit, unsigned, fixed-point value with 8 fractional bits (i.e. Q0.8 in [Q-Format]).
+=======
+<dfn noexport>control_point_relative_time</dfn> shall specify the time of the middle control point of a quadratic Bezier curve, i.e. its x-axis value. This value is expressed as a fraction of the parameter segment interval with valid values in the range of 0 and 1, inclusively. A value equal to 0 or 1 shall indicate that this animation implements a linear Bezier curve, in which case control_point_value shall be ignored by the IA parser. It is stored as an 8-bit, unsigned, fixed-point value with 8 fractional bits (i.e. Q0.8 in [[!Q-Format]]).
+>>>>>>> 0503d25 (Fix #105, #107, #125, #134 and #209)
 
 #### Parameter Definition Syntax and Semantics #### {#parameter-definition}
 
@@ -973,7 +1086,7 @@ class channel_audio_layer_config(i) {
   unsigned int (2) reserved;
   unsigned int (8) substream_count(i);
   unsigned int (8) coupled_substream_count(i);
-  signed int (16) loudness(i);
+  loudness_info loudness(i);
   if (output_gain_is_present_flag(i) == 1) {
     unsigned int (6) output_gain_flag(i);
     unsigned int (2) reserved;
@@ -1000,12 +1113,15 @@ The IA decoder shall select one of one or more channel audios provided by scalab
 <b>Semantics</b>
 
 <dfn noexport>num_layers</dfn> shall indicate the number of ChannelGroups for scalable channel audio. It shall not be set to zero and its maximum number shall be limited to 6.
+- For Binaural, this field shall be set to 1.
+
+ISUUE: Added for Binaural
 
 <dfn noexport>channel_audio_layer_config()</dfn> is a class that provides the information regarding the configuration of ChannelGroup for scalable channel audio. channel_audio_layer_config(i) shall provide information regarding the configuaration of ChannelGroup #i.
 
 <dfn noexport>loudspeaker_layout</dfn> shall indicate the channel layout for the channels to be reconstructed from the precedent ChannelGroups and the current ChannelGroup among ChannelGroups for scalable channel audio.
 
-In the current version of the specification, [=loudspeaker_layout=] shall indicate one of 9 channel layouts including Mono, Stereo, 5.1ch, 5.1.2ch, 5.1.4ch, 7.1ch, 7.1.2ch, 7.1.4ch and 3.1.2ch. Where,
+In the current version of the specification, [=loudspeaker_layout=] shall indicate one of 10 channel layouts including Mono, Stereo, 5.1ch, 5.1.2ch, 5.1.4ch, 7.1ch, 7.1.2ch, 7.1.4ch, 3.1.2ch and Binaural. Where,
 - <dfn noexport>Stereo</dfn> is the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System A (0+2+0)=] of [[!ITU2051-3]].
 - <dfn noexport>5.1ch</dfn> is the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System B (0+5+0)=] of [[!ITU2051-3]].
 - <dfn noexport>5.1.2ch</dfn> is the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System C (2+5+0)=] of [[!ITU2051-3]].
@@ -1026,6 +1142,7 @@ Loudspeaker Layout (4 bits) :  Channel Layout  : Loudspeaker Location Ordering
              0110           :     7.1.2ch      : L/C/R/Lss/Rss/Lrs/Rrs/Ltf/Rtf/LFE
              0111           :     7.1.4ch      : L/C/R/Lss/Rss/Lrs/Rrs/Ltf/Rtf/Ltb/Rtb/LFE
              1000           :     3.1.2ch      : L/C/R//Ltf/Rtf/LFE
+             1001           :     Binaural     : L/R
             others          :     reserved     :
 </pre>
 
@@ -1048,7 +1165,7 @@ Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
 
 <dfn noexport>coupled_substream_count</dfn> shall specify the number of referenced substreams that are coded as coupled stereo channels.
 
-<dfn noexport>loudness</dfn> shall indicate the loudness value of the downmixed channels, for the channel layout which is indicated by loudspeaker_layout, from the original channel audio. It shall be stored in fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]) and should be [=LKFS=] based on [[!ITU1770-4]], so it shall be to represent zero or negative value.
+<dfn noexport>loudness</dfn> shall indicate the loudness information of the downmixed channels, for the channel layout which is indicated by loudspeaker_layout, from the original channel audio. 
 
 <dfn noexport>output_gain_flags</dfn> shall indicate the channels which output_gian is applied to. If a bit set to 1, output_gain shall be applied to the channel. Otherwise, output_gain shall not be applied to the channel.
 
@@ -1188,25 +1305,27 @@ The each bit of [=recon_gain_flags=] indicates the presence of [=recon_gain=] ap
 
 <dfn noexport>recon_gain</dfn> shall indicate the gain value to be applied to the channel, which is indicated by [=recon_gain_flags=], after decoding of the associated frames and demixing operation. Where, the channel is indicated by recon_gain_flags. Detailed operation by using this value is specified in [[#processing-scalablechannelaudio-recongain]].
 
-### Mix Target Layout Syntax and Semantics ### {#syntax-mix-target-layout}
+### Layout Syntax and Semantics ### {#syntax-layout}
 
-The mix target layout specifies the list of physical loudspeaker positions according to [[!ITU2051-3]].
+The layout class specifies either a binaural system or the list of physical loudspeaker positions according to [[!ITU2051-3]].
 
 <b>Syntax</b>
 
 ```
-class mix_target_layout(mix_target_layout_type) {
-  if (mix_target_layout_type == LOUDSPEAKERS_SP_LABEL) {
+class layout() {
+  unsigned int (2) layout_type;
+  
+  if (layout_type == LOUDSPEAKERS_SP_LABEL) {
     unsigned int (6) num_loudspeakers;
     for (i = 0; i < num_loudspeakers; i++) {
       unsigned int (8) sp_label;
     }
   } 
-  else if (mix_target_layout_type == LOUDSPEAKERS_SS_CONVENTION) {
+  else if (layout_type == LOUDSPEAKERS_SS_CONVENTION) {
     unsigned int (4) sound_system;
     unsigned int (2) reserved;
   }
-  else if (mix_target_layout_type == BINAURAL or NOT_DEFINED) {
+  else if (layout_type == BINAURAL or NOT_DEFINED) {
     unsigned int (6) reserved;
   }
 }
@@ -1214,6 +1333,20 @@ class mix_target_layout(mix_target_layout_type) {
 
 <b>Semantics</b>
 
+<dfn noexport>layout_type</dfn> specifies a playback layout type that used for authoring this mix presentation. 
+
+<pre class = "def">
+layout_type : Layout type
+     0      : NOT_DEFINED
+     1      : LOUDSPEAKERS_SP_LABEL
+     2      : LOUDSPEAKERS_SS_CONVENTION
+     3      : BINAURAL
+</pre>
+
+- A value of 0 shall indicate no specific layout.
+- A value of 1 shall indicate that the layout is defined using the [=SP Label=] of [[!ITU2051-3]].
+- A value of 2 shall indicate that the layout is defined using the sound system convention of [[!ITU2051-3]].
+- A value of 3 shall indicate that the layout is binaural.
 
 <dfn noexport>num_loudspeakers</dfn> shall specify the number of loudspeakers.
 
@@ -1290,7 +1423,7 @@ class mix_target_layout(mix_target_layout_type) {
 </table>
 
 
-<dfn noexport>sound_system</dfn> shall specify the sound system A to J as specified in [[!ITU2051-3]] as follows:
+<dfn noexport>sound_system</dfn> shall specify the sound system A to J as specified in [[!ITU2051-3]], 7.1.2ch and 3.1.2ch of [=loudspeaker_layout=] as follows:
  - 0: It shall indicate [=Loudspeaker configuration for Sound System A (0+2+0)=]
  - 1: It shall indicate [=Loudspeaker configuration for Sound System B (0+5+0)=]
  - 2: It shall indicate [=Loudspeaker configuration for Sound System C (2+5+0)=]
@@ -1301,7 +1434,9 @@ class mix_target_layout(mix_target_layout_type) {
  - 7: It shall indicate [=Loudspeaker configuration for Sound System H (9+10+3)=]
  - 8: It shall indicate [=Loudspeaker configuration for Sound System I (0+7+0)=]
  - 9: It shall indicate [=Loudspeaker configuration for Sound System J (4+7+0)=]
- - 10 ~ 15: Reserved
+ - 10: It shall indicate the same loudspeaker configuration as [=loudspeaker_layout=] = 0110 (i.e. 7.1.2ch)
+ - 11: It shall indicate the same loudspeaker configuration as [=loudspeaker_layout=] = 1000 (i.e. 3.1.2ch)
+ - 12 ~ 15: Reserved
 
 ### Rendering Config Syntax and Semantics ### {#syntax-rendering-config}
 
@@ -1309,11 +1444,166 @@ class mix_target_layout(mix_target_layout_type) {
 
 ```
 class rendering_config() {
-  // TODO
+  if (audio_element_type == CHANNEL_BASED) {
+    itur_bs2127_direct_speakers_config();
+  }
+  else if (audio_element_type == SCENE_BASED) {
+    itur_bs2127_hoa_config();
+  }
 }
 ```
 
 <b>Semantics</b>
+
+<dfn value noexport for="rendering_config()">audio_element_type</dfn> is the [=audio_element_type=] value in Audio Element OBU.
+
+<dfn noexport>itur_bs2127_direct_speakers_config()</dfn> is a class that provides the metadata required for rendering a multichannel audio element to a loudspeaker layout, as specified in [[!ITU2127-0]].
+
+<dfn noexport>itur_bs2127_hoa_config()</dfn> is a class that provides the metadata required for rendering an ambisonics audio element to a loudspeaker layout, as specified in [[!ITU2127-0]].
+
+#### ITU-R BS.2127 Direct Speakers Config Syntax and Semantics #### {#syntax-rendering-direct-speakers-config}
+
+The metadata specified in itur_bs2127_direct_speakers_config(), based on [[!ITU2076-2]], provides information about the loudspeaker that is intended to be used for playing back each of the input audio channels. An IA renderer must use the DirectSpeakers rendering method of EAR, specified in [[!ITU2127-0]], in combination with these metadata to render to the output loudspeakers.
+
+The position information is specified in polar coordinates following the convention of [[!ITU2076-2]]. Specifically,
+
+- The origin is in the centre.
+- The azimuth angles are expressed in degrees, with 0 degrees as straight ahead, and positive values rotating to the left (anti-clockwise) when viewed from above.
+- The elevation angles are expressed in degrees, with 0 degrees horizontally ahead, and positive values going up.
+- The distance is a normalized distance, where 1.0 is assumed to be the default radius of the sphere.
+
+
+<b>Syntax</b>
+
+```
+class itur_bs2127_direct_speakers_config() {
+  unsigned int (1) distance_flag;
+  unsigned int (1) position_bounds_flag;
+  unsigned int (1) screen_edge_lock_azimuth_flag;
+  unsigned int (1) screen_edge_lock_elevation_flag;
+  unsigned int (4) reserved;
+
+  for (int i = 0; i < num_channels; i++) {
+    if (distance_flag) {
+      signed int (8) distance;
+    }
+
+    if (position_bounds_flag) {
+      signed int (16) azimuth_max;
+      signed int (16) azimuth_min;
+      signed int (16) elevation_max;
+      signed int (16) elevation_min;
+      signed int (16) distance_max;
+      signed int (16) distance_min;
+    }
+
+    if (screen_edge_lock_azimuth_flag) {
+      unsigned int (2) screen_edge_lock_azimuth;
+    }
+    if (screen_edge_lock_elevation_flag) {
+      unsigned int (2) screen_edge_lock_elevation;
+    }
+    byte_alignment();
+  }
+}
+```
+
+<b>Semantics</b>
+
+<dfn noexport>distance_flag</dfn> indicates if a distance other than the default value of 1.0 is provided.
+
+<dfn noexport>position_bounds_flag</dfn> indicates if the position bounds for the azimuth, elevation and distance are provided.
+
+<dfn noexport>screen_edge_lock_azimuth_flag</dfn> indicates if the screen edge lock value to be used in combination with the azimuth position is provided.
+
+<dfn noexport>screen_edge_lock_elevation_flag</dfn> indicates if the screen edge lock value to be used in combination with the elevation position is provided.
+
+<dfn noexport>num_channels</dfn> indicates the number of audio channels within the audio element. The order of the channels shall be the same as the order in which they are specified in [=loudspeaker_layout=].
+
+<dfn noexport>distance</dfn> specifies the normalized distance from the origin as a signed Q1.6 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
+
+- audioChannelFormat.typeDefinition == "DirectSpeakers"
+- sub-element: "position"
+- attribute: coordinate="distance"
+
+<dfn noexport>azimuth_max</dfn> specifies the maximum bound of the azimuth as a signed Q8.7 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
+
+- audioChannelFormat.typeDefinition == "DirectSpeakers"
+- sub-element: "position"
+- attribute: coordinate="azimuth", bound="max"
+
+<dfn noexport>azimuth_min</dfn> specifies the minimum bound of the azimuth as a signed Q8.7 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
+
+- audioChannelFormat.typeDefinition == "DirectSpeakers"
+- sub-element: "position"
+- attribute: coordinate="azimuth", bound="min"
+
+<dfn noexport>elevation_max</dfn> specifies the maximum bound of the elevation as a signed Q8.7 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
+
+- audioChannelFormat.typeDefinition == "DirectSpeakers"
+- sub-element: "position"
+- attribute: coordinate="elevation", bound="max"
+
+<dfn noexport>elevation_min</dfn> specifies the minimum bound of the elevation as a signed Q8.7 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
+
+- audioChannelFormat.typeDefinition == "DirectSpeakers"
+- sub-element: "position"
+- attribute: coordinate="elevation", bound="min"
+
+<dfn noexport>distance_max</dfn> specifies the maximum bound of the distance as a signed Q8.7 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
+
+- audioChannelFormat.typeDefinition == "DirectSpeakers"
+- sub-element: "position"
+- attribute: coordinate="distance", bound="max"
+
+<dfn noexport>distance_min</dfn> specifies the minimum bound of the distance as a signed Q8.7 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
+
+- audioChannelFormat.typeDefinition == "DirectSpeakers"
+- sub-element: "position"
+- attribute: coordinate="distance", bound="min"
+
+<dfn noexport>screen_edge_lock_azimuth</dfn> indicates the edge that the loudspeaker is locked to, to be used in combination with the azimuth position. It is the same as the following attribute in [[!ITU2076-2]]:
+
+- audioChannelFormat.typeDefinition == "DirectSpeakers"
+- sub-element: "position"
+- attribute: screenEdgeLock
+
+<pre class = "def">
+screen_edge_lock_azimuth : Screen edge to lock to
+            0            : LEFT
+            1            : RIGHT
+            2            : TOP
+            3            : BOTTOM
+</pre>
+
+<dfn noexport>screen_edge_lock_elevation</dfn> indicates the edge that the loudspeaker is locked to, to be used in combination with the elevation position. It is the same as the following attribute in [[!ITU2076-2]]:
+
+- audioChannelFormat.typeDefinition == "DirectSpeakers"
+- sub-element: "position"
+- attribute: screenEdgeLock
+
+<pre class = "def">
+screen_edge_lock_elevation : Screen edge to lock to
+            0              : LEFT
+            1              : RIGHT
+            2              : TOP
+            3              : BOTTOM
+</pre>
+
+
+#### ITU-R BS.2127 HOA Config Syntax and Semantics #### {#syntax-rendering-hoa-config}
+
+<b>Syntax</b>
+
+```
+class itur_bs2127_hoa_config() {
+}
+ ```
+ 
+<b>Semantics</b>
+ 
+NOTE: itur_bs2127_hoa_config() has an empty payload.
+
 
 ### Element Mix Config Syntax and Semantics ### {#syntax-element-mix-config}
 
@@ -1351,36 +1641,6 @@ class mix_gain_parameter_data(animation_type) {
 
 <dfn noexport>param_data</dfn> shall use the AnimatedParameterData function template. Each of the values defined within this instance (start_point_value, end_point_value and control_point_value) shall be expressed in dB and shall be applied to all channels in the rendered audio element. They are stored as 16-bit, signed, two's complement fixed-point values with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]).
 
-### Mix Loudness Info Syntax and Semantics ### {#syntax-mix-loudness-info}
-
-<b>Syntax</b>
-
-```
-class mix_loudness_info() {
-  signed int (16) mix_loudness
-}
-```
-
-<b>Semantics</b>
-
-<dfn noexport>mix_loudness</dfn> shall indicate the loudness value of the mixed channels, for the [=mix_target_layout()=], from the audio elements which are specified in the mix_presentation_obu(). It is stored in fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]) and the value should be [=LKFS=] based on [[!ITU1770-4]], so it shall be to represent zero or negative value.
-
-
-### Mix Bus Config Syntax and Semantics ### {#syntax-mix-bus-config}
-
-<b>Syntax</b>
-
-```
-class mix_bus_config() {
-  drc_config();
-}
-```
-
-class drc_config() {	
-  // TODO
-}
-
-<b>Semantics</b>
 
 ## Codec Specific ## {#codec-specific}
 
@@ -1468,6 +1728,8 @@ Restrictions on the IA sequence:
 - There shall not be any Temporal Delimiter OBUs present.
 - [=version=] shall be set to 0 for this version of specification.
 - [=profile_version=] shall be set to 0 for this version of specification.
+	- [=num_sub_mixes=] shall be set to 1 for this profile.
+	- All flags of itur_bs2127_direct_speakers_config() shall be set to 0 for this profile.
 - [=num_layers=] shall be set to 1 or up to 6 for Channel-based audio element (i.e. scalable channel audio).
     - In this case, [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=] may be present in the IA sequence.
     - In case of simple scalable channel audio (e.g. mono for layer 1 & stereo for layer 2), demixing_info() and recon_gain_info() shall not be present in the bitstream.
@@ -1491,6 +1753,9 @@ Restrictions on IA sequence:
 - There may be Temporal Delimiter OBUs present.
 - [=version=] shall be set to 0 for this version of specification.
 - [=profile_version=] shall be set to 16 for this version of specification.
+	- [=num_sub_mixes=] shall be set to 1 for this profile.
+	- All flags of itur_bs2127_direct_speakers_config() shall be set to 0 for this profile.
+	- For a given Mix Presentation OBU, it shall include at most one scene-based audio element and it shall include at most one channel-based audio element with [=num_layers=] > 1 for this profile.
 - [=num_layers=] shall be set to 1 or up to 6 for Channel-based audio element (i.e. scalable channel audio)
     - In this case, [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=] may be present in the IA sequence.
     - In case of simple scalable channel audio (e.g. mono for layer 1 & stereo for layer 2), [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=] shall not be present in the bitstream.
@@ -2071,32 +2336,116 @@ Recommend values for specific codecs are as follows
 
 ## Mix Presentation ## {#processing-mixpresentation}
 
-//To Do: Fill in the text
+An IA sequence may contain more than one mix presentation. [[#processing-mixpresentation-selection]] details how a mix presentation should be selected from multiple of them.
 
-### Rendering for Audio Element ### {#processing-mixpresentation-rendering}
+A mix presentation specifies how to render, process and mix one or more audio elements. Each audio element should first be individually renderered and processed before mixing. Then, any additional processing specified by [=output_mix_config()=] should be applied to the mixed audio signal in order to generate the final output audio for playback. [[#processing-mixpresentation-rendering]] details how each audio element should be renderered, while [[#processing-mixpresentation-mixing]] details how the audio elements should be processed and mixed.
 
-This section provide a guideline by the rendering_config() which is specified in mix presentation OBU.
+### Selecting a Mix Presentation ### {#processing-mixpresentation-selection}
 
-//To Do: Fill in rendering method for scene-based audio element if any
+An IA sequence may contain more than one mix presentations. The IA parser should select the appropriate mix presentation in the following order.
 
-//To Do: Fill in rendering method for channel-based audio element if any
+1. If there are any user-selectable mixes, the IA parser should select the mix, or mixes, that match the user's preferences. An example might be a mix with a specific language. Mix presentations may use [=mix_presentation_friendly_label=] to describe such mixes.
+2. If there are more than one valid mixes remaining, the IA parser should select an appropriate mix for rendering, in the following order.
+	1. If the playback layout is binaural, i.e. headphones:
+		1. Select the mix with a BINAURAL [=layout_type=] in [=authored_layout=].
+		2. If there is no such mix, select the mix with the highest available [=authored_layout=]. If there is mix that contains only scalable channel audio elements, all of which containing the same [=loudspeaker_layout=] which is higher than the highest available [=authored_layout=], that mix should be selected instead.
+	2. If the playback layout is loudspeakers:
+		1. If there is a mix with an [=authored_layout=] that matches the playback loudspeaker layout, it should be selected. If there are more than one matching mixes, the first one should be selected.
+		2. If there is a mix that contains only scalable channel audio elements, all of which containing a [=loudspeaker_layout=] that matches the playback loudspeaker layout, that mix should be selected. If there are multiple such mixes, the first mix should be selected.
+		3. Select the mix presentation with the highest available [=authored_layout=]. If there is a mix that contains only scalable channel audio elements, all of which containing the same [=loudspeaker_layout=] which is higher than the highest available [=authored_layout=], that mix should be selected instead.
 
-### Mixing for Audio Elements ### {#processing-mixpresentation-mixing}
+### Rendering an Audio Element ### {#processing-mixpresentation-rendering}
 
-This section provide a guideline by the element_mix_config() which is specified in mix presentation OBU.
+After selecting a Mix Presentation, an audio element should be rendered as follows:
+- If the selected Mix Presentation OBU includes only one single channel-based audio element (M2M-Rendering: Multichannel to Multichannel Rendering).
+- If the selected Mix Presentation OBU includes only one single scene-based audio element (A2M-Rendering: Ambisonics to Multichannel Rendering).
+- If the selected Mix Presentation OBU includes multiple audio elements.
+	- If the audio element is channel-based, then it should follow M2M-Rendering.
+	- If the audio elemetn is scene-based, then it should follow A2M-Rendering.
+	
+For M2M-Rendering,
+- The input layout of the IA renderer
+	- If num_layer = 1, use the [=loudspeaker_layout=] of the audio element.
+	- Else, use the layout that matches the playback layout, or is the next highest available layout.
+- The IA render
+	- If the playback layout matches a [=loudspeaker_layout=] which can be generated from the highest loudspeaker layout of the audio element according to [[#iacgeneration-scalablechannelaudio-channellayoutgenerationrule]], use demixing_info_parameter_data().
+		- If demixing_info_parameter_data() is not delivered, use EAR Direct Speakers renderer ([[!ITU2127-0]]).
+	- Else if the playback layout complies with loudspeaker layouts supported by [[!ITU2051-3]], use EAR Direct Speakers renderer ([[!ITU2127-0]]).
+	- Else, use implementation-specific renderer.
+- The output of the IA render: the playback layout
+ 
+For A2M-Rendering,
+- The input layout of the IA renderer: Ambisonics
+- The IA render
+	- If the playback layout complies with loudspeaker layouts supported by [[!ITU2051-3]], use EAR HOA renderer ([[!ITU2127-0]]).
+	- Else, use implementation-specific renderer.
+		- If there is no implementation-specific Ambisonics renderer, use libear to render to the next highest BS2051 layout compared to the playback layout, and then downmix using implementation-specific renderer.
+- The output of the IA render: the playback layout
 
-When the output channel audio of scene-based audio element or channel-based audio element does not match with the loudspeaker layout which is indicated by mix_target_layout() in mix presentation OBU.
+This specification supports the rendering of either a multichannel or ambisonics audio element to either a target loudspeaker layout or a binaural output. The choice of the renderer to use when processing a mix presentation depends on the input audio element and the playback layout, as defined in the table below.
 
-Down-mixing matrics, which are specified in [[#processing-downmixmatrix]], are recommended for down-mixing of the output channel audio.
+<table class="def">
+<tr>
+  <th>audio_element_type</th><th>Playback layout</th><th>Renderer to use</th>
+</tr>
+<tr>
+  <td>CHANNEL_BASED</td><td>Loudspeaker layouts supported by [[!ITU2051-3]]</td><td>EAR Direct Speakers renderer ([[!ITU2127-0]]).</td>
+</tr>
+<tr>
+  <td>CHANNEL_BASED</td><td>Loudspeaker layouts not supported by [[!ITU2051-3]]</td><td>Implementation-specific loudspeaker renderer.</td>
+</tr>
+<tr>
+  <td>SCENE_BASED</td><td>Loudspeaker layouts supported by [[!ITU2051-3]]</td><td>EAR HOA renderer ([[!ITU2127-0]]).</td>
+</tr>
+<tr>
+  <td>SCENE_BASED</td><td>Loudspeaker layouts not supported by [[!ITU2051-3]]</td><td>Implementation-specific Ambisonics renderer.<br><br>If an implementation-specific Ambisonics renderer is not available, the EAR HOA renderer may be used to render the Ambisonics audio element to the an [[!ITU2051-3]] layout than the output loudspeaker layout, and then downmixed using the implementation-specific loudspeaker renderer.</td>
+</tr>
+<tr>
+  <td>CHANNEL_BASED</td><td>Binaural</td><td>// TODO</td>
+</tr>
+<tr>
+  <td>SCENE_BASED</td><td>Binaural</td><td>// TODO</td>
+</tr>
+</table>
 
-When multiple audio elements are mixed into one channel audio:
-- Each of them is mixed based on the element_mix_config() before mixing them.
-- If a sampling rate or an audio sample size of an audio element differs from the target sampling rate or the target audio sample size, then the audio element shall be re-sampled to the target sampling rate or the target audio sample size, respectively.
-	- If mix presentation OBU does not provide the sampling rate or the sample size, then 48000hz for the sampling rate and 16 bits for the audio sample size are recommended.
 
-After relevant processing, multiple audio elements are mixed into one channel audio according to the target loudspeaker layout with the target sampling rate by considering the synchronization in audio sample by audio sample among them.
+#### EAR Direct Speakers renderer #### {#processing-mixpresentation-rendering-ear-directspeakers}
 
-//To Do: Fill in the text based on element_mix_config()
+In addition to the metadata provided in itur_bs2127_direct_speakers_config(), the IA renderer should provide the following to the EAR Direct Speakers renderer for each audio channel of the audio element:
+
+- speaker label: the label of the speaker position, using the same convention as "SP Label" in [[!ITU2051-3]]. This is defined for each audio channel of the audio element based on the information from [=loudspeaker_layouts=].
+- azimuth: specifies the azimuth location of the sound. This is mapped from the speaker label as defined in [[!ITU2051-3]].
+- elevation: specifies the elevation location of the sound. This is mapped from the speaker label as defined in [[!ITU2051-3]].
+
+In [[!ITU2051-3]], an LFE audio channel may be identified either by an explicit label or its frequency content. In this specification, the LFE channel is identified based on the explicit label only, given by [=loudspeaker_layout=].
+
+#### EAR HOA renderer #### {#processing-mixpresentation-rendering-ear-hoa}
+
+The IA renderer should provide the following metadata to the EAR HOA renderer for each audio channel:
+
+1. Ambisonics order
+2. Ambisonics degree
+3. Ambisonics normalization method
+
+In this specification, the AmbiX format is adopted, which uses SN3D normalization and ACN channel ordering. Accordingly, the Ambisonics order and degree can be computed from the channel index k as follows:
+
+```
+order   n = floor(sqrt(k)),
+degree  m = k - n * (n + 1).
+```
+
+### Mixing Audio Elements ### {#processing-mixpresentation-mixing}
+
+Each audio element is processed individually before mixing as follows:
+1. Render to the playback layout.
+2. If all audio elements do not have a common sample rate, re-sample to 48 kHz.
+3. If all audio elements do not have a common bit-depth, convert to a common bit-depth. This specification recommends using 16 bits.
+4. If [=authored_layout=] matches with the playback layout, apply any per-element processing according to [=element_mix_config()=]. Otherwise, apply any per-element processing according to implementation-specific element_mix.
+
+The rendered and processed audio elements are then summed to generate one mixed audio signal.
+
+If [=authored_layout=] matches with the playback layout, apply any per-element processing according to [=element_mix_config()=]. Otherwise, apply any per-element processing according to implementation-specific element_mix.
+
 
 ## Animated Parameters ## {#processing-animated-params}
 
@@ -2136,10 +2485,15 @@ B_quad(a) = (1 - a)^2 * P0 + 2 * (1 - a) * a * P1 + a^2 * P2,
 
 ### Loudness Normalization ### {#processing-post-loudness}
 
-Loudness normalization is done by adjusting a loudness level to -24 LKFS based on the loudness value of the target channel layout (i.e. CL #i) which is signaled in [=Channel_Audio_Layer_Config()=] or the loudness value in mix presentation OBU.
+Loudness normalization should be done by adjusting the loudness level to a target value, using the integrated loudness and true peak information provided in loudness_info(). If the true peak information is not available, the digital peak information should be used.
 
-Real implementations for [[#processing-post-loudness]], [[#processing-post-drc]] and [[#processing-post-limiter]] are soly dependent on implementers (i.e., out of scope of this specification) unless mix presentation OBU provide algorithms for those. This specification only recommends the principles for the former.
+The rendered layout that was used to measure the loudness information of a sub-mix is provided by measured_layout or as [=loudspeaker_layout=] in channel_audio_layer_config(). 
 
+If this matches the playback layout, the loudness information should be used directly for normalization. If there is a mismatch between measured_layout (or [=loudspeaker_layout=]) and the playback layout, the implementation may choose to use the provided loudness information as-is. 
+
+If there is more than one loudness_info() specified in the mix presentation, the implementation should normalize the loudness of each sub-mix independently before summing them.
+
+<del>
 ### DRC Control ### {#processing-post-drc}
 
 In this specification, DRC control can be guided by a pre-defined DRC or by the algorithm specified in mix presentation OBU.
@@ -2179,23 +2533,16 @@ The below is the equation that represents the pre-defined DRC compression scheme
 	  X   : Input sample value in dBFS
 	  Y   : Output sample value in dBFS
 ```
+</del>
 
 ### Limiter ### {#processing-post-limiter}
 
-This module limits the true peak of input signal at -1dB. The definition of thr true peak is base on [[!ITU1770-4]].
-
-Below is a recommended loudness normalization and DRC control principle according to application.
-- For AV application, it only applies Limiter at -1dBTP.
-- For TV application, it only applies Loudness normalization at -24LKFS and Limiter at -1dBTP.
-- For Mobile application, it applies Loudness normalization at -24LKFS, the pre-defined DRC control and adjusting of target loudness at -16 LKFS, and Limiter at -1dBTP.
-
-NOTE: The definitions of AV, TV and Mobile applications are as follows:
-.AV application: Sound devices with external speakers such as Soundbar, AV receiver, HiFi speaker etc..
-.TV application: Television with built-in speakers such as LCD/OLED slim TV.
-.Mobile application: Handheld devices with built-in speakers such as smartphone, tablet etc..
+The limiter should limit the true peak of audio signal at -1 dBTP, where true peak is defined in [[!ITU1770-4]]. The limiter should apply to multichannel signals in a linked manner and further support auto-release.
 
 
 ## Down-mix Matrix ## {#processing-downmixmatrix}
+
+<del>
 
 ### Static Down-mix Matrix ### {#processing-downmixmatrix-static}
 
@@ -2245,6 +2592,8 @@ The figures below show static down-mix matrices to 3.1.2ch.
 <center><figcaption>3.1.2ch Down-mix matrix for 7.1.4ch</figcaption></center>
 
 Where, p1 = 0.707 and p2 = 0.3535. Implementations may use limiter defined in [[#processing-post-limiter]] to preserve energy of audio signals instead of normalization factors.
+
+</del>
 
 ### Dynamic Down-mix Matrix {#processing-downmixmatrix-dynamic}
 
@@ -2516,23 +2865,41 @@ Below figure shows one example of transformation matrix with 4 CGs (2ch/3.1.2ch/
 
 ### Mix Presentation Encoding ### {#iacgeneration-mixpresentation}
 
-//To Do: Fill in the text
+For Mix Presentation OBU for one single channel-based audio element, Mix Presentation OBU shall follow following restrictions:
+- [=authored_layout=] = A, when A is the highest loudspeaker layout of the audio element.
+- [=num_sub_mixes=] = 1
+- [=num_audio_elements=] = 1
+- [=rendering_config()=] = itur_bs2127_direct_speakers_config() with no matadata (i.e all flags off)
+- [=element_mix_config()=] = No parameter block for element_mix and default_mix_gain = 0dB
+- [=output_mix_config()=] = No parameter block for output_mix and default_mix_gain = 0dB
+- [=measured_layout=] = A
+- loudness_info(): loudness information of the rendered audio to the measured layout A.
 
-#### Rendering Config ####  {#iacgeneration-mixpresentation-rendering}
-
-This section provide a guideline to generate rendering_config().
-
-//To Do: Fill in how to generate rendering_config() for scene-based audio element
-
-//To Do: Fill in how to generate rendering_config() for channel-based audio element
+For Mix Presentation for one single scene-based audio element, Mix Presentation OBU shall follow following restrictions:
+- [=authored_layout=] = B, where B is the playback layout that used for authoring this mix.
+- [=num_sub_mixes=] = 1
+- [=num_audio_elements=] = 1
+- [=rendering_config()=] = itur_bs2127_hos_config()
+- [=element_mix_config()=] = [=mix_gain=]
+- [=output_mix_config()=] = [=output_mix_gain=]
+- [=measured_layout=] = B', B' is the playback layout that used to measure the loudness information.
+- loudness_info(): loudness information of the rendered audio to the measrued layout B' after applying the [=output_mix_gain=] in this Mix Presentation OBU.
+ 
+For Mix Presenation for N (>1) audio elements (when num_sub-mixes = 1), Mix Presentation OBU shall follow following restrictions:
+- [=authored_layout=] = C, where C is the playback layout that used for authoring this mix.
+- [=num_sub_mixes=] = 1
+- [=num_audio_elements=] = N
+- [=rendering_config()=] for each audio element = itur_bs2127_direct_speakers_config() if channel-based or itur_bs2127_hoa_config() if scene-based 
+- [=element_mix_config()=] for each audio element = [=mix_gain=]
+- [=output_mix_config()=] for each audio element = [=output_mix_gain=]
+- [=measured_layout=] = C', C' is the playback layout that used to measure the loudness information.
+- loudness_info(): loudness information of the mixed audio to the authored layout, C'.
 
 #### Element Mix Config ####  {#iacgeneration-mixpresentation-mix}
 
 This section provide a guideline to generate element_mix_config().
 
-//To Do: Fill in how to generate element_mix_config() for scene-based audio element
-
-//To Do: Fill in how to generate element_mix_config() for channel-based audio element
+An IA multiplexer may merge two or more IA sequences. In this case, it should adjust the gain values for [=element_mix_config()=]s as necessary to describe the desired relative gains between the IA sequences when they are summed to generate the final mix. It should also ensure that the gains selected do not result in clipping when the final mix is generated.
 
 ### Multiple Audio Elements Encoding ### {#iacgeneration-multipleaudioelements}
 
@@ -2543,24 +2910,24 @@ This section provide a guideline to generate IA sequence having multiple audio e
 This section provides a way how to generate IA sequence having multiple audio elements from two IA simple profiles with the same codec config OBU. However, the result shall comply with the base profile of IA sequence.
 
 Step1: Descriptor OBUs are generated as follows:
- - Magic Code OBU: get the larger version field and the larger profile version field, respectively.
- - Codec Config OBU
- 	- take just one codec_id and codec_config()
- 	- update num_audio_elements and audio_element_id
- - Mix Presentation OBUs: just take all of them and generate ones which are used after mixing of multiple audio elements if needed except following:
- 	- [=audio_element_id=]s are updated to be aligned according to Codec Config OBU.
- - Audio Element OBUs: just take all of them except followings:
-  - [=audio_element_id=]s are updated to be aligned according to Mix Presentation OBUs.
- 	- [=audio_substream_id=]s are updated to be unique in all of Audio Element OBUs. 
- 	- {{"audio_element_obu()"/parameter_id]s are updated to be unique in all of Audio Element OBUs.
+- Magic Code OBU: get the larger version field and the larger profile version field, respectively.
+- Codec Config OBU
+	- take just one codec_id and codec_config()
+	- update num_audio_elements and audio_element_id
+- Mix Presentation OBUs: just take all of them and generate new ones which are used for mixing of multiple audio elements if needed except following:
+	- [=audio_element_id=]s are updated to be aligned according to Codec Config OBU.
+- Audio Element OBUs: just take all of them except followings:
+	- [=audio_element_id=]s are updated to be aligned according to Mix Presentation OBUs.
+	- [=audio_substream_id=]s are updated to be unique in all of Audio Element OBUs. 
+	- {{"audio_element_obu()"/parameter_id]s are updated to be unique in all of Audio Element OBUs.
 
 Step2: ith temporal unit is generated as follows:
- - Just take all of temporal units for ith frames from each audio element and keep the order of temporal units as the order of audio element OBUs in descriptor OBUs except following:
- 	- [=obu_type=]s are updated to be aligned according to [=audio_element_id=]s specified in Audio Element OBUs.
- 	- {{"parameter_block_obu()"/parameter_id]s in Parameter Block OBUs are updated to be aligned according to {{"audio_element_obu()"/parameter_id]s in Audio Element OBUs.
- - Add Sync OBU in front of ith temporal unit if needed.
- 	- New Sync OBU is generated based on Sync OBUs of each IA sequence and updated [=audio_substream_id=]s and {{"parameter_block_obu()"/parameter_id]s.
- - It may have the immediately preceding temporal delimiter OBU for each temporal unit.
+- Just take all of temporal units for ith frames from each audio element and keep the order of temporal units as the order of audio element OBUs in descriptor OBUs except following:
+	- [=obu_type=]s are updated to be aligned according to [=audio_element_id=]s specified in Audio Element OBUs.
+	- {{"parameter_block_obu()"/parameter_id]s in Parameter Block OBUs are updated to be aligned according to {{"audio_element_obu()"/parameter_id]s in Audio Element OBUs.
+- Add Sync OBU in front of ith temporal unit if needed.
+	- New Sync OBU is generated based on Sync OBUs of each IA sequence and updated [=audio_substream_id=]s and {{"parameter_block_obu()"/parameter_id]s.
+- It may have the immediately preceding temporal delimiter OBU for each temporal unit.
 
 Step3: Generate IA sequence which starts descriptor OBUs and followed by temporal units in order.
 
@@ -2569,21 +2936,21 @@ Step3: Generate IA sequence which starts descriptor OBUs and followed by tempora
 This section provides a way how to generate IA sequence having multiple audio elements from two IA simple or base profiles with the different codec config OBUs. However, the result shall comply with the enhanced profile of IA sequence.
 
 Step1: Descriptor OBUs are generated as follows:
- - Magic Code OBU: get the larger version field and the larger profile version field, respectively.
- - Codec Config OBU: if some of multiple Codec Config OBUs are same, then merge multiple Codec Config OBUs into one Codec Config OBU, and take each of the others.
- 	- Update [=audio_element_id=]s to be unique in all of Codec Config OBUs.
- - Mix Presentation OBUs: just take all of them and generate ones which are used after mixing of multiple audio elements if needed except following:
- 	- [=audio_element_id=]s are updated to be aligned according to Codec Config OBU.
- - Audio Element OBUs: just take all of them except followings:
-  - [=audio_element_id=]s are updated to be aligned according to Mix Presentation OBUs.
- 	- [=audio_substream_id=]s are updated to be unique in all of Audio Element OBUs. 
- 	- {{"audio_element_obu()"/parameter_id]s are updated to be unique in all of Audio Element OBUs.
+- Magic Code OBU: get the larger version field and the larger profile version field, respectively.
+- Codec Config OBU: if some of multiple Codec Config OBUs are same, then merge multiple Codec Config OBUs into one Codec Config OBU, and take each of the others.
+	- Update [=audio_element_id=]s to be unique in all of Codec Config OBUs.
+- Mix Presentation OBUs: just take all of them and generate ones which are used after mixing of multiple audio elements if needed except following:
+	- [=audio_element_id=]s are updated to be aligned according to Codec Config OBU.
+- Audio Element OBUs: just take all of them except followings:
+	- [=audio_element_id=]s are updated to be aligned according to Mix Presentation OBUs.
+	- [=audio_substream_id=]s are updated to be unique in all of Audio Element OBUs. 
+	- {{"audio_element_obu()"/parameter_id]s are updated to be unique in all of Audio Element OBUs.
 
 Step2: Data OBUs are generated as follows:
- - Place Temporal Units from multiple audio elements in timing order.
- - Add Sync OBU in front of Temporal Unit, frequently.
- 	- New Sync OBU is generated based on Sync OBUs from each IA sequence and updated [=audio_substream_id=]s and {{"parameter_block_obu()"/parameter_id]s.
- - It may have the immediately preceding temporal delimiter OBU for each audio element,
+- Place Temporal Units from multiple audio elements in timing order.
+- Add Sync OBU in front of Temporal Unit, frequently.
+	- New Sync OBU is generated based on Sync OBUs from each IA sequence and updated [=audio_substream_id=]s and {{"parameter_block_obu()"/parameter_id]s.
+- It may have the immediately preceding temporal delimiter OBU for each audio element,
 
 Step3: Generate IA sequence which starts descriptor OBUs and followed by Temporal Units in order.
 
