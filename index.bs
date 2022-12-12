@@ -725,7 +725,7 @@ class mix_presentation_obu() {
       element_mix_config();
     }
     output_mix_config();
-    layout measured_layout;
+    layout measured_layout_for_loudness;
     loudness_info loudness; 
   }
 }  
@@ -750,7 +750,7 @@ class mix_presentation_obu() {
 
 <dfn noexport>output_mix_config()</dfn> is a class that provides the metadata required for post-processing the mixed audio signal to generate the audio signal for playback.
 
-<dfn noexport>measured_layout</dfn> identifies the layout that was used to measure the loudness information provided in this sub-mix.
+<dfn noexport>measured_layout_for_loudness</dfn> identifies the layout that was used to measure the loudness information provided in this sub-mix.
 
 <dfn value noexport for ="mix_presentation_obu()">loudness</dfn> provides the loudness information for the mixed audio elements. If any of the audio elements are of type scalable channel layout with [=num_layers=] > 1, the loudness information provided here should correspond to the highest layout available.
 
@@ -772,7 +772,7 @@ class mix_presentation_annotations() {
 
 The layout specified in [=authored_layout=] should not be higher than the highest layout among layouts provided by the audio elements. In other words, rendering from an audio element with the highest layout to the [=authored_layout=] should not require an upmix.
 
-NOTE: [=authored_layout=] does not necessarily required to be the same as [=measured_layout=].
+NOTE: [=authored_layout=] does not necessarily required to be the same as [=measured_layout_for_loudness=].
 
 #### Mix Presentation Element Annotations Syntax and Semantics #### {#obu-mixpresentation-elementannotation}
 
@@ -2487,9 +2487,9 @@ B_quad(a) = (1 - a)^2 * P0 + 2 * (1 - a) * a * P1 + a^2 * P2,
 
 Loudness normalization should be done by adjusting the loudness level to a target value, using the integrated loudness and true peak information provided in loudness_info(). If the true peak information is not available, the digital peak information should be used.
 
-The rendered layout that was used to measure the loudness information of a sub-mix is provided by measured_layout or as [=loudspeaker_layout=] in channel_audio_layer_config(). 
+The rendered layout that was used to measure the loudness information of a sub-mix is provided by [=measured_layout_for_loudness=] or as [=loudspeaker_layout=] in channel_audio_layer_config(). 
 
-If this matches the playback layout, the loudness information should be used directly for normalization. If there is a mismatch between measured_layout (or [=loudspeaker_layout=]) and the playback layout, the implementation may choose to use the provided loudness information as-is. 
+If this matches the playback layout, the loudness information should be used directly for normalization. If there is a mismatch between [=measured_layout_for_loudness=] (or [=loudspeaker_layout=]) and the playback layout, the implementation may choose to use the provided loudness information as-is. 
 
 If there is more than one loudness_info() specified in the mix presentation, the implementation should normalize the loudness of each sub-mix independently before summing them.
 
@@ -2872,7 +2872,7 @@ For Mix Presentation OBU for one single channel-based audio element, Mix Present
 - [=rendering_config()=] = itur_bs2127_direct_speakers_config() with no matadata (i.e all flags off)
 - [=element_mix_config()=] = No parameter block for element_mix and default_mix_gain = 0dB
 - [=output_mix_config()=] = No parameter block for output_mix and default_mix_gain = 0dB
-- [=measured_layout=] = A
+- [=measured_layout_for_loudness=] = A
 - loudness_info(): loudness information of the rendered audio to the measured layout A.
 
 For Mix Presentation for one single scene-based audio element, Mix Presentation OBU shall follow following restrictions:
@@ -2882,7 +2882,7 @@ For Mix Presentation for one single scene-based audio element, Mix Presentation 
 - [=rendering_config()=] = itur_bs2127_hos_config()
 - [=element_mix_config()=] = [=mix_gain=]
 - [=output_mix_config()=] = [=output_mix_gain=]
-- [=measured_layout=] = B', B' is the playback layout that used to measure the loudness information.
+- [=measured_layout_for_loudness=] = B', B' is the playback layout that used to measure the loudness information.
 - loudness_info(): loudness information of the rendered audio to the measrued layout B' after applying the [=output_mix_gain=] in this Mix Presentation OBU.
  
 For Mix Presenation for N (>1) audio elements (when num_sub-mixes = 1), Mix Presentation OBU shall follow following restrictions:
@@ -2892,7 +2892,7 @@ For Mix Presenation for N (>1) audio elements (when num_sub-mixes = 1), Mix Pres
 - [=rendering_config()=] for each audio element = itur_bs2127_direct_speakers_config() if channel-based or itur_bs2127_hoa_config() if scene-based 
 - [=element_mix_config()=] for each audio element = [=mix_gain=]
 - [=output_mix_config()=] for each audio element = [=output_mix_gain=]
-- [=measured_layout=] = C', C' is the playback layout that used to measure the loudness information.
+- [=measured_layout_for_loudness=] = C', C' is the playback layout that used to measure the loudness information.
 - loudness_info(): loudness information of the mixed audio to the authored layout, C'.
 
 #### Element Mix Config ####  {#iacgeneration-mixpresentation-mix}
