@@ -1301,46 +1301,31 @@ class rendering_config() {
 
 ```
 class element_mix_config() {
-  leb128() mix_gain_type;
-  if (mix_gain_type == DEFAULT) {
-    signed int (16) default_mix_gain;
-  }
-  if (mix_gain_type = MIX_GAIN_PARAMETER_DATA) {
-    MixGainParamDefinition mix_gain;
-  }
-}
-```
-
-```
-class MixGainParamDefinition extends ParamDefinition() {
+  MixGainParamDefinition mix_gain;
 }
 ```
 
 <b>Semantics</b>
 
-<dfn noexport>mix_gain_type</dfn> specifies the type of mix gain as described in the table below. The value 0 indicates that there shall be no mix gain parameter blocks provided and the value 1 indicates that there shall be mix gain parameter blocks provided.
- 
-<pre class = "def">
-mix_gain_type : Mix Gain Type
-       0      : DEFAULT
-       1      : MIX_GAIN_PARAMETER_DATA
-</pre>
-
-<dfn noexport>default_mix_gain</dfn> shall specify the default mix gain value to apply when there are no mix gain parameter blocks provided. This value is expressed in dB and shall be applied to all channels in the rendered audio element. It is stored as a 16-bit, signed, two's complement fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]).
-
 <dfn noexport>mix_gain</dfn> provides the parameter definition for the gain value that is applied to all channels of the rendered audio element signal. The parameter definition is provided by MixGainParamDefinition() and the corresponding parameter data to be provided in parameter blocks is specified in mix_gain_parameter_data().
 
-#### Mix Gain Parameter Data Syntax and Semantics #### {#syntax-mix-gain-param}
+#### Mix Gain Parameter Definition and Data Syntax and Semantics #### {#syntax-mix-gain-param}
 
 <b>Syntax</b>
 
 ```
+class MixGainParamDefinition extends ParamDefinition() {
+  signed int (16) default_mix_gain;
+}
+
 class mix_gain_parameter_data(animation_type) {
   AnimatedParameterData<signed int (16)> param_data;
 }
 ```
 
 <b>Semantics</b>
+
+<dfn noexport>default_mix_gain</dfn> shall specify the default mix gain value to apply when there are no mix gain parameter blocks provided. This value is expressed in dB and shall be applied to all channels in the rendered audio element. It is stored as a 16-bit, signed, two's complement fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]).
 
 <dfn noexport>param_data</dfn> shall use the AnimatedParameterData function template. Each of the values defined within this instance (start_point_value, end_point_value and control_point_value) shall be expressed in dB and shall be applied to all channels in the rendered audio element. They are stored as 16-bit, signed, two's complement fixed-point values with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]).
 
