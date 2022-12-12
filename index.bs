@@ -830,7 +830,7 @@ class loudness_info() {
 <pre class = "def">
  Bit : Type of information provided
   0  : True peak
- 2~8 : Reserved
+ 1~8 : Reserved
 </pre>
 
 <dfn noexport>integrated_loudness</dfn> provides the integrated loudness information, specified in [=LKFS=] as defined in [[!ITU1770-4]], and measured according to [[!ITU1770-4]].
@@ -1115,8 +1115,6 @@ The IA decoder shall select one of one or more channel audios provided by scalab
 <dfn noexport>num_layers</dfn> shall indicate the number of ChannelGroups for scalable channel audio. It shall not be set to zero and its maximum number shall be limited to 6.
 - For Binaural, this field shall be set to 1.
 
-ISUUE: Added for Binaural
-
 <dfn noexport>channel_audio_layer_config()</dfn> is a class that provides the information regarding the configuration of ChannelGroup for scalable channel audio. channel_audio_layer_config(i) shall provide information regarding the configuaration of ChannelGroup #i.
 
 <dfn noexport>loudspeaker_layout</dfn> shall indicate the channel layout for the channels to be reconstructed from the precedent ChannelGroups and the current ChannelGroup among ChannelGroups for scalable channel audio.
@@ -1333,7 +1331,7 @@ class layout() {
 
 <b>Semantics</b>
 
-<dfn noexport>layout_type</dfn> specifies a playback layout type that used for authoring this mix presentation. 
+<dfn noexport>layout_type</dfn> specifies the layout type. 
 
 <pre class = "def">
 layout_type : Layout type
@@ -1493,8 +1491,8 @@ class itur_bs2127_direct_speakers_config() {
       signed int (16) azimuth_min;
       signed int (16) elevation_max;
       signed int (16) elevation_min;
-      signed int (16) distance_max;
-      signed int (16) distance_min;
+      signed int (8) distance_max;
+      signed int (8) distance_min;
     }
 
     if (screen_edge_lock_azimuth_flag) {
@@ -1526,37 +1524,37 @@ class itur_bs2127_direct_speakers_config() {
 - sub-element: "position"
 - attribute: coordinate="distance"
 
-<dfn noexport>azimuth_max</dfn> specifies the maximum bound of the azimuth as a signed Q8.7 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
+<dfn noexport>azimuth_max</dfn> specifies the maximum bound of the azimuth as a signed Q7.8 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
 
 - audioChannelFormat.typeDefinition == "DirectSpeakers"
 - sub-element: "position"
 - attribute: coordinate="azimuth", bound="max"
 
-<dfn noexport>azimuth_min</dfn> specifies the minimum bound of the azimuth as a signed Q8.7 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
+<dfn noexport>azimuth_min</dfn> specifies the minimum bound of the azimuth as a signed Q7.8 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
 
 - audioChannelFormat.typeDefinition == "DirectSpeakers"
 - sub-element: "position"
 - attribute: coordinate="azimuth", bound="min"
 
-<dfn noexport>elevation_max</dfn> specifies the maximum bound of the elevation as a signed Q8.7 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
+<dfn noexport>elevation_max</dfn> specifies the maximum bound of the elevation as a signed Q7.8 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
 
 - audioChannelFormat.typeDefinition == "DirectSpeakers"
 - sub-element: "position"
 - attribute: coordinate="elevation", bound="max"
 
-<dfn noexport>elevation_min</dfn> specifies the minimum bound of the elevation as a signed Q8.7 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
+<dfn noexport>elevation_min</dfn> specifies the minimum bound of the elevation as a signed Q7.8 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
 
 - audioChannelFormat.typeDefinition == "DirectSpeakers"
 - sub-element: "position"
 - attribute: coordinate="elevation", bound="min"
 
-<dfn noexport>distance_max</dfn> specifies the maximum bound of the distance as a signed Q8.7 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
+<dfn noexport>distance_max</dfn> specifies the maximum bound of the distance as a signed Q1.6 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
 
 - audioChannelFormat.typeDefinition == "DirectSpeakers"
 - sub-element: "position"
 - attribute: coordinate="distance", bound="max"
 
-<dfn noexport>distance_min</dfn> specifies the minimum bound of the distance as a signed Q8.7 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
+<dfn noexport>distance_min</dfn> specifies the minimum bound of the distance as a signed Q1.6 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
 
 - audioChannelFormat.typeDefinition == "DirectSpeakers"
 - sub-element: "position"
@@ -2442,7 +2440,7 @@ Each audio element is processed individually before mixing as follows:
 3. If all audio elements do not have a common bit-depth, convert to a common bit-depth. This specification recommends using 16 bits.
 4. If [=authored_layout=] matches with the playback layout, apply any per-element processing according to [=element_mix_config()=]. Otherwise, apply any per-element processing according to implementation-specific element_mix.
 
-The rendered and processed audio elements are then summed to generate one mixed audio signal.
+The rendered and processed audio elements are then summed to generate one sub-mixed audio signal. If there are more than one sub-mixes, the output of each sub-mix is further summed to generate the final mixed audio signal.
 
 If [=authored_layout=] matches with the playback layout, apply any per-element processing according to [=element_mix_config()=]. Otherwise, apply any per-element processing according to implementation-specific element_mix.
 
@@ -2493,48 +2491,6 @@ If this matches the playback layout, the loudness information should be used dir
 
 If there is more than one loudness_info() specified in the mix presentation, the implementation should normalize the loudness of each sub-mix independently before summing them.
 
-<del>
-### DRC Control ### {#processing-post-drc}
-
-In this specification, DRC control can be guided by a pre-defined DRC or by the algorithm specified in mix presentation OBU.
-
-For the pre-defined DRC, it is assumed an input loudness of -24 LKFS and targets an output loudness of -16 LKFS and DRC control module applies the pre-defined DRC compression by assuming a target loudness is adjusted to -16 LKFS as follows:
-- DRC Segment 0
-	- Threshold: not applicable
-	- Ratio: 1:1
-	- Type: Neutral
-- DRC Segment 1
-	- Threshold: -16.5 dBFS
-	- Ratio: 1.5:1
-	- Type: Compressor
-- DRC Segment 2
-	- Threshold: -9 dBFS
-	- Ratio: 2:1
-	- Type: Compressor
-- DRC Segment 3
-	- Threshold: -6 dBFS
-	- Ratio: 3:1
-	- Type: Compressor
-
-Below figure shows the schematic diagram of the pre-defined DRC compression.
-
-<center><img src="images/Pre-defined DRC Compression Scheme.png" style="width:80%; height:auto;"></center>
-<center><figcaption>Pre-defined DRC Compression Scheme</figcaption></center>
-
-The below is the equation that represents the pre-defined DRC compression scheme.
-
-```
-	Y = D_T(i) + (X - T(i)) / R(i). Where,
-	X ∈ Seg(i) and D_T (i) = T(0) + ∑ ((T(k+1) - T(k)) / R(k)) (k = 0 to i-1).
-	Seg(i): ith Segment
-	 T(i) : Threshold vlaue in dBFS for Seg(i), where T(0) = -96.33
-	 R(i) : Ratio value for Seg(i)
-	D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) = T(0)
-	  X   : Input sample value in dBFS
-	  Y   : Output sample value in dBFS
-```
-</del>
-
 ### Limiter ### {#processing-post-limiter}
 
 The limiter should limit the true peak of audio signal at -1 dBTP, where true peak is defined in [[!ITU1770-4]]. The limiter should apply to multichannel signals in a linked manner and further support auto-release.
@@ -2542,58 +2498,6 @@ The limiter should limit the true peak of audio signal at -1 dBTP, where true pe
 
 ## Down-mix Matrix ## {#processing-downmixmatrix}
 
-<del>
-
-### Static Down-mix Matrix ### {#processing-downmixmatrix-static}
-
-This section recommends static down-mix matrices.
-
-IAC players need to support any valid channel layout, even if the number of channels does not match the physically connected audio hardware. Players need to perform channel mixing to increase or reduce the number of channels as needed.
-
-Implementations can use the matrices below to implement down-mixing from the output channel audio, which are known to give acceptable results for stereo, 5.1ch, 7.1ch and 3.1.2ch.
-
-Down-mixing can be done directly by using one of the matrices below or a combination of them. For example, stereo down-mixing for 7.1.4ch can be done by the combination of the 7.1ch down-mix matrix for 7.1.4ch, 5.1ch down-mix matrix for 7.1ch and stereo down-mix matrix for 5.1ch.
-
-The figures below shows recommended static down-mix matrices to stereo, 5.1ch and 7.1ch.
-
-<center><img src="images/7.1ch Down-mix Matrix for 7.1.4ch.png" style="width:100%; height:auto;"></center>
-<center><figcaption>7.1ch Down-mix matrix for 7.1.4ch</figcaption></center>
-
-<center><img src="images/7.1ch Down-mix Matrix for 7.1.2ch.png" style="width:100%; height:auto;"></center>
-<center><figcaption>7.1ch Down-mix matrix for 7.1.2ch</figcaption></center>
-
-<center><img src="images/5.1ch Down-mix Matrix for 5.1.4ch.png" style="width:100%; height:auto;"></center>
-<center><figcaption>5.1ch Down-mix matrix for 5.1.4ch</figcaption></center>
-
-<center><img src="images/5.1ch Down-mix Matrix for 5.1.2ch.png" style="width:100%; height:auto;"></center>
-<center><figcaption>5.1ch Down-mix matrix for 5.1.2ch</figcaption></center>
-
-<center><img src="images/5.1ch Down-mix Matrix for 7.1ch.png" style="width:80%; height:auto;"></center>
-<center><figcaption>5.1ch Down-mix matrix for 7.1ch</figcaption></center>
-
-<center><img src="images/Stereo Down-mix Matrix for 5.1ch.png" style="width:80%; height:auto;"></center>
-<center><figcaption>Stereo Down-mix matrix for 5.1ch</figcaption></center>
-
-<center><img src="images/Stereo Down-mix Matrix for 3.1.2ch.png" style="width:80%; height:auto;"></center>
-<center><figcaption>Stereo Down-mix matrix for 3.1.2ch</figcaption></center>
-
-The figures below show static down-mix matrices to 3.1.2ch.
-
-<center><img src="images/3.1.2ch Down-mix Matrix for 5.1.2ch.png" style="width:80%; height:auto;"></center>
-<center><figcaption>3.1.2ch Down-mix matrix for 5.1.2ch</figcaption></center>
-
-<center><img src="images/3.1.2ch Down-mix Matrix for 5.1.4ch.png" style="width:80%; height:auto;"></center>
-<center><figcaption>3.1.2ch Down-mix matrix for 5.1.4ch</figcaption></center>
-
-<center><img src="images/3.1.2ch Down-mix Matrix for 7.1.2ch.png" style="width:100%; height:auto;"></center>
-<center><figcaption>3.1.2ch Down-mix matrix for 7.1.2ch</figcaption></center>
-
-<center><img src="images/3.1.2ch Down-mix Matrix for 7.1.4ch.png" style="width:100%; height:auto;"></center>
-<center><figcaption>3.1.2ch Down-mix matrix for 7.1.4ch</figcaption></center>
-
-Where, p1 = 0.707 and p2 = 0.3535. Implementations may use limiter defined in [[#processing-post-limiter]] to preserve energy of audio signals instead of normalization factors.
-
-</del>
 
 ### Dynamic Down-mix Matrix {#processing-downmixmatrix-dynamic}
 
