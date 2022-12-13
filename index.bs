@@ -336,7 +336,7 @@ In the above figure,
 		- The audio element obu is saying that there are two substreams (substream_id = 31 and 32) which composing of this audio element.
 			- The audio substream having substream_id = 31 is linked to the audio frame obus having id = 31.
 			- The audio substream having substream_id = 32 is linked to the audio frame obus having id = 32.
-		- The audio element obu is saying that there are one parameter block (parameter_id = 71) for demixing_info() which is applied to the audio element.
+		- The audio element obu is saying that there are one parameter block (parameter_id = 71) for demixing_info_parameter_data() which is applied to the audio element.
 			- The parameter block having parameter_id = 71 is linked to the parameter block obu having parameter_id = 71.
 		- IAC decoders applies the parameter block to the audio substreams after decoding by substream decoders.
 	- The audio element having audio_element_id = 12 is linked to the audio element obu having obu_id = 12.
@@ -578,18 +578,32 @@ class audio_element_obu() {
   
   leb128() num_parameters;
   for (i = 0; i < num_parameters; i++) {
-    leb128() parameter_id;
-    leb128() parameter_name;
+    leb128() param_definition_type;
+    if (param_definition_type == PARAMETER_DEFINITION_DEMIXING) {
+        DemixingParamDefinition demixing_info;
+    }
+    if (param_definition_type == PARAMETER_DEFINITION_RECON_GAIN) {
+        ReconGainParamDefinition recon_gain_info;
+    }
   }
 
   if (audio_element_type == CHANNEL_BASED) {
     scalable_channel_layout_config();
   } else if (audio_element_type == SCENE_BASED) {
     ambisonics_config();
-  }
-  
-  
+  }  
 }
+```
+
+```
+class DemixingParamDefinition() extends ParamDefinition() {
+}
+```
+
+```
+class ReconGainParamDefinition() extends ParamDefinition() {
+}
+
 ```
 
 <b>Semantics</b>
@@ -623,21 +637,30 @@ A ChannelGroup is defined in [[#iacgeneration]]. The order of the substreams in 
 
 <dfn noexport>num_parameters</dfn> shall specify the number of parameters that are used by the algorithms specified in this audio element.
 
-<dfn value noexport for="audio_element_obu()">parameter_id</dfn> shall be the unique ID associated with a parameter that is used by the algorithm specified in this audio element.
+<dfn noexport>param_definition_type</dfn> specifies the type of the parameter definition. All parameter definition types described in this version of the specification are listed in the table below, along with their associated parameter definitions.
 
-<dfn noexport>parameter_name</dfn> shall specify the name of the parameter.
+<table class = "def">
+<tr>
+  <th>param_definition_type</th><th>Parameter definition type</th><th>Parameter definition</th>
+</tr>
+<tr>
+  <td>0</td><td>PARAMETER_DEFINITION_MIX_GAIN</td><td>MixGainParamDefinition</td>
+</tr>
+<tr>
+  <td>1</td><td>PARAMETER_DEFINITION_DEMIXING</td><td>DemixingParamDefinition</td>
+</tr>
+<tr>
+  <td>2</td><td>PARAMETER_DEFINITION_RECON_GAIN</td><td>ReconGainParamDefinition</td>
+</tr>
+</table>
 
-<pre class = "def">
-parameter_name : Parameter name.
-       0       : SCALABLE_CHANNEL_LAYOUT_DEMIXING_INFO
-       1       : SCALABLE_CHANNEL_LAYOUT_RECON_GAIN_INFO
-   the others  : reserved
-</pre>
+<dfn noexport>demixing_info</dfn> provides the parameter definition for the demixing information to reconstruct channel audios according to [=loudspeaker_layout=] from scalable channel audio. The parameter definition is provided by DemixingParamDefinition() and the corresponding parameter data to be provided in parameter blocks is specified in demixing_info_parameter_data().
+
+<dfn noexport>recon_gain_info</dfn> provides the parameter definition for the gain value to reconstruct channel audios according to [=loudspeaker_layout=] from scalable channel audio. The parameter definition is provided by ReconGainParamDefinition() and the corresponding parameter data to be provided in parameter blocks is specified in recon_gain_info_parameter_data().
 
 <dfn noexport>scalable_channel_layout_config()</dfn> is a class that provides the metadata required for combining the substreams identified here in order to reconstruct a scalable channel layout.
 
 <dfn noexport>ambisonics_config()</dfn> is a class that provides the metadata required for combining the substreams identified here in order to reconstruct an Ambisonics layout.
-
 
 ### Mix Presentation OBU Syntax and Semantics ### {#obu-mixpresentation}
 
@@ -724,7 +747,7 @@ class parameter_block_obu() {
   leb128() num_segments;
   leb128() constant_segment_interval;
 
-  leb128() param_definition_type = get_param_definition_type(parameter_id);
+  param_definition_type = get_param_definition_type(parameter_id);
 
   for (i = 0; i < num_segments; i++) {
     if (constant_segment_interval == 0) {
@@ -735,10 +758,10 @@ class parameter_block_obu() {
       leb128() animation_type;
       mix_gain_parameter_data(animation_type);
     }
-    if (param_definition_type == PARAMETER_DEFINITION_DEMIXING_INFO) {
+    if (param_definition_type == PARAMETER_DEFINITION_DEMIXING) {
       demixing_info_parameter_data();
     }
-    if (param_definition_type == PARAMETER_DEFINITION_RECON_GAIN_INFO) {
+    if (param_definition_type == PARAMETER_DEFINITION_RECON_GAIN) {
       recon_gain_info_parameter_data();
     }
   }
@@ -755,24 +778,9 @@ class parameter_block_obu() {
 
 <dfn noexport>constant_segment_interval</dfn> shall specify the interval of each segment, in the case where all segments except the last segment have equal intervals. If all segments except the last segment do not have equal intervals, the value of constant_segment_interval shall be set to 0. 
 
-<dfn noexport>get_param_definition_type()</dfn> is a run-time function that shall map the parameter_id to its registered parameter definition type. All parameter definition types described in this version of the specification are listed in the table below, along with their associated parameter definitions.
+<dfn noexport>get_param_definition_type()</dfn> is a run-time function to get the parameter definition type mapped to the parameter_id. 
 
-<table class = "def">
-<tr>
-  <th>param_definition_type</th><th>Parameter definition type</th><th>Parameter definition</th>
-</tr>
-<tr>
-  <td>0</td><td>PARAMETER_DEFINITION_MIX_GAIN</td><td>MixGainParamDefinition</td>
-</tr>
-<tr>
-  <td>0</td><td>PARAMETER_DEFINITION_DEMIXING_INFO</td><td>DemixingInfoParamDefinition</td>
-</tr>
-<tr>
-  <td>0</td><td>PARAMETER_DEFINITION_RECON_GAIN_INFO</td><td>ReconGainInfoParamDefinition</td>
-</tr>
-</table>
-
-NOTE: param_definition_type is not coded in the bitstream but is inferred at run time based on parameter_id.
+Audio Element OBU and/or Mix Presentation OBU is mapping a parameter_id to the parameter definition type. So, IA decoders can know the definition type mapped to the parameter_id.
 
 <dfn noexport>segment_interval</dfn> shall specify the interval for the given segment.
 
@@ -868,7 +876,6 @@ This value must be greater or equal to 22, in order to avoid collision with the 
 <dfn noexport>audio_frame()</dfn> is the raw coded audio data for the frame. It shall be [=opus packet=] of [[!RFC6716]] for IAC-OPUS, [=raw_data_block()=] of [[!AAC]] for IAC-AAC-LC and [=FRAME=] of [[!FLAC]] for IAC-FLAC.
 
 For IAC-LPCM, [=audio_frame()=] shall be LPCM samples. When more than one byte is used to represent a LPCM sample, the byte order shall be in little endian. 
-
 
 For this version of the specification, all audio frames for a given substream must be gapless.
 
@@ -1030,9 +1037,9 @@ Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
 - 0: No output_gain information fields for the ChannelGroup present.
 - 1: output_gain information fields for the ChannelGroup present. In this case, output_gain_flags and output_gain fields present.
 
-<dfn noexport>recon_gain_is_present_flag</dfn> shall indicate if recon_gain information fields for the ChannelGroup presents in Recon_Gain_Info().
-- 0: No recon_gain information fields for the ChannelGroup present in Recon_Gain_Info_OBU.
-- 1: recon_gain information fields for the ChannelGroup present in Recon_Gain_Info_OBU. In this case, recon_gain_flags and recon_gain fields present.
+<dfn noexport>recon_gain_is_present_flag</dfn> shall indicate if recon_gain information fields for the ChannelGroup presents in recon_gain_info_parameter_data().
+- 0: No recon_gain information fields for the ChannelGroup present in recon_gain_info_parameter_data().
+- 1: recon_gain information fields for the ChannelGroup present in recon_gain_info_parameter_data(). In this case, recon_gain_flags and recon_gain fields present.
 
 <dfn noexport>substream_count</dfn> shall specify the number of audio substreams. It must be the same as [=num_substreams=] in its corresponding audio_element().
 
@@ -1114,14 +1121,14 @@ If ambisonics_mode is equal to PROJECTION, this shall indicate that the Ambisoni
 <dfn noexport>demixing_matrix</dfn> shall be the same as the one for [=ChannelMappingFamily=] = 3 in [[!RFC8486]] except the byte order of each of matrix coefficients shall be converted to big endian.
 
 
-### Demixing Info Syntax and Semantics ### {#syntax-demixing-info}
+### Demixing Info Parameter Data Syntax and Semantics ### {#syntax-demixing-info}
 
-<dfn noexport>demixing_info()</dfn> specifies demixing parameter mode to be used to reconstruct output channel audio according to its [=loudspeaker_layout=].
+<dfn noexport>demixing_info_parameter_data()</dfn> specifies demixing parameter mode to be used to reconstruct output channel audio according to its [=loudspeaker_layout=].
 
 <b>Syntax</b>
 
 ```
-class demixing_info() {
+class demixing_info_parameter_data() {
   unsigned int (3) dmixp_mode;
   unsigned int (5) reserved;
 }
@@ -1144,14 +1151,14 @@ class demixing_info() {
 <center><img src="images/Down-mix Mechanism.png" style="width:100%; height:auto;"></center>
 <center><figcaption></b>IA Down-mix Mechanism</figcaption></center>
 
-### Recon Gain Info Syntax and Semantics ### {#syntax-recon-gain-info}
+### Recon Gain Info Parameter Data Syntax and Semantics ### {#syntax-recon-gain-info}
 
-<dfn noexport>recon_gain_info()</dfn> contains recon gain values for demixed channels.
+<dfn noexport>recon_gain_info_parameter_data()</dfn> contains recon gain values for demixed channels.
 
 <b>Syntax</b>
 
 ```
-class recon_gain_info() {
+class recon_gain_info_parameter_data() {
   for (i=0; i< num_layers; i++) {
     if (recon_gain_is_present_flag(i) == 1) {
       leb128() recon_gain_flags(i);
@@ -1457,7 +1464,7 @@ Restrictions on the IA sequence:
 - [=version=] shall be set to 0 for this version of specification.
 - [=profile_version=] shall be set to 0 for this version of specification.
 - [=num_layers=] shall be set to 1 or up to 6 for Channel-based audio element (i.e. scalable channel audio).
-    - In this case, [=demixing_info()=] and [=recon_gain_info()=] may be present in the IA sequence.
+    - In this case, [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=] may be present in the IA sequence.
     - In case of simple scalable channel audio (e.g. mono for layer 1 & stereo for layer 2), demixing_info() and recon_gain_info() shall not be present in the bitstream.
     - When num_layers = 1, OBU_IA_Parameter_Block including demixing_info() may be present in the IA sequence and IA decoders may use the demixing_info() for dynamic down-mixing.
 - All audio frames shall have aligned frame boundaries.
@@ -1466,7 +1473,7 @@ Capabilities of the IA parser, decoder and processor:
 - They shall be able to parse an IA sequence with the MSB four bits of [=profile_version=] = 0 and the MSB four bits of [=version=] = 0 (i.e., profile_version = 0 to 15 and version = 0 to 15).
 - They shall be able to decode and process up to 16 channels.
 - They shall be able to reconstruct one audio element.
-- They may use demixing_info() to do down-mixing.
+- They may use demixing_info_parameter_data() to do down-mixing.
 
 ## IA Base Profile ## {#profiles-base}
 
@@ -1480,9 +1487,9 @@ Restrictions on IA sequence:
 - [=version=] shall be set to 0 for this version of specification.
 - [=profile_version=] shall be set to 16 for this version of specification.
 - [=num_layers=] shall be set to 1 or up to 6 for Channel-based audio element (i.e. scalable channel audio)
-    - In this case, [=demixing_info()=] and [=recon_gain_info()=] may be present in the IA sequence.
-    - In case of simple scalable channel audio (e.g. mono for layer 1 & stereo for layer 2), demixing_info() and recon_gain_info() shall not be present in the bitstream.
-    - When num_layers = 1, OBU_IA_Parameter_Block including demixing_info() may be present in the IA sequence and IA decoders may use the demixing_info() for dynamic down-mixing.
+    - In this case, [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=] may be present in the IA sequence.
+    - In case of simple scalable channel audio (e.g. mono for layer 1 & stereo for layer 2), [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=] shall not be present in the bitstream.
+    - When num_layers = 1, OBU_IA_Parameter_Block including [=demixing_info_parameter_data()=] may be present in the IA sequence and IA decoders may use the [=demixing_info_parameter_data()=] for dynamic down-mixing.
 - All audio frames shall have aligned frame boundaries.
 
 Capabilities of the IA parser, decoder and processor:
@@ -1508,8 +1515,8 @@ Restrictions on IA sequence:
     - The combination of [=codec_id=] = 'fLaC' for one substream and [=codec_id=] = 'opus' for another substream shall not be allowed.
     - The combination of [=codec_id=] = 'fLaC' for one substream and [=codec_id=] = 'mp4a' for another substream shall not be allowed.
 - [=num_layers=] shall be set to 1 or up to 6 for Channel-based audio element (i.e. scalable channel audio)
-    - In this case, [=demixing_info()=] and [=recon_gain_info()=] may be present.
-    - In case of simple scalable channel audio (e.g. mono for layer 1 & stereo for layer 2), [=demixing_info()=] and [=recon_gain_info()=] shall not be present.
+    - In this case, [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=] may be present.
+    - In case of simple scalable channel audio (e.g. mono for layer 1 & stereo for layer 2), [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=] shall not be present.
 
 Capabilities of the IA parser, decoder and processor:
 - They shall be able to parse an IA sequence with the MSB four bits of [=profile_version=] = 0, 1 or 2 and the MSB four bits of [=version=] = 0 (i.e., profile_version = 0 to 47 and version = 0 to 15).
@@ -1689,7 +1696,7 @@ During encapsulation process, OBUs of IA sequence are encapsulated into [[!ISOBM
 - Sync OBU: parse the input timeline using the Sync OBU information and construct a PTRO box that describes the relative offsets for each parameter block.
 - Each temporal unit:
 	- Temporal Delimiter OBU: shall be discarded if present.
-	- Parameter Block OBU for demixing_info() (with OBU syntax) shall be stored as a new sample group having [=grouping_type=], [=demi=].
+	- Parameter Block OBU for demixing_info_parameter_data() (with OBU syntax) shall be stored as a new sample group having [=grouping_type=], [=demi=].
 	- Remained OBUs of each temporal unit shall be stored as one sample data without gap among OBUs.
 - Audio Frame OBUs:
 	- Select one substream. 
@@ -1802,9 +1809,9 @@ During encapsulation process, global descriptors shall be discarded from IA sequ
 
 #### Demixing Info Sample Group #### {#iasamplegroup-demixing}
 
-During encapsulation process, Parameter Block OBU for demixing_info shall be discarded from IA sequence. A new sample group for demixing_info() shall be defined by using 'sgpd' and 'sbgp' boxes with following requirements:
+During encapsulation process, Parameter Block OBU for demixing_info_parameter_data shall be discarded from IA sequence. A new sample group for demixing_info_parameter_data() shall be defined by using 'sgpd' and 'sbgp' boxes with following requirements:
 - [=grouping_type=] shall be set to <dfn noexport>demi</dfn>.
-- Each [=SampleGroupDescriptionEntry=] shall be Parameter Block OBU for demixing_info with OBU syntax.
+- Each [=SampleGroupDescriptionEntry=] shall be Parameter Block OBU for demixing_info_parameter_data with OBU syntax.
 
 
 ## Common Encryption ## {#CommonEncryption}
@@ -2036,8 +2043,8 @@ For example, when CL #1 = 2ch, CL #2 = 3.1.2ch, CL #3 = 5.1.2ch and CL #4 = 7.1.
 
 ### Recon Gain ### {#processing-scalablechannelaudio-recongain}
 
-[=Recon_Gain=] shall be only applied to all of audio samples of the de-mixed channels from De-mixer module.
-- [=Recon_Gain_Info()=] indicates each channel of CL #i which Recon_Gain needs to be applied to and provides Recon_Gain value for each frame of the channel.
+[=recon_gain=] shall be only applied to all of audio samples of the de-mixed channels from De-mixer module.
+- [=recon_gain_info_parameter_data()=] indicates each channel of CL #i which Recon_Gain needs to be applied to and provides Recon_Gain value for each frame of the channel.
 	- Sample (k,i) *= Smoothed_Recon_Gain (k,i), where k is the frame index and i is the sample index of the frame.
 	- Smoothed_Recon_Gain (k) = MA_gain (k-1) x e_window + MA_gain (k) x s_window
 	- MA_gain (k) = 2 / (N+1) x Recon_Gain (k) / 255 + (1 – 2/(N+1)) x MA_gain (k-1), where MA_gain (0) = 1.
@@ -2046,7 +2053,7 @@ For example, when CL #1 = 2ch, CL #2 = 3.1.2ch, CL #3 = 5.1.2ch and CL #4 = 7.1.
 	- Where, hanning = np.hanning (2*olen), ps is the pre-skip value, flen is the frame size and olen is the overlab size.
 	- Recommend values: N = 7
 
-Below figure shows the smoothing scheme of [=Recon_Gain=].
+Below figure shows the smoothing scheme of [=recon_gain=].
 
 <center><img src="images/Smoothing Scheme of Recon Gain.png" style="width:100%; height:auto;"></center>
 <center><figcaption>Smoothing Scheme of Recon Gain</figcaption></center>
@@ -2240,7 +2247,7 @@ The IA encoder is composed of Pre-processor, Codec encoder and OBU packetizer.
 	- It outputs descriptors which are composed of one Magic Code, one Codec Config, one Audio Element config, one or more Mix Presentation config. 
 	- It may output paramete blocks
 		- For channel-based audio element with [=num_layers=] = 1, it may output parameter blocks for demixing info.
-		- For channel-based audio element with [=num_layers=] > 1, it outputs parameter blocks for demixing info and recon_gain_info.
+		- For channel-based audio element with [=num_layers=] > 1, it outputs parameter blocks for demixing_info_parameter_data and recon_gain_info_parameter_data.
 		- It may further output parameter blocks for post processing such as Loudness and DRC control.
 - Codec encoder generates one or more substreams from each ChannelGroup based on Codec Config.
 	- Mono or stereo coding shall be only allowed.
@@ -2284,8 +2291,8 @@ For Ambisonics encoding:
 For Scalable Channel Audio encoding:
 - Pre-processor outputs one or more ChannelGroups, desriptors and parameter blocks. It is composed of Down-mix parameter generator, Down-mixer, Loudness, ChannelGroup generator, Attenation and Meta generator.
 	- For non-scalable channel audio (i.e. [=num_layers=] = 1):
-		- Parameter blocks for recon_gain_info is not be generated. 
-		- Parameter blocks for demixing_info may be generated by implementers who assume it to be recommended for dynamic downmixing in a decoder side.
+		- Parameter blocks for recon_gain_info_parameter_data is not be generated. 
+		- Parameter blocks for demixing_info_parameter_data may be generated by implementers who assume it to be recommended for dynamic downmixing in a decoder side.
 		- Down-mixer, ChannelGroup generator and Attenuation modules do not needed.
 	- Down-mix parameter generator shall generate 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k)) by analyzing input channel audio.
 	- Down-mixer shall generate down-mixed audios according to the list of channel layouts and the down-mix parameters.
@@ -2304,9 +2311,9 @@ For Scalable Channel Audio encoding:
 				- [=loudness=] shall be set to the loudness ([=LKFS=]) of the down-mixed audio for the ith channel layout for the ith ChannelGroup.
 				- Each bit of [=output_gain_flags=] shall be set to 1 for the ith ChannelGroup if attenuation is applied to the relevant channel of the ith ChannelGroup. Otherwies it shall be set to 0 for the ith ChannelGroup.
 				- [=output_gain=] shall be set to the inverse number of the gain which is applied to the channels which are indicated by output_gain_flags.
-		- Parameter blocks can be composed of [=demixing_info()=] and [=recon_gain_info()=]. When [=recon_gain_is_present_flag=] = 0 for all ChannelGroup, recon_gain_info shall not present in IA sequence.
-			- [=dmixp_mode=] of demixing_info for the kth frame shall be set to indicate (α(k), β(k), γ(k), δ(k)) and w_idx_offset(k). Where w_idx_offset(k) = 1 or -1.
-			- [=recon_gain_flags=] of recon_gain_info shall be set to indicate the de-mixed channels, which need to apply [=recon_gain=] among the output channels after demixing for ith channel layout.
+		- Parameter blocks can be composed of [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=]. When [=recon_gain_is_present_flag=] = 0 for all ChannelGroup, recon_gain_info shall not present in IA sequence.
+			- [=dmixp_mode=] of demixing_info_parameter_data for the kth frame shall be set to indicate (α(k), β(k), γ(k), δ(k)) and w_idx_offset(k). Where w_idx_offset(k) = 1 or -1.
+			- [=recon_gain_flags=] of recon_gain_info_parameter_data shall be set to indicate the de-mixed channels, which need to apply [=recon_gain=] among the output channels after demixing for ith channel layout.
 			- [=recon_gain=] shall be set to the gain value to be applied to the channel which is indicated by recon_gain_flags for the ith ChannelGroup.
 - Temporal unit for kth frame shall be composed of audio frame OBUs for the kth frames of the substreams and followed by OBUs for zero or more prameter block OBUs.
 	- It may have the immediately preceding temporal delimiter OBU,
@@ -2322,7 +2329,7 @@ Below figure shows IA encoding flowchart for Scalable Channel Audio.
 - Codec Enc. generates the coded substreams from PCMs and passes substreams and one single decoder_config to OBU Packetizer.
 - OBU packetizer generates descriptor OBUs which consists of one Magic Code OBU, one Codec Config OBU, one Audio Element OBU and zero or more Mix Presentation OBU.
 		- Codec Config OBU is generated based on [=decoder_config()=].
-- OBU packetizer generates zero or more parameter block OBUs for each frame which contains demixing_info and recon_gain_info.
+- OBU packetizer generates zero or more parameter block OBUs for each frame which contains demixing_info_parameter_data and recon_gain_info_parameter_data.
 - OBU packetizer generates audio frame OBUs for each frame of the substreams.
 - OBU packetizer generates temporal unit for each frame.
 	- Temporal unit consists of audio frame OBUs and followed by zero or more parameter block OBUs and audio frame OBUs.
@@ -2405,7 +2412,7 @@ Down-mix paths, which conform to the above rule, shall be only allowed for scala
 
 ### Recon Gain Generation ### {#iacgeneration-scalablechannelaudio-recongaingeneration}
 
-This section describes how to generate [=Recon_Gain=].
+This section describes how to generate [=recon_gain=].
 
 Recon_Gain needs to be applied to de-mixed channels. For this, IA encoder needs to deliver it to IA decoders.
 
