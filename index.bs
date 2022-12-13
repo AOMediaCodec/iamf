@@ -813,6 +813,25 @@ class AnimatedParameterData(animation_type) {
 
 <dfn noexport>control_point_relative_time</dfn> shall specify the time of the middle control point of a quadratic Bezier curve, i.e. its x-axis value. This value is expressed as a fraction of the parameter segment interval with valid values in the range of 0 and 1, inclusively. A value equal to 0 or 1 shall indicate that this animation implements a linear Bezier curve, in which case control_point_value shall be ignored by the IA parser. It is stored as an 8-bit, unsigned, fixed-point value with 8 fractional bits (i.e. Q0.8 in [Q-Format]).
 
+#### Parameter Definition Syntax and Semantics #### {#parameter-definition}
+
+Parameter definition classes shall inherit from the abstract <dfn noexport>ParamDefinition()</dfn> class. They may optionally further provide default parameter values, which are applied when there are no parameter blocks available.
+
+<b>Syntax</b>
+
+```
+abstract class ParamDefinition() {
+  leb128() parameter_id;
+  leb128() time_base;
+}
+```
+
+<b>Semantics</b>
+
+<dfn value noexport for="ParamDefinition()">parameter_id</dfn> shall indicate the unique ID in an IA sequence for a given parameter.
+
+<dfn value noexport for="ParamDefinition()">time_base</dfn> shall specify the time base used by this parameter, expressed as seconds per tick. Time-related fields associated with this parameter, such as durations and intervals, shall be expressed in the number of ticks.
+
 ### Audio Frame OBU Syntax and Semantics ### {#obu-audioframe}
 
 This section specifies OBU payloads of OBU_IA_Audio_Frame and OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21. 
