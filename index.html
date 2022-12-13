@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 26e85e599, updated Thu Dec 8 15:29:31 2022 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="a1ffd1dad771d68d96c48d47e9cb0f89e8295b30" name="document-revision">
+  <meta content="86a19fb3bc120aa60e80a2991b2ef8204e102403" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -3801,21 +3801,21 @@ Quantity:  One of more
        <p>[Step1-4] Figure out the offset (i1) and number (im) of Samples, which the ith SampleGroupDescriptionEntry is applied to, from the SampleGroup.</p>
      </ul>
     <li data-md>
-     <p>Step2: Reconstructing of the jth Temporal Unit of the ith IA sequence (j = i1, i2, …, im)</p>
+     <p>Step2: Prepare Sync_OBU with obu_type = OBU_IA_Sync.</p>
+    <li data-md>
+     <p>Step3: Reconstructing of the jth Temporal Unit of the ith IA sequence (j = i1, i2, …, im)</p>
      <ul>
       <li data-md>
-       <p>[Step2-1] Prepare Sync_OBU with obu_type = OBU_IA_Sync.</p>
-      <li data-md>
-       <p>[Step2-2] If there is the SampleGroup with grouping_type = <a data-link-type="dfn" href="#demi" id="ref-for-demi①">demi</a>, then take the parameter block OBU for the demixing_info and jth sample. Otherwise, take jth sample as it is.</p>
+       <p>[Step3-1] If there is the SampleGroup with grouping_type = <a data-link-type="dfn" href="#demi" id="ref-for-demi①">demi</a>, then take the parameter block OBU for the demixing_info and jth sample. Otherwise, take jth sample as it is.</p>
        <ul>
         <li data-md>
          <p>Parameter block OBU for demixing_info: take the SampleGroupDescriptionEntry as it is, from SampleGrouop with grouping_type = <a data-link-type="dfn" href="#demi" id="ref-for-demi②">demi</a>, mapped to jth Sample.</p>
        </ul>
       <li data-md>
-       <p>[Step2-3] Place Sync_OBU at the front of the result of Step2-2 without gap to reconstruct the jth Temporal Unit.</p>
+       <p>[Step3-2] Place Sync_OBU at the front of the result of Step2-2 without gap to reconstruct the jth Temporal Unit.</p>
      </ul>
     <li data-md>
-     <p>Step3: Place descriptor OBUs and followed by Temporal Units in order (j = i1, i2, …, im) without gap to reconstruct the ith IA sequence.</p>
+     <p>Step4: Place descriptor OBUs, followed by Sync OBU, and followed by Temporal Units in order (j = i1, i2, …, im) without gap, to reconstruct the ith IA sequence.</p>
    </ul>
    <p><a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id①⓪">codec_id</a> and <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config⑤">decoder_config()</a> for IAC-OPUS is generated as follows:</p>
    <ul>
