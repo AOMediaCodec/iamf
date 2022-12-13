@@ -760,17 +760,23 @@ class parameter_block_obu() {
 
 <dfn value noexport for="parameter_block_obu()">parameter_id</dfn> shall indicate the unique ID that is associated with a specific parameter definition. All parameter blocks that provide data for that parameter definition shall have the same parameter_id.
 
-<dfn noexport>duration</dfn> shall specify the duration for which this parameter block is valid and applicable. The duration shall be expressed as the number of ticks at the rate indicated by the time_base specified in the corresponding parameter definition.
+<dfn noexport>duration</dfn> shall specify the duration for which this parameter block is valid and applicable. 
 
 <dfn noexport>num_segments</dfn> shall specify the number of different sets of parameter values specified in this parameter block, where each set describes a different segment of the timeline, contiguously.
 
-<dfn noexport>constant_segment_interval</dfn> shall specify the interval of each segment, in the case where all segments have equal intervals. If all segments do not have equal intervals, the value of constant_segment_interval shall be set to 0. This value shall be expressed as the number of ticks at the rate indicated by the time base specified in the corresponding parameter definition.
+<dfn noexport>constant_segment_interval</dfn> shall specify the interval of each segment, in the case where all segments except the last segment have equal intervals. If all segments except the last segment do not have equal intervals, the value of constant_segment_interval shall be set to 0. 
 
 <dfn noexport>get_param_definition_type()</dfn> is a run-time function to get the parameter definition type mapped to the parameter_id. 
 
 Audio Element OBU and/or Mix Presentation OBU is mapping a parameter_id to the parameter definition type. So, IA decoders can know the definition type mapped to the parameter_id.
 
 <dfn noexport>segment_interval</dfn> shall specify the interval for the given segment.
+
+Each value of [=duration=], [=constant_segment_interval=] and [=segment_interval=] shall be expressed as the number of ticks at the rate indicated by the time base specified in the corresponding parameter definition.
+- When it defines <dfn noexport>D</dfn> = the value of [=duration=], <dfn noexport>NS</dfn> = the value of [=num_segments=], <dfn noexport>CSI</dfn> = the value of [=constant_segment_interval=] and <dfn noexport>SI</dfn> = the value of [=segment_interval=].
+	- When [=CSI=] != 0, [=NS=] x [=CSI=] shall be equal to or greater than [=D=].
+		- If [=NS=] x [=CSI=] > [=D=], the actual interval of the last segment shall be [=D=] - ([=NS=] - 1) x [=CSI=].
+	- When [=CSI=] = 0, the summation of all [=SI=]s in this parameter block shall be equal to [=D=].
 
 <dfn noexport>animation_type</dfn> shall specify the how the parameter values in this parameter block shall be animated.
 
@@ -806,25 +812,6 @@ class AnimatedParameterData(animation_type) {
 <dfn noexport>control_point_value</dfn> shall specify the parameter value of the middle control point of a quadratic Bezier curve, i.e. its y-axis value. If this animation implements a linear Bezier curve, control_point_value shall be ignored by the IA parser.
 
 <dfn noexport>control_point_relative_time</dfn> shall specify the time of the middle control point of a quadratic Bezier curve, i.e. its x-axis value. This value is expressed as a fraction of the parameter segment interval with valid values in the range of 0 and 1, inclusively. A value equal to 0 or 1 shall indicate that this animation implements a linear Bezier curve, in which case control_point_value shall be ignored by the IA parser. It is stored as an 8-bit, unsigned, fixed-point value with 8 fractional bits (i.e. Q0.8 in [Q-Format]).
-
-#### Parameter Definition Syntax and Semantics #### {#parameter-definition}
-
-Parameter definition classes shall inherit from the abstract <dfn noexport>ParamDefinition()</dfn> class. They may optionally further provide default parameter values, which are applied when there are no parameter blocks available.
-
-<b>Syntax</b>
-
-```
-abstract class ParamDefinition() {
-  leb128() parameter_id;
-  leb128() time_base;
-}
-```
-
-<b>Semantics</b>
-
-<dfn value noexport for="ParamDefinition()">parameter_id</dfn> shall indicate the unique ID in an IA sequence for a given parameter.
-
-<dfn value noexport for="ParamDefinition()">time_base</dfn> shall specify the time base used by this parameter, expressed as seconds per tick. Time-related fields associated with this parameter, such as durations and intervals, shall be expressed in the number of ticks.
 
 ### Audio Frame OBU Syntax and Semantics ### {#obu-audioframe}
 
@@ -891,7 +878,6 @@ class sync_obu() {
     unsigned int (6) reserved;
     sleb128() relative_offset;
   }
-  leb128() concatenation_rule;
 }
 ```
 
@@ -923,9 +909,11 @@ For this version of the specification, the value of reinitialize_decoder shall b
 
 <dfn value noexport for="sync_obu()">reserved</dfn> shall be set to 0. Reserved units are for future use and shall be ignored by an IAC-OBU parser.
 
-<dfn noexport>relative_offset</dfn> is the offset that is applied to the first audio frame or parameter block with the referenced obu_id that comes after this Sync OBU. It describes the position of audio and parameters in a local frame of reference. The local frame of reference is unique for each Sync OBU.
+<dfn noexport>relative_offset</dfn> is the offset to position the first audio frame (before trimming) or parameter block with the referenced obu_id that comes after this Sync OBU with respect to the timeline generated before this Sync OBU. If this Sync OBU is the first one, it is the offset from 0. Otherwise, it is the offset from the end of the timeline of Substreams generated from the previous Sync OBU.
 
-<dfn noexport>concatenation_rule</dfn> shall specify the type of concatenation rule that is applied to position the audio frames and parameters that happened after a Sync OBU with respect to the timeline before the Sync OBU. A value of 0 shall indicate that Concatenation Rule 1 specified in [[#standalone-synchronizing-data-obus]] shall be used, while a value of 1 shall indicate that Concatenation Rule 2 shall be used.
+The offset shall be indicated in the number of ticks at the time_base specified in the corresponding substream or parameter definition. 
+
+IA encoder and decoder operations related to this field are specified in [[#standalone-synchronizing-data-obus]].
 
 ## Detailed OBU Syntax and Semantics ## {#syntax-detailed}
 
@@ -1469,8 +1457,8 @@ Restrictions on IA sequence:
 - [=profile_version=] shall be set to 16 for this version of specification.
 - [=num_layers=] shall be set to 1 or up to 6 for Channel-based audio element (i.e. scalable channel audio)
     - In this case, [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=] may be present in the IA sequence.
-    - In case of simple scalable channel audio (e.g. mono for layer 1 & stereo for layer 2), demixing_info_parameter_data() and recon_gain_info_parameter_data() shall not be present in the bitstream.
-    - When num_layers = 1, OBU_IA_Parameter_Block including demixing_info() may be present in the IA sequence and IA decoders may use the demixing_info() for dynamic down-mixing.
+    - In case of simple scalable channel audio (e.g. mono for layer 1 & stereo for layer 2), [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=] shall not be present in the bitstream.
+    - When num_layers = 1, OBU_IA_Parameter_Block including [=demixing_info_parameter_data()=] may be present in the IA sequence and IA decoders may use the [=demixing_info_parameter_data()=] for dynamic down-mixing.
 - All audio frames shall have aligned frame boundaries.
 
 Capabilities of the IA parser, decoder and processor:
@@ -1514,6 +1502,8 @@ This section details the order in which the OBUs shall be sequenced in a standal
 
 ## OBU Sequence Order ## {#standalone-obu-sequence-order}
 
+An IA sequence is composed of a series of OBUs in the sequence of a set of descriptor OBUs followed by their associated data OBUs, and where this pattern is repeated as many times as needed.
+
 ### Descriptor OBUs ### {#standalone-descriptor-obus}
 A set of Descriptor OBUs shall be placed at the beginning of the bitstream in the following order:
 
@@ -1525,7 +1515,7 @@ A set of Descriptor OBUs shall be placed at the beginning of the bitstream in th
 
 ### Data OBUs ### {#standalone-data-obus}
 
-One Sync OBU is placed immediately after the Descriptor OBUs. This is followed by a sequence of Audio Frame OBUs, Parameter Block OBUs, one or more additional Sync OBUs and one or more Temporal Delimiter OBUs, according to the rules below:
+One Sync OBU shall be placed immediately after the Descriptor OBUs. This shall be followed by a sequence of Audio Frame OBUs, Parameter Block OBUs, one or more additional Sync OBUs and one or more Temporal Delimiter OBUs, according to the rules below:
 
 - Audio Frame OBUs and Parameter Block OBUs must be ordered by their implied timestamp in the timeline, and may be interleaved.
 - If there are multiple Audio Frame OBUs that have the same implied start timestamp, they must be grouped by audio elements.
@@ -1560,104 +1550,84 @@ The Sync OBU contains two pieces of information that apply to all substream and 
 
 2) a global offset.
 
-The relative offsets describe how the substreams and parameters are positioned within a local frame of reference, which is unique for each Sync OBU. For example, the Sync OBU given below indicates that Substream 1 has a start timestamp that is 15 units before Substream 2, 10 units after Parameter 1, and 25 units before Parameter 2.
+The relative offsets describe how the substreams and parameters are positioned with respect to the timeline of Substreams generated from the previous Sync OBU. For example, from the previous Sync OBU, Substream 1 has a end timestamp 960 units, Substream 2 has a end timestamp 1024 units, Parameter 1 has a end timestamp 900 units and Parameter 2 has a end timestamp 1100 units. The relative offsets are calculated with respect to the maximum timeline of Substreams (i.e. 1024 units). So, Subsream 1 has a relative offset that is 64 units before Substream 2, Substream 2 has  a relative offset that is 0 unit, Parameter 1 has a relative offset that is 124 units before Substream 2 and Parameter 2 has a relative offset that is 76 after Substream 2.
 
 <table class="def">
 <tr>
-  <th>ID (name)</th><th>Relative offset</th>
-</tr>
-<tr>
-  <td>N/A (Global offset)</td><td>0</td>
-</td>
-</tr>
-  <td>1 (Substream 1)</td><td>-5</td>
-</td>
-</tr>
-  <td>2 (Substream 2)</td><td>+10</td>
-</td>
-</tr>
-  <td>3 (Parameter 1)</td><td>-15</td>
-</td>
-</tr>
-  <td>4 (Parameter 2)</td><td>+20</td>
-</tr>
-</table>
-
-Within a Sync OBU, only the relative information between the relative offsets is meaningful for positioning it within the global frame of reference, where the method of positioning is described further below. This is not affected by any constant shift in the relative offsets. As such, each Sync OBU can have any number of variants, as long as there is a constant difference between the two variants (see the example below). This removes any restrictions on how the absolute values of the relative offsets are selected. For example, some implementations may wish to always set the relative offset of an arbitrarily selected substream or parameter to 0.
-
-<table class="def">
-<tr>
-  <th>ID (name)</th><th>Relative offset (variant 1)</th><th>Relative offset (variant 2)</th>
+  <th>ID (name)</th><th>end timestamp</th><th>Relative offset</th>
 </tr>
 <tr>
   <td>N/A (Global offset)</td><td>0</td><td>0</td>
 </td>
 </tr>
-  <td>1 (Substream 1)</td><td>-5</td><td>+10</td>
+  <td>1 (Substream 1)</td><td>960</td><td>-64</td>
 </td>
 </tr>
-  <td>2 (Substream 2)</td><td>+40</td><td>+55</td>
+  <td>2 (Substream 2)</td><td>1024</td><td>+0</td>
 </td>
 </tr>
-  <td>3 (Parameter 1)</td><td>-15</td><td>0</td>
+  <td>3 (Parameter 1)</td><td>900</td><td>-124</td>
 </td>
 </tr>
-  <td>4 (Parameter 2)</td><td>+20</td><td>+35</td>
+  <td>4 (Parameter 2)</td><td>1100</td><td>+76</td>
 </tr>
 </table>
 
-The global offset defines an additional offset that is applied to all substreams and parameters, and can be used to express intentional gaps between the substreams and parameters associated with two Sync OBUs.
+The global offset defines an additional offset that is applied to all substreams and parameters, and can be used to express intentional gaps between the local frames associated with two Sync OBUs.
 
-The local frame of reference can be positioned in a global frame of reference by using one of the two concatenation rules provided below. These rules specify how two timelines associated with different Sync OBUs shall be aligned.
+The local frame of reference can be positioned in a global frame of reference by using the concatenation rule provided below. This rule specify how two timelines associated with different Sync OBUs shall be aligned.
 
-<dfn noexport>Concatenation Rule 1</dfn>
+<dfn noexport>Concatenation Rule</dfn>
 
-Ignoring the global offset, the new timeline after a Sync OBU is shifted as early as possible such that the earliest substream or parameter in the new timeline concatenates with its counterpart in the previous timeline. Then, the global offset is applied to additionally shift the new timeline.
+Ignoring the global offset, the new timeline after a Sync OBU is extended based on the timeline generated from the previous Sync OBU and relative offsets in the current Sync OBU. Then, the global offset is applied to additionally shift the new timeline.
 
-<dfn noexport>Concatenation Rule 2</dfn>
 
-Ignoring the global offset, the new timeline after a Sync OBU is shifted as early as possible such that the earliest substream in the new timeline concatenates with the latest substream in the old timeline. Then, the global offset is applied to additionally shift the new timeline.
-
-ISSUE: Choose if this applies to 1) all audio substreams + params, or to 2) audio substreams only. Option 1) can lead to audio gaps. 2) can lead to overlapping params. See https://github.com/AOMediaCodec/iac/issues/102
-
-The algorithm below may be used to implement the concatenation rules.
+The algorithm below may be used to implement the concatenation rule. But, the result shall comply with this.
 
 ```
-// Timestamp at the end of the most recent frame before the Sync OBU, for a
-// given substream or parameter ID.
-end_timestamp\[ID];
+For a given ID, end_timestamp\[ID]\[0] = 0 (i.e. initial value = 0)
 
-// Offset specified by the new Sync OBU.
-relative_offset\[ID];
+Encoder operation for the Nth Sync OBU 
+// Encoders know the position of an OBU on global timeline. 
+// So, they know start_timestamp\[ID]\[N] and global_offset\[N].
 
-if (concatenation_rule_1) {
-  // The timestamp for the “zero offset” is computed by applying relativ
-  // offsets to the end timestamps, and seeing which one comes latest in time.
-  timestamp_for_zero_offset =
-    max(end_timestamp\[ID] - relative_offset\[ID] for each ID)
-    + global_offset;
+For each ID in the Nth Sync OBU.
+
+relative_offset\[ID]\[N] = start_timestamp\[ID]\[N] - global_offset\[N]
+                           - max(end_timestamp\[ID]\[N-1] for each audio frame ID);
+// i.e. relative_offset\[ID]\[1] = start_timestamp\[ID]\[1] 
+//                                 - global_offset\[1] for the first Sync OBU.
+
+// end_timestamp\[ID]\[N] for each ID is calculated as follows:
+
+end_timestamp\[ID]\[N] = start_timestamp\[ID]\[N];
+
+for (i = 0: i < M(N); i++) {
+  end_timestamp\[ID]\[N] += frame size of ith audio frame
+                            (or duration of ith parameter block) having the ID;
 }
+// M(N) is the number of audio frame OBUs(or parameter block OBUs) having the given ID
+// between the Nth Sync OBU and the (N+1)th Sync OBU.
 
-if (concatenation_rule_2) {
-  timestamp_for_zero_offset =
-    max(end_timestamp\[ID]) - min(relative_offset\[ID])
-    + global_offset;
+Decoder operation for the Nth Sync OBU 
+// Decoders need to extend the timeline generated from the previous Sync OBU.
+// For the first Sync OBU which decoders get after join mid-stream, N is set to 1.
+
+For each ID in the Nth Sync OBU.
+
+start_timestamp\[ID]\[N] = max(end_timestamp\[ID]\[N-1] for each audio frame ID)
+                           + relative_offset\[ID]\[N] + globl_offset\[N];
+
+end_timestamp\[ID]\[N] = start_timestamp\[ID]\[N];
+
+for (i = 0: i < M(N); i++) {
+  end_timestamp\[ID]\[N] += frame size of ith audio frame
+                            (or duration of ith parameter block) having the ID;
 }
-
-// Find the timestamp of each substream and parameter relative to the new
-// “zero”.
-For each ID:
-  next_start_timestamp\[ID] = timestamp_for_zero_offset + relative_offset\[ID]
+// M(N) is the number of audio frame OBUs
+// (or parameter block OBUs) having the given ID
+// between the Nth Sync OBU and the (N+1)th Sync OBU.
 ```
-
-The example below illustrates three examples of how the same timeline after (orange and blue) is aligned with different previous timelines (white) when using Concatenation Rule 1.
-
-<center><img src="images/sync_obu_concat_rule.png" style="width:100%; height:auto;"></center>
-<center><figcaption>Aligning timelines before and after a Sync OBU using the concatenation rule.</figcaption></center>
-
-ISSUE: Add a similar diagram for Concat Rule 2 when its corresponding issue is resolved.
-
-Since the Data OBUs between two Sync OBUs must be gapless, the remainder of the timeline can be inferred from the durations of the audio frames and parameter blocks. The duration of an audio frame is specified by the [=num_samples_per_frame=] field in its corresponding Codec Config OBU, while the duration of a parameter block is specified in its [=duration=] field.
 
 
 # ISOBMFF IAC Encapsulation # {#isobmff}
@@ -1883,12 +1853,12 @@ During decapsulation process, IAC file is decapsulated into IA sequences which c
 	- [Step1-2] Codec Config OBU: generate [=codec_id=] and [=decoder_config()=] from CodecSpecificBox of <code>iamf</code> sample entry, num_samples_per_frame from 'stts' box and take roll_distance from [=AudioPreRollEntry=], and packetize it by OBU with obu_type = OBU_IA_Codec_Config.
 	- [Step1-3] Mix Presentation OBUs and Audio Element OBUs: take the ith SampleGroupDescriptionEntry as it is in SampleGroup with grouping_type, [=iagd=].
 	- [Step1-4] Figure out the offset (i1) and number (im) of Samples, which the ith SampleGroupDescriptionEntry is applied to, from the SampleGroup.
-- Step2: Reconstructing of the jth Temporal Unit of the ith IA sequence (j = i1, i2, …, im)
-	- [Step2-1] Prepare Sync_OBU with obu_type = OBU_IA_Sync.
-	- [Step2-2] If there is the SampleGroup with grouping_type = [=demi=], then take the parameter block OBU for the demixing_info_parameter_data and jth sample. Otherwise, take jth sample as it is.
-		- Parameter block OBU for demixing_info_parameter_data: take the SampleGroupDescriptionEntry as it is, from SampleGrouop with grouping_type = [=demi=], mapped to jth Sample.
-	- [Step2-3] Place Sync_OBU at the front of the result of Step2-2 without gap to reconstruct the jth Temporal Unit.
-- Step3: Place descriptor OBUs and followed by Temporal Units in order (j = i1, i2, …, im) without gap to reconstruct the ith IA sequence.
+- Step2: Prepare Sync_OBU with obu_type = OBU_IA_Sync.
+- Step3: Reconstructing of the jth Temporal Unit of the ith IA sequence (j = i1, i2, …, im)
+	- [Step3-1] If there is the SampleGroup with grouping_type = [=demi=], then take the parameter block OBU for the demixing_info and jth sample. Otherwise, take jth sample as it is.
+		- Parameter block OBU for demixing_info: take the SampleGroupDescriptionEntry as it is, from SampleGrouop with grouping_type = [=demi=], mapped to jth Sample.
+	- [Step3-2] Place Sync_OBU at the front of the result of Step2-2 without gap to reconstruct the jth Temporal Unit.
+- Step4: Place descriptor OBUs, followed by Sync OBU, and followed by Temporal Units in order (j = i1, i2, …, im) without gap, to reconstruct the ith IA sequence.
 
 [=codec_id=] and [=decoder_config()=] for IAC-OPUS is generated as follows:
 - The syntax and values shall conform to [=ID Header=] of [[!RFC7845]] with following constraints.
