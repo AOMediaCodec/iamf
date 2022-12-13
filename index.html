@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 26e85e599, updated Thu Dec 8 15:29:31 2022 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="86a19fb3bc120aa60e80a2991b2ef8204e102403" name="document-revision">
+  <meta content="9eaebf130a6cc59892eee8e10839c3a0b1f06aee" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2656,9 +2656,9 @@ class codec_config() {
 </pre>
    <p><b>Semantics</b></p>
    <p><dfn class="css" data-dfn-for="parameter_block_obu()" data-dfn-type="value" data-noexport id="valdef-parameter_block_obu-parameter_id">parameter_id<a class="self-link" href="#valdef-parameter_block_obu-parameter_id"></a></dfn> shall indicate the unique ID that is associated with a specific parameter definition. All parameter blocks that provide data for that parameter definition shall have the same parameter_id.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="duration">duration<a class="self-link" href="#duration"></a></dfn> shall specify the duration for which this parameter block is valid and applicable. The duration shall be expressed as the number of ticks at the rate indicated by the time_base specified in the corresponding parameter definition.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="num_segments">num_segments<a class="self-link" href="#num_segments"></a></dfn> shall specify the number of different sets of parameter values specified in this parameter block, where each set describes a different segment of the timeline, contiguously.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="constant_segment_interval">constant_segment_interval<a class="self-link" href="#constant_segment_interval"></a></dfn> shall specify the interval of each segment, in the case where all segments have equal intervals. If all segments do not have equal intervals, the value of constant_segment_interval shall be set to 0. This value shall be expressed as the number of ticks at the rate indicated by the time base specified in the corresponding parameter definition.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="duration">duration</dfn> shall specify the duration for which this parameter block is valid and applicable.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_segments">num_segments</dfn> shall specify the number of different sets of parameter values specified in this parameter block, where each set describes a different segment of the timeline, contiguously.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="constant_segment_interval">constant_segment_interval</dfn> shall specify the interval of each segment, in the case where all segments except the last segment have equal intervals. If all segments except the last segment do not have equal intervals, the value of constant_segment_interval shall be set to 0.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="get_param_definition_type">get_param_definition_type()<a class="self-link" href="#get_param_definition_type"></a></dfn> is a run-time function that shall map the parameter_id to its registered parameter definition type. All parameter definition types described in this version of the specification are listed in the table below, along with their associated parameter definitions.</p>
    <table class="def">
     <tbody>
@@ -2680,7 +2680,22 @@ class codec_config() {
       <td>ReconGainInfoParamDefinition
    </table>
    <p class="note" role="note"><span>NOTE:</span> param_definition_type is not coded in the bitstream but is inferred at run time based on parameter_id.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="segment_interval">segment_interval<a class="self-link" href="#segment_interval"></a></dfn> shall specify the interval for the given segment.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="segment_interval">segment_interval</dfn> shall specify the interval for the given segment.</p>
+   <p>Each value of <a data-link-type="dfn" href="#duration" id="ref-for-duration">duration</a>, <a data-link-type="dfn" href="#constant_segment_interval" id="ref-for-constant_segment_interval">constant_segment_interval</a> and <a data-link-type="dfn" href="#segment_interval" id="ref-for-segment_interval">segment_interval</a> shall be expressed as the number of ticks at the rate indicated by the time base specified in the corresponding parameter definition.</p>
+   <ul>
+    <li data-md>
+     <p>When it defines <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="d">D</dfn> = the value of <a data-link-type="dfn" href="#duration" id="ref-for-duration①">duration</a>, <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="ns">NS</dfn> = the value of <a data-link-type="dfn" href="#num_segments" id="ref-for-num_segments">num_segments</a>, <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="csi">CSI</dfn> = the value of <a data-link-type="dfn" href="#constant_segment_interval" id="ref-for-constant_segment_interval①">constant_segment_interval</a> and <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="si">SI</dfn> = the value of <a data-link-type="dfn" href="#segment_interval" id="ref-for-segment_interval①">segment_interval</a>.</p>
+     <ul>
+      <li data-md>
+       <p>When <a data-link-type="dfn" href="#csi" id="ref-for-csi">CSI</a> != 0, <a data-link-type="dfn" href="#ns" id="ref-for-ns">NS</a> x <a data-link-type="dfn" href="#csi" id="ref-for-csi①">CSI</a> shall be equal to or greater than <a data-link-type="dfn" href="#d" id="ref-for-d">D</a>.</p>
+       <ul>
+        <li data-md>
+         <p>If <a data-link-type="dfn" href="#ns" id="ref-for-ns①">NS</a> x <a data-link-type="dfn" href="#csi" id="ref-for-csi②">CSI</a> > <a data-link-type="dfn" href="#d" id="ref-for-d①">D</a>, the actual interval of the last segment shall be <a data-link-type="dfn" href="#d" id="ref-for-d②">D</a> - (<a data-link-type="dfn" href="#ns" id="ref-for-ns②">NS</a> - 1) x <a data-link-type="dfn" href="#csi" id="ref-for-csi③">CSI</a>.</p>
+       </ul>
+      <li data-md>
+       <p>When <a data-link-type="dfn" href="#csi" id="ref-for-csi④">CSI</a> = 0, the summation of all <a data-link-type="dfn" href="#si" id="ref-for-si">SI</a>s in this parameter block shall be equal to <a data-link-type="dfn" href="#d" id="ref-for-d③">D</a>.</p>
+     </ul>
+   </ul>
    <p><dfn data-dfn-type="dfn" data-noexport id="animation_type">animation_type<a class="self-link" href="#animation_type"></a></dfn> shall specify the how the parameter values in this parameter block shall be animated.</p>
 <pre class="def">animation_type : Animation Type
        0       : STEP
@@ -4964,6 +4979,8 @@ Recon_Gain for D_Rtb4:
    <li><a href="#control_point_value">control_point_value</a><span>, in § 4.1.9</span>
    <li><a href="#coupled-channels">Coupled channels</a><span>, in § 10</span>
    <li><a href="#coupled_substream_count">coupled_substream_count</a><span>, in § 4.2.1</span>
+   <li><a href="#csi">CSI</a><span>, in § 4.1.9</span>
+   <li><a href="#d">D</a><span>, in § 4.1.9</span>
    <li><a href="#decoder_config">decoder_config()</a><span>, in § 4.1.6</span>
    <li><a href="#default_mix_gain">default_mix_gain</a><span>, in § 4.2.7.1</span>
    <li><a href="#delta">delta</a><span>, in § 4.2.3</span>
@@ -5008,6 +5025,7 @@ Recon_Gain for D_Rtb4:
    <li><a href="#mix_target_layout_type">mix_target_layout_type</a><span>, in § 4.1.8</span>
    <li><a href="#n-i">n(i)</a><span>, in § 4.2.4</span>
    <li><a href="#non-coupled-substream">non-coupled substream</a><span>, in § 10</span>
+   <li><a href="#ns">NS</a><span>, in § 4.1.9</span>
    <li>
     num_audio_elements
     <ul>
@@ -5065,6 +5083,7 @@ Recon_Gain for D_Rtb4:
    <li><a href="#sample_size">sample_size</a><span>, in § 4.3.4</span>
    <li><a href="#scalable_channel_layout_config">scalable_channel_layout_config()</a><span>, in § 4.1.7</span>
    <li><a href="#segment_interval">segment_interval</a><span>, in § 4.1.9</span>
+   <li><a href="#si">SI</a><span>, in § 4.1.9</span>
    <li><a href="#sound_system">sound_system</a><span>, in § 4.2.5</span>
    <li><a href="#sp_label">sp_label</a><span>, in § 4.2.5</span>
    <li><a href="#start_point_value">start_point_value</a><span>, in § 4.1.9</span>
@@ -5991,6 +6010,54 @@ Recon_Gain for D_Rtb4:
    <b><a href="#element_mix_config">#element_mix_config</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-element_mix_config">4.2.7. Element Mix Config Syntax and Semantics</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="duration">
+   <b><a href="#duration">#duration</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-duration">4.1.9. Parameter Block OBU Syntax and Semantics</a> <a href="#ref-for-duration①">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="num_segments">
+   <b><a href="#num_segments">#num_segments</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-num_segments">4.1.9. Parameter Block OBU Syntax and Semantics</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="constant_segment_interval">
+   <b><a href="#constant_segment_interval">#constant_segment_interval</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-constant_segment_interval">4.1.9. Parameter Block OBU Syntax and Semantics</a> <a href="#ref-for-constant_segment_interval①">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="segment_interval">
+   <b><a href="#segment_interval">#segment_interval</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-segment_interval">4.1.9. Parameter Block OBU Syntax and Semantics</a> <a href="#ref-for-segment_interval①">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="d">
+   <b><a href="#d">#d</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-d">4.1.9. Parameter Block OBU Syntax and Semantics</a> <a href="#ref-for-d①">(2)</a> <a href="#ref-for-d②">(3)</a> <a href="#ref-for-d③">(4)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="ns">
+   <b><a href="#ns">#ns</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-ns">4.1.9. Parameter Block OBU Syntax and Semantics</a> <a href="#ref-for-ns①">(2)</a> <a href="#ref-for-ns②">(3)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="csi">
+   <b><a href="#csi">#csi</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-csi">4.1.9. Parameter Block OBU Syntax and Semantics</a> <a href="#ref-for-csi①">(2)</a> <a href="#ref-for-csi②">(3)</a> <a href="#ref-for-csi③">(4)</a> <a href="#ref-for-csi④">(5)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="si">
+   <b><a href="#si">#si</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-si">4.1.9. Parameter Block OBU Syntax and Semantics</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="animatedparameterdata">
