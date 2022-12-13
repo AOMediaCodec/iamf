@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 26e85e599, updated Thu Dec 8 15:29:31 2022 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="9eaebf130a6cc59892eee8e10839c3a0b1f06aee" name="document-revision">
+  <meta content="fa1bb056491f2a3a07b3ebeb6b0f6aa5fd30b459" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2564,6 +2564,18 @@ class codec_config() {
 </pre>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_substreams">num_substreams</dfn> shall specify the number of audio substreams that are used to reconstruct this audio element.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_substream_id">audio_substream_id</dfn> shall specify the unique ID associated with the audio substream that is used to reconstruct this audio element.</p>
+   <p>Let a particular ChannelGroup’s substream be indexed as [<dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="c">c</dfn>, <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="n_c">n_c</dfn>], where</p>
+   <ul>
+    <li data-md>
+     <p><a data-link-type="dfn" href="#c" id="ref-for-c">c</a> = [1, ..., C] is the ChannelGroup index and C is the number of ChannelGroups.</p>
+    <li data-md>
+     <p><a data-link-type="dfn" href="#n_c" id="ref-for-n_c">n_c</a> = [1, ..., N_c] is the substream index in the c-th ChannelGroup and N_c is the number of substreams in the c-th ChannelGroup.</p>
+    <li data-md>
+     <p>The i-th audio_substream_id maps to a ChannelGroup’s substream as follows, where i is the index of the array:</p>
+   </ul>
+<pre>[[1, 1], [1, 2], ..., [1, N_1], [2, 1], [2, 2], ..., [2, N_2], ..., [C, 1], [C, 2], ..., [C, N_c]]
+</pre>
+   <p>A ChannelGroup is defined in <a href="#iacgeneration">§ 10 IAC Generation Process</a>. The order of the substreams in each ChannelGroup., i.e. the semantics of n_c, is specified in <a href="#syntax-scalable-channel-layout-config">§ 4.2.1 Scalable Channel Layout Config Syntax and Semantics</a>.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="num_parameters">num_parameters<a class="self-link" href="#num_parameters"></a></dfn> shall specify the number of parameters that are used by the algorithms specified in this audio element.</p>
    <p><dfn class="css" data-dfn-for="audio_element_obu()" data-dfn-type="value" data-noexport id="valdef-audio_element_obu-parameter_id">parameter_id<a class="self-link" href="#valdef-audio_element_obu-parameter_id"></a></dfn> shall be the unique ID associated with a parameter that is used by the algorithm specified in this audio element.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="parameter_name">parameter_name<a class="self-link" href="#parameter_name"></a></dfn> shall specify the name of the parameter.</p>
@@ -4964,6 +4976,7 @@ Recon_Gain for D_Rtb4:
      <li><a href="#valdef-audio_frame_obu_with_no_id-audio_substream_id">value for audio_frame_obu_with_no_id()</a><span>, in § 4.1.10</span>
     </ul>
    <li><a href="#beta">beta</a><span>, in § 4.2.3</span>
+   <li><a href="#c">c</a><span>, in § 4.1.7</span>
    <li><a href="#channel_audio_layer_config">channel_audio_layer_config()</a><span>, in § 4.2.1</span>
    <li><a href="#channelgroup">ChannelGroup</a><span>, in § 4.2.1</span>
    <li><a href="#channel_mapping">channel_mapping</a><span>, in § 4.2.2</span>
@@ -5023,6 +5036,7 @@ Recon_Gain for D_Rtb4:
    <li><a href="#mix-presentations">Mix presentations</a><span>, in § 3.1</span>
    <li><a href="#mix_target_layout">mix_target_layout()</a><span>, in § 4.1.8</span>
    <li><a href="#mix_target_layout_type">mix_target_layout_type</a><span>, in § 4.1.8</span>
+   <li><a href="#n_c">n_c</a><span>, in § 4.1.7</span>
    <li><a href="#n-i">n(i)</a><span>, in § 4.2.4</span>
    <li><a href="#non-coupled-substream">non-coupled substream</a><span>, in § 10</span>
    <li><a href="#ns">NS</a><span>, in § 4.1.9</span>
@@ -5971,6 +5985,18 @@ Recon_Gain for D_Rtb4:
    <ul>
     <li><a href="#ref-for-audio_substream_id">10.2.7.1. Multiple Audio Elements with One Codec Config</a> <a href="#ref-for-audio_substream_id①">(2)</a>
     <li><a href="#ref-for-audio_substream_id②">10.2.7.2. Multiple Audio Elements with Multiple Codec Config</a> <a href="#ref-for-audio_substream_id③">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="c">
+   <b><a href="#c">#c</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-c">4.1.7. Audio Element OBU Syntax and Semantics</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="n_c">
+   <b><a href="#n_c">#n_c</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-n_c">4.1.7. Audio Element OBU Syntax and Semantics</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="scalable_channel_layout_config">
