@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 26e85e599, updated Thu Dec 8 15:29:31 2022 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="fa1bb056491f2a3a07b3ebeb6b0f6aa5fd30b459" name="document-revision">
+  <meta content="849ac88fcb5281843d80bf087a564e4e9c2d5b5b" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2037,8 +2037,8 @@ dfn > a.self-link::before      { content: "#"; }
        <ol class="toc">
         <li><a href="#syntax-scalable-channel-layout-config"><span class="secno">4.2.1</span> <span class="content">Scalable Channel Layout Config Syntax and Semantics</span></a>
         <li><a href="#syntax-ambisonics-config"><span class="secno">4.2.2</span> <span class="content">Ambisonics Config Syntax and Semantics</span></a>
-        <li><a href="#syntax-demixing-info"><span class="secno">4.2.3</span> <span class="content">Demixing Info Syntax and Semantics</span></a>
-        <li><a href="#syntax-recon-gain-info"><span class="secno">4.2.4</span> <span class="content">Recon Gain Info Syntax and Semantics</span></a>
+        <li><a href="#syntax-demixing-info"><span class="secno">4.2.3</span> <span class="content">Demixing Info Parameter Data Syntax and Semantics</span></a>
+        <li><a href="#syntax-recon-gain-info"><span class="secno">4.2.4</span> <span class="content">Recon Gain Info Parameter Data Syntax and Semantics</span></a>
         <li><a href="#syntax-mix-target-layout"><span class="secno">4.2.5</span> <span class="content">Mix Target Layout Syntax and Semantics</span></a>
         <li><a href="#syntax-rendering-config"><span class="secno">4.2.6</span> <span class="content">Rendering Config Syntax and Semantics</span></a>
         <li>
@@ -2338,7 +2338,7 @@ class Bar {
            <p>The audio substream having substream_id = 32 is linked to the audio frame obus having id = 32.</p>
          </ul>
         <li data-md>
-         <p>The audio element obu is saying that there are one parameter block (parameter_id = 71) for demixing_info() which is applied to the audio element.</p>
+         <p>The audio element obu is saying that there are one parameter block (parameter_id = 71) for demixing_info_parameter_data() which is applied to the audio element.</p>
          <ul>
           <li data-md>
            <p>The parameter block having parameter_id = 71 is linked to the parameter block obu having parameter_id = 71.</p>
@@ -2541,18 +2541,28 @@ class codec_config() {
   
   leb128() num_parameters;
   for (i = 0; i &lt; num_parameters; i++) {
-    leb128() parameter_id;
-    leb128() parameter_name;
+    leb128() param_definition_type;
+    if (param_definition_type == PARAMETER_DEFINITION_DEMIXING) {
+        DemixingParamDefinition demixing_info;
+    }
+    if (param_definition_type == PARAMETER_DEFINITION_RECON_GAIN) {
+        ReconGainParamDefinition recon_gain_info;
+    }
   }
 
   if (audio_element_type == CHANNEL_BASED) {
     scalable_channel_layout_config();
   } else if (audio_element_type == SCENE_BASED) {
     ambisonics_config();
-  }
-  
-  
+  }  
 }
+</pre>
+<pre>class DemixingParamDefinition() extends ParamDefinition() {
+}
+</pre>
+<pre>class ReconGainParamDefinition() extends ParamDefinition() {
+}
+
 </pre>
    <p><b>Semantics</b></p>
    <p><dfn class="css" data-dfn-for="audio_element_obu()" data-dfn-type="value" data-noexport id="valdef-audio_element_obu-audio_element_id">audio_element_id<a class="self-link" href="#valdef-audio_element_obu-audio_element_id"></a></dfn> shall indicate a unique ID in an IA sequence for a given audio element. A Codec Config OBU that refers to that audio element shall use the same value for its <a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id">audio_element_id</a> field.</p>
@@ -2577,13 +2587,28 @@ class codec_config() {
 </pre>
    <p>A ChannelGroup is defined in <a href="#iacgeneration">§ 10 IAC Generation Process</a>. The order of the substreams in each ChannelGroup., i.e. the semantics of n_c, is specified in <a href="#syntax-scalable-channel-layout-config">§ 4.2.1 Scalable Channel Layout Config Syntax and Semantics</a>.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="num_parameters">num_parameters<a class="self-link" href="#num_parameters"></a></dfn> shall specify the number of parameters that are used by the algorithms specified in this audio element.</p>
-   <p><dfn class="css" data-dfn-for="audio_element_obu()" data-dfn-type="value" data-noexport id="valdef-audio_element_obu-parameter_id">parameter_id<a class="self-link" href="#valdef-audio_element_obu-parameter_id"></a></dfn> shall be the unique ID associated with a parameter that is used by the algorithm specified in this audio element.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="parameter_name">parameter_name<a class="self-link" href="#parameter_name"></a></dfn> shall specify the name of the parameter.</p>
-<pre class="def">parameter_name : Parameter name.
-       0       : SCALABLE_CHANNEL_LAYOUT_DEMIXING_INFO
-       1       : SCALABLE_CHANNEL_LAYOUT_RECON_GAIN_INFO
-   the others  : reserved
-</pre>
+   <p><dfn data-dfn-type="dfn" data-noexport id="param_definition_type">param_definition_type<a class="self-link" href="#param_definition_type"></a></dfn> specifies the type of the parameter definition. All parameter definition types described in this version of the specification are listed in the table below, along with their associated parameter definitions.</p>
+   <table class="def">
+    <tbody>
+     <tr>
+      <th>param_definition_type
+      <th>Parameter definition type
+      <th>Parameter definition
+     <tr>
+      <td>0
+      <td>PARAMETER_DEFINITION_MIX_GAIN
+      <td>MixGainParamDefinition
+     <tr>
+      <td>1
+      <td>PARAMETER_DEFINITION_DEMIXING
+      <td>DemixingParamDefinition
+     <tr>
+      <td>2
+      <td>PARAMETER_DEFINITION_RECON_GAIN
+      <td>ReconGainParamDefinition
+   </table>
+   <p><dfn data-dfn-type="dfn" data-noexport id="demixing_info">demixing_info<a class="self-link" href="#demixing_info"></a></dfn> provides the parameter definition for the demixing information to reconstruct channel audios according to <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout">loudspeaker_layout</a> from scalable channel audio. The parameter definition is provided by DemixingParamDefinition() and the corresponding parameter data to be provided in parameter blocks is specified in demixing_info_parameter_data().</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="recon_gain_info">recon_gain_info<a class="self-link" href="#recon_gain_info"></a></dfn> provides the parameter definition for the gain value to reconstruct channel audios according to <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout①">loudspeaker_layout</a> from scalable channel audio. The parameter definition is provided by ReconGainParamDefinition() and the corresponding parameter data to be provided in parameter blocks is specified in recon_gain_info_parameter_data().</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="scalable_channel_layout_config">scalable_channel_layout_config()</dfn> is a class that provides the metadata required for combining the substreams identified here in order to reconstruct a scalable channel layout.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="ambisonics_config">ambisonics_config()</dfn> is a class that provides the metadata required for combining the substreams identified here in order to reconstruct an Ambisonics layout.</p>
    <h4 class="heading settled" data-level="4.1.8" id="obu-mixpresentation"><span class="secno">4.1.8. </span><span class="content">Mix Presentation OBU Syntax and Semantics</span><a class="self-link" href="#obu-mixpresentation"></a></h4>
@@ -2646,7 +2671,7 @@ class codec_config() {
   leb128() num_segments;
   leb128() constant_segment_interval;
 
-  leb128() param_definition_type = get_param_definition_type(parameter_id);
+  param_definition_type = get_param_definition_type(parameter_id);
 
   for (i = 0; i &lt; num_segments; i++) {
     if (constant_segment_interval == 0) {
@@ -2657,10 +2682,10 @@ class codec_config() {
       leb128() animation_type;
       mix_gain_parameter_data(animation_type);
     }
-    if (param_definition_type == PARAMETER_DEFINITION_DEMIXING_INFO) {
+    if (param_definition_type == PARAMETER_DEFINITION_DEMIXING) {
       demixing_info_parameter_data();
     }
-    if (param_definition_type == PARAMETER_DEFINITION_RECON_GAIN_INFO) {
+    if (param_definition_type == PARAMETER_DEFINITION_RECON_GAIN) {
       recon_gain_info_parameter_data();
     }
   }
@@ -2671,27 +2696,8 @@ class codec_config() {
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="duration">duration</dfn> shall specify the duration for which this parameter block is valid and applicable.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_segments">num_segments</dfn> shall specify the number of different sets of parameter values specified in this parameter block, where each set describes a different segment of the timeline, contiguously.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="constant_segment_interval">constant_segment_interval</dfn> shall specify the interval of each segment, in the case where all segments except the last segment have equal intervals. If all segments except the last segment do not have equal intervals, the value of constant_segment_interval shall be set to 0.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="get_param_definition_type">get_param_definition_type()<a class="self-link" href="#get_param_definition_type"></a></dfn> is a run-time function that shall map the parameter_id to its registered parameter definition type. All parameter definition types described in this version of the specification are listed in the table below, along with their associated parameter definitions.</p>
-   <table class="def">
-    <tbody>
-     <tr>
-      <th>param_definition_type
-      <th>Parameter definition type
-      <th>Parameter definition
-     <tr>
-      <td>0
-      <td>PARAMETER_DEFINITION_MIX_GAIN
-      <td>MixGainParamDefinition
-     <tr>
-      <td>0
-      <td>PARAMETER_DEFINITION_DEMIXING_INFO
-      <td>DemixingInfoParamDefinition
-     <tr>
-      <td>0
-      <td>PARAMETER_DEFINITION_RECON_GAIN_INFO
-      <td>ReconGainInfoParamDefinition
-   </table>
-   <p class="note" role="note"><span>NOTE:</span> param_definition_type is not coded in the bitstream but is inferred at run time based on parameter_id.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="get_param_definition_type">get_param_definition_type()<a class="self-link" href="#get_param_definition_type"></a></dfn> is a run-time function to get the parameter definition type mapped to the parameter_id.</p>
+   <p>Audio Element OBU and/or Mix Presentation OBU is mapping a parameter_id to the parameter definition type. So, IA decoders can know the definition type mapped to the parameter_id.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="segment_interval">segment_interval</dfn> shall specify the interval for the given segment.</p>
    <p>Each value of <a data-link-type="dfn" href="#duration" id="ref-for-duration">duration</a>, <a data-link-type="dfn" href="#constant_segment_interval" id="ref-for-constant_segment_interval">constant_segment_interval</a> and <a data-link-type="dfn" href="#segment_interval" id="ref-for-segment_interval">segment_interval</a> shall be expressed as the number of ticks at the rate indicated by the time base specified in the corresponding parameter definition.</p>
    <ul>
@@ -2860,7 +2866,7 @@ class channel_audio_layer_config(i) {
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_layers">num_layers</dfn> shall indicate the number of ChannelGroups for scalable channel audio. It shall not be set to zero and its maximum number shall be limited to 6.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="channel_audio_layer_config">channel_audio_layer_config()</dfn> is a class that provides the information regarding the configuration of ChannelGroup for scalable channel audio. channel_audio_layer_config(i) shall provide information regarding the configuaration of ChannelGroup #i.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="loudspeaker_layout">loudspeaker_layout</dfn> shall indicate the channel layout for the channels to be reconstructed from the precedent ChannelGroups and the current ChannelGroup among ChannelGroups for scalable channel audio.</p>
-   <p>In the current version of the specification, <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout">loudspeaker_layout</a> shall indicate one of 9 channel layouts including Mono, Stereo, 5.1ch, 5.1.2ch, 5.1.4ch, 7.1ch, 7.1.2ch, 7.1.4ch and 3.1.2ch. Where,</p>
+   <p>In the current version of the specification, <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout②">loudspeaker_layout</a> shall indicate one of 9 channel layouts including Mono, Stereo, 5.1ch, 5.1.2ch, 5.1.4ch, 7.1ch, 7.1.2ch, 7.1.4ch and 3.1.2ch. Where,</p>
    <ul>
     <li data-md>
      <p><dfn data-dfn-type="dfn" data-noexport id="stereo">Stereo<a class="self-link" href="#stereo"></a></dfn> is the loudspeaker configuration as depicted in <a data-link-type="dfn" href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.2051-3-202205-I!!PDF-E.pdf#" id="termref-for-①④">Loudspeaker configuration for Sound System A (0+2+0)</a> of <a data-link-type="biblio" href="#biblio-itu2051-3" title="Advance sound system for programme production">[ITU2051-3]</a>.</p>
@@ -2903,12 +2909,12 @@ Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
     <li data-md>
      <p>1: output_gain information fields for the ChannelGroup present. In this case, output_gain_flags and output_gain fields present.</p>
    </ul>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="recon_gain_is_present_flag">recon_gain_is_present_flag</dfn> shall indicate if recon_gain information fields for the ChannelGroup presents in Recon_Gain_Info().</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="recon_gain_is_present_flag">recon_gain_is_present_flag</dfn> shall indicate if recon_gain information fields for the ChannelGroup presents in recon_gain_info_parameter_data().</p>
    <ul>
     <li data-md>
-     <p>0: No recon_gain information fields for the ChannelGroup present in Recon_Gain_Info_OBU.</p>
+     <p>0: No recon_gain information fields for the ChannelGroup present in recon_gain_info_parameter_data().</p>
     <li data-md>
-     <p>1: recon_gain information fields for the ChannelGroup present in Recon_Gain_Info_OBU. In this case, recon_gain_flags and recon_gain fields present.</p>
+     <p>1: recon_gain information fields for the ChannelGroup present in recon_gain_info_parameter_data(). In this case, recon_gain_flags and recon_gain fields present.</p>
    </ul>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="substream_count">substream_count</dfn> shall specify the number of audio substreams. It must be the same as <a data-link-type="dfn" href="#num_substreams" id="ref-for-num_substreams">num_substreams</a> in its corresponding audio_element().</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="coupled_substream_count">coupled_substream_count</dfn> shall specify the number of referenced substreams that are coded as coupled stereo channels.</p>
@@ -2968,10 +2974,10 @@ class ambisonics_projection_config() {
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="channel_mapping">channel_mapping</dfn> shall be the same as the one for <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②④">ChannelMappingFamily</a> = 2 in <a data-link-type="biblio" href="#biblio-rfc8486" title="Ambisonics in an Ogg Opus Container">[RFC8486]</a>.</p>
    <p><a data-link-type="dfn" href="#coupled_substream_count" id="ref-for-coupled_substream_count">coupled_substream_count</a> shall specify the number of referenced substreams that are coded as coupled stereo channels, where M &lt;= N.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="demixing_matrix">demixing_matrix</dfn> shall be the same as the one for <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-②⑤">ChannelMappingFamily</a> = 3 in <a data-link-type="biblio" href="#biblio-rfc8486" title="Ambisonics in an Ogg Opus Container">[RFC8486]</a> except the byte order of each of matrix coefficients shall be converted to big endian.</p>
-   <h4 class="heading settled" data-level="4.2.3" id="syntax-demixing-info"><span class="secno">4.2.3. </span><span class="content">Demixing Info Syntax and Semantics</span><a class="self-link" href="#syntax-demixing-info"></a></h4>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="demixing_info">demixing_info()</dfn> specifies demixing parameter mode to be used to reconstruct output channel audio according to its <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout①">loudspeaker_layout</a>.</p>
+   <h4 class="heading settled" data-level="4.2.3" id="syntax-demixing-info"><span class="secno">4.2.3. </span><span class="content">Demixing Info Parameter Data Syntax and Semantics</span><a class="self-link" href="#syntax-demixing-info"></a></h4>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="demixing_info_parameter_data">demixing_info_parameter_data()</dfn> specifies demixing parameter mode to be used to reconstruct output channel audio according to its <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout③">loudspeaker_layout</a>.</p>
    <p><b>Syntax</b></p>
-<pre>class demixing_info() {
+<pre>class demixing_info_parameter_data() {
   unsigned int (3) dmixp_mode;
   unsigned int (5) reserved;
 }
@@ -3001,10 +3007,10 @@ class ambisonics_projection_config() {
    <center>
     <figcaption>IA Down-mix Mechanism</figcaption>
    </center>
-   <h4 class="heading settled" data-level="4.2.4" id="syntax-recon-gain-info"><span class="secno">4.2.4. </span><span class="content">Recon Gain Info Syntax and Semantics</span><a class="self-link" href="#syntax-recon-gain-info"></a></h4>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="recon_gain_info">recon_gain_info()</dfn> contains recon gain values for demixed channels.</p>
+   <h4 class="heading settled" data-level="4.2.4" id="syntax-recon-gain-info"><span class="secno">4.2.4. </span><span class="content">Recon Gain Info Parameter Data Syntax and Semantics</span><a class="self-link" href="#syntax-recon-gain-info"></a></h4>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="recon_gain_info_parameter_data">recon_gain_info_parameter_data()</dfn> contains recon gain values for demixed channels.</p>
    <p><b>Syntax</b></p>
-<pre>class recon_gain_info() {
+<pre>class recon_gain_info_parameter_data() {
   for (i=0; i&lt; num_layers; i++) {
     if (recon_gain_is_present_flag(i) == 1) {
       leb128() recon_gain_flags(i);
@@ -3354,7 +3360,7 @@ class mix_gain_parameter_data(animation_type) {
      <p><a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②">num_layers</a> shall be set to 1 or up to 6 for Channel-based audio element (i.e. scalable channel audio).</p>
      <ul>
       <li data-md>
-       <p>In this case, <a data-link-type="dfn" href="#demixing_info" id="ref-for-demixing_info">demixing_info()</a> and <a data-link-type="dfn" href="#recon_gain_info" id="ref-for-recon_gain_info">recon_gain_info()</a> may be present in the IA sequence.</p>
+       <p>In this case, <a data-link-type="dfn" href="#demixing_info_parameter_data" id="ref-for-demixing_info_parameter_data">demixing_info_parameter_data()</a> and <a data-link-type="dfn" href="#recon_gain_info_parameter_data" id="ref-for-recon_gain_info_parameter_data">recon_gain_info_parameter_data()</a> may be present in the IA sequence.</p>
       <li data-md>
        <p>In case of simple scalable channel audio (e.g. mono for layer 1 &amp; stereo for layer 2), demixing_info() and recon_gain_info() shall not be present in the bitstream.</p>
       <li data-md>
@@ -3372,7 +3378,7 @@ class mix_gain_parameter_data(animation_type) {
     <li data-md>
      <p>They shall be able to reconstruct one audio element.</p>
     <li data-md>
-     <p>They may use demixing_info() to do down-mixing.</p>
+     <p>They may use demixing_info_parameter_data() to do down-mixing.</p>
    </ul>
    <h3 class="heading settled" data-level="5.2" id="profiles-base"><span class="secno">5.2. </span><span class="content">IA Base Profile</span><a class="self-link" href="#profiles-base"></a></h3>
    <p>This section specifies the conformance points of the base profile.</p>
@@ -3394,11 +3400,11 @@ class mix_gain_parameter_data(animation_type) {
      <p><a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers③">num_layers</a> shall be set to 1 or up to 6 for Channel-based audio element (i.e. scalable channel audio)</p>
      <ul>
       <li data-md>
-       <p>In this case, <a data-link-type="dfn" href="#demixing_info" id="ref-for-demixing_info①">demixing_info()</a> and <a data-link-type="dfn" href="#recon_gain_info" id="ref-for-recon_gain_info①">recon_gain_info()</a> may be present in the IA sequence.</p>
+       <p>In this case, <a data-link-type="dfn" href="#demixing_info_parameter_data" id="ref-for-demixing_info_parameter_data①">demixing_info_parameter_data()</a> and <a data-link-type="dfn" href="#recon_gain_info_parameter_data" id="ref-for-recon_gain_info_parameter_data①">recon_gain_info_parameter_data()</a> may be present in the IA sequence.</p>
       <li data-md>
-       <p>In case of simple scalable channel audio (e.g. mono for layer 1 &amp; stereo for layer 2), demixing_info() and recon_gain_info() shall not be present in the bitstream.</p>
+       <p>In case of simple scalable channel audio (e.g. mono for layer 1 &amp; stereo for layer 2), <a data-link-type="dfn" href="#demixing_info_parameter_data" id="ref-for-demixing_info_parameter_data②">demixing_info_parameter_data()</a> and <a data-link-type="dfn" href="#recon_gain_info_parameter_data" id="ref-for-recon_gain_info_parameter_data②">recon_gain_info_parameter_data()</a> shall not be present in the bitstream.</p>
       <li data-md>
-       <p>When num_layers = 1, OBU_IA_Parameter_Block including demixing_info() may be present in the IA sequence and IA decoders may use the demixing_info() for dynamic down-mixing.</p>
+       <p>When num_layers = 1, OBU_IA_Parameter_Block including <a data-link-type="dfn" href="#demixing_info_parameter_data" id="ref-for-demixing_info_parameter_data③">demixing_info_parameter_data()</a> may be present in the IA sequence and IA decoders may use the <a data-link-type="dfn" href="#demixing_info_parameter_data" id="ref-for-demixing_info_parameter_data④">demixing_info_parameter_data()</a> for dynamic down-mixing.</p>
      </ul>
     <li data-md>
      <p>All audio frames shall have aligned frame boundaries.</p>
@@ -3446,9 +3452,9 @@ class mix_gain_parameter_data(animation_type) {
      <p><a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers④">num_layers</a> shall be set to 1 or up to 6 for Channel-based audio element (i.e. scalable channel audio)</p>
      <ul>
       <li data-md>
-       <p>In this case, <a data-link-type="dfn" href="#demixing_info" id="ref-for-demixing_info②">demixing_info()</a> and <a data-link-type="dfn" href="#recon_gain_info" id="ref-for-recon_gain_info②">recon_gain_info()</a> may be present.</p>
+       <p>In this case, <a data-link-type="dfn" href="#demixing_info_parameter_data" id="ref-for-demixing_info_parameter_data⑤">demixing_info_parameter_data()</a> and <a data-link-type="dfn" href="#recon_gain_info_parameter_data" id="ref-for-recon_gain_info_parameter_data③">recon_gain_info_parameter_data()</a> may be present.</p>
       <li data-md>
-       <p>In case of simple scalable channel audio (e.g. mono for layer 1 &amp; stereo for layer 2), <a data-link-type="dfn" href="#demixing_info" id="ref-for-demixing_info③">demixing_info()</a> and <a data-link-type="dfn" href="#recon_gain_info" id="ref-for-recon_gain_info③">recon_gain_info()</a> shall not be present.</p>
+       <p>In case of simple scalable channel audio (e.g. mono for layer 1 &amp; stereo for layer 2), <a data-link-type="dfn" href="#demixing_info_parameter_data" id="ref-for-demixing_info_parameter_data⑥">demixing_info_parameter_data()</a> and <a data-link-type="dfn" href="#recon_gain_info_parameter_data" id="ref-for-recon_gain_info_parameter_data④">recon_gain_info_parameter_data()</a> shall not be present.</p>
      </ul>
    </ul>
    <p>Capabilities of the IA parser, decoder and processor:</p>
@@ -3645,7 +3651,7 @@ for (i = 0: i &lt; M(N); i++) {
       <li data-md>
        <p>Temporal Delimiter OBU: shall be discarded if present.</p>
       <li data-md>
-       <p>Parameter Block OBU for demixing_info() (with OBU syntax) shall be stored as a new sample group having <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑦⑧">grouping_type</a>, <a data-link-type="dfn" href="#demi" id="ref-for-demi">demi</a>.</p>
+       <p>Parameter Block OBU for demixing_info_parameter_data() (with OBU syntax) shall be stored as a new sample group having <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑦⑧">grouping_type</a>, <a data-link-type="dfn" href="#demi" id="ref-for-demi">demi</a>.</p>
       <li data-md>
        <p>Remained OBUs of each temporal unit shall be stored as one sample data without gap among OBUs.</p>
      </ul>
@@ -3737,12 +3743,12 @@ Quantity:  One of more
      <p><a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-①⓪③">SampleGroupDescriptionEntry</a> shall be Mix Presentation OBUs and followed by Audio Element OBUs with OBU syntax.</p>
    </ul>
    <h5 class="heading settled" data-level="7.2.6.2" id="iasamplegroup-demixing"><span class="secno">7.2.6.2. </span><span class="content">Demixing Info Sample Group</span><a class="self-link" href="#iasamplegroup-demixing"></a></h5>
-   <p>During encapsulation process, Parameter Block OBU for demixing_info shall be discarded from IA sequence. A new sample group for demixing_info() shall be defined by using <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-①⓪④">sgpd</a> and <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-①⓪⑤">sbgp</a> boxes with following requirements:</p>
+   <p>During encapsulation process, Parameter Block OBU for demixing_info_parameter_data shall be discarded from IA sequence. A new sample group for demixing_info_parameter_data() shall be defined by using <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-①⓪④">sgpd</a> and <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="termref-for-①⓪⑤">sbgp</a> boxes with following requirements:</p>
    <ul>
     <li data-md>
      <p><a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-①⓪⑥">grouping_type</a> shall be set to <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="demi">demi</dfn>.</p>
     <li data-md>
-     <p>Each <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-①⓪⑦">SampleGroupDescriptionEntry</a> shall be Parameter Block OBU for demixing_info with OBU syntax.</p>
+     <p>Each <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-①⓪⑦">SampleGroupDescriptionEntry</a> shall be Parameter Block OBU for demixing_info_parameter_data with OBU syntax.</p>
    </ul>
    <h3 class="heading settled" data-level="7.3" id="CommonEncryption"><span class="secno">7.3. </span><span class="content">Common Encryption</span><a class="self-link" href="#CommonEncryption"></a></h3>
     TBA 
@@ -3936,7 +3942,7 @@ Quantity:  One of more
    <center>
     <figcaption>Scalable Channel Audio Decoding Flowchart</figcaption>
    </center>
-   <p>For a given loudspeaker layout (i.e. CL #i) among the list of <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout②">loudspeaker_layout</a> in scalable channel layout config,</p>
+   <p>For a given loudspeaker layout (i.e. CL #i) among the list of <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout④">loudspeaker_layout</a> in scalable channel layout config,</p>
    <ul>
     <li data-md>
      <p>OBU Parser shall get substreams for ChannelGroup #1 ~ ChannelGroup #i and pass them to Codec decoder with <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config⑧">Decoder_Config()</a>.</p>
@@ -4059,10 +4065,10 @@ Quantity:  One of more
 Ltf = Ltf3 - w(k) x (L2 - 0.707 x C - L5) and Rtf = Rtf3 - w(k) x (R2 - 0.707 x C - R5).
 </pre>
    <h4 class="heading settled" data-level="9.2.3" id="processing-scalablechannelaudio-recongain"><span class="secno">9.2.3. </span><span class="content">Recon Gain</span><a class="self-link" href="#processing-scalablechannelaudio-recongain"></a></h4>
-   <p><a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain③">Recon_Gain</a> shall be only applied to all of audio samples of the de-mixed channels from De-mixer module.</p>
+   <p><a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain③">recon_gain</a> shall be only applied to all of audio samples of the de-mixed channels from De-mixer module.</p>
    <ul>
     <li data-md>
-     <p><a data-link-type="dfn" href="#recon_gain_info" id="ref-for-recon_gain_info④">Recon_Gain_Info()</a> indicates each channel of CL #i which Recon_Gain needs to be applied to and provides Recon_Gain value for each frame of the channel.</p>
+     <p><a data-link-type="dfn" href="#recon_gain_info_parameter_data" id="ref-for-recon_gain_info_parameter_data⑤">recon_gain_info_parameter_data()</a> indicates each channel of CL #i which Recon_Gain needs to be applied to and provides Recon_Gain value for each frame of the channel.</p>
      <ul>
       <li data-md>
        <p>Sample (k,i) *= Smoothed_Recon_Gain (k,i), where k is the frame index and i is the sample index of the frame.</p>
@@ -4080,7 +4086,7 @@ Ltf = Ltf3 - w(k) x (L2 - 0.707 x C - L5) and Rtf = Rtf3 - w(k) x (R2 - 0.707 x 
        <p>Recommend values: N = 7</p>
      </ul>
    </ul>
-   <p>Below figure shows the smoothing scheme of <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain④">Recon_Gain</a>.</p>
+   <p>Below figure shows the smoothing scheme of <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain④">recon_gain</a>.</p>
    <center><img height="200" src="images/Smoothing Scheme of Recon Gain.png" style="width:100%; height:auto;" width="800"></center>
    <center>
     <figcaption>Smoothing Scheme of Recon Gain</figcaption>
@@ -4257,7 +4263,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
     <li data-md>
      <p>Ambiosnics format: It shall conform to <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-①①⑨">ChannelMappingFamily</a> = 2 or 3 of <a data-link-type="biblio" href="#biblio-rfc8486" title="Ambisonics in an Ogg Opus Container">[RFC8486]</a>.</p>
     <li data-md>
-     <p>Channel Audio format: It shall conform to <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout③">loudspeaker_layout</a> specified in channel_audio_layer_config().</p>
+     <p>Channel Audio format: It shall conform to <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout⑤">loudspeaker_layout</a> specified in channel_audio_layer_config().</p>
     <li data-md>
      <p>Input Smapling Rate: 48000hz</p>
     <li data-md>
@@ -4282,7 +4288,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
     <li data-md>
      <p>Ambisonics mode to indicate if <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-①②⓪">ChannelMappingFamily</a> = 2 or 3 of <a data-link-type="biblio" href="#biblio-rfc8486" title="Ambisonics in an Ogg Opus Container">[RFC8486]</a>.</p>
     <li data-md>
-     <p>List of channel layouts to be supported for scalable channel audio: it shall conform to <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout④">loudspeaker_layout</a>.</p>
+     <p>List of channel layouts to be supported for scalable channel audio: it shall conform to <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout⑥">loudspeaker_layout</a>.</p>
    </ul>
    <p>IA encoding can be done by using the combination of following generation processing.</p>
    <ul>
@@ -4309,7 +4315,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
         <li data-md>
          <p>For channel-based audio element with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers⑧">num_layers</a> = 1, it may output parameter blocks for demixing info.</p>
         <li data-md>
-         <p>For channel-based audio element with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers⑨">num_layers</a> > 1, it outputs parameter blocks for demixing info and recon_gain_info.</p>
+         <p>For channel-based audio element with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers⑨">num_layers</a> > 1, it outputs parameter blocks for demixing_info_parameter_data and recon_gain_info_parameter_data.</p>
         <li data-md>
          <p>It may further output parameter blocks for post processing such as Loudness and DRC control.</p>
        </ul>
@@ -4405,9 +4411,9 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
        <p>For non-scalable channel audio (i.e. <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⓪">num_layers</a> = 1):</p>
        <ul>
         <li data-md>
-         <p>Parameter blocks for recon_gain_info is not be generated.</p>
+         <p>Parameter blocks for recon_gain_info_parameter_data is not be generated.</p>
         <li data-md>
-         <p>Parameter blocks for demixing_info may be generated by implementers who assume it to be recommended for dynamic downmixing in a decoder side.</p>
+         <p>Parameter blocks for demixing_info_parameter_data may be generated by implementers who assume it to be recommended for dynamic downmixing in a decoder side.</p>
         <li data-md>
          <p>Down-mixer, ChannelGroup generator and Attenuation modules do not needed.</p>
        </ul>
@@ -4433,7 +4439,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
            <p><a data-link-type="dfn" href="#channel_audio_layer_config" id="ref-for-channel_audio_layer_config②">channel_audio_layer_config()</a> shall be set to as follows:</p>
            <ul>
             <li data-md>
-             <p><a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout⑤">loudspeaker_layout</a> shall be set to the ith list of channel layouts for the ith ChannelGroup.</p>
+             <p><a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout⑦">loudspeaker_layout</a> shall be set to the ith list of channel layouts for the ith ChannelGroup.</p>
             <li data-md>
              <p><a data-link-type="dfn" href="#output_gain_is_present_flag" id="ref-for-output_gain_is_present_flag">output_gain_is_present_flag</a> shall set to 1 for the ith ChannelGroup if attenuation is applied to the mixed channels of the ith ChannelGroup. Otherwise it shall be set to 0 for the ith ChannelGroup.</p>
             <li data-md>
@@ -4451,12 +4457,12 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
            </ul>
          </ul>
         <li data-md>
-         <p>Parameter blocks can be composed of <a data-link-type="dfn" href="#demixing_info" id="ref-for-demixing_info④">demixing_info()</a> and <a data-link-type="dfn" href="#recon_gain_info" id="ref-for-recon_gain_info⑤">recon_gain_info()</a>. When <a data-link-type="dfn" href="#recon_gain_is_present_flag" id="ref-for-recon_gain_is_present_flag①">recon_gain_is_present_flag</a> = 0 for all ChannelGroup, recon_gain_info shall not present in IA sequence.</p>
+         <p>Parameter blocks can be composed of <a data-link-type="dfn" href="#demixing_info_parameter_data" id="ref-for-demixing_info_parameter_data⑦">demixing_info_parameter_data()</a> and <a data-link-type="dfn" href="#recon_gain_info_parameter_data" id="ref-for-recon_gain_info_parameter_data⑥">recon_gain_info_parameter_data()</a>. When <a data-link-type="dfn" href="#recon_gain_is_present_flag" id="ref-for-recon_gain_is_present_flag①">recon_gain_is_present_flag</a> = 0 for all ChannelGroup, recon_gain_info shall not present in IA sequence.</p>
          <ul>
           <li data-md>
-           <p><a data-link-type="dfn" href="#dmixp_mode" id="ref-for-dmixp_mode">dmixp_mode</a> of demixing_info for the kth frame shall be set to indicate (α(k), β(k), γ(k), δ(k)) and w_idx_offset(k). Where w_idx_offset(k) = 1 or -1.</p>
+           <p><a data-link-type="dfn" href="#dmixp_mode" id="ref-for-dmixp_mode">dmixp_mode</a> of demixing_info_parameter_data for the kth frame shall be set to indicate (α(k), β(k), γ(k), δ(k)) and w_idx_offset(k). Where w_idx_offset(k) = 1 or -1.</p>
           <li data-md>
-           <p><a data-link-type="dfn" href="#recon_gain_flags" id="ref-for-recon_gain_flags②">recon_gain_flags</a> of recon_gain_info shall be set to indicate the de-mixed channels, which need to apply <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain⑤">recon_gain</a> among the output channels after demixing for ith channel layout.</p>
+           <p><a data-link-type="dfn" href="#recon_gain_flags" id="ref-for-recon_gain_flags②">recon_gain_flags</a> of recon_gain_info_parameter_data shall be set to indicate the de-mixed channels, which need to apply <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain⑤">recon_gain</a> among the output channels after demixing for ith channel layout.</p>
           <li data-md>
            <p><a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain⑥">recon_gain</a> shall be set to the gain value to be applied to the channel which is indicated by recon_gain_flags for the ith ChannelGroup.</p>
          </ul>
@@ -4498,7 +4504,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
        <p>Codec Config OBU is generated based on <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config⑨">decoder_config()</a>.</p>
      </ul>
     <li data-md>
-     <p>OBU packetizer generates zero or more parameter block OBUs for each frame which contains demixing_info and recon_gain_info.</p>
+     <p>OBU packetizer generates zero or more parameter block OBUs for each frame which contains demixing_info_parameter_data and recon_gain_info_parameter_data.</p>
     <li data-md>
      <p>OBU packetizer generates audio frame OBUs for each frame of the substreams.</p>
     <li data-md>
@@ -4595,7 +4601,7 @@ T2toTF2 enc.: Ltf3 = Ltf2 + w(k) x δ(k) x Ls5 and Rtf3 = Rtf2 + w(k) x δ(k) x 
     <li data-md>
      <p>Si ≤ Si+1 and Wi ≤ Wi+1 and Ti ≤ Ti+1 except Si = Si+1 and Wi = Wi+1 and Ti = Ti+1 for i = n-1, n-2, …, 1. Where ith Channel Layout CL #i = Si.Wi.Ti.</p>
     <li data-md>
-     <p>CL #i is one of <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout⑥">loudspeaker_layouts</a> supported in this specification.</p>
+     <p>CL #i is one of <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout⑧">loudspeaker_layouts</a> supported in this specification.</p>
    </ul>
    <p>Down-mix paths, which conform to the above rule, shall be only allowed for scalable channel audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⑤">num_layers</a> > 1 as depicted in below figure.</p>
    <center><img height="716" src="images/Down-mix Path.png" style="width:90%; height:auto;" width="792"></center>
@@ -4603,7 +4609,7 @@ T2toTF2 enc.: Ltf3 = Ltf2 + w(k) x δ(k) x Ls5 and Rtf3 = Rtf2 + w(k) x δ(k) x 
     <figcaption>IA Down-mix Path</figcaption>
    </center>
    <h4 class="heading settled" data-level="10.2.4" id="iacgeneration-scalablechannelaudio-recongaingeneration"><span class="secno">10.2.4. </span><span class="content">Recon Gain Generation</span><a class="self-link" href="#iacgeneration-scalablechannelaudio-recongaingeneration"></a></h4>
-   <p>This section describes how to generate <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain⑧">Recon_Gain</a>.</p>
+   <p>This section describes how to generate <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain⑧">recon_gain</a>.</p>
    <p>Recon_Gain needs to be applied to de-mixed channels. For this, IA encoder needs to deliver it to IA decoders.</p>
    <p>Let’s define followings:</p>
    <ul>
@@ -4998,7 +5004,8 @@ Recon_Gain for D_Rtb4:
    <li><a href="#default_mix_gain">default_mix_gain</a><span>, in § 4.2.7.1</span>
    <li><a href="#delta">delta</a><span>, in § 4.2.3</span>
    <li><a href="#demi">demi</a><span>, in § 7.2.6.2</span>
-   <li><a href="#demixing_info">demixing_info()</a><span>, in § 4.2.3</span>
+   <li><a href="#demixing_info">demixing_info</a><span>, in § 4.1.7</span>
+   <li><a href="#demixing_info_parameter_data">demixing_info_parameter_data()</a><span>, in § 4.2.3</span>
    <li><a href="#demixing_matrix">demixing_matrix</a><span>, in § 4.2.2</span>
    <li><a href="#dmixp_mode">dmixp_mode</a><span>, in § 4.2.3</span>
    <li><a href="#dops">dOps</a><span>, in § 7.2.4.1</span>
@@ -5068,21 +5075,21 @@ Recon_Gain for D_Rtb4:
    <li><a href="#output_gain_is_present_flag">output_gain_is_present_flag</a><span>, in § 4.2.1</span>
    <li><a href="#param_data">param_data</a><span>, in § 4.2.7.1</span>
    <li><a href="#paramdefinition">ParamDefinition()</a><span>, in § 4.1.9.1</span>
+   <li><a href="#param_definition_type">param_definition_type</a><span>, in § 4.1.7</span>
    <li><a href="#parameter-block-obu">Parameter Block OBU</a><span>, in § 3.2.2</span>
    <li>
     parameter_id
     <ul>
      <li><a href="#valdef-paramdefinition-parameter_id">value for ParamDefinition()</a><span>, in § 4.1.9.1</span>
-     <li><a href="#valdef-audio_element_obu-parameter_id">value for audio_element_obu()</a><span>, in § 4.1.7</span>
      <li><a href="#valdef-parameter_block_obu-parameter_id">value for parameter_block_obu()</a><span>, in § 4.1.9</span>
     </ul>
-   <li><a href="#parameter_name">parameter_name</a><span>, in § 4.1.7</span>
    <li><a href="#parameters">Parameters</a><span>, in § 3.1</span>
    <li><a href="#profile_version">profile_version</a><span>, in § 4.1.5</span>
    <li><a href="#pv">PV</a><span>, in § 7.4</span>
    <li><a href="#recon_gain">recon_gain</a><span>, in § 4.2.4</span>
    <li><a href="#recon_gain_flags">recon_gain_flags</a><span>, in § 4.2.4</span>
-   <li><a href="#recon_gain_info">recon_gain_info()</a><span>, in § 4.2.4</span>
+   <li><a href="#recon_gain_info">recon_gain_info</a><span>, in § 4.1.7</span>
+   <li><a href="#recon_gain_info_parameter_data">recon_gain_info_parameter_data()</a><span>, in § 4.2.4</span>
    <li><a href="#recon_gain_is_present_flag">recon_gain_is_present_flag</a><span>, in § 4.2.1</span>
    <li><a href="#reinitialize_decoder">reinitialize_decoder</a><span>, in § 4.1.12</span>
    <li><a href="#relative_offset">relative_offset</a><span>, in § 4.1.12</span>
@@ -6127,7 +6134,7 @@ Recon_Gain for D_Rtb4:
    <b><a href="#num_layers">#num_layers</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-num_layers">4.2.1. Scalable Channel Layout Config Syntax and Semantics</a>
-    <li><a href="#ref-for-num_layers①">4.2.4. Recon Gain Info Syntax and Semantics</a>
+    <li><a href="#ref-for-num_layers①">4.2.4. Recon Gain Info Parameter Data Syntax and Semantics</a>
     <li><a href="#ref-for-num_layers②">5.1. IA Simple Profile</a>
     <li><a href="#ref-for-num_layers③">5.2. IA Base Profile</a>
     <li><a href="#ref-for-num_layers④">5.3. IA Enhanced Profile</a>
@@ -6150,12 +6157,13 @@ Recon_Gain for D_Rtb4:
   <aside class="dfn-panel" data-for="loudspeaker_layout">
    <b><a href="#loudspeaker_layout">#loudspeaker_layout</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-loudspeaker_layout">4.2.1. Scalable Channel Layout Config Syntax and Semantics</a>
-    <li><a href="#ref-for-loudspeaker_layout①">4.2.3. Demixing Info Syntax and Semantics</a>
-    <li><a href="#ref-for-loudspeaker_layout②">9.2. Scalable Channel Audio decoding</a>
-    <li><a href="#ref-for-loudspeaker_layout③">10. IAC Generation Process</a> <a href="#ref-for-loudspeaker_layout④">(2)</a>
-    <li><a href="#ref-for-loudspeaker_layout⑤">10.2. Scalable Channel Audio Encoding</a>
-    <li><a href="#ref-for-loudspeaker_layout⑥">10.2.3. Channel Layout Generation Rule</a>
+    <li><a href="#ref-for-loudspeaker_layout">4.1.7. Audio Element OBU Syntax and Semantics</a> <a href="#ref-for-loudspeaker_layout①">(2)</a>
+    <li><a href="#ref-for-loudspeaker_layout②">4.2.1. Scalable Channel Layout Config Syntax and Semantics</a>
+    <li><a href="#ref-for-loudspeaker_layout③">4.2.3. Demixing Info Parameter Data Syntax and Semantics</a>
+    <li><a href="#ref-for-loudspeaker_layout④">9.2. Scalable Channel Audio decoding</a>
+    <li><a href="#ref-for-loudspeaker_layout⑤">10. IAC Generation Process</a> <a href="#ref-for-loudspeaker_layout⑥">(2)</a>
+    <li><a href="#ref-for-loudspeaker_layout⑦">10.2. Scalable Channel Audio Encoding</a>
+    <li><a href="#ref-for-loudspeaker_layout⑧">10.2.3. Channel Layout Generation Rule</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="714ch">
@@ -6239,13 +6247,13 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-demixing_matrix①">10.1. Ambisonics Encoding</a> <a href="#ref-for-demixing_matrix②">(2)</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="demixing_info">
-   <b><a href="#demixing_info">#demixing_info</a></b><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="demixing_info_parameter_data">
+   <b><a href="#demixing_info_parameter_data">#demixing_info_parameter_data</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-demixing_info">5.1. IA Simple Profile</a>
-    <li><a href="#ref-for-demixing_info①">5.2. IA Base Profile</a>
-    <li><a href="#ref-for-demixing_info②">5.3. IA Enhanced Profile</a> <a href="#ref-for-demixing_info③">(2)</a>
-    <li><a href="#ref-for-demixing_info④">10.2. Scalable Channel Audio Encoding</a>
+    <li><a href="#ref-for-demixing_info_parameter_data">5.1. IA Simple Profile</a>
+    <li><a href="#ref-for-demixing_info_parameter_data①">5.2. IA Base Profile</a> <a href="#ref-for-demixing_info_parameter_data②">(2)</a> <a href="#ref-for-demixing_info_parameter_data③">(3)</a> <a href="#ref-for-demixing_info_parameter_data④">(4)</a>
+    <li><a href="#ref-for-demixing_info_parameter_data⑤">5.3. IA Enhanced Profile</a> <a href="#ref-for-demixing_info_parameter_data⑥">(2)</a>
+    <li><a href="#ref-for-demixing_info_parameter_data⑦">10.2. Scalable Channel Audio Encoding</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dmixp_mode">
@@ -6255,27 +6263,27 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-dmixp_mode①">10.2.1. Down-mix parameter and Loudness</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="recon_gain_info">
-   <b><a href="#recon_gain_info">#recon_gain_info</a></b><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="recon_gain_info_parameter_data">
+   <b><a href="#recon_gain_info_parameter_data">#recon_gain_info_parameter_data</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-recon_gain_info">5.1. IA Simple Profile</a>
-    <li><a href="#ref-for-recon_gain_info①">5.2. IA Base Profile</a>
-    <li><a href="#ref-for-recon_gain_info②">5.3. IA Enhanced Profile</a> <a href="#ref-for-recon_gain_info③">(2)</a>
-    <li><a href="#ref-for-recon_gain_info④">9.2.3. Recon Gain</a>
-    <li><a href="#ref-for-recon_gain_info⑤">10.2. Scalable Channel Audio Encoding</a>
+    <li><a href="#ref-for-recon_gain_info_parameter_data">5.1. IA Simple Profile</a>
+    <li><a href="#ref-for-recon_gain_info_parameter_data①">5.2. IA Base Profile</a> <a href="#ref-for-recon_gain_info_parameter_data②">(2)</a>
+    <li><a href="#ref-for-recon_gain_info_parameter_data③">5.3. IA Enhanced Profile</a> <a href="#ref-for-recon_gain_info_parameter_data④">(2)</a>
+    <li><a href="#ref-for-recon_gain_info_parameter_data⑤">9.2.3. Recon Gain</a>
+    <li><a href="#ref-for-recon_gain_info_parameter_data⑥">10.2. Scalable Channel Audio Encoding</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="recon_gain_flags">
    <b><a href="#recon_gain_flags">#recon_gain_flags</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-recon_gain_flags">4.2.4. Recon Gain Info Syntax and Semantics</a> <a href="#ref-for-recon_gain_flags①">(2)</a>
+    <li><a href="#ref-for-recon_gain_flags">4.2.4. Recon Gain Info Parameter Data Syntax and Semantics</a> <a href="#ref-for-recon_gain_flags①">(2)</a>
     <li><a href="#ref-for-recon_gain_flags②">10.2. Scalable Channel Audio Encoding</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="recon_gain">
    <b><a href="#recon_gain">#recon_gain</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-recon_gain">4.2.4. Recon Gain Info Syntax and Semantics</a> <a href="#ref-for-recon_gain①">(2)</a> <a href="#ref-for-recon_gain②">(3)</a>
+    <li><a href="#ref-for-recon_gain">4.2.4. Recon Gain Info Parameter Data Syntax and Semantics</a> <a href="#ref-for-recon_gain①">(2)</a> <a href="#ref-for-recon_gain②">(3)</a>
     <li><a href="#ref-for-recon_gain③">9.2.3. Recon Gain</a> <a href="#ref-for-recon_gain④">(2)</a>
     <li><a href="#ref-for-recon_gain⑤">10.2. Scalable Channel Audio Encoding</a> <a href="#ref-for-recon_gain⑥">(2)</a>
     <li><a href="#ref-for-recon_gain⑦">10.2.1. Down-mix parameter and Loudness</a>
