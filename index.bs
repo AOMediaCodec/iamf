@@ -609,6 +609,18 @@ audio_element_type: The type of audio representation.
 
 <dfn noexport>audio_substream_id</dfn> shall specify the unique ID associated with the audio substream that is used to reconstruct this audio element.
 
+Let a particular ChannelGroup's substream be indexed as [<dfn noexport>c</dfn>, <dfn noexport>n_c</dfn>], where
+- [=c=] = [1, ..., C] is the ChannelGroup index and C is the number of ChannelGroups.
+- [=n_c=] = [1, ..., N_c] is the substream index in the c-th ChannelGroup and N_c is the number of substreams in the c-th ChannelGroup.
+- The i-th audio_substream_id maps to a ChannelGroup's substream as follows, where i is the index of the array:
+
+```
+[[1, 1], [1, 2], ..., [1, N_1], [2, 1], [2, 2], ..., [2, N_2], ..., [C, 1], [C, 2], ..., [C, N_c]]
+```
+
+A ChannelGroup is defined in [[#iacgeneration]]. The order of the substreams in each ChannelGroup., i.e. the semantics of n_c, is specified in [[#syntax-scalable-channel-layout-config]].
+
+
 <dfn noexport>num_parameters</dfn> shall specify the number of parameters that are used by the algorithms specified in this audio element.
 
 <dfn value noexport for="audio_element_obu()">parameter_id</dfn> shall be the unique ID associated with a parameter that is used by the algorithm specified in this audio element.
