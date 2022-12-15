@@ -790,23 +790,26 @@ Each value of [=duration=], [=constant_segment_interval=] and [=segment_interval
 		- If [=NS=] x [=CSI=] > [=D=], the actual interval of the last segment shall be [=D=] - ([=NS=] - 1) x [=CSI=].
 	- When [=CSI=] = 0, the summation of all [=SI=]s in this parameter block shall be equal to [=D=].
 
-<dfn noexport>animation_type</dfn> shall specify the how the parameter values in this parameter block shall be animated.
+<dfn noexport>animation_type</dfn> specifies the type of animation applied to the parameter values in this parameter block.
 
 <pre class = "def">
 animation_type : Animation Type
        0       : STEP
-       1       : BEZIER
+       1       : LINEAR
+       2       : BEZIER
 </pre>
 
-In the case where animation_type is equal to BEZIER, parameters for the linear and quadratic Bezier curves may be defined in this version of the specification.
-
-Classes that take animation_type as an input argument shall use the <dfn noexport>AnimatedParameterData()</dfn> function template.
+Classes that take [=animation_type=] as an input argument must use the <dfn noexport>AnimatedParameterData()</dfn> function template. The method of applying the animation is described in [[#processing-animated-params]].
 
 ```
 template <class T>
 class AnimatedParameterData(animation_type) {
   if (animation_type == STEP) {
     T start_point_value;
+  }
+  if (animation_type == LINEAR) {
+    T start_point_value;
+    T end_point_value;
   }
   if (animation_type == BEZIER) {
     T start_point_value;
@@ -821,9 +824,9 @@ class AnimatedParameterData(animation_type) {
 
 <dfn noexport>end_point_value</dfn> shall specify the parameter value that is applied at the end of the segment.
 
-<dfn noexport>control_point_value</dfn> shall specify the parameter value of the middle control point of a quadratic Bezier curve, i.e. its y-axis value. If this animation implements a linear Bezier curve, control_point_value shall be ignored by the IA parser.
+<dfn noexport>control_point_value</dfn> shall specify the parameter value of the middle control point of a quadratic Bezier curve, i.e. its y-axis value.
 
-<dfn noexport>control_point_relative_time</dfn> shall specify the time of the middle control point of a quadratic Bezier curve, i.e. its x-axis value. This value is expressed as a fraction of the parameter segment interval with valid values in the range of 0 and 1, inclusively. A value equal to 0 or 1 shall indicate that this animation implements a linear Bezier curve, in which case control_point_value shall be ignored by the IA parser. It is stored as an 8-bit, unsigned, fixed-point value with 8 fractional bits (i.e. Q0.8 in [Q-Format]).
+<dfn noexport>control_point_relative_time</dfn> shall specify the time of the middle control point of a quadratic Bezier curve, i.e. its x-axis value. This value is expressed as a fraction of the parameter segment interval with valid values in the range of 0 and 1, inclusively. It is stored as an 8-bit, unsigned, fixed-point value with 8 fractional bits (i.e. Q0.8 in [Q-Format]).
 
 #### Parameter Definition Syntax and Semantics #### {#parameter-definition}
 
@@ -2090,6 +2093,40 @@ When multiple audio elements are mixed into one channel audio:
 After relevant processing, multiple audio elements are mixed into one channel audio according to the target loudspeaker layout with the target sampling rate by considering the synchronization in audio sample by audio sample among them.
 
 //To Do: Fill in the text based on element_mix_config()
+
+## Animated Parameters ## {#processing-animated-params}
+
+This section describes how a set of parameters is animated over a segment in a parameter block, using the information provided in [=AnimatedParameterData()=].
+
+Let P0, P1 and P2 be 2D coordinates defined as
+
+```
+P0 = (t_start, start_point_value),
+P1 = (t_control, control_point_value),
+P2 = (t_end, end_point_value),
+```
+
+where t_start is the segment start time, t_end is the segment end time and t_control is the control point time given by
+
+```
+t_control = t_start + (t_end - t_start) * control_point_relative_time.
+```
+
+If [=animation_type=] is equal to STEP, the parameter value provided by [=start_point_value=] should be applied immediately.
+
+If [=animation_type=] is equal to LINEAR, the parameter value is linearly interpolated between [=start_point_value=] and [=end_point_value=] as follows:
+
+```
+B_linear(a) = (1 - a) * P0 + a * P2,
+0 <= a <= 1.
+```
+
+If [=animation_type=] is equal to BEZIER, the parameter value is interpolated following a quadratic Bezier curve between [=start_point_value=] and [=end_point_value=] as follows:
+
+```
+B_quad(a) = (1 - a)^2 * P0 + 2 * (1 - a) * a * P1 + a^2 * P2,
+0 <= a <= 1.
+```
 
 ## Post Processing ## {#processing-post}
 
