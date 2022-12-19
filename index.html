@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 26e85e599, updated Thu Dec 8 15:29:31 2022 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="77f7ada1ea4d3b60135370c37d09e08200ca0211" name="document-revision">
+  <meta content="3a52daf17d382f12006acdc973bb7117b528c84f" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2961,7 +2961,7 @@ class ambisonics_projection_config() {
    0    : MONO
    1    : PROJECTION
 </pre>
-   <p>If ambisonics_mode is equal to MONO, this shall indicate that the Ambisonics channels are coded as individual mono substreams.</p>
+   <p>If ambisonics_mode is equal to MONO, this shall indicate that the Ambisonics channels are coded as individual mono substreams. For IAMF-LPCM, <a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode">ambisonics_mode</a> shall be equal to MONO.</p>
    <p>If ambisonics_mode is equal to PROJECTION, this shall indicate that the Ambisonics channels are first linearly projected onto another subspace before coding as a mix of coupled stereo and mono substreams.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="output_channel_count">output_channel_count</dfn> shall be the same as <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc8486#" id="termref-for-②③">channel count</a> in [[!RFC8486] with following restrictions:</p>
    <ul>
@@ -3338,6 +3338,7 @@ class mix_gain_parameter_data(animation_type) {
    <p><dfn data-dfn-type="dfn" data-noexport id="sample_rate">sample_rate<a class="self-link" href="#sample_rate"></a></dfn> shall indicate the sample rate of the input audio in Hz.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="sample_size">sample_size<a class="self-link" href="#sample_size"></a></dfn> shall indicate the size of a PCM sample in bit units. The value shall be less than or equal to 24.</p>
    <p>Substream format shall be the LPCM audio samples for the frame size.</p>
+   <p>For IAMF-LPCM, one Substream is an individual channel of input audio. For example, one Ambisonics channel of Ambisonics is one Substream and one speaker channel of channel audio is one Substream.</p>
    <h2 class="heading settled" data-level="5" id="profiles"><span class="secno">5. </span><span class="content">Profiles</span><a class="self-link" href="#profiles"></a></h2>
    <p>The IA Profiles define a set of capabilities that are required to parse, decode and process the corresponding IA sequence.</p>
    <h3 class="heading settled" data-level="5.1" id="profiles-simple"><span class="secno">5.1. </span><span class="content">IA Simple Profile</span><a class="self-link" href="#profiles-simple"></a></h3>
@@ -3922,7 +3923,7 @@ Quantity:  One of more
      <p>OBU parser shall output the substreams for the scene-based audio element in IA sequence.</p>
      <ul>
       <li data-md>
-       <p>OBU parser shall output <a data-link-type="dfn" href="#channel_mapping" id="ref-for-channel_mapping">channel_mapping</a> or <a data-link-type="dfn" href="#demixing_matrix" id="ref-for-demixing_matrix">demixing_matrix</a> according to <a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode">ambisonics_mode</a> to Channel_Mapping/Demixing_Matrix module</p>
+       <p>OBU parser shall output <a data-link-type="dfn" href="#channel_mapping" id="ref-for-channel_mapping">channel_mapping</a> or <a data-link-type="dfn" href="#demixing_matrix" id="ref-for-demixing_matrix">demixing_matrix</a> according to <a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode①">ambisonics_mode</a> to Channel_Mapping/Demixing_Matrix module</p>
      </ul>
     <li data-md>
      <p>Codec decoder shall output decoded channels (PCM) in the transmission order as many as<a data-link-type="dfn" href="#output_channel_count" id="ref-for-output_channel_count①">output_channel_count</a> after decoding of each Substream.</p>
@@ -4355,18 +4356,29 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
      <p>In ChannelGroup for Scalable Channel Audio: The order shall conform to following rules:</p>
      <ul>
       <li data-md>
-       <p>Coupled Substreams comes first and followed by non-coupled Substreams.</p>
+       <p>For IAMF-OPUS, IAMF-AAC-LC and IAMF-FLAC,</p>
+       <ul>
+        <li data-md>
+         <p>Coupled Substreams comes first and followed by non-coupled Substreams.</p>
+        <li data-md>
+         <p>Coupled Substreams for surround channels comes first and followed by one(s) for top channels.</p>
+        <li data-md>
+         <p>Coupled Substreams for front channels comes first and followed by one(s) for side, rear and back channels.</p>
+        <li data-md>
+         <p>Coupled Substreams for side channels comes first and followed by one(s) for rear channels.</p>
+        <li data-md>
+         <p>Center channel comes first and followed by LFE and followed by the other one.</p>
+        <li data-md>
+         <p>Where, <dfn data-dfn-type="dfn" data-noexport id="non-coupled-substream">non-coupled substream<a class="self-link" href="#non-coupled-substream"></a></dfn> is a coded substream from one of non-coupled channels.</p>
+       </ul>
       <li data-md>
-       <p>Coupled Substreams for surround channels comes first and followed by one(s) for top channels.</p>
-      <li data-md>
-       <p>Coupled Substreams for front channels comes first and followed by one(s) for side, rear and back channels.</p>
-      <li data-md>
-       <p>Coupled Substreams for side channels comes first and followed by one(s) for rear channels.</p>
-      <li data-md>
-       <p>Center channel comes first and followed by LFE and followed by the other one.</p>
+       <p>For IAMF-LPCM,</p>
+       <ul>
+        <li data-md>
+         <p>The order of substreams in ChannelGroup complies with "Loudspeaker Location Ordering" specified in <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout⑦">loudspeaker_layout</a>.</p>
+       </ul>
      </ul>
    </ul>
-   <p>Where, <dfn data-dfn-type="dfn" data-noexport id="non-coupled-substream">non-coupled substream<a class="self-link" href="#non-coupled-substream"></a></dfn> is a coded substream from one of non-coupled channels.</p>
    <h3 class="heading settled" data-level="10.1" id="iacgeneration-ambisonics"><span class="secno">10.1. </span><span class="content">Ambisonics Encoding</span><a class="self-link" href="#iacgeneration-ambisonics"></a></h3>
    <p>For Ambisonics encoding:</p>
    <ul>
@@ -4377,16 +4389,16 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
        <p>Meta generator generates descriptors based on Ambisonics mode and the number of channels for Ambisonics.</p>
        <ul>
         <li data-md>
-         <p><a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode①">ambisonics_mode</a> shall be set to 0 for <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-①②①">ChannelMappingFamily</a> = 2 of <a data-link-type="biblio" href="#biblio-rfc8486" title="Ambisonics in an Ogg Opus Container">[RFC8486]</a> or 1 for <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-①②②">ChannelMappingFamily</a> = 3 of <a data-link-type="biblio" href="#biblio-rfc8486" title="Ambisonics in an Ogg Opus Container">[RFC8486]</a>.</p>
+         <p><a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode②">ambisonics_mode</a> shall be set to 0 for <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-①②①">ChannelMappingFamily</a> = 2 of <a data-link-type="biblio" href="#biblio-rfc8486" title="Ambisonics in an Ogg Opus Container">[RFC8486]</a> or 1 for <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-①②②">ChannelMappingFamily</a> = 3 of <a data-link-type="biblio" href="#biblio-rfc8486" title="Ambisonics in an Ogg Opus Container">[RFC8486]</a>.</p>
         <li data-md>
          <p>ambisonics_config is set to as follows:</p>
          <ul>
           <li data-md>
            <p><a data-link-type="dfn" href="#output_channel_count" id="ref-for-output_channel_count③">output_channel_count</a>, <a data-link-type="dfn" href="#substream_count" id="ref-for-substream_count①">substream_count</a> and <a data-link-type="dfn" href="#coupled_substream_count" id="ref-for-coupled_substream_count①">coupled_substream_count</a> shall be set to the number of channels for Ambisonics.</p>
           <li data-md>
-           <p><a data-link-type="dfn" href="#channel_mapping" id="ref-for-channel_mapping①">channel_mapping</a> for <a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode②">ambisonics_mode</a> = 0 is assigned to according to the order of substreams in ChannelGroup.</p>
+           <p><a data-link-type="dfn" href="#channel_mapping" id="ref-for-channel_mapping①">channel_mapping</a> for <a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode③">ambisonics_mode</a> = 0 is assigned to according to the order of substreams in ChannelGroup.</p>
           <li data-md>
-           <p><a data-link-type="dfn" href="#demixing_matrix" id="ref-for-demixing_matrix①">demixing_matrix</a> for <a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode③">ambisonics_mode</a> = 1 is assigned to according to the order of substreams in ChannelGroup.</p>
+           <p><a data-link-type="dfn" href="#demixing_matrix" id="ref-for-demixing_matrix①">demixing_matrix</a> for <a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode④">ambisonics_mode</a> = 1 is assigned to according to the order of substreams in ChannelGroup.</p>
          </ul>
        </ul>
      </ul>
@@ -4439,7 +4451,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
            <p><a data-link-type="dfn" href="#channel_audio_layer_config" id="ref-for-channel_audio_layer_config②">channel_audio_layer_config()</a> shall be set to as follows:</p>
            <ul>
             <li data-md>
-             <p><a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout⑦">loudspeaker_layout</a> shall be set to the ith list of channel layouts for the ith ChannelGroup.</p>
+             <p><a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout⑧">loudspeaker_layout</a> shall be set to the ith list of channel layouts for the ith ChannelGroup.</p>
             <li data-md>
              <p><a data-link-type="dfn" href="#output_gain_is_present_flag" id="ref-for-output_gain_is_present_flag">output_gain_is_present_flag</a> shall set to 1 for the ith ChannelGroup if attenuation is applied to the mixed channels of the ith ChannelGroup. Otherwise it shall be set to 0 for the ith ChannelGroup.</p>
             <li data-md>
@@ -4601,7 +4613,7 @@ T2toTF2 enc.: Ltf3 = Ltf2 + w(k) x δ(k) x Ls5 and Rtf3 = Rtf2 + w(k) x δ(k) x 
     <li data-md>
      <p>Si ≤ Si+1 and Wi ≤ Wi+1 and Ti ≤ Ti+1 except Si = Si+1 and Wi = Wi+1 and Ti = Ti+1 for i = n-1, n-2, …, 1. Where ith Channel Layout CL #i = Si.Wi.Ti.</p>
     <li data-md>
-     <p>CL #i is one of <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout⑧">loudspeaker_layouts</a> supported in this specification.</p>
+     <p>CL #i is one of <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout⑨">loudspeaker_layouts</a> supported in this specification.</p>
    </ul>
    <p>Down-mix paths, which conform to the above rule, shall be only allowed for scalable channel audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⑤">num_layers</a> > 1 as depicted in below figure.</p>
    <center><img height="716" src="images/Down-mix Path.png" style="width:90%; height:auto;" width="792"></center>
@@ -6161,9 +6173,9 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-loudspeaker_layout②">4.2.1. Scalable Channel Layout Config Syntax and Semantics</a>
     <li><a href="#ref-for-loudspeaker_layout③">4.2.3. Demixing Info Parameter Data Syntax and Semantics</a>
     <li><a href="#ref-for-loudspeaker_layout④">9.2. Scalable Channel Audio decoding</a>
-    <li><a href="#ref-for-loudspeaker_layout⑤">10. IAC Generation Process</a> <a href="#ref-for-loudspeaker_layout⑥">(2)</a>
-    <li><a href="#ref-for-loudspeaker_layout⑦">10.2. Scalable Channel Audio Encoding</a>
-    <li><a href="#ref-for-loudspeaker_layout⑧">10.2.3. Channel Layout Generation Rule</a>
+    <li><a href="#ref-for-loudspeaker_layout⑤">10. IAC Generation Process</a> <a href="#ref-for-loudspeaker_layout⑥">(2)</a> <a href="#ref-for-loudspeaker_layout⑦">(3)</a>
+    <li><a href="#ref-for-loudspeaker_layout⑧">10.2. Scalable Channel Audio Encoding</a>
+    <li><a href="#ref-for-loudspeaker_layout⑨">10.2.3. Channel Layout Generation Rule</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="714ch">
@@ -6221,8 +6233,9 @@ Recon_Gain for D_Rtb4:
   <aside class="dfn-panel" data-for="ambisonics_mode">
    <b><a href="#ambisonics_mode">#ambisonics_mode</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-ambisonics_mode">9.1. Ambisonics decoding</a>
-    <li><a href="#ref-for-ambisonics_mode①">10.1. Ambisonics Encoding</a> <a href="#ref-for-ambisonics_mode②">(2)</a> <a href="#ref-for-ambisonics_mode③">(3)</a>
+    <li><a href="#ref-for-ambisonics_mode">4.2.2. Ambisonics Config Syntax and Semantics</a>
+    <li><a href="#ref-for-ambisonics_mode①">9.1. Ambisonics decoding</a>
+    <li><a href="#ref-for-ambisonics_mode②">10.1. Ambisonics Encoding</a> <a href="#ref-for-ambisonics_mode③">(2)</a> <a href="#ref-for-ambisonics_mode④">(3)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="output_channel_count">
