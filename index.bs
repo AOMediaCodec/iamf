@@ -728,7 +728,7 @@ class mix_presentation_obu() {
     
     leb128() num_layouts;
     for (j = 0; j < num_layouts; j++) {
-      layout measured_layout_for_loudness;
+      layout loudness_layout;
       loudness_info loudness; 
     }
   }
@@ -756,17 +756,17 @@ class mix_presentation_obu() {
 
 <dfn noexport>num_layouts</dfn> specifies the number of layouts for this sub-mix which the loudness informations were measured on.
 
-<dfn noexport>measured_layout_for_loudness</dfn> identifies the layout that was used to measure the loudness information provided in this sub-mix.
+<dfn noexport>loudness_layout</dfn> identifies the layout that was used to measure the loudness information provided in this sub-mix.
 
-<dfn noexport>loudness</dfn> provides the loudness information which was measured on [=measured_layout_for_loudness=] for the mixed audio elements by this sub-mix.
+<dfn noexport>loudness</dfn> provides the loudness information which was measured on [=loudness_layout=] for the mixed audio elements by this sub-mix.
 
-The layout specified in [=measured_layout_for_loudness=] should not be higher than the highest layout among layouts provided by the audio elements. In other words, rendering from an audio element with the highest layout to the [=measured_layout_for_loudness=] should not require an upmix.
+The layout specified in [=loudness_layout=] should not be higher than the highest layout among layouts provided by the audio elements. In other words, rendering from an audio element with the highest layout to the [=loudness_layout=] should not require an upmix.
 
 If one sub-mix of Mix Presentation OBU includes only one single scalable channel audio, then it shall compy with as follows:
 - [=num_layouts=] shall be greater than or equal to [=num_layers=] specified in [=scalable_channel_layout_config()=] of Audio Element OBU for the [=audio_element_id=].
-- The set of [=measured_layout_for_loudness=]s shall include all of [=loudspeaker_layout=]s specified in the [=channel_audio_layer_config()=]s of Audio Element OBU for the [=audio_element_id=]. 
+- The set of [=loudness_layout=]s shall include all of [=loudspeaker_layout=]s specified in the [=channel_audio_layer_config()=]s of Audio Element OBU for the [=audio_element_id=]. 
 
-The highest [=measured_layout_for_loudness=] specified in one sub-mix is the layout which was used for authoring the sub-mix.
+The highest [=loudness_layout=] specified in one sub-mix is the layout which was used for authoring the sub-mix.
 
 ISSUE: Loudness_info in scalable_channel_audio_layer is removed instead.
 
@@ -2353,10 +2353,10 @@ An IA sequence may contain more than one mix presentations. The IA parser should
 2. If there are more than one valid mixes remaining, the IA parser should select an appropriate mix for rendering, in the following order.
 	1. If the playback layout is binaural, i.e. headphones:
 		1. Select the mix with [=audio_element_id=] whose [=loudspeaker_layout=] is BINAURAL.
-		2. If there is no such mix, select the mix with the closest available [=measured_layout_for_loudness=].
+		2. If there is no such mix, select the mix with the highest available [=loudness_layout=].
 	2. If the playback layout is loudspeakers:
-		1. If there is a mix with an [=measured_layout_for_loudness=] that matches the playback loudspeaker layout, it should be selected. If there are more than one matching mixes, the first one should be selected.
-		2. If there is no such mix, select the mix presentation with the closest available [=measured_layout_for_loudness=].
+		1. If there is a mix with an [=loudness_layout=] that matches the playback loudspeaker layout, it should be selected. If there are more than one matching mixes, the first one should be selected.
+		2. If there is no such mix, select the mix presentation with the highest available [=loudness_layout=].
 
 ### Rendering an Audio Element ### {#processing-mixpresentation-rendering}
 
@@ -2444,7 +2444,7 @@ Each audio element is processed individually before mixing as follows:
 1. Render to the playback layout.
 2. If all audio elements do not have a common sample rate, re-sample to 48 kHz.
 3. If all audio elements do not have a common bit-depth, convert to a common bit-depth. This specification recommends using 16 bits.
-4. If [=measured_layout_for_loudness=] matches with the playback layout, apply any per-element processing according to [=element_mix_config()=]. Otherwise, apply any per-element processing according to implementation-specific element_mix.
+4. If [=loudness_layout=] matches with the playback layout, apply any per-element processing according to [=element_mix_config()=]. Otherwise, apply any per-element processing according to implementation-specific element_mix.
 
 The rendered and processed audio elements are then summed, and then apply [=output_mix_config()=] to generate one sub-mixed audio signal. If there are more than one sub-mixes, the output of each sub-mix is further summed to generate the final mixed audio signal.
 
@@ -2489,9 +2489,9 @@ B_quad(a) = (1 - a)^2 * P0 + 2 * (1 - a) * a * P1 + a^2 * P2,
 
 Loudness normalization should be done by adjusting the loudness level to a target value, using the integrated loudness and true peak information provided in loudness_info(). If the true peak information is not available, the digital peak information should be used.
 
-The rendered layouts that was used to measure the loudness information of a sub-mix are provided by [=measured_layout_for_loudness=]s. 
+The rendered layouts that was used to measure the loudness information of a sub-mix are provided by [=loudness_layout=]s. 
 
-If one of them matches the playback layout, the loudness information should be used directly for normalization. If there is a mismatch between [=measured_layout_for_loudness=] and the playback layout, the implementation may choose to use the provided loudness information of the closest [=measured_layout_for_loudness=] as-is. 
+If one of them matches the playback layout, the loudness information should be used directly for normalization. If there is a mismatch between [=loudness_layout=] and the playback layout, the implementation may choose to use the provided loudness information of the highest [=loudness_layout=] as-is. 
 
 If there is more than one selected loudness_info() specified in the mix presentation (i.e. in case of multiple sub-mixes), the implementation should normalize the loudness of each sub-mix independently before summing them.
 
@@ -2780,7 +2780,7 @@ For Mix Presentation OBU for one single channel-based audio element, Mix Present
 - [=element_mix_config()=]: No parameter block for element_mix and default_mix_gain = 0dB
 - [=output_mix_config()=]: No parameter block for output_mix and default_mix_gain = 0dB
 - [=num_layouts=]: set to [=num_layers=]
-- [=measured_layout_for_loudness=]: set to L(1), L(2), ..., L([=num_layers=]).
+- [=loudness_layout=]: set to L(1), L(2), ..., L([=num_layers=]).
 - loudness_info() on L(1), loudness_info on L(2), ..., loudness_info on L([=num_layers=]): loudness information of the rendered audio to the measured layout L(i).
 - Where L(i) is the measured layout for the ith layer and i = 1, 2, ..., [=num_layers=]
 
@@ -2791,10 +2791,10 @@ For Mix Presentation for one single scene-based audio element, Mix Presentation 
 - [=element_mix_config()=]: set to [=mix_gain=]
 - [=output_mix_config()=]: set to [=output_mix_gain=]
 - [=num_layouts=]: set to M1, the number of loudness informations which are provided.
-- [=measured_layout_for_loudness=]: set to L(1), L(2), ..., L(M1).
+- [=loudness_layout=]: set to L(1), L(2), ..., L(M1).
 - loudness_info() on L(1), loudness_info on L(2), ..., loudness_info on L(M1): loudness information of the rendered audio to the measured layout L(i).
 - Where L(i) is the measured layout for the ith loudness information and i = 1, 2, ..., M1.
-- This Mix Presentation is authored by using the highest [=measured_layout_for_loudness=].
+- This Mix Presentation is authored by using the highest [=loudness_layout=].
  
 For Mix Presenation for N (>1) audio elements (when num_sub-mixes = 1), Mix Presentation OBU shall follow following restrictions:
 - [=num_sub_mixes=]: set to 1
@@ -2803,10 +2803,10 @@ For Mix Presenation for N (>1) audio elements (when num_sub-mixes = 1), Mix Pres
 - [=element_mix_config()=] for each audio element: set to [=mix_gain=]
 - [=output_mix_config()=]: set to [=output_mix_gain=]
 - [=num_layouts=]: set to M2, the number of loudness informations which are provided.
-- [=measured_layout_for_loudness=]: set to L(1), L(2), ..., L(M2).
+- [=loudness_layout=]: set to L(1), L(2), ..., L(M2).
 - loudness_info() on L(1), loudness_info on L(2), ..., loudness_info on L(M2): loudness information of the rendered audio to the measured layout L(i).
 - Where L(i) is the measured layout for the ith loudness information and i = 1, 2, ..., M2.
-- This Mix Presentation is authored by using the highest [=measured_layout_for_loudness=].
+- This Mix Presentation is authored by using the highest [=loudness_layout=].
 
 #### Element Mix Config ####  {#iacgeneration-mixpresentation-mix}
 
