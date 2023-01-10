@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 26e85e599, updated Thu Dec 8 15:29:31 2022 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="3a52daf17d382f12006acdc973bb7117b528c84f" name="document-revision">
+  <meta content="5e4da30208396d9cf18e27d93bbc1d3042fd3d93" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -3524,6 +3524,7 @@ class mix_gain_parameter_data(animation_type) {
    </ul>
    <h4 class="heading settled" data-level="6.1.3" id="standalone-obu-sequence-refreshes"><span class="secno">6.1.3. </span><span class="content">Refreshing Descriptor OBUs</span><a class="self-link" href="#standalone-obu-sequence-refreshes"></a></h4>
    <p>The above describes the full sequence of OBUs for a given set of descriptor OBUs and their associated data OBUs. If the IAC configuration changes, a new set of descriptor OBUs is required. In that case, a new sequence of the complete set of descriptor OBUs, a Sync OBU and their corresponding data OBUs shall follow, in the same order as described above.</p>
+   <p class="note" role="note"><span>NOTE:</span> In case of that IA sequence contains two audio elements which one of them is a short-lived contents, the number of audio elements is changed (i.e. one to two or two to one) depending on whether the short-lived contents is present or not. So, a new set of descriptor OBUs presents to indicate the changes. In this case, the new set of descriptor OBUs includes a new Mix Presentation OBU to provide the proper mixing according to the audio element(s) to be mixed.</p>
    <p>The descriptor OBUs may additionally be repeated redundantly and as frequently as necessary. In this case, the "obu_redundant_copy" field in the OBU header of each of the descriptor OBUs shall be set to 1.</p>
    <p>If there is set of descriptor OBUs placed mid-stream, there may be parameter blocks that came before them which are still valid and applicable for the duration after the descriptor OBUs. In this case, these parameter blocks must be redundantly copied and placed after the first Sync OBU that follows the descriptor OBUs. This ensures that any receiver joining mid-stream and encountering a set of descriptor OBU is guaranteed to be able to receive the complete set of metadata that is applicable to all audio frames that come after.</p>
    <h3 class="heading settled" data-level="6.2" id="standalone-synchronizing-data-obus"><span class="secno">6.2. </span><span class="content">Synchronizing Data OBUs</span><a class="self-link" href="#standalone-synchronizing-data-obus"></a></h3>
