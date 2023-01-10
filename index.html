@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 26e85e599, updated Thu Dec 8 15:29:31 2022 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="5e4da30208396d9cf18e27d93bbc1d3042fd3d93" name="document-revision">
+  <meta content="58a5b4ac1f9e6ef572ae012873b9e26e4409b19a" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2126,18 +2126,19 @@ dfn > a.self-link::before      { content: "#"; }
         <li><a href="#processing-mixpresentation-rendering"><span class="secno">9.3.1</span> <span class="content">Rendering for Audio Element</span></a>
         <li><a href="#processing-mixpresentation-mixing"><span class="secno">9.3.2</span> <span class="content">Mixing for Audio Elements</span></a>
        </ol>
+      <li><a href="#processing-animated-params"><span class="secno">9.4</span> <span class="content">Animated Parameters</span></a>
       <li>
-       <a href="#processing-post"><span class="secno">9.4</span> <span class="content">Post Processing</span></a>
+       <a href="#processing-post"><span class="secno">9.5</span> <span class="content">Post Processing</span></a>
        <ol class="toc">
-        <li><a href="#processing-post-loudness"><span class="secno">9.4.1</span> <span class="content">Loudness Normalization</span></a>
-        <li><a href="#processing-post-drc"><span class="secno">9.4.2</span> <span class="content">DRC Control</span></a>
-        <li><a href="#processing-post-limiter"><span class="secno">9.4.3</span> <span class="content">Limiter</span></a>
+        <li><a href="#processing-post-loudness"><span class="secno">9.5.1</span> <span class="content">Loudness Normalization</span></a>
+        <li><a href="#processing-post-drc"><span class="secno">9.5.2</span> <span class="content">DRC Control</span></a>
+        <li><a href="#processing-post-limiter"><span class="secno">9.5.3</span> <span class="content">Limiter</span></a>
        </ol>
       <li>
-       <a href="#processing-downmixmatrix"><span class="secno">9.5</span> <span class="content">Down-mix Matrix</span></a>
+       <a href="#processing-downmixmatrix"><span class="secno">9.6</span> <span class="content">Down-mix Matrix</span></a>
        <ol class="toc">
-        <li><a href="#processing-downmixmatrix-static"><span class="secno">9.5.1</span> <span class="content">Static Down-mix Matrix</span></a>
-        <li><a href="#processing-downmixmatrix-dynamic"><span class="secno">9.5.2</span> <span class="content">Dynamic Down-mix Matrix {#processing-downmixmatrix-dynamic}</span></a>
+        <li><a href="#processing-downmixmatrix-static"><span class="secno">9.6.1</span> <span class="content">Static Down-mix Matrix</span></a>
+        <li><a href="#processing-downmixmatrix-dynamic"><span class="secno">9.6.2</span> <span class="content">Dynamic Down-mix Matrix {#processing-downmixmatrix-dynamic}</span></a>
        </ol>
      </ol>
     <li>
@@ -2652,7 +2653,7 @@ class codec_config() {
     <li data-md>
      <p>If there is no match, the IA parser shall select the mix presentation with <a data-link-type="dfn" href="#mix_target_layout_type" id="ref-for-mix_target_layout_type">mix_target_layout_type</a> = 0. In this case, the renderer specified in rendering_config() shall render the physical playback layout appropriately.</p>
     <li data-md>
-     <p>If there is no mix presentation with <a data-link-type="dfn" href="#mix_target_layout_type" id="ref-for-mix_target_layout_type①">mix_target_layout_type</a> = 0, the IA parser should select the mix presentation with the closest specified layout to the physical layout. The renderer specified in rendering_config() shall first render the layout specified by mix_target_layout() and then apply up or down-mixing appropriately. Sections <a href="#iacgeneration-scalablechannelaudio-downmixmechanism">§ 10.2.2 Down-mix Mechanism</a> and <a href="#processing-downmixmatrix">§ 9.5 Down-mix Matrix</a> provide example dynamic and static down-mixing matrices for some common layouts that may be used.</p>
+     <p>If there is no mix presentation with <a data-link-type="dfn" href="#mix_target_layout_type" id="ref-for-mix_target_layout_type①">mix_target_layout_type</a> = 0, the IA parser should select the mix presentation with the closest specified layout to the physical layout. The renderer specified in rendering_config() shall first render the layout specified by mix_target_layout() and then apply up or down-mixing appropriately. Sections <a href="#iacgeneration-scalablechannelaudio-downmixmechanism">§ 10.2.2 Down-mix Mechanism</a> and <a href="#processing-downmixmatrix">§ 9.6 Down-mix Matrix</a> provide example dynamic and static down-mixing matrices for some common layouts that may be used.</p>
    </ol>
    <p><dfn class="css" data-dfn-for="mix_presentation_obu()" data-dfn-type="value" data-noexport id="valdef-mix_presentation_obu-num_audio_elements">num_audio_elements<a class="self-link" href="#valdef-mix_presentation_obu-num_audio_elements"></a></dfn> shall specify the number of audio elements that are used in this mix presentation to generate the final output audio signal for playback.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="audio_element_friendly_label">audio_element_friendly_label<a class="self-link" href="#audio_element_friendly_label"></a></dfn> shall specify a human-friendly label to describe the referenced audio element.</p>
@@ -2714,17 +2715,21 @@ class codec_config() {
        <p>When <a data-link-type="dfn" href="#csi" id="ref-for-csi④">CSI</a> = 0, the summation of all <a data-link-type="dfn" href="#si" id="ref-for-si">SI</a>s in this parameter block shall be equal to <a data-link-type="dfn" href="#d" id="ref-for-d③">D</a>.</p>
      </ul>
    </ul>
-   <p><dfn data-dfn-type="dfn" data-noexport id="animation_type">animation_type<a class="self-link" href="#animation_type"></a></dfn> shall specify the how the parameter values in this parameter block shall be animated.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="animation_type">animation_type</dfn> specifies the type of animation applied to the parameter values in this parameter block.</p>
 <pre class="def">animation_type : Animation Type
        0       : STEP
-       1       : BEZIER
+       1       : LINEAR
+       2       : BEZIER
 </pre>
-   <p>In the case where animation_type is equal to BEZIER, parameters for the linear and quadratic Bezier curves may be defined in this version of the specification.</p>
-   <p>Classes that take animation_type as an input argument shall use the <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="animatedparameterdata">AnimatedParameterData()</dfn> function template.</p>
+   <p>Classes that take <a data-link-type="dfn" href="#animation_type" id="ref-for-animation_type">animation_type</a> as an input argument must use the <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="animatedparameterdata">AnimatedParameterData()</dfn> function template. The method of applying the animation is described in <a href="#processing-animated-params">§ 9.4 Animated Parameters</a>.</p>
 <pre>template &lt;class T>
 class AnimatedParameterData(animation_type) {
   if (animation_type == STEP) {
     T start_point_value;
+  }
+  if (animation_type == LINEAR) {
+    T start_point_value;
+    T end_point_value;
   }
   if (animation_type == BEZIER) {
     T start_point_value;
@@ -2734,10 +2739,10 @@ class AnimatedParameterData(animation_type) {
   }
 }
 </pre>
-   <p><dfn data-dfn-type="dfn" data-noexport id="start_point_value">start_point_value<a class="self-link" href="#start_point_value"></a></dfn> shall specify the parameter value that is applied at the start of the segment.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="end_point_value">end_point_value<a class="self-link" href="#end_point_value"></a></dfn> shall specify the parameter value that is applied at the end of the segment.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="control_point_value">control_point_value<a class="self-link" href="#control_point_value"></a></dfn> shall specify the parameter value of the middle control point of a quadratic Bezier curve, i.e. its y-axis value. If this animation implements a linear Bezier curve, control_point_value shall be ignored by the IA parser.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="control_point_relative_time">control_point_relative_time<a class="self-link" href="#control_point_relative_time"></a></dfn> shall specify the time of the middle control point of a quadratic Bezier curve, i.e. its x-axis value. This value is expressed as a fraction of the parameter segment interval with valid values in the range of 0 and 1, inclusively. A value equal to 0 or 1 shall indicate that this animation implements a linear Bezier curve, in which case control_point_value shall be ignored by the IA parser. It is stored as an 8-bit, unsigned, fixed-point value with 8 fractional bits (i.e. Q0.8 in [Q-Format]).</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="start_point_value">start_point_value</dfn> shall specify the parameter value that is applied at the start of the segment.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="end_point_value">end_point_value</dfn> shall specify the parameter value that is applied at the end of the segment.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="control_point_value">control_point_value<a class="self-link" href="#control_point_value"></a></dfn> shall specify the parameter value of the middle control point of a quadratic Bezier curve, i.e. its y-axis value.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="control_point_relative_time">control_point_relative_time<a class="self-link" href="#control_point_relative_time"></a></dfn> shall specify the time of the middle control point of a quadratic Bezier curve, i.e. its x-axis value. This value is expressed as a fraction of the parameter segment interval with valid values in the range of 0 and 1, inclusively. It is stored as an 8-bit, unsigned, fixed-point value with 8 fractional bits (i.e. Q0.8 in [Q-Format]).</p>
    <h5 class="heading settled" data-level="4.1.9.1" id="parameter-definition"><span class="secno">4.1.9.1. </span><span class="content">Parameter Definition Syntax and Semantics</span><a class="self-link" href="#parameter-definition"></a></h5>
    <p>Parameter definition classes shall inherit from the abstract <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="paramdefinition">ParamDefinition()</dfn> class. They may optionally further provide default parameter values, which are applied when there are no parameter blocks available.</p>
    <p><b>Syntax</b></p>
@@ -2860,7 +2865,7 @@ class channel_audio_layer_config(i) {
     <li data-md>
      <p>The IA decoder should first attempt to select the channel audio whose loudspeaker layout matches the physical playback layout.</p>
     <li data-md>
-     <p>If there is no match, the IA decoder should select the channel audio with the closest specified loudspeaker layout to the physical layout and then apply up or down-mixing appropriately, after decoding and reconstruction of the channel audio. <a href="#iacgeneration-scalablechannelaudio-downmixmechanism">§ 10.2.2 Down-mix Mechanism</a> and <a href="#processing-downmixmatrix">§ 9.5 Down-mix Matrix</a> provide examples of dynamic and static down-mixing matrices for some common layouts that may be used.</p>
+     <p>If there is no match, the IA decoder should select the channel audio with the closest specified loudspeaker layout to the physical layout and then apply up or down-mixing appropriately, after decoding and reconstruction of the channel audio. <a href="#iacgeneration-scalablechannelaudio-downmixmechanism">§ 10.2.2 Down-mix Mechanism</a> and <a href="#processing-downmixmatrix">§ 9.6 Down-mix Matrix</a> provide examples of dynamic and static down-mixing matrices for some common layouts that may be used.</p>
    </ul>
    <p><b>Semantics</b></p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_layers">num_layers</dfn> shall indicate the number of ChannelGroups for scalable channel audio. It shall not be set to zero and its maximum number shall be limited to 6.</p>
@@ -4109,7 +4114,7 @@ Ltf = Ltf3 - w(k) x (L2 - 0.707 x C - L5) and Rtf = Rtf3 - w(k) x (R2 - 0.707 x 
    <h4 class="heading settled" data-level="9.3.2" id="processing-mixpresentation-mixing"><span class="secno">9.3.2. </span><span class="content">Mixing for Audio Elements</span><a class="self-link" href="#processing-mixpresentation-mixing"></a></h4>
    <p>This section provide a guideline by the element_mix_config() which is specified in mix presentation OBU.</p>
    <p>When the output channel audio of scene-based audio element or channel-based audio element does not match with the loudspeaker layout which is indicated by mix_target_layout() in mix presentation OBU.</p>
-   <p>Down-mixing matrics, which are specified in <a href="#processing-downmixmatrix">§ 9.5 Down-mix Matrix</a>, are recommended for down-mixing of the output channel audio.</p>
+   <p>Down-mixing matrics, which are specified in <a href="#processing-downmixmatrix">§ 9.6 Down-mix Matrix</a>, are recommended for down-mixing of the output channel audio.</p>
    <p>When multiple audio elements are mixed into one channel audio:</p>
    <ul>
     <li data-md>
@@ -4123,11 +4128,30 @@ Ltf = Ltf3 - w(k) x (L2 - 0.707 x C - L5) and Rtf = Rtf3 - w(k) x (R2 - 0.707 x 
    </ul>
    <p>After relevant processing, multiple audio elements are mixed into one channel audio according to the target loudspeaker layout with the target sampling rate by considering the synchronization in audio sample by audio sample among them.</p>
    <p>//To Do: Fill in the text based on element_mix_config()</p>
-   <h3 class="heading settled" data-level="9.4" id="processing-post"><span class="secno">9.4. </span><span class="content">Post Processing</span><a class="self-link" href="#processing-post"></a></h3>
-   <h4 class="heading settled" data-level="9.4.1" id="processing-post-loudness"><span class="secno">9.4.1. </span><span class="content">Loudness Normalization</span><a class="self-link" href="#processing-post-loudness"></a></h4>
+   <h3 class="heading settled" data-level="9.4" id="processing-animated-params"><span class="secno">9.4. </span><span class="content">Animated Parameters</span><a class="self-link" href="#processing-animated-params"></a></h3>
+   <p>This section describes how a set of parameters is animated over a segment in a parameter block, using the information provided in <a data-link-type="dfn" href="#animatedparameterdata" id="ref-for-animatedparameterdata①">AnimatedParameterData()</a>.</p>
+   <p>Let P0, P1 and P2 be 2D coordinates defined as</p>
+<pre>P0 = (t_start, start_point_value),
+P1 = (t_control, control_point_value),
+P2 = (t_end, end_point_value),
+</pre>
+   <p>where t_start is the segment start time, t_end is the segment end time and t_control is the control point time given by</p>
+<pre>t_control = t_start + (t_end - t_start) * control_point_relative_time.
+</pre>
+   <p>If <a data-link-type="dfn" href="#animation_type" id="ref-for-animation_type①">animation_type</a> is equal to STEP, the parameter value provided by <a data-link-type="dfn" href="#start_point_value" id="ref-for-start_point_value">start_point_value</a> should be applied immediately to all samples of the segment.</p>
+   <p>If <a data-link-type="dfn" href="#animation_type" id="ref-for-animation_type②">animation_type</a> is equal to LINEAR, the parameter value is linearly interpolated between <a data-link-type="dfn" href="#start_point_value" id="ref-for-start_point_value①">start_point_value</a> and <a data-link-type="dfn" href="#end_point_value" id="ref-for-end_point_value">end_point_value</a> as follows:</p>
+<pre>B_linear(a) = (1 - a) * P0 + a * P2,
+0 &lt;= a &lt;= 1.
+</pre>
+   <p>If <a data-link-type="dfn" href="#animation_type" id="ref-for-animation_type③">animation_type</a> is equal to BEZIER, the parameter value is interpolated following a quadratic Bezier curve between <a data-link-type="dfn" href="#start_point_value" id="ref-for-start_point_value②">start_point_value</a> and <a data-link-type="dfn" href="#end_point_value" id="ref-for-end_point_value①">end_point_value</a> as follows:</p>
+<pre>B_quad(a) = (1 - a)^2 * P0 + 2 * (1 - a) * a * P1 + a^2 * P2,
+0 &lt;= a &lt;= 1.
+</pre>
+   <h3 class="heading settled" data-level="9.5" id="processing-post"><span class="secno">9.5. </span><span class="content">Post Processing</span><a class="self-link" href="#processing-post"></a></h3>
+   <h4 class="heading settled" data-level="9.5.1" id="processing-post-loudness"><span class="secno">9.5.1. </span><span class="content">Loudness Normalization</span><a class="self-link" href="#processing-post-loudness"></a></h4>
    <p>Loudness normalization is done by adjusting a loudness level to -24 LKFS based on the loudness value of the target channel layout (i.e. CL #i) which is signaled in <a data-link-type="dfn" href="#channel_audio_layer_config" id="ref-for-channel_audio_layer_config①">Channel_Audio_Layer_Config()</a> or the loudness value in mix presentation OBU.</p>
-   <p>Real implementations for <a href="#processing-post-loudness">§ 9.4.1 Loudness Normalization</a>, <a href="#processing-post-drc">§ 9.4.2 DRC Control</a> and <a href="#processing-post-limiter">§ 9.4.3 Limiter</a> are soly dependent on implementers (i.e., out of scope of this specification) unless mix presentation OBU provide algorithms for those. This specification only recommends the principles for the former.</p>
-   <h4 class="heading settled" data-level="9.4.2" id="processing-post-drc"><span class="secno">9.4.2. </span><span class="content">DRC Control</span><a class="self-link" href="#processing-post-drc"></a></h4>
+   <p>Real implementations for <a href="#processing-post-loudness">§ 9.5.1 Loudness Normalization</a>, <a href="#processing-post-drc">§ 9.5.2 DRC Control</a> and <a href="#processing-post-limiter">§ 9.5.3 Limiter</a> are soly dependent on implementers (i.e., out of scope of this specification) unless mix presentation OBU provide algorithms for those. This specification only recommends the principles for the former.</p>
+   <h4 class="heading settled" data-level="9.5.2" id="processing-post-drc"><span class="secno">9.5.2. </span><span class="content">DRC Control</span><a class="self-link" href="#processing-post-drc"></a></h4>
    <p>In this specification, DRC control can be guided by a pre-defined DRC or by the algorithm specified in mix presentation OBU.</p>
    <p>For the pre-defined DRC, it is assumed an input loudness of -24 LKFS and targets an output loudness of -16 LKFS and DRC control module applies the pre-defined DRC compression by assuming a target loudness is adjusted to -16 LKFS as follows:</p>
    <ul>
@@ -4187,7 +4211,7 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
   X   : Input sample value in dBFS
   Y   : Output sample value in dBFS
 </pre>
-   <h4 class="heading settled" data-level="9.4.3" id="processing-post-limiter"><span class="secno">9.4.3. </span><span class="content">Limiter</span><a class="self-link" href="#processing-post-limiter"></a></h4>
+   <h4 class="heading settled" data-level="9.5.3" id="processing-post-limiter"><span class="secno">9.5.3. </span><span class="content">Limiter</span><a class="self-link" href="#processing-post-limiter"></a></h4>
    <p>This module limits the true peak of input signal at -1dB. The definition of thr true peak is base on <a data-link-type="biblio" href="#biblio-itu1770-4" title="Algorithms to measure audio programme loudness and true-peak audio level">[ITU1770-4]</a>.</p>
    <p>Below is a recommended loudness normalization and DRC control principle according to application.</p>
    <ul>
@@ -4202,8 +4226,8 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
 .AV application: Sound devices with external speakers such as Soundbar, AV receiver, HiFi speaker etc..
 .TV application: Television with built-in speakers such as LCD/OLED slim TV.
 .Mobile application: Handheld devices with built-in speakers such as smartphone, tablet etc..</p>
-   <h3 class="heading settled" data-level="9.5" id="processing-downmixmatrix"><span class="secno">9.5. </span><span class="content">Down-mix Matrix</span><a class="self-link" href="#processing-downmixmatrix"></a></h3>
-   <h4 class="heading settled" data-level="9.5.1" id="processing-downmixmatrix-static"><span class="secno">9.5.1. </span><span class="content">Static Down-mix Matrix</span><a class="self-link" href="#processing-downmixmatrix-static"></a></h4>
+   <h3 class="heading settled" data-level="9.6" id="processing-downmixmatrix"><span class="secno">9.6. </span><span class="content">Down-mix Matrix</span><a class="self-link" href="#processing-downmixmatrix"></a></h3>
+   <h4 class="heading settled" data-level="9.6.1" id="processing-downmixmatrix-static"><span class="secno">9.6.1. </span><span class="content">Static Down-mix Matrix</span><a class="self-link" href="#processing-downmixmatrix-static"></a></h4>
    <p>This section recommends static down-mix matrices.</p>
    <p>IAC players need to support any valid channel layout, even if the number of channels does not match the physically connected audio hardware. Players need to perform channel mixing to increase or reduce the number of channels as needed.</p>
    <p>Implementations can use the matrices below to implement down-mixing from the output channel audio, which are known to give acceptable results for stereo, 5.1ch, 7.1ch and 3.1.2ch.</p>
@@ -4254,8 +4278,8 @@ D_T(i): Threshold value in dBFS for Seg(i) after DRC compression, where D_T(0) =
    <center>
     <figcaption>3.1.2ch Down-mix matrix for 7.1.4ch</figcaption>
    </center>
-   <p>Where, p1 = 0.707 and p2 = 0.3535. Implementations may use limiter defined in <a href="#processing-post-limiter">§ 9.4.3 Limiter</a> to preserve energy of audio signals instead of normalization factors.</p>
-   <h4 class="heading settled" data-level="9.5.2" id="processing-downmixmatrix-dynamic"><span class="secno">9.5.2. </span><span class="content">Dynamic Down-mix Matrix {#processing-downmixmatrix-dynamic}</span><a class="self-link" href="#processing-downmixmatrix-dynamic"></a></h4>
+   <p>Where, p1 = 0.707 and p2 = 0.3535. Implementations may use limiter defined in <a href="#processing-post-limiter">§ 9.5.3 Limiter</a> to preserve energy of audio signals instead of normalization factors.</p>
+   <h4 class="heading settled" data-level="9.6.2" id="processing-downmixmatrix-dynamic"><span class="secno">9.6.2. </span><span class="content">Dynamic Down-mix Matrix {#processing-downmixmatrix-dynamic}</span><a class="self-link" href="#processing-downmixmatrix-dynamic"></a></h4>
    <p>This section recommends dynamic down-mixing matrics.</p>
    <p>The dynamix down-mixing matrics shall comply with the down-mixing mechanisam which is specified in <a href="#iacgeneration-scalablechannelaudio-downmixmechanism">§ 10.2.2 Down-mix Mechanism</a>.</p>
    <h2 class="heading settled" data-level="10" id="iacgeneration"><span class="secno">10. </span><span class="content">IAC Generation Process</span><a class="self-link" href="#iacgeneration"></a></h2>
@@ -6106,10 +6130,30 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-si">4.1.9. Parameter Block OBU Syntax and Semantics</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="animation_type">
+   <b><a href="#animation_type">#animation_type</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-animation_type">4.1.9. Parameter Block OBU Syntax and Semantics</a>
+    <li><a href="#ref-for-animation_type①">9.4. Animated Parameters</a> <a href="#ref-for-animation_type②">(2)</a> <a href="#ref-for-animation_type③">(3)</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="animatedparameterdata">
    <b><a href="#animatedparameterdata">#animatedparameterdata</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-animatedparameterdata">4.1.9. Parameter Block OBU Syntax and Semantics</a>
+    <li><a href="#ref-for-animatedparameterdata①">9.4. Animated Parameters</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="start_point_value">
+   <b><a href="#start_point_value">#start_point_value</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-start_point_value">9.4. Animated Parameters</a> <a href="#ref-for-start_point_value①">(2)</a> <a href="#ref-for-start_point_value②">(3)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="end_point_value">
+   <b><a href="#end_point_value">#end_point_value</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-end_point_value">9.4. Animated Parameters</a> <a href="#ref-for-end_point_value①">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="paramdefinition">
@@ -6163,7 +6207,7 @@ Recon_Gain for D_Rtb4:
    <b><a href="#channel_audio_layer_config">#channel_audio_layer_config</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-channel_audio_layer_config">9.2.1. Gain</a>
-    <li><a href="#ref-for-channel_audio_layer_config①">9.4.1. Loudness Normalization</a>
+    <li><a href="#ref-for-channel_audio_layer_config①">9.5.1. Loudness Normalization</a>
     <li><a href="#ref-for-channel_audio_layer_config②">10.2. Scalable Channel Audio Encoding</a>
    </ul>
   </aside>
