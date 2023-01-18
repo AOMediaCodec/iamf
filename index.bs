@@ -768,8 +768,6 @@ If one sub-mix of Mix Presentation OBU includes only one single scalable channel
 
 The highest [=loudness_layout=] specified in one sub-mix is the layout which was used for authoring the sub-mix.
 
-ISSUE: Loudness_info in scalable_channel_audio_layer is removed instead.
-
 #### Mix Presentation Annotations Syntax and Semantics #### {#obu-mixpresentation-annotation}
 
 <b>Syntax</b>
@@ -2356,40 +2354,40 @@ An IA sequence may contain more than one mix presentations. The IA parser should
 
 ### Rendering an Audio Element ### {#processing-mixpresentation-rendering}
 
+This specification supports the rendering of either a multichannel or ambisonics audio element to either a target loudspeaker layout or a binaural output. The choice of the renderer to use when processing a mix presentation depends on the input audio element and the playback layout, as defined below and summarized in the following table.
+
 After selecting a Mix Presentation, an audio element should be rendered as follows:
-- If the selected Mix Presentation OBU includes only one single channel-based audio element, do M2M-Rendering (M2M-Rendering: Multichannel to Multichannel Rendering).
-- If the selected Mix Presentation OBU includes only one single scene-based audio element, do A2M-Rendering (A2M-Rendering: Ambisonics to Multichannel Rendering).
-- If the selected Mix Presentation OBU includes multiple audio elements.
-	- If the audio element is channel-based, then it should follow M2M-Rendering.
-	- If the audio element is scene-based, then it should follow A2M-Rendering.
+- If the audio element is a channel-based element, apply M2M-Rendering (M2M-Rendering: Multichannel to Multichannel Rendering).
+- If the audio element is a scene-based audio element, apply A2M-Rendering (A2M-Rendering: Ambisonics to Multichannel Rendering).
 	
 For M2M-Rendering,
-- The input layout of the IA renderer
-	- If num_layer = 1, use the [=loudspeaker_layout=] of the audio element.
-	- Else, use the layout that matches the playback layout, or is the next highest available layout.
-- The IA render
+- The input layout of the IA renderer is set as follows:
+	- If [=num_layers=] = 1, use the [=loudspeaker_layout=] of the audio element.
+	- Else, if there is a [=loudness_layout=] that matches the playback layout, use it.
+	- Else, use the next highest available layout from all available [=loudspeaker_layout=] and [=loudness_layout=].
+- The output layout of the IA renderer is set to the playback layout.
+- The IA renderer used is selected according to the following rules:
 	- If the playback layout matches a [=loudspeaker_layout=] which can be generated from the highest loudspeaker layout of the audio element according to [[#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule]], use demixing_info_parameter_data().
 		- If demixing_info_parameter_data() is not delivered, use EAR Direct Speakers renderer ([[!ITU2127-0]]).
 	- Else if the playback layout complies with loudspeaker layouts supported by [[!ITU2051-3]], use EAR Direct Speakers renderer ([[!ITU2127-0]]).
 	- Else, use implementation-specific renderer.
-- The output of the IA render: the playback layout
  
 For A2M-Rendering,
-- The input layout of the IA renderer: Ambisonics
-- The IA render
+- The input layout of the IA renderer is set to Ambisonics.
+- The output layout of the IA renderer is set to the playback layout.
+- The IA renderer used is selected according to the following rules:
 	- If the playback layout complies with loudspeaker layouts supported by [[!ITU2051-3]], use EAR HOA renderer ([[!ITU2127-0]]).
 	- Else, use implementation-specific renderer.
-		- If there is no implementation-specific Ambisonics renderer, use libear to render to the next highest BS2051 layout compared to the playback layout, and then downmix using implementation-specific renderer.
-- The output of the IA render: the playback layout
+		- If there is no implementation-specific Ambisonics renderer, use the EAR HOA renderer to render to the next highest [[!ITU2051-3]] layout compared to the playback layout, and then downmix using implementation-specific renderer.
 
-This specification supports the rendering of either a multichannel or ambisonics audio element to either a target loudspeaker layout or a binaural output. The choice of the renderer to use when processing a mix presentation depends on the input audio element and the playback layout, as defined in the table below.
+For a given x.y.z layout, the next highest layout x'.y'.z' means that x', y' and z' are greater than or equal to x, y and z, respectively. 
 
 <table class="def">
 <tr>
   <th>audio_element_type</th><th>Playback layout</th><th>Renderer to use</th>
 </tr>
 <tr>
-  <td>CHANNEL_BASED</td><td>Loudspeaker layouts supported by [[!ITU2051-3]]</td><td>EAR Direct Speakers renderer ([[!ITU2127-0]]).</td>
+  <td>CHANNEL_BASED</td><td>Loudspeaker layouts supported by [[!ITU2051-3]]</td><td>If there is a playback layout that can be generated from the input layout according to [[#iacgeneration-scalablechannelaudio-channellayoutgenerationrule]], use the provided demixing_info_parameter_data().<br><br> If demixing_info_parameter_data() is not provided, use the EAR Direct Speakers renderer ([[!ITU2127-0]]).</td>
 </tr>
 <tr>
   <td>CHANNEL_BASED</td><td>Loudspeaker layouts not supported by [[!ITU2051-3]]</td><td>Implementation-specific loudspeaker renderer.</td>
@@ -2398,7 +2396,7 @@ This specification supports the rendering of either a multichannel or ambisonics
   <td>SCENE_BASED</td><td>Loudspeaker layouts supported by [[!ITU2051-3]]</td><td>EAR HOA renderer ([[!ITU2127-0]]).</td>
 </tr>
 <tr>
-  <td>SCENE_BASED</td><td>Loudspeaker layouts not supported by [[!ITU2051-3]]</td><td>Implementation-specific Ambisonics renderer.<br><br>If an implementation-specific Ambisonics renderer is not available, the EAR HOA renderer may be used to render the Ambisonics audio element to the [[!ITU2051-3]] layout than the output loudspeaker layout, and then downmixed using the implementation-specific loudspeaker renderer.</td>
+  <td>SCENE_BASED</td><td>Loudspeaker layouts not supported by [[!ITU2051-3]]</td><td>Implementation-specific Ambisonics renderer.<br><br>If an implementation-specific Ambisonics renderer is not available, the EAR HOA renderer may be used to render the Ambisonics audio element to the next highest [[!ITU2051-3]] layout compared to the output loudspeaker layout, and then downmixed using the implementation-specific loudspeaker renderer.</td>
 </tr>
 <tr>
   <td>CHANNEL_BASED</td><td>Binaural</td><td>// TODO</td>
@@ -2440,7 +2438,7 @@ Each audio element is processed individually before mixing as follows:
 1. Render to the playback layout.
 2. If all audio elements do not have a common sample rate, re-sample to 48 kHz.
 3. If all audio elements do not have a common bit-depth, convert to a common bit-depth. This specification recommends using 16 bits.
-4. If [=loudness_layout=] matches with the playback layout, apply any per-element processing according to [=element_mix_config()=]. Otherwise, apply any per-element processing according to implementation-specific element_mix.
+4. If [=loudness_layout=] matches with the playback layout, apply any per-element processing according to [=element_mix_config()=].
 
 The rendered and processed audio elements are then summed, and then apply [=output_mix_config()=] to generate one sub-mixed audio signal. If there are more than one sub-mixes, the output of each sub-mix is further summed to generate the final mixed audio signal.
 
