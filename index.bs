@@ -2916,3 +2916,5 @@ An IA sequence may contain audio elements which are short-lived, where the audio
 1. The first method uses a new set of Descriptor OBUs. The first set of Descriptor OBUs includes an Audio Element OBU for each of A and B, and a Mix Presentation OBU that references both A and B. When the audio element B has ended, a second set of Descriptor OBUs is placed in the IA stream, which includes an Audio Element for only A, and a Mix Presentation OBU that references only A.
 
 2. The second method uses Sync OBUs, without requiring a new Mix Presentation OBU. The Mix Presentation OBU contains an Audio Element OBU for each of A and B, and a Mix Presentation OBU that references both A and B. The first Sync OBU placed immediately after the Mix Presentation OBU includes both A and B. When the audio element B has ended, a new Sync OBU is placed in the IA stream which includes only A, indicating that B is no longer present in the timeline that comes immediately afterwards.
+
+In both cases, relevant parameter blocks must be updated in a way to match the timing of the short-lived audio elements if necessary to ensure that the processed audio output is correct.
