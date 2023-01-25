@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version d6f2d6445, updated Tue Jan 17 11:25:25 2023 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="ac4366832f152ff64aaa38cdf05b6196e5e12b14" name="document-revision">
+  <meta content="e79fb3799564781b2c3eddec441a7be4041bcd3d" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2195,6 +2195,7 @@ dfn > a.self-link::before      { content: "#"; }
       <li><a href="#a-gap-between-two-audio-substreams"><span class="secno">12.2</span> <span class="content">A gap between two audio substreams</span></a>
       <li><a href="#a-gap-due-to-packet-loss"><span class="secno">12.3</span> <span class="content">A gap due to packet loss</span></a>
      </ol>
+    <li><a href="#annex-b-short-lived-audio"><span class="secno">13</span> <span class="content">Annex B: Short-lived Audio</span></a>
     <li><a href="#conformance"><span class="secno"></span> <span class="content"> Conformance</span></a>
     <li>
      <a href="#index"><span class="secno"></span> <span class="content">Index</span></a>
@@ -3792,7 +3793,6 @@ class mix_gain_parameter_data(animation_type) {
    </ul>
    <h4 class="heading settled" data-level="6.1.3" id="standalone-obu-sequence-refreshes"><span class="secno">6.1.3. </span><span class="content">Refreshing Descriptor OBUs</span><a class="self-link" href="#standalone-obu-sequence-refreshes"></a></h4>
    <p>The above describes the full sequence of OBUs for a given set of descriptor OBUs and their associated data OBUs. If the IAMF configuration changes, a new set of descriptor OBUs is required. In that case, a new sequence of the complete set of descriptor OBUs, a Sync OBU and their corresponding data OBUs shall follow, in the same order as described above.</p>
-   <p class="note" role="note"><span class="marker">NOTE:</span> In case of that IA sequence contains two audio elements which one of them is a short-lived contents, the number of audio elements is changed (i.e. one to two or two to one) depending on whether the short-lived contents is present or not. So, a new set of descriptor OBUs presents to indicate the changes. In this case, the new set of descriptor OBUs includes a new Mix Presentation OBU to provide the proper mixing according to the audio element(s) to be mixed.</p>
    <p>The descriptor OBUs may additionally be repeated redundantly and as frequently as necessary. In this case, the "obu_redundant_copy" field in the OBU header of each of the descriptor OBUs shall be set to 1.</p>
    <p>If there is set of descriptor OBUs placed mid-stream, there may be parameter blocks that came before them which are still valid and applicable for the duration after the descriptor OBUs. In this case, these parameter blocks must be redundantly copied and placed after the first Sync OBU that follows the descriptor OBUs. This ensures that any receiver joining mid-stream and encountering a set of descriptor OBU is guaranteed to be able to receive the complete set of metadata that is applicable to all audio frames that come after.</p>
    <h3 class="heading settled" data-level="6.2" id="standalone-synchronizing-data-obus"><span class="secno">6.2. </span><span class="content">Synchronizing Data OBUs</span><a class="self-link" href="#standalone-synchronizing-data-obus"></a></h3>
@@ -5188,6 +5188,15 @@ Recon_Gain for D_Rtb4:
    <h3 class="heading settled" data-level="12.3" id="a-gap-due-to-packet-loss"><span class="secno">12.3. </span><span class="content">A gap due to packet loss</span><a class="self-link" href="#a-gap-due-to-packet-loss"></a></h3>
    <p>In the case where a gap is not signalled by the Sync OBUs, any unexpected absence of audio frames shall be interpreted as packet loss. The IAMF parser is unable to guarantee the correctness of following OBUs received until the next set of Descriptor OBUs.</p>
    <p>In this version of the specification, gaps in the audio substreams are not supported so if a gap is encountered, it can always be interpreted as packet loss.</p>
+   <h2 class="heading settled" data-level="13" id="annex-b-short-lived-audio"><span class="secno">13. </span><span class="content">Annex B: Short-lived Audio</span><a class="self-link" href="#annex-b-short-lived-audio"></a></h2>
+   <p>An IA sequence may contain audio elements which are short-lived, where the audio element may not exist for the entire timeline of the IA sequence. There are two methods for signalling this. Consider the example with two audio elements, A and B, present at the start of the IA sequence, where B is a short-lived audio element with a length shorter than A.</p>
+   <ol>
+    <li data-md>
+     <p>The first method uses a new set of Descriptor OBUs. The first set of Descriptor OBUs includes an Audio Element OBU for each of A and B, and a Mix Presentation OBU that references both A and B. When the audio element B has ended, a second set of Descriptor OBUs is placed in the IA stream, which includes an Audio Element for only A, and a Mix Presentation OBU that references only A.</p>
+    <li data-md>
+     <p>The second method uses Sync OBUs, without requiring a new Mix Presentation OBU. The Mix Presentation OBU contains an Audio Element OBU for each of A and B, and a Mix Presentation OBU that references both A and B. The first Sync OBU placed immediately after the Mix Presentation OBU includes both A and B. When the audio element B has ended, a new Sync OBU is placed in the IA stream which includes only A, indicating that B is no longer present in the timeline that comes immediately afterwards.</p>
+   </ol>
+   <p>In both cases, relevant parameter blocks must be updated in a way to match the timing of the short-lived audio elements if necessary to ensure that the processed audio output is correct.</p>
   </main>
   <div data-fill-with="conformance">
    <h2 class="no-ref no-num heading settled" id="conformance"><span class="content"> Conformance</span><a class="self-link" href="#conformance"></a></h2>
