@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version d6f2d6445, updated Tue Jan 17 11:25:25 2023 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="e79fb3799564781b2c3eddec441a7be4041bcd3d" name="document-revision">
+  <meta content="2f2d753e462293ff5e0e09a4435a33799bed3697" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2521,11 +2521,7 @@ greater is incompatible.</p>
    <p>This section specifies the OBU payload of OBU_IA_Codec_Config.</p>
    <p><b>Syntax</b></p>
 <pre>class codec_config_obu() {
-  leb128() codec_config_id;
-  leb128() num_audio_elements;
-  for (i = 0; i &lt; num_audio_elements; i++) {
-    leb128() audio_element_id;
-  }
+  leb128() codec_config_id;  
   codec_config();
 
 }
@@ -2539,9 +2535,7 @@ class codec_config() {
 }
 </pre>
    <p><b>Semantics</b></p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="codec_config_id">codec_config_id<a class="self-link" href="#codec_config_id"></a></dfn> shall indicate a unique ID in an IA sequence for a given codec config.</p>
-   <p><dfn class="css" data-dfn-for="codec_config_obu()" data-dfn-type="value" data-noexport id="valdef-codec_config_obu-num_audio_elements">num_audio_elements<a class="self-link" href="#valdef-codec_config_obu-num_audio_elements"></a></dfn> shall specify the number of audio elements that refer to this codec config.</p>
-   <p><dfn class="css" data-dfn-for="codec_config_obu()" data-dfn-type="value" data-noexport id="valdef-codec_config_obu-audio_element_id">audio_element_id<a class="self-link" href="#valdef-codec_config_obu-audio_element_id"></a></dfn> shall specify the unique ID associated with the specific audio element that refers to this codec config.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="codec_config_id">codec_config_id</dfn> shall indicate a unique ID in an IA sequence for a given codec config.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="codec_id">codec_id</dfn> shall be a ‘four-character code’ (4CC) to identify the codec used to generate the audio substreams. It shall be <a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-⑥">opus</a> for IAMF-OPUS, <a class="property css" data-link-type="property" href="https://www.iso.org/standard/79110.html#" id="termref-for-⑦">mp4a</a> for IAMF-AAC-LC, <a class="property css" data-link-type="property" href="https://xiph.org/flac/format.html" id="termref-for-⑧">fLaC</a> for IAMF-FLAC and <a class="property css" data-link-type="property">lpcm</a> for IAMF-LPCM.</p>
    <p>For ISOBMFF encapsulation, it shall be the same as the <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨">boxtype</a> of its AudioSampleEntry if exist.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="num_samples_per_frame">num_samples_per_frame<a class="self-link" href="#num_samples_per_frame"></a></dfn> shall indicate the frame length, in samples, of the raw coded audio provided in by audio_frame_obu().</p>
@@ -2568,6 +2562,8 @@ class codec_config() {
   leb128() audio_element_id;
   unsigned int (3) audio_element_type;
   unsigned int (5) reserved;
+  
+  leb128() codec_config_id;  
 
   leb128() num_substreams;
   for (i = 0; i &lt; num_substreams; i++) {
@@ -2600,15 +2596,16 @@ class codec_config() {
 
 </pre>
    <p><b>Semantics</b></p>
-   <p><dfn class="css" data-dfn-for="audio_element_obu()" data-dfn-type="value" data-noexport id="valdef-audio_element_obu-audio_element_id">audio_element_id<a class="self-link" href="#valdef-audio_element_obu-audio_element_id"></a></dfn> shall indicate a unique ID in an IA sequence for a given audio element. A Codec Config OBU that refers to that audio element shall use the same value for its <a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id">audio_element_id</a> field.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_element_id">audio_element_id</dfn> shall indicate a unique ID in an IA sequence for a given audio element.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_element_type">audio_element_type</dfn> shall specify the audio representation of this audio element which is constructed from one or more audio substreams.</p>
 <pre class="def">audio_element_type: The type of audio representation.
    0    : CHANNEL_BASED
    1    : SCENE_BASED
   2~7   : Reserved
 </pre>
+   <p><dfn class="css" data-dfn-for="audio_element_obu()" data-dfn-type="value" data-noexport id="valdef-audio_element_obu-codec_config_id">codec_config_id<a class="self-link" href="#valdef-audio_element_obu-codec_config_id"></a></dfn> shall indicate the unique ID for the codec config which this audio element refers to.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_substreams">num_substreams</dfn> shall specify the number of audio substreams that are used to reconstruct this audio element.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_substream_id">audio_substream_id</dfn> shall specify the unique ID associated with the audio substream that is used to reconstruct this audio element.</p>
+   <p><dfn class="css" data-dfn-for="audio_element_obu()" data-dfn-type="value" data-noexport id="valdef-audio_element_obu-audio_substream_id">audio_substream_id<a class="self-link" href="#valdef-audio_element_obu-audio_substream_id"></a></dfn> shall specify the unique ID associated with the audio substream that is used to reconstruct this audio element.</p>
    <p>Let a particular ChannelGroup’s substream be indexed as [<dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="c">c</dfn>, <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="n_c">n_c</dfn>], where</p>
    <ul>
     <li data-md>
@@ -2679,8 +2676,8 @@ class codec_config() {
    <p><dfn data-dfn-type="dfn" data-noexport id="mix_presentation_id">mix_presentation_id<a class="self-link" href="#mix_presentation_id"></a></dfn> shall indicate a unique ID in an IA sequence for a given mix presentation.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="mix_presentation_annotations">mix_presentation_annotations()<a class="self-link" href="#mix_presentation_annotations"></a></dfn> is a class that provides informational metadata that an IA parser should refer to when selecting the mix presentation to use. The metadata may also be used by the playback system to display information to the user, but is not used in the rendering or mixing process to generate the final output audio signal.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_sub_mixes">num_sub_mixes</dfn> specifies the number of sub-mixes.</p>
-   <p><dfn class="css" data-dfn-for="mix_presentation_obu()" data-dfn-type="value" data-noexport id="valdef-mix_presentation_obu-num_audio_elements">num_audio_elements<a class="self-link" href="#valdef-mix_presentation_obu-num_audio_elements"></a></dfn> shall specify the number of audio elements that are used in this mix presentation to generate the final output audio signal for playback.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_element_id">audio_element_id</dfn> shall indicate the unique ID associated with a specific audio element that is used in this mix presentation.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_audio_elements">num_audio_elements</dfn> shall specify the number of audio elements that are used in this mix presentation to generate the final output audio signal for playback.</p>
+   <p><dfn class="css" data-dfn-for="mix_presentation_obu()" data-dfn-type="value" data-noexport id="valdef-mix_presentation_obu-audio_element_id">audio_element_id<a class="self-link" href="#valdef-mix_presentation_obu-audio_element_id"></a></dfn> shall indicate the unique ID associated with a specific audio element that is used in this mix presentation.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="rendering_config">rendering_config()</dfn> is a class that provides the metadata required for rendering the referenced audio element.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="element_mix_config">element_mix_config()</dfn> is a class that provides the metadata required for applying any processing to the referenced and rendered audio element before being summed with other processed audio elements.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="output_mix_config">output_mix_config()</dfn> is a class that provides the metadata required for post-processing the mixed audio signal to generate the audio signal for playback.</p>
@@ -2691,9 +2688,9 @@ class codec_config() {
    <p>If one sub-mix of Mix Presentation OBU includes only one single scalable channel audio, then it shall comply with as follows:</p>
    <ul>
     <li data-md>
-     <p><a data-link-type="dfn" href="#num_layouts" id="ref-for-num_layouts">num_layouts</a> shall be greater than or equal to <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers">num_layers</a> specified in <a data-link-type="dfn" href="#scalable_channel_layout_config" id="ref-for-scalable_channel_layout_config">scalable_channel_layout_config()</a> of Audio Element OBU for the <a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id①">audio_element_id</a>.</p>
+     <p><a data-link-type="dfn" href="#num_layouts" id="ref-for-num_layouts">num_layouts</a> shall be greater than or equal to <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers">num_layers</a> specified in <a data-link-type="dfn" href="#scalable_channel_layout_config" id="ref-for-scalable_channel_layout_config">scalable_channel_layout_config()</a> of Audio Element OBU for the <a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id">audio_element_id</a>.</p>
     <li data-md>
-     <p>The set of <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout③">loudness_layout</a>s shall include all of <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout②">loudspeaker_layout</a>s specified in the <a data-link-type="dfn" href="#channel_audio_layer_config" id="ref-for-channel_audio_layer_config">channel_audio_layer_config()</a>s of Audio Element OBU for the <a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id②">audio_element_id</a>.</p>
+     <p>The set of <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout③">loudness_layout</a>s shall include all of <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout②">loudspeaker_layout</a>s specified in the <a data-link-type="dfn" href="#channel_audio_layer_config" id="ref-for-channel_audio_layer_config">channel_audio_layer_config()</a>s of Audio Element OBU for the <a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id①">audio_element_id</a>.</p>
    </ul>
    <p>The highest <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout④">loudness_layout</a> specified in one sub-mix is the layout which was used for authoring the sub-mix.</p>
    <h5 class="heading settled" data-level="4.1.8.1" id="obu-mixpresentation-annotation"><span class="secno">4.1.8.1. </span><span class="content">Mix Presentation Annotations Syntax and Semantics</span><a class="self-link" href="#obu-mixpresentation-annotation"></a></h5>
@@ -2776,7 +2773,7 @@ class codec_config() {
 }
 </pre>
    <p><b>Semantics</b></p>
-   <p><dfn class="css" data-dfn-for="parameter_block_obu()" data-dfn-type="value" data-noexport id="valdef-parameter_block_obu-parameter_id">parameter_id<a class="self-link" href="#valdef-parameter_block_obu-parameter_id"></a></dfn> shall indicate the unique ID that is associated with a specific parameter definition. All parameter blocks that provide data for that parameter definition shall have the same parameter_id.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="parameter_id">parameter_id</dfn> shall indicate the unique ID that is associated with a specific parameter definition. All parameter blocks that provide data for that parameter definition shall have the same parameter_id.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="duration">duration</dfn> shall specify the duration for which this parameter block is valid and applicable.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_segments">num_segments</dfn> shall specify the number of different sets of parameter values specified in this parameter block, where each set describes a different segment of the timeline, contiguously.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="constant_segment_interval">constant_segment_interval</dfn> shall specify the interval of each segment, in the case where all segments except the last segment have equal intervals. If all segments except the last segment do not have equal intervals, the value of constant_segment_interval shall be set to 0.</p>
@@ -2839,7 +2836,8 @@ class AnimatedParameterData(animation_type) {
    <p><dfn class="css" data-dfn-for="ParamDefinition()" data-dfn-type="value" data-noexport id="valdef-paramdefinition-time_base">time_base<a class="self-link" href="#valdef-paramdefinition-time_base"></a></dfn> shall specify the time base used by this parameter, expressed as seconds per tick. Time-related fields associated with this parameter, such as durations and intervals, shall be expressed in the number of ticks.</p>
    <h4 class="heading settled" data-level="4.1.10" id="obu-audioframe"><span class="secno">4.1.10. </span><span class="content">Audio Frame OBU Syntax and Semantics</span><a class="self-link" href="#obu-audioframe"></a></h4>
    <p>This section specifies OBU payloads of OBU_IA_Audio_Frame and OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21.</p>
-   <p>The first 22 audio substreams in an IA sequence may use the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21, which have predefined audio substream IDs associated with them. This avoids the need to manually specify an audio_substream_id.</p>
+   <p>The first 22 audio substreams in an IA sequence may use the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21, which have predefined audio substream IDs associated with them. This avoids the need to manually specify an <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id">audio_substream_id</a>.</p>
+   <p><a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id①">audio_substream_id</a> = 0 to <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id②">audio_substream_id</a> = 21 shall be assigned to Audio Frame OBUs with the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21, respectively.</p>
    <p><b>Syntax</b></p>
 <pre>class audio_frame_obu_with_no_id() {
   leb128() audio_substream_id;
@@ -2851,7 +2849,7 @@ class AnimatedParameterData(animation_type) {
 }
 </pre>
    <p><b>Semantics</b></p>
-   <p><dfn class="css" data-dfn-for="audio_frame_obu_with_no_id()" data-dfn-type="value" data-noexport id="valdef-audio_frame_obu_with_no_id-audio_substream_id">audio_substream_id<a class="self-link" href="#valdef-audio_frame_obu_with_no_id-audio_substream_id"></a></dfn> shall indicate a unique ID in an IA sequence for a given substream. All Audio Frame OBUs of the same substream shall have the same audio_substream_id.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_substream_id">audio_substream_id</dfn> shall indicate a unique ID in an IA sequence for a given substream. All Audio Frame OBUs of the same substream shall have the same audio_substream_id.</p>
    <p>This value must be greater or equal to 22, in order to avoid collision with the reserved IDs for the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="coded_frame_size">coded_frame_size<a class="self-link" href="#coded_frame_size"></a></dfn> is the size of <a data-link-type="dfn" href="#audio_frame" id="ref-for-audio_frame">audio_frame()</a> in bytes.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_frame">audio_frame()</dfn> is the raw coded audio data for the frame. It shall be <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6716#" id="termref-for-①①">opus packet</a> of <a data-link-type="biblio" href="#biblio-rfc6716" title="Definition of the Opus Audio Codec">[RFC6716]</a> for IAMF-OPUS, <a data-link-type="dfn" href="https://www.iso.org/standard/43345.html#" id="termref-for-①②">raw_data_block()</a> of <a data-link-type="biblio" href="#biblio-aac" title="Information technology — Generic coding of moving pictures and associated audio information — Part 7: Advanced Audio Coding (AAC)">[AAC]</a> for IAMF-AAC-LC and <a data-link-type="dfn" href="https://xiph.org/flac/format.html" id="termref-for-①③">FRAME</a> of <a data-link-type="biblio" href="#biblio-flac" title="Free Lossless Audio Codec">[FLAC]</a> for IAMF-FLAC.</p>
@@ -4383,7 +4381,7 @@ Ltf = Ltf3 - w(k) x (L2 - 0.707 x C - L5) and Rtf = Rtf3 - w(k) x (R2 - 0.707 x 
        <p>If the playback layout is binaural, i.e. headphones:</p>
        <ol>
         <li data-md>
-         <p>Select the mix with <a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id③">audio_element_id</a> whose <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout①⓪">loudspeaker_layout</a> is BINAURAL.</p>
+         <p>Select the mix with <a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id②">audio_element_id</a> whose <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout①⓪">loudspeaker_layout</a> is BINAURAL.</p>
         <li data-md>
          <p>If there is no such mix, select the mix with the highest available <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout⑤">loudness_layout</a>.</p>
        </ol>
@@ -4999,7 +4997,7 @@ Recon_Gain for D_Rtb4:
     <li data-md>
      <p><a data-link-type="dfn" href="#num_sub_mixes" id="ref-for-num_sub_mixes②">num_sub_mixes</a>: set to 1</p>
     <li data-md>
-     <p><a data-link-type="dfn">num_audio_elements</a>: set to 1</p>
+     <p><a data-link-type="dfn" href="#num_audio_elements" id="ref-for-num_audio_elements">num_audio_elements</a>: set to 1</p>
     <li data-md>
      <p><a data-link-type="dfn" href="#rendering_config" id="ref-for-rendering_config">rendering_config()</a>: set to itur_bs2127_direct_speakers_config() with no metadata (i.e all flags off)</p>
     <li data-md>
@@ -5020,7 +5018,7 @@ Recon_Gain for D_Rtb4:
     <li data-md>
      <p><a data-link-type="dfn" href="#num_sub_mixes" id="ref-for-num_sub_mixes③">num_sub_mixes</a>: set to 1</p>
     <li data-md>
-     <p><a data-link-type="dfn">num_audio_elements</a>: set to 1</p>
+     <p><a data-link-type="dfn" href="#num_audio_elements" id="ref-for-num_audio_elements①">num_audio_elements</a>: set to 1</p>
     <li data-md>
      <p><a data-link-type="dfn" href="#rendering_config" id="ref-for-rendering_config①">rendering_config()</a>: set to itur_bs2127_hos_config()</p>
     <li data-md>
@@ -5043,7 +5041,7 @@ Recon_Gain for D_Rtb4:
     <li data-md>
      <p><a data-link-type="dfn" href="#num_sub_mixes" id="ref-for-num_sub_mixes④">num_sub_mixes</a>: set to 1</p>
     <li data-md>
-     <p><a data-link-type="dfn">num_audio_elements</a>: set to N</p>
+     <p><a data-link-type="dfn" href="#num_audio_elements" id="ref-for-num_audio_elements②">num_audio_elements</a>: set to N</p>
     <li data-md>
      <p><a data-link-type="dfn" href="#rendering_config" id="ref-for-rendering_config②">rendering_config()</a> for each audio element: set to itur_bs2127_direct_speakers_config() with no metadata (i.e all flags off) if channel-based or itur_bs2127_hoa_config() if scene-based</p>
     <li data-md>
@@ -5077,24 +5075,24 @@ Recon_Gain for D_Rtb4:
      <ul>
       <li data-md>
        <p>take just one codec_id and codec_config()</p>
-      <li data-md>
-       <p>update num_audio_elements and audio_element_id</p>
-     </ul>
-    <li data-md>
-     <p>Mix Presentation OBUs: just take all of them and generate new ones which are used for mixing of multiple audio elements if needed except following:</p>
-     <ul>
-      <li data-md>
-       <p><a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id④">audio_element_id</a>s are updated to be aligned according to Codec Config OBU.</p>
      </ul>
     <li data-md>
      <p>Audio Element OBUs: just take all of them except followings:</p>
      <ul>
       <li data-md>
-       <p><a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id⑤">audio_element_id</a>s are updated to be aligned according to Mix Presentation OBUs.</p>
+       <p>codec_config_id in each Audio Element OBU is updated to indicate <a data-link-type="dfn" href="#codec_config_id" id="ref-for-codec_config_id">codec_config_id</a> specified in the taken Codec Config OBU.</p>
       <li data-md>
-       <p><a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id">audio_substream_id</a>s are updated to be unique in all of Audio Element OBUs.</p>
+       <p><a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id③">audio_element_id</a>s are updated to be unique in all of Audio Element OBUs.</p>
       <li data-md>
-       <p>{{"audio_element_obu()"/parameter_id]s are updated to be unique in all of Audio Element OBUs.</p>
+       <p><a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id③">audio_substream_id</a>s are updated to be unique in all of Audio Element OBUs.</p>
+      <li data-md>
+       <p>parameter_ids in Audio Element OBUs are updated to be unique in all of Audio Element OBUs.</p>
+     </ul>
+    <li data-md>
+     <p>Mix Presentation OBUs: just take all of them and generate new ones which are used for mixing of multiple audio elements if needed except following:</p>
+     <ul>
+      <li data-md>
+       <p>audio_element_ids in each Mix Presentation OBU are updated to indicate the <a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id④">audio_element_id</a>s specified in Audio Element OBUs.</p>
      </ul>
    </ul>
    <p>Step2: ith temporal unit is generated as follows:</p>
@@ -5103,15 +5101,15 @@ Recon_Gain for D_Rtb4:
      <p>Just take all of temporal units for ith frames from each audio element and keep the order of temporal units as the order of audio element OBUs in descriptor OBUs except following:</p>
      <ul>
       <li data-md>
-       <p><a data-link-type="dfn" href="#obu_type" id="ref-for-obu_type">obu_type</a>s are updated to be aligned according to <a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id⑥">audio_element_id</a>s specified in Audio Element OBUs.</p>
+       <p><a data-link-type="dfn" href="#obu_type" id="ref-for-obu_type">obu_type</a>s are updated to be aligned according to <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id④">audio_substream_id</a>s specified in Audio Element OBUs.</p>
       <li data-md>
-       <p>{{"parameter_block_obu()"/parameter_id]s in Parameter Block OBUs are updated to be aligned according to {{"audio_element_obu()"/parameter_id]s in Audio Element OBUs.</p>
+       <p><a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id">parameter_id</a>s in Parameter Block OBUs are updated to be aligned according to parameter_ids in Audio Element OBUs.</p>
      </ul>
     <li data-md>
      <p>Add Sync OBU in front of ith temporal unit if needed.</p>
      <ul>
       <li data-md>
-       <p>New Sync OBU is generated based on Sync OBUs of each IA sequence and updated <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id①">audio_substream_id</a>s and {{"parameter_block_obu()"/parameter_id]s.</p>
+       <p>New Sync OBU is generated based on Sync OBUs of each IA sequence and updated <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id⑤">audio_substream_id</a>s and <a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id①">parameter_id</a>s.</p>
      </ul>
     <li data-md>
      <p>It may have the immediately preceding temporal delimiter OBU for each temporal unit.</p>
@@ -5124,37 +5122,41 @@ Recon_Gain for D_Rtb4:
     <li data-md>
      <p>Magic Code OBU: get the larger version field and the larger profile version field, respectively.</p>
     <li data-md>
-     <p>Codec Config OBU: if some of multiple Codec Config OBUs are same, then merge multiple Codec Config OBUs into one Codec Config OBU, and take each of the others.</p>
+     <p>Codec Config OBU: just take one Codec Config OBU per <a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id①③">codec_id</a>.</p>
+    <li data-md>
+     <p>Audio Element OBUs: just take all of them except followings:</p>
      <ul>
       <li data-md>
-       <p>Update <a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id⑦">audio_element_id</a>s to be unique in all of Codec Config OBUs.</p>
+       <p>codec_config_id in each Audio Element OBU is updated to indicate <a data-link-type="dfn" href="#codec_config_id" id="ref-for-codec_config_id①">codec_config_id</a> specified in the taken Codec Config OBU.</p>
+      <li data-md>
+       <p><a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id⑤">audio_element_id</a>s are updated to be unique in all of Audio Element OBUs.</p>
+      <li data-md>
+       <p><a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id⑥">audio_substream_id</a>s are updated to be unique in all of Audio Element OBUs.</p>
+      <li data-md>
+       <p>parameter_ids in Audio Element OBUs are updated to be unique in all of Audio Element OBUs.</p>
      </ul>
     <li data-md>
      <p>Mix Presentation OBUs: just take all of them and generate ones which are used after mixing of multiple audio elements if needed except following:</p>
      <ul>
       <li data-md>
-       <p><a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id⑧">audio_element_id</a>s are updated to be aligned according to Codec Config OBU.</p>
-     </ul>
-    <li data-md>
-     <p>Audio Element OBUs: just take all of them except followings:</p>
-     <ul>
-      <li data-md>
-       <p><a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id⑨">audio_element_id</a>s are updated to be aligned according to Mix Presentation OBUs.</p>
-      <li data-md>
-       <p><a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id②">audio_substream_id</a>s are updated to be unique in all of Audio Element OBUs.</p>
-      <li data-md>
-       <p>{{"audio_element_obu()"/parameter_id]s are updated to be unique in all of Audio Element OBUs.</p>
+       <p>audio_element_ids in each Mix Presentation OBU are updated to indicate the <a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id⑥">audio_element_id</a>s specified in Audio Element OBUs.</p>
      </ul>
    </ul>
    <p>Step2: Data OBUs are generated as follows:</p>
    <ul>
     <li data-md>
      <p>Place Temporal Units from multiple audio elements in timing order.</p>
+     <ul>
+      <li data-md>
+       <p><a data-link-type="dfn" href="#obu_type" id="ref-for-obu_type①">obu_type</a>s are updated to be aligned according to <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id⑦">audio_substream_id</a>s specified in Audio Element OBUs.</p>
+      <li data-md>
+       <p><a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id②">parameter_id</a>s in Parameter Block OBUs are updated to be aligned according to parameter_ids in Audio Element OBUs.</p>
+     </ul>
     <li data-md>
      <p>Add Sync OBU in front of Temporal Unit, frequently.</p>
      <ul>
       <li data-md>
-       <p>New Sync OBU is generated based on Sync OBUs from each IA sequence and updated <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id③">audio_substream_id</a>s and {{"parameter_block_obu()"/parameter_id]s.</p>
+       <p>New Sync OBU is generated based on Sync OBUs from each IA sequence and updated <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id⑧">audio_substream_id</a>s and <a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id③">parameter_id</a>s.</p>
      </ul>
     <li data-md>
      <p>It may have the immediately preceding temporal delimiter OBU for each audio element,</p>
@@ -5364,9 +5366,8 @@ Recon_Gain for D_Rtb4:
    <li>
     audio_element_id
     <ul>
-     <li><a href="#audio_element_id">definition of</a><span>, in § 4.1.8</span>
-     <li><a href="#valdef-audio_element_obu-audio_element_id">value for audio_element_obu()</a><span>, in § 4.1.7</span>
-     <li><a href="#valdef-codec_config_obu-audio_element_id">value for codec_config_obu()</a><span>, in § 4.1.6</span>
+     <li><a href="#audio_element_id">definition of</a><span>, in § 4.1.7</span>
+     <li><a href="#valdef-mix_presentation_obu-audio_element_id">value for mix_presentation_obu()</a><span>, in § 4.1.8</span>
     </ul>
    <li><a href="#audio-element-obu">Audio Element OBU</a><span>, in § 3.2.1</span>
    <li>
@@ -5381,8 +5382,8 @@ Recon_Gain for D_Rtb4:
    <li>
     audio_substream_id
     <ul>
-     <li><a href="#audio_substream_id">definition of</a><span>, in § 4.1.7</span>
-     <li><a href="#valdef-audio_frame_obu_with_no_id-audio_substream_id">value for audio_frame_obu_with_no_id()</a><span>, in § 4.1.10</span>
+     <li><a href="#audio_substream_id">definition of</a><span>, in § 4.1.10</span>
+     <li><a href="#valdef-audio_element_obu-audio_substream_id">value for audio_element_obu()</a><span>, in § 4.1.7</span>
     </ul>
    <li><a href="#azimuth_max">azimuth_max</a><span>, in § 4.2.6.1</span>
    <li><a href="#azimuth_min">azimuth_min</a><span>, in § 4.2.6.1</span>
@@ -5391,7 +5392,12 @@ Recon_Gain for D_Rtb4:
    <li><a href="#channel_audio_layer_config">channel_audio_layer_config()</a><span>, in § 4.2.1</span>
    <li><a href="#channelgroup">ChannelGroup</a><span>, in § 4.2.1</span>
    <li><a href="#channel_mapping">channel_mapping</a><span>, in § 4.2.2</span>
-   <li><a href="#codec_config_id">codec_config_id</a><span>, in § 4.1.6</span>
+   <li>
+    codec_config_id
+    <ul>
+     <li><a href="#codec_config_id">definition of</a><span>, in § 4.1.6</span>
+     <li><a href="#valdef-audio_element_obu-codec_config_id">value for audio_element_obu()</a><span>, in § 4.1.7</span>
+    </ul>
    <li><a href="#codec-config-obu">Codec Config OBU</a><span>, in § 3.2.1</span>
    <li><a href="#codec_id">codec_id</a><span>, in § 4.1.6</span>
    <li><a href="#codec-specific-box">codec specific box</a><span>, in § 7.2.4</span>
@@ -5461,12 +5467,7 @@ Recon_Gain for D_Rtb4:
    <li><a href="#n-i">n(i)</a><span>, in § 4.2.4</span>
    <li><a href="#non-coupled-substream">non-coupled substream</a><span>, in § 10</span>
    <li><a href="#ns">NS</a><span>, in § 4.1.9</span>
-   <li>
-    num_audio_elements
-    <ul>
-     <li><a href="#valdef-codec_config_obu-num_audio_elements">value for codec_config_obu()</a><span>, in § 4.1.6</span>
-     <li><a href="#valdef-mix_presentation_obu-num_audio_elements">value for mix_presentation_obu()</a><span>, in § 4.1.8</span>
-    </ul>
+   <li><a href="#num_audio_elements">num_audio_elements</a><span>, in § 4.1.8</span>
    <li><a href="#num_channels">num_channels</a><span>, in § 4.2.6.1</span>
    <li><a href="#num_layers">num_layers</a><span>, in § 4.2.1</span>
    <li><a href="#num_layouts">num_layouts</a><span>, in § 4.1.8</span>
@@ -5499,8 +5500,8 @@ Recon_Gain for D_Rtb4:
    <li>
     parameter_id
     <ul>
+     <li><a href="#parameter_id">definition of</a><span>, in § 4.1.9</span>
      <li><a href="#valdef-paramdefinition-parameter_id">value for ParamDefinition()</a><span>, in § 4.1.9.1</span>
-     <li><a href="#valdef-parameter_block_obu-parameter_id">value for parameter_block_obu()</a><span>, in § 4.1.9</span>
     </ul>
    <li><a href="#parameters">Parameters</a><span>, in § 3.1</span>
    <li><a href="#position_bounds_flag">position_bounds_flag</a><span>, in § 4.2.6.1</span>
@@ -6315,6 +6316,7 @@ Recon_Gain for D_Rtb4:
    <b><a href="#obu_type">#obu_type</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-obu_type">10.2.7.1. Multiple Audio Elements with One Codec Config</a>
+    <li><a href="#ref-for-obu_type①">10.2.7.2. Multiple Audio Elements with Multiple Codec Config</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="obu_trimming_status_flag">
@@ -6374,6 +6376,13 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-profile_version⑥">7.2.3. IA Sample Entry</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="codec_config_id">
+   <b><a href="#codec_config_id">#codec_config_id</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-codec_config_id">10.2.7.1. Multiple Audio Elements with One Codec Config</a>
+    <li><a href="#ref-for-codec_config_id①">10.2.7.2. Multiple Audio Elements with Multiple Codec Config</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="codec_id">
    <b><a href="#codec_id">#codec_id</a></b><b>Referenced in:</b>
    <ul>
@@ -6383,6 +6392,7 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-codec_id③">4.3.4. IAMF-LPCM Specific</a>
     <li><a href="#ref-for-codec_id④">5.3. IA Enhanced Profile</a> <a href="#ref-for-codec_id⑤">(2)</a> <a href="#ref-for-codec_id⑥">(3)</a> <a href="#ref-for-codec_id⑦">(4)</a> <a href="#ref-for-codec_id⑧">(5)</a>
     <li><a href="#ref-for-codec_id⑨">8.1. ISOBMFF IAMF Decapsulation with single track</a> <a href="#ref-for-codec_id①⓪">(2)</a> <a href="#ref-for-codec_id①①">(3)</a> <a href="#ref-for-codec_id①②">(4)</a>
+    <li><a href="#ref-for-codec_id①③">10.2.7.2. Multiple Audio Elements with Multiple Codec Config</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="decoder_config">
@@ -6397,6 +6407,15 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-decoder_config⑨">10.2. Scalable Channel Audio Encoding</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="audio_element_id">
+   <b><a href="#audio_element_id">#audio_element_id</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-audio_element_id">4.1.8. Mix Presentation OBU Syntax and Semantics</a> <a href="#ref-for-audio_element_id①">(2)</a>
+    <li><a href="#ref-for-audio_element_id②">9.3.1. Selecting a Mix Presentation</a>
+    <li><a href="#ref-for-audio_element_id③">10.2.7.1. Multiple Audio Elements with One Codec Config</a> <a href="#ref-for-audio_element_id④">(2)</a>
+    <li><a href="#ref-for-audio_element_id⑤">10.2.7.2. Multiple Audio Elements with Multiple Codec Config</a> <a href="#ref-for-audio_element_id⑥">(2)</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="audio_element_type">
    <b><a href="#audio_element_type">#audio_element_type</a></b><b>Referenced in:</b>
    <ul>
@@ -6408,13 +6427,6 @@ Recon_Gain for D_Rtb4:
    <ul>
     <li><a href="#ref-for-num_substreams">4.2.1. Scalable Channel Layout Config Syntax and Semantics</a>
     <li><a href="#ref-for-num_substreams①">4.2.2. Ambisonics Config Syntax and Semantics</a>
-   </ul>
-  </aside>
-  <aside class="dfn-panel" data-for="audio_substream_id">
-   <b><a href="#audio_substream_id">#audio_substream_id</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-audio_substream_id">10.2.7.1. Multiple Audio Elements with One Codec Config</a> <a href="#ref-for-audio_substream_id①">(2)</a>
-    <li><a href="#ref-for-audio_substream_id②">10.2.7.2. Multiple Audio Elements with Multiple Codec Config</a> <a href="#ref-for-audio_substream_id③">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="c">
@@ -6451,14 +6463,10 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-num_sub_mixes②">10.2.6. Mix Presentation Encoding</a> <a href="#ref-for-num_sub_mixes③">(2)</a> <a href="#ref-for-num_sub_mixes④">(3)</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="audio_element_id">
-   <b><a href="#audio_element_id">#audio_element_id</a></b><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="num_audio_elements">
+   <b><a href="#num_audio_elements">#num_audio_elements</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-audio_element_id">4.1.7. Audio Element OBU Syntax and Semantics</a>
-    <li><a href="#ref-for-audio_element_id①">4.1.8. Mix Presentation OBU Syntax and Semantics</a> <a href="#ref-for-audio_element_id②">(2)</a>
-    <li><a href="#ref-for-audio_element_id③">9.3.1. Selecting a Mix Presentation</a>
-    <li><a href="#ref-for-audio_element_id④">10.2.7.1. Multiple Audio Elements with One Codec Config</a> <a href="#ref-for-audio_element_id⑤">(2)</a> <a href="#ref-for-audio_element_id⑥">(3)</a>
-    <li><a href="#ref-for-audio_element_id⑦">10.2.7.2. Multiple Audio Elements with Multiple Codec Config</a> <a href="#ref-for-audio_element_id⑧">(2)</a> <a href="#ref-for-audio_element_id⑨">(3)</a>
+    <li><a href="#ref-for-num_audio_elements">10.2.6. Mix Presentation Encoding</a> <a href="#ref-for-num_audio_elements①">(2)</a> <a href="#ref-for-num_audio_elements②">(3)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="rendering_config">
@@ -6518,6 +6526,13 @@ Recon_Gain for D_Rtb4:
    <b><a href="#output_mix_gain">#output_mix_gain</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-output_mix_gain">10.2.6. Mix Presentation Encoding</a> <a href="#ref-for-output_mix_gain①">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="parameter_id">
+   <b><a href="#parameter_id">#parameter_id</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-parameter_id">10.2.7.1. Multiple Audio Elements with One Codec Config</a> <a href="#ref-for-parameter_id①">(2)</a>
+    <li><a href="#ref-for-parameter_id②">10.2.7.2. Multiple Audio Elements with Multiple Codec Config</a> <a href="#ref-for-parameter_id③">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="duration">
@@ -6598,6 +6613,14 @@ Recon_Gain for D_Rtb4:
    <b><a href="#paramdefinition">#paramdefinition</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-paramdefinition">4.1.9. Parameter Block OBU Syntax and Semantics</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="audio_substream_id">
+   <b><a href="#audio_substream_id">#audio_substream_id</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-audio_substream_id">4.1.10. Audio Frame OBU Syntax and Semantics</a> <a href="#ref-for-audio_substream_id①">(2)</a> <a href="#ref-for-audio_substream_id②">(3)</a>
+    <li><a href="#ref-for-audio_substream_id③">10.2.7.1. Multiple Audio Elements with One Codec Config</a> <a href="#ref-for-audio_substream_id④">(2)</a> <a href="#ref-for-audio_substream_id⑤">(3)</a>
+    <li><a href="#ref-for-audio_substream_id⑥">10.2.7.2. Multiple Audio Elements with Multiple Codec Config</a> <a href="#ref-for-audio_substream_id⑦">(2)</a> <a href="#ref-for-audio_substream_id⑧">(3)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="audio_frame">
