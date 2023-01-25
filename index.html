@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version d6f2d6445, updated Tue Jan 17 11:25:25 2023 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="2f2d753e462293ff5e0e09a4435a33799bed3697" name="document-revision">
+  <meta content="b257ef2ef4e487f4d45cf69169d3f6b4e5c50ce2" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -4586,7 +4586,18 @@ P2 = (t_end, end_point_value),
      <p>Ambisonics mode to indicate if <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-①①⑨">ChannelMappingFamily</a> = 2 or 3 of <a data-link-type="biblio" href="#biblio-rfc8486" title="Ambisonics in an Ogg Opus Container">[RFC8486]</a>.</p>
     <li data-md>
      <p>List of channel layouts to be supported for scalable channel audio: it shall conform to <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout①⑦">loudspeaker_layout</a>.</p>
+     <ul>
+      <li data-md>
+       <p>For a given input audio with Channel Audio format, if the input audio has height channels (e.g 7.1.4ch), each of the list of channel layouts should have height channels (i.e it should be higher than or equal to 3.1.2ch).</p>
+       <ul>
+        <li data-md>
+         <p>Examples for recommended list of channel layouts: 3.1.2ch/5.1.2ch, 3.1.2ch/5.1.2ch/7.1.4ch, 5.1.2ch/7.1.4ch etc..</p>
+        <li data-md>
+         <p>Examples for not-recommended list of channel layouts: 2ch/3.1.2ch/5.1.2ch, 2ch/3.1.2ch/5.1.2ch/7.1.4ch, 2ch/5.1.2ch/7.1.4ch, 2ch/7.1.4ch etc..</p>
+       </ul>
+     </ul>
    </ul>
+   <p class="note" role="note"><span class="marker">NOTE:</span> Contents providers may be satisfied with the down-mixed audio having no height channels even though the down-mix mechanism, specified in <a href="#iamfgeneration-scalablechannelaudio-downmixmechanism">§ 10.2.2 Down-mix Mechanism</a>, drops height channels when it does down-mix from input channel audio with height channels to surround channels for example from 7.14ch to Mono, Stereo, 5.1ch or 7.1ch. In that case, encoder may generate a scalable audio with the down-mixed audio without having height channels from the input channel audio with height channels. In other words, this specification does not disallow for scalable audios to have a down-mixed audio without having height channels from input channel auido having height channels.</p>
    <p>IA encoding can be done by using the combination of following generation processing.</p>
    <ul>
     <li data-md>
