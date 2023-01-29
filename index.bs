@@ -251,6 +251,12 @@ All of syntax elements shall conform to [=Syntactic Description Language=] speci
   <td>*</td><td>Multiplication.</td>
 </tr>
 <tr>
+  <td>÷</td><td>Floating point (arithmetic) division.</td>
+</tr>
+<tr>
+  <td>/</td><td>Integer division with truncation of the result toward zero.</td>
+</tr>
+<tr>
   <td>floor(x)</td><td>The largest integer that is smaller than or equal to x.</td>
 </tr>
 <tr>
@@ -279,9 +285,17 @@ class Bar {
 
 ### Mathematical functions ### {#convention-function-mathematical}
  
- <b>Clip3(x, y, z)</b>
+<b>Clip3(x, y, z)</b>
  
- It shall conform to [=Clip3=] specified in [[!AV1-Convention]].
+It shall conform to [=Clip3=] specified in [[!AV1-Convention]].
+
+<b>round(x)</b>
+
+The round() function returns the integer value closest to <code>x</code> and may be implemented as
+
+```
+round(x) = floor(x + 0.5).
+```
  
 ### Function UTF-8 Encoding ### {#convention-function-utf8}
 
@@ -2461,12 +2475,32 @@ where <code>t0 = 0</code> is the segment start time, <code>t2 = T - 1</code> and
 t1 = round(T * control_point_relative_time) - 1.
 ```
 
-The values of <code>t0</code>, <code>t1</code> and <code>t2</code> are expressed as ticks at the [=parameter_rate=] given in the associated parameter definition. To compute the parameter values for each audio sample, the [=parameter_rate=] must be resampled to the audio sample rate to give:
+The values of <code>t0</code>, <code>t1</code> and <code>t2</code> are expressed as ticks at the [=parameter_rate=] given in the associated parameter definition.
+
+If [=animation_type=] is equal to LINEAR, the parameter value is linearly interpolated between [=start_point_value=] and [=end_point_value=] at a given point in time as:
 
 ```
-n0 = t0 * audio_sample_rate / parameter_rate = 0
-n1 = t1 * audio_sample_rate / parameter_rate
-n2 = t2 * audio_sample_rate / parameter_rate
+B_linear(a) = (1 - a) * P0 + a * P2,
+0 <= a <= 1,
+```
+
+where <code>B_linear(a) = (t, y)</code> is a 2D coordinate with the parameter value <code>y</code> at time <code>t</code>.
+
+If [=animation_type=] is equal to BEZIER, the parameter value is interpolated following a quadratic Bezier curve between [=start_point_value=] and [=end_point_value=] at a given point in time as:
+
+```
+B_quad(a) = (1 - a)^2 * P0 + 2 * (1 - a) * a * P1 + a^2 * P2,
+0 <= a <= 1.
+```
+
+where <code>B_quad(a) = (t, y)</code> is a 2D coordinate with parameter value <code>y</code> at time <code>t</code>.
+
+To apply the parameter values to the audio samples in the segment without interpolation, the [=parameter_rate=] is first resampled to the audio sample rate to give:
+
+```
+n0 = t0 * audio_sample_rate / parameter_rate,
+n1 = t1 * audio_sample_rate / parameter_rate,
+n2 = t2 * audio_sample_rate / parameter_rate.
 ```
 
 Then, <code>P0</code>, <code>P1</code>, <code>P2</code> can be rewritten as:
@@ -2474,22 +2508,31 @@ Then, <code>P0</code>, <code>P1</code>, <code>P2</code> can be rewritten as:
 ```
 P0 = (n0, start_point_value),
 P1 = (n1, control_point_value),
-P2 = (n2, end_point_value),
+P2 = (n2, end_point_value).
 ```
 
-If [=animation_type=] is equal to LINEAR, the parameter value is linearly interpolated between [=start_point_value=] and [=end_point_value=] at a given audio sample index in the segment as follows:
+Next, the parameter value <code>y</code> is computed for each time <code>t</code> that corresponds to an integer audio sample index, <code>t = n = [0, 1, 2, ..., n2]</code>. This is done by computing the equivalent value of <code>a</code> for every <code>n</code>, and then applying the Bezier equations <code>B_linear(a)</code> and <code>B_quad(a)</code> to find the parameter value <code>y</code>.
+
+In the case of <code>B_linear(a)</code>, the mapping between <code>n</code> and <code>a</code> is given by:
 
 ```
-B_linear(a) = (1 - a) * P0 + a * P2,
-a = [0, 1, 2, ..., n2] / n2.
+a = n ÷ n2.
 ```
 
-If [=animation_type=] is equal to BEZIER, the parameter value is interpolated following a quadratic Bezier curve between [=start_point_value=] and [=end_point_value=] at a given audio sample index in the segment as follows:
+In the case of <code>B_quad(a)</code>, the mapping between <code>n</code> and <code>a</code> is given by:
 
 ```
-B_quad(a) = (1 - a)^2 * P0 + 2 * (1 - a) * a * P1 + a^2 * P2,
-a = [0, 1, 2, ..., n2] / n2.
+a = -beta + sqrt((beta^2) - (4 * alpha * gamma)) ÷ (2 * alpha),
 ```
+
+where
+
+```
+alpha = (n0 - n) - 2 * (n1 - n) + (n2 - n),
+beta = -2 * (n0 - n) + 2 * (n1 - n),
+gamma = n0 - n.
+```
+
 
 ## Post Processing ## {#processing-post}
 
