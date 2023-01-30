@@ -1655,7 +1655,7 @@ For legacy codecs, Decoder_Config() shall be exactly the same information as the
 [=Codec_ID=] shall be 'opus'.
 
 Codec_Specific_Info for IAMF-OPUS shall conform to [=ID Header=] with [=ChannelMappingFamily=] = 0 of [[!RFC7845]] with following constraints:
-- [=Channel Count=] should be set to 2. [=Channel Count=] can be ignored because the real value can be determined from the Audio Element OBU and from the opus packet header.
+- [=Channel Count=] must be set to 2. [=Channel Count=] can be ignored because the real value can be determined from the Audio Element OBU and from the opus packet header.
 - [=Output Gain=] shall not be used. In other words, it shall be set to 0dB.
 - The byte order of each field in [=ID Header=] shall be converted to big endian.
 
@@ -1672,7 +1672,7 @@ Substream format shall be [=opus packet=] of [[!RFC6716]] which contains only on
 - [=upstream=] = 0
 - [=decSpecificInfo()=]: The syntax and values shall conform to [=AudioSpecificConfig()=] of [[!MP4-Audio]] with following constraints:
 	- [=audioObjectType=] = 2
-	- [=channelConfiguration=] should be set to 2.
+	- [=channelConfiguration=] must be set to 2. The real value can be implied from the Audio Element OBU.
 	- [=GASpecificConfig()=]: The syntax and values shall conform to [=GASpecificConfig()=] of [[!MP4-Audio]] with following constraints:
 		- [=frameLengthFlag=] = 0 (1024 lines IMDCT)
 		- [=dependsOnCoreCoder=] = 0
@@ -2033,7 +2033,7 @@ It shall be the same as 'dOps' box for 'opus' with that [=ChannelMappingFamily=]
 <b>Semantics</b>
 
 It shall be the same as the semantics in [[!OPUS-IN-ISOBMFF]] except followings:
-- [=OutputChannelCount=] should be set to 2. [=OutputChannelCount=] can be ignored because the real value can be determined from the Audio Element OBU and from the [=opus packet=] header.
+- [=OutputChannelCount=] must be set to 2. [=OutputChannelCount=] can be ignored because the real value can be determined from the Audio Element OBU and from the [=opus packet=] header.
 - In case of [=num_layers=] > 1, [=OutputGain=] shall be set to 0.
 - [=ChannelMappingFamily=] shall be set to 0.
 
@@ -2059,7 +2059,7 @@ It shall be the same as 'esds' box for [=Low Complexity Profile=] of [[!AAC]] (A
 <b>Semantics</b>
 
 It shall be the same as the semantics in 'esds' except followings:
-- [=channelConfiguration=] field should be set to 2. The real value can be implied from the Audio Element OBU.
+- [=channelConfiguration=] field must be set to 2. The real value can be implied from the Audio Element OBU.
 
 ISSUE: We need to add specific boxes for FLAC and LPCM.
 
