@@ -1487,9 +1487,9 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version d6f2d6445, updated Tue Jan 17 11:25:25 2023 -0800" name="generator">
+  <meta content="Bikeshed version 859efb4bd, updated Fri Jan 27 16:04:01 2023 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="13ec14ca1e366a04ede8099e8be676d993623ccb" name="document-revision">
+  <meta content="0b90f6a6833a7756485f775c5dc8fd94255e9a1a" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2239,6 +2239,12 @@ dfn > a.self-link::before      { content: "#"; }
       <td>*
       <td>Multiplication.
      <tr>
+      <td>÷
+      <td>Floating point (arithmetic) division.
+     <tr>
+      <td>/
+      <td>Integer division with truncation of the result toward zero.
+     <tr>
       <td>floor(x)
       <td>The largest integer that is smaller than or equal to x.
      <tr>
@@ -2261,6 +2267,10 @@ class Bar {
    <h4 class="heading settled" data-level="1.3.2" id="convention-function-mathematical"><span class="secno">1.3.2. </span><span class="content">Mathematical functions</span><a class="self-link" href="#convention-function-mathematical"></a></h4>
    <p><b>Clip3(x, y, z)</b></p>
    <p>It shall conform to <a data-link-type="dfn" href="https://aomedia.org/av1/specification/conventions/" id="termref-for-⑤">Clip3</a> specified in <a data-link-type="biblio" href="#biblio-av1-convention" title="Conventions">[AV1-Convention]</a>.</p>
+   <p><b>round(x)</b></p>
+   <p>The round() function returns the integer value closest to <code>x</code> and may be implemented as</p>
+<pre>round(x) = floor(x + 0.5).
+</pre>
    <h4 class="heading settled" data-level="1.3.3" id="convention-function-utf8"><span class="secno">1.3.3. </span><span class="content">Function UTF-8 Encoding</span><a class="self-link" href="#convention-function-utf8"></a></h4>
    <p><b>UTF-8_Enc(label)</b></p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="utf-8_enc-label" values>UTF-8_Enc(label)</dfn> byte representation of the encoded <b>label</b>, which is UTF-8 string as defined in <a data-link-type="biblio" href="#biblio-rfc3629" title="UTF-8, a transformation format of ISO 10646">[RFC3629]</a>, null terminated.</p>
@@ -2780,7 +2790,7 @@ class codec_config() {
    <p><dfn data-dfn-type="dfn" data-noexport id="get_param_definition_type">get_param_definition_type()<a class="self-link" href="#get_param_definition_type"></a></dfn> is a run-time function to get the parameter definition type mapped to the parameter_id.</p>
    <p>Audio Element OBU and/or Mix Presentation OBU is mapping a parameter_id to the parameter definition type. So, IA decoders can know the definition type mapped to the parameter_id.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="segment_interval">segment_interval</dfn> shall specify the interval for the given segment.</p>
-   <p>Each value of <a data-link-type="dfn" href="#duration" id="ref-for-duration">duration</a>, <a data-link-type="dfn" href="#constant_segment_interval" id="ref-for-constant_segment_interval">constant_segment_interval</a> and <a data-link-type="dfn" href="#segment_interval" id="ref-for-segment_interval">segment_interval</a> shall be expressed as the number of ticks at the rate indicated by the time base specified in the corresponding parameter definition.</p>
+   <p>Each value of <a data-link-type="dfn" href="#duration" id="ref-for-duration">duration</a>, <a data-link-type="dfn" href="#constant_segment_interval" id="ref-for-constant_segment_interval">constant_segment_interval</a> and <a data-link-type="dfn" href="#segment_interval" id="ref-for-segment_interval">segment_interval</a> shall be expressed as the number of ticks at the <a data-link-type="dfn">parameter_rate</a> specified in the corresponding parameter definition.</p>
    <ul>
     <li data-md>
      <p>When it defines <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="d">D</dfn> = the value of <a data-link-type="dfn" href="#duration" id="ref-for-duration①">duration</a>, <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="ns">NS</dfn> = the value of <a data-link-type="dfn" href="#num_segments" id="ref-for-num_segments">num_segments</a>, <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="csi">CSI</dfn> = the value of <a data-link-type="dfn" href="#constant_segment_interval" id="ref-for-constant_segment_interval①">constant_segment_interval</a> and <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="si">SI</dfn> = the value of <a data-link-type="dfn" href="#segment_interval" id="ref-for-segment_interval①">segment_interval</a>.</p>
@@ -2828,12 +2838,12 @@ class AnimatedParameterData(animation_type) {
    <p><b>Syntax</b></p>
 <pre>abstract class ParamDefinition() {
   leb128() parameter_id;
-  leb128() time_base;
+  leb128() parameter_rate;
 }
 </pre>
    <p><b>Semantics</b></p>
    <p><dfn class="css" data-dfn-for="ParamDefinition()" data-dfn-type="value" data-noexport id="valdef-paramdefinition-parameter_id">parameter_id<a class="self-link" href="#valdef-paramdefinition-parameter_id"></a></dfn> shall indicate the unique ID in an IA sequence for a given parameter.</p>
-   <p><dfn class="css" data-dfn-for="ParamDefinition()" data-dfn-type="value" data-noexport id="valdef-paramdefinition-time_base">time_base<a class="self-link" href="#valdef-paramdefinition-time_base"></a></dfn> shall specify the time base used by this parameter, expressed as seconds per tick. Time-related fields associated with this parameter, such as durations and intervals, shall be expressed in the number of ticks.</p>
+   <p><dfn class="css" data-dfn-for="ParamDefinition()" data-dfn-type="value" data-noexport id="valdef-paramdefinition-parameter_rate">parameter_rate<a class="self-link" href="#valdef-paramdefinition-parameter_rate"></a></dfn> shall specify the rate used by this parameter, expressed as ticks per second. Time-related fields associated with this parameter, such as durations and intervals, shall be expressed in the number of ticks.</p>
    <h4 class="heading settled" data-level="4.1.10" id="obu-audioframe"><span class="secno">4.1.10. </span><span class="content">Audio Frame OBU Syntax and Semantics</span><a class="self-link" href="#obu-audioframe"></a></h4>
    <p>This section specifies OBU payloads of OBU_IA_Audio_Frame and OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21.</p>
    <p>The first 22 audio substreams in an IA sequence may use the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21, which have predefined audio substream IDs associated with them. This avoids the need to manually specify an <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id">audio_substream_id</a>.</p>
@@ -2893,7 +2903,7 @@ class AnimatedParameterData(animation_type) {
    <p>For this version of the specification, the value of reinitialize_decoder shall be set to 0. If a value of 1 is seen, the IA sequence shall be rejected as invalid.</p>
    <p><dfn class="css" data-dfn-for="sync_obu()" data-dfn-type="value" data-noexport id="valdef-sync_obu-reserved">reserved<a class="self-link" href="#valdef-sync_obu-reserved"></a></dfn> shall be set to 0. Reserved units are for future use and shall be ignored by an IAMF-OBU parser.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="relative_offset">relative_offset<a class="self-link" href="#relative_offset"></a></dfn> is the offset to position the first audio frame (before trimming) or parameter block with the referenced obu_id that comes after this Sync OBU with respect to the timeline generated before this Sync OBU. If this Sync OBU is the first one, it is the offset from 0. Otherwise, it is the offset from the end of the timeline of Substreams generated from the previous Sync OBU.</p>
-   <p>The offset shall be indicated in the number of ticks at the time_base specified in the corresponding substream or parameter definition.</p>
+   <p>The offset shall be indicated in the number of ticks at the <a data-link-type="dfn">parameter_rate</a> specified in the corresponding substream or parameter definition.</p>
    <p>IA encoder and decoder operations related to this field are specified in <a href="#standalone-synchronizing-data-obus">§ 6.2 Synchronizing Data OBUs</a>.</p>
    <h3 class="heading settled" data-level="4.2" id="syntax-detailed"><span class="secno">4.2. </span><span class="content">Detailed OBU Syntax and Semantics</span><a class="self-link" href="#syntax-detailed"></a></h3>
    <h4 class="heading settled" data-level="4.2.1" id="syntax-scalable-channel-layout-config"><span class="secno">4.2.1. </span><span class="content">Scalable Channel Layout Config Syntax and Semantics</span><a class="self-link" href="#syntax-scalable-channel-layout-config"></a></h4>
@@ -4524,23 +4534,48 @@ degree  m = k - n * (n + 1).
    </ol>
    <p>The rendered and processed audio elements are then summed, and then apply <a data-link-type="dfn" href="#output_mix_config" id="ref-for-output_mix_config①">output_mix_config()</a> to generate one sub-mixed audio signal. If there are more than one sub-mixes, the output of each sub-mix is further summed to generate the final mixed audio signal.</p>
    <h3 class="heading settled" data-level="9.4" id="processing-animated-params"><span class="secno">9.4. </span><span class="content">Animated Parameters</span><a class="self-link" href="#processing-animated-params"></a></h3>
-   <p>This section describes how a set of parameters is animated over a segment in a parameter block, using the information provided in <a data-link-type="dfn" href="#animatedparameterdata" id="ref-for-animatedparameterdata①">AnimatedParameterData()</a>.</p>
-   <p>Let P0, P1 and P2 be 2D coordinates defined as</p>
-<pre>P0 = (t_start, start_point_value),
-P1 = (t_control, control_point_value),
-P2 = (t_end, end_point_value),
+   <p>This section describes how a set of parameters is animated over a segment in a parameter block and applied to the corresponding audio samples, using the information provided in <a data-link-type="dfn" href="#animatedparameterdata" id="ref-for-animatedparameterdata①">AnimatedParameterData()</a>.</p>
+   <p>If <a data-link-type="dfn" href="#animation_type" id="ref-for-animation_type①">animation_type</a> is equal to STEP, the parameter value provided by <a data-link-type="dfn" href="#start_point_value" id="ref-for-start_point_value">start_point_value</a> should be applied to all time steps in the segment.</p>
+   <p>If <a data-link-type="dfn" href="#animation_type" id="ref-for-animation_type②">animation_type</a> is equal to LINEAR or BEZIER, the information provided in <a data-link-type="dfn" href="#animatedparameterdata" id="ref-for-animatedparameterdata②">AnimatedParameterData()</a> describes how the parameter is animated as a Bezier curve. Let <code>T</code> be the segment interval defined in the <a data-link-type="dfn">parameter_block_obu</a> and <code>P0</code>, <code>P1</code> and <code>P2</code> be 2D coordinates defined as</p>
+<pre>P0 = (t0, start_point_value),
+P1 = (t1, control_point_value),
+P2 = (t2, end_point_value),
 </pre>
-   <p>where t_start is the segment start time, t_end is the segment end time and t_control is the control point time given by</p>
-<pre>t_control = t_start + (t_end - t_start) * control_point_relative_time.
+   <p>where <code>t0 = 0</code> is the segment start time, <code>t2 = T - 1</code> and <code>t1</code> is the control point time given by</p>
+<pre>t1 = round(T * control_point_relative_time) - 1.
 </pre>
-   <p>If <a data-link-type="dfn" href="#animation_type" id="ref-for-animation_type①">animation_type</a> is equal to STEP, the parameter value provided by <a data-link-type="dfn" href="#start_point_value" id="ref-for-start_point_value">start_point_value</a> should be applied immediately to all samples of the segment.</p>
-   <p>If <a data-link-type="dfn" href="#animation_type" id="ref-for-animation_type②">animation_type</a> is equal to LINEAR, the parameter value is linearly interpolated between <a data-link-type="dfn" href="#start_point_value" id="ref-for-start_point_value①">start_point_value</a> and <a data-link-type="dfn" href="#end_point_value" id="ref-for-end_point_value">end_point_value</a> as follows:</p>
+   <p>The values of <code>t0</code>, <code>t1</code> and <code>t2</code> are expressed as ticks at the <a data-link-type="dfn">parameter_rate</a> given in the associated parameter definition.</p>
+   <p>If <a data-link-type="dfn" href="#animation_type" id="ref-for-animation_type③">animation_type</a> is equal to LINEAR, the parameter value is linearly interpolated between <a data-link-type="dfn" href="#start_point_value" id="ref-for-start_point_value①">start_point_value</a> and <a data-link-type="dfn" href="#end_point_value" id="ref-for-end_point_value">end_point_value</a> at a given point in time as:</p>
 <pre>B_linear(a) = (1 - a) * P0 + a * P2,
-0 &lt;= a &lt;= 1.
+0 &lt;= a &lt;= 1,
 </pre>
-   <p>If <a data-link-type="dfn" href="#animation_type" id="ref-for-animation_type③">animation_type</a> is equal to BEZIER, the parameter value is interpolated following a quadratic Bezier curve between <a data-link-type="dfn" href="#start_point_value" id="ref-for-start_point_value②">start_point_value</a> and <a data-link-type="dfn" href="#end_point_value" id="ref-for-end_point_value①">end_point_value</a> as follows:</p>
+   <p>where <code>B_linear(a) = (t, y)</code> is a 2D coordinate with the parameter value <code>y</code> at time <code>t</code>.</p>
+   <p>If <a data-link-type="dfn" href="#animation_type" id="ref-for-animation_type④">animation_type</a> is equal to BEZIER, the parameter value is interpolated following a quadratic Bezier curve between <a data-link-type="dfn" href="#start_point_value" id="ref-for-start_point_value②">start_point_value</a> and <a data-link-type="dfn" href="#end_point_value" id="ref-for-end_point_value①">end_point_value</a> at a given point in time as:</p>
 <pre>B_quad(a) = (1 - a)^2 * P0 + 2 * (1 - a) * a * P1 + a^2 * P2,
 0 &lt;= a &lt;= 1.
+</pre>
+   <p>where <code>B_quad(a) = (t, y)</code> is a 2D coordinate with parameter value <code>y</code> at time <code>t</code>.</p>
+   <p>To apply the parameter values to the audio samples in the segment without interpolation, the <a data-link-type="dfn">parameter_rate</a> is first resampled to the audio sample rate to give:</p>
+<pre>n0 = t0 * audio_sample_rate / parameter_rate,
+n1 = t1 * audio_sample_rate / parameter_rate,
+n2 = t2 * audio_sample_rate / parameter_rate.
+</pre>
+   <p>Then, <code>P0</code>, <code>P1</code>, <code>P2</code> can be rewritten as:</p>
+<pre>P0 = (n0, start_point_value),
+P1 = (n1, control_point_value),
+P2 = (n2, end_point_value).
+</pre>
+   <p>Next, the parameter value <code>y</code> is computed for each time <code>t</code> that corresponds to an integer audio sample index, <code>t = n = [0, 1, 2, ..., n2]</code>. This is done by computing the equivalent value of <code>a</code> for every <code>n</code>, and then applying the Bezier equations <code>B_linear(a)</code> and <code>B_quad(a)</code> to find the parameter value <code>y</code>.</p>
+   <p>In the case of <code>B_linear(a)</code>, the mapping between <code>n</code> and <code>a</code> is given by:</p>
+<pre>a = n ÷ n2.
+</pre>
+   <p>In the case of <code>B_quad(a)</code>, the mapping between <code>n</code> and <code>a</code> is given by:</p>
+<pre>a = -beta + sqrt((beta^2) - (4 * alpha * gamma)) ÷ (2 * alpha),
+</pre>
+   <p>where</p>
+<pre>alpha = n0 - 2 * n1 + n2,
+beta = 2 * (n1 - n0),
+gamma = n0 - n.
 </pre>
    <h3 class="heading settled" data-level="9.5" id="processing-post"><span class="secno">9.5. </span><span class="content">Post Processing</span><a class="self-link" href="#processing-post"></a></h3>
    <h4 class="heading settled" data-level="9.5.1" id="processing-post-loudness"><span class="secno">9.5.1. </span><span class="content">Loudness Normalization</span><a class="self-link" href="#processing-post-loudness"></a></h4>
@@ -5515,6 +5550,7 @@ Recon_Gain for D_Rtb4:
      <li><a href="#parameter_id">definition of</a><span>, in § 4.1.9</span>
      <li><a href="#valdef-paramdefinition-parameter_id">value for ParamDefinition()</a><span>, in § 4.1.9.1</span>
     </ul>
+   <li><a href="#valdef-paramdefinition-parameter_rate">parameter_rate</a><span>, in § 4.1.9.1</span>
    <li><a href="#parameters">Parameters</a><span>, in § 3.1</span>
    <li><a href="#position_bounds_flag">position_bounds_flag</a><span>, in § 4.2.6.1</span>
    <li><a href="#profile_version">profile_version</a><span>, in § 4.1.5</span>
@@ -5551,7 +5587,6 @@ Recon_Gain for D_Rtb4:
    <li><a href="#t2to4-de-mixer">T2to4 de-mixer</a><span>, in § 9.2.2</span>
    <li><a href="#temporal-delimiter-obu">Temporal Delimiter OBU</a><span>, in § 3.2.2</span>
    <li><a href="#tf2tot2-de-mixer">TF2toT2 de-mixer</a><span>, in § 9.2.2</span>
-   <li><a href="#valdef-paramdefinition-time_base">time_base</a><span>, in § 4.1.9.1</span>
    <li><a href="#true_peak">true_peak</a><span>, in § 4.1.8.4</span>
    <li><a href="#utf-8_enc-label">UTF-8_Enc(label)</a><span>, in § 1.3.3</span>
    <li><a href="#v">V</a><span>, in § 7.4</span>
@@ -6600,14 +6635,14 @@ Recon_Gain for D_Rtb4:
    <b><a href="#animation_type">#animation_type</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-animation_type">4.1.9. Parameter Block OBU Syntax and Semantics</a>
-    <li><a href="#ref-for-animation_type①">9.4. Animated Parameters</a> <a href="#ref-for-animation_type②">(2)</a> <a href="#ref-for-animation_type③">(3)</a>
+    <li><a href="#ref-for-animation_type①">9.4. Animated Parameters</a> <a href="#ref-for-animation_type②">(2)</a> <a href="#ref-for-animation_type③">(3)</a> <a href="#ref-for-animation_type④">(4)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="animatedparameterdata">
    <b><a href="#animatedparameterdata">#animatedparameterdata</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-animatedparameterdata">4.1.9. Parameter Block OBU Syntax and Semantics</a>
-    <li><a href="#ref-for-animatedparameterdata①">9.4. Animated Parameters</a>
+    <li><a href="#ref-for-animatedparameterdata①">9.4. Animated Parameters</a> <a href="#ref-for-animatedparameterdata②">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="start_point_value">
