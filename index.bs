@@ -1461,170 +1461,16 @@ layout_type : Layout type
 
 ### Rendering Config Syntax and Semantics ### {#syntax-rendering-config}
 
+During playback, an audio element should be rendered using a pre-defined renderer according to [[#processing-mixpresentation-rendering]]. In this version of the specification, no additional metadata is required to configure the renderers, and as such, <code>rendering_config()</code> has an empty payload.
+
 <b>Syntax</b>
 
 ```
 class rendering_config() {
-  if (audio_element_type == CHANNEL_BASED) {
-    itur_bs2127_direct_speakers_config();
-  }
-  else if (audio_element_type == SCENE_BASED) {
-    itur_bs2127_hoa_config();
-  }
 }
 ```
 
 <b>Semantics</b>
-
-<dfn value noexport for="rendering_config()">audio_element_type</dfn> is the [=audio_element_type=] value in Audio Element OBU.
-
-<dfn noexport>itur_bs2127_direct_speakers_config()</dfn> is a class that provides the metadata required for rendering a multichannel audio element to a loudspeaker layout, as specified in [[!ITU2127-0]].
-
-<dfn noexport>itur_bs2127_hoa_config()</dfn> is a class that provides the metadata required for rendering an ambisonics audio element to a loudspeaker layout, as specified in [[!ITU2127-0]].
-
-#### ITU-R BS.2127 Direct Speakers Config Syntax and Semantics #### {#syntax-rendering-direct-speakers-config}
-
-The metadata specified in itur_bs2127_direct_speakers_config(), based on [[!ITU2076-2]], provides information about the loudspeaker that is intended to be used for playing back each of the input audio channels. An IA renderer uses the DirectSpeakers rendering method of EAR, specified in [[!ITU2127-0]], in combination with these metadata to render to the output loudspeakers.
-
-The position information is specified in polar coordinates following the convention of [[!ITU2076-2]]. Specifically,
-
-- The origin is in the centre.
-- The azimuth angles are expressed in degrees, with 0 degrees as straight ahead, and positive values rotating to the left (anti-clockwise) when viewed from above.
-- The elevation angles are expressed in degrees, with 0 degrees horizontally ahead, and positive values going up.
-- The distance is a normalized distance, where 1.0 is assumed to be the default radius of the sphere.
-
-
-<b>Syntax</b>
-
-```
-class itur_bs2127_direct_speakers_config() {
-  unsigned int (1) distance_flag;
-  unsigned int (1) position_bounds_flag;
-  unsigned int (1) screen_edge_lock_azimuth_flag;
-  unsigned int (1) screen_edge_lock_elevation_flag;
-  unsigned int (4) reserved;
-
-  for (int i = 0; i < num_channels; i++) {
-    if (distance_flag) {
-      signed int (8) distance;
-    }
-
-    if (position_bounds_flag) {
-      signed int (16) azimuth_max;
-      signed int (16) azimuth_min;
-      signed int (16) elevation_max;
-      signed int (16) elevation_min;
-      signed int (8) distance_max;
-      signed int (8) distance_min;
-    }
-
-    if (screen_edge_lock_azimuth_flag) {
-      unsigned int (2) screen_edge_lock_azimuth;
-    }
-    if (screen_edge_lock_elevation_flag) {
-      unsigned int (2) screen_edge_lock_elevation;
-    }
-    byte_alignment();
-  }
-}
-```
-
-<b>Semantics</b>
-
-<dfn noexport>distance_flag</dfn> indicates if a distance other than the default value of 1.0 is provided.
-
-<dfn noexport>position_bounds_flag</dfn> indicates if the position bounds for the azimuth, elevation and distance are provided.
-
-<dfn noexport>screen_edge_lock_azimuth_flag</dfn> indicates if the screen edge lock value to be used in combination with the azimuth position is provided.
-
-<dfn noexport>screen_edge_lock_elevation_flag</dfn> indicates if the screen edge lock value to be used in combination with the elevation position is provided.
-
-<dfn noexport>num_channels</dfn> indicates the number of audio channels within the audio element. The order of the channels is the same as the order in which they are specified in [=loudspeaker_layout=].
-
-<dfn noexport>distance</dfn> specifies the normalized distance from the origin as a signed Q1.6 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
-
-- audioChannelFormat.typeDefinition == "DirectSpeakers"
-- sub-element: "position"
-- attribute: coordinate="distance"
-
-<dfn noexport>azimuth_max</dfn> specifies the maximum bound of the azimuth as a signed Q8.7 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
-
-- audioChannelFormat.typeDefinition == "DirectSpeakers"
-- sub-element: "position"
-- attribute: coordinate="azimuth", bound="max"
-
-<dfn noexport>azimuth_min</dfn> specifies the minimum bound of the azimuth as a signed Q8.7 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
-
-- audioChannelFormat.typeDefinition == "DirectSpeakers"
-- sub-element: "position"
-- attribute: coordinate="azimuth", bound="min"
-
-<dfn noexport>elevation_max</dfn> specifies the maximum bound of the elevation as a signed Q8.7 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
-
-- audioChannelFormat.typeDefinition == "DirectSpeakers"
-- sub-element: "position"
-- attribute: coordinate="elevation", bound="max"
-
-<dfn noexport>elevation_min</dfn> specifies the minimum bound of the elevation as a signed Q8.7 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
-
-- audioChannelFormat.typeDefinition == "DirectSpeakers"
-- sub-element: "position"
-- attribute: coordinate="elevation", bound="min"
-
-<dfn noexport>distance_max</dfn> specifies the maximum bound of the distance as a signed Q1.6 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
-
-- audioChannelFormat.typeDefinition == "DirectSpeakers"
-- sub-element: "position"
-- attribute: coordinate="distance", bound="max"
-
-<dfn noexport>distance_min</dfn> specifies the minimum bound of the distance as a signed Q1.6 fixed-point value (in [[!Q-Format]]). It is the same as the following attribute in [[!ITU2076-2]]:
-
-- audioChannelFormat.typeDefinition == "DirectSpeakers"
-- sub-element: "position"
-- attribute: coordinate="distance", bound="min"
-
-<dfn noexport>screen_edge_lock_azimuth</dfn> indicates the edge that the loudspeaker is locked to, to be used in combination with the azimuth position. It is the same as the following attribute in [[!ITU2076-2]]:
-
-- audioChannelFormat.typeDefinition == "DirectSpeakers"
-- sub-element: "position"
-- attribute: screenEdgeLock
-
-<pre class = "def">
-screen_edge_lock_azimuth : Screen edge to lock to
-            0            : LEFT
-            1            : RIGHT
-            2            : TOP
-            3            : BOTTOM
-</pre>
-
-<dfn noexport>screen_edge_lock_elevation</dfn> indicates the edge that the loudspeaker is locked to, to be used in combination with the elevation position. It is the same as the following attribute in [[!ITU2076-2]]:
-
-- audioChannelFormat.typeDefinition == "DirectSpeakers"
-- sub-element: "position"
-- attribute: screenEdgeLock
-
-<pre class = "def">
-screen_edge_lock_elevation : Screen edge to lock to
-            0              : LEFT
-            1              : RIGHT
-            2              : TOP
-            3              : BOTTOM
-</pre>
-
-
-#### ITU-R BS.2127 HOA Config Syntax and Semantics #### {#syntax-rendering-hoa-config}
-
-<b>Syntax</b>
-
-```
-class itur_bs2127_hoa_config() {
-}
- ```
- 
-<b>Semantics</b>
- 
-NOTE: itur_bs2127_hoa_config() has an empty payload.
-
 
 ### Element Mix Config Syntax and Semantics ### {#syntax-element-mix-config}
 
@@ -1752,7 +1598,6 @@ Restrictions on the IA sequence:
 - [=version=] shall be set to 0 for this version of specification.
 - [=profile_version=] shall be set to 0 for this version of specification.
 	- [=num_sub_mixes=] shall be set to 1 for this profile.
-	- All flags of itur_bs2127_direct_speakers_config() shall be set to 0 for this profile.
 - [=num_layers=] shall be set to 1 or up to 6 for Channel-based audio element (i.e. scalable channel audio).
     - In this case, [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=] may be present in the IA sequence.
     - In case of simple scalable channel audio (e.g. mono for layer 1 & stereo for layer 2), demixing_info() and recon_gain_info() shall not be present in the bitstream.
@@ -1784,7 +1629,6 @@ Restrictions on IA sequence:
 - [=version=] shall be set to 0 for this version of specification.
 - [=profile_version=] shall be set to 16 for this version of specification.
 	- [=num_sub_mixes=] shall be set to 1 for this profile.
-	- All flags of itur_bs2127_direct_speakers_config() shall be set to 0 for this profile.
 	- For a given Mix Presentation OBU, it shall include at most one scene-based audio element and it shall include at most one channel-based audio element with [=num_layers=] > 1 for this profile.
 - [=num_layers=] shall be set to 1 or up to 6 for Channel-based audio element (i.e. scalable channel audio)
     - In this case, [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=] may be present in the IA sequence.
@@ -2424,13 +2268,9 @@ This section defines the renderer to use, given a channel-based audio element an
 	- Else if the playback layout is 3.1.2ch, use the static down-mix matrices specified in [[#processing-downmixmatrix-static]].
 	- Else, use implementation-specific renderer.
 
-If the EAR Direct Speakers renderer is used, it should be configured as follows.
-
-In addition to the metadata provided in itur_bs2127_direct_speakers_config(), the IA renderer should provide the following to the EAR Direct Speakers renderer for each audio channel of the audio element:
+If the EAR Direct Speakers renderer is used, the following should be provided for each audio channel of the audio element:
 
 - speaker label: the label of the speaker position, using the same convention as "SP Label" in [[!ITU2051-3]]. This is defined for each audio channel of the audio element based on the information from [=loudspeaker_layouts=].
-- azimuth: specifies the azimuth location of the sound. This is mapped from the speaker label as defined in [[!ITU2051-3]].
-- elevation: specifies the elevation location of the sound. This is mapped from the speaker label as defined in [[!ITU2051-3]].
 
 In [[!ITU2051-3]], an LFE audio channel may be identified either by an explicit label or its frequency content. In this specification, the LFE channel is identified based on the explicit label only, given by [=loudspeaker_layout=].
 
@@ -2875,7 +2715,6 @@ Below figure shows one example of transformation matrix with 4 CGs (2ch/3.1.2ch/
 For Mix Presentation OBU for one single channel-based audio element, Mix Presentation OBU shall follow following restrictions:
 - [=num_sub_mixes=]: set to 1
 - [=num_audio_elements=]: set to 1
-- [=rendering_config()=]: set to itur_bs2127_direct_speakers_config() with no metadata (i.e all flags off)
 - [=element_mix_config()=]: No parameter block for element_mix and default_mix_gain = 0dB
 - [=output_mix_config()=]: No parameter block for output_mix and default_mix_gain = 0dB
 - [=num_layouts=]: set to [=num_layers=]
@@ -2886,7 +2725,6 @@ For Mix Presentation OBU for one single channel-based audio element, Mix Present
 For Mix Presentation for one single scene-based audio element, Mix Presentation OBU shall follow following restrictions:
 - [=num_sub_mixes=]: set to 1
 - [=num_audio_elements=]: set to 1
-- [=rendering_config()=]: set to itur_bs2127_hos_config()
 - [=element_mix_config()=]: set to [=mix_gain=]
 - [=output_mix_config()=]: set to [=output_mix_gain=]
 - [=num_layouts=]: set to M1, the number of loudness informations which are provided.
@@ -2898,7 +2736,6 @@ For Mix Presentation for one single scene-based audio element, Mix Presentation 
 For Mix Presentation for N (>1) audio elements (when num_sub-mixes = 1), Mix Presentation OBU shall follow following restrictions:
 - [=num_sub_mixes=]: set to 1
 - [=num_audio_elements=]: set to N
-- [=rendering_config()=] for each audio element: set to itur_bs2127_direct_speakers_config() with no metadata (i.e all flags off) if channel-based or itur_bs2127_hoa_config() if scene-based 
 - [=element_mix_config()=] for each audio element: set to [=mix_gain=]
 - [=output_mix_config()=]: set to [=output_mix_gain=]
 - [=num_layouts=]: set to M2, the number of loudness informations which are provided.
