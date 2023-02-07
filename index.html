@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 859efb4bd, updated Fri Jan 27 16:04:01 2023 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="88014a4616c9995724e727b1cfba408155506fb4" name="document-revision">
+  <meta content="757baa810aa12c8e814794c8481faf7ad0017c2f" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2546,7 +2546,7 @@ class codec_config() {
 </pre>
    <p><b>Semantics</b></p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="codec_config_id">codec_config_id</dfn> shall indicate a unique ID in an IA sequence for a given codec config.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="codec_id">codec_id</dfn> shall be a ‘four-character code’ (4CC) to identify the codec used to generate the audio substreams. It shall be <a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-⑥">Opus</a> for IAMF-OPUS, <a class="property css" data-link-type="property" href="https://www.iso.org/standard/79110.html#" id="termref-for-⑦">mp4a</a> for IAMF-AAC-LC, <a class="property css" data-link-type="property" href="https://xiph.org/flac/format.html" id="termref-for-⑧">fLaC</a> for IAMF-FLAC and <a class="property css" data-link-type="property">lpcm</a> for IAMF-LPCM.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="codec_id">codec_id</dfn> indicates a ‘four-character code’ (4CC) to identify the codec used to generate the audio substreams. It shall be <a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="termref-for-⑥">Opus</a> for IAMF-OPUS, <a class="property css" data-link-type="property" href="https://www.iso.org/standard/79110.html#" id="termref-for-⑦">mp4a</a> for IAMF-AAC-LC, <a class="property css" data-link-type="property" href="https://xiph.org/flac/format.html" id="termref-for-⑧">fLaC</a> for IAMF-FLAC and <a class="property css" data-link-type="property">ipcm</a> for IAMF-LPCM.</p>
    <p>For ISOBMFF encapsulation, it shall be the same as the <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="termref-for-⑨">boxtype</a> of its AudioSampleEntry if exist.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="num_samples_per_frame">num_samples_per_frame<a class="self-link" href="#num_samples_per_frame"></a></dfn> shall indicate the frame length, in samples, of the raw coded audio provided in by audio_frame_obu(). It shall not be set to zero.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="roll_distance">roll_distance<a class="self-link" href="#roll_distance"></a></dfn> is a signed integer that gives the number of frames that need to be decoded in order for a frame to be decoded correctly. A negative value indicates the number of frames before the frame to be decoded corrently.</p>
@@ -3592,9 +3592,9 @@ class mix_gain_parameter_data(animation_type) {
    <p><a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config②">Decoder_Config()</a> for IAMF-FLAC shall be <a data-link-type="dfn" href="https://xiph.org/flac/format.html" id="termref-for-⑥②">METADATA_BLOCK</a> of <a data-link-type="biblio" href="#biblio-flac" title="Free Lossless Audio Codec">[FLAC]</a>.</p>
    <p>Substream format shall be <a data-link-type="dfn" href="https://xiph.org/flac/format.html" id="termref-for-⑥③">FRAME</a> of <a data-link-type="biblio" href="#biblio-flac" title="Free Lossless Audio Codec">[FLAC]</a>, which is composed of <a data-link-type="dfn" href="https://xiph.org/flac/format.html" id="termref-for-⑥④">FRAME_HEADER</a>, followed by <a data-link-type="dfn" href="https://xiph.org/flac/format.html" id="termref-for-⑥⑤">SUBFRAME</a>(s) (one <a data-link-type="dfn" href="https://xiph.org/flac/format.html" id="termref-for-⑥⑥">SUBFRAME</a> per channel) and followed by <a data-link-type="dfn" href="https://xiph.org/flac/format.html" id="termref-for-⑥⑦">FRAME_FOOTER</a>.</p>
    <h4 class="heading settled" data-level="4.3.4" id="iamf-lpcm-specific"><span class="secno">4.3.4. </span><span class="content">IAMF-LPCM Specific</span><a class="self-link" href="#iamf-lpcm-specific"></a></h4>
-   <p><a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id④">Codec_ID</a> shall be <a class="property css" data-link-type="property">lpcm</a>.</p>
+   <p><a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id④">Codec_ID</a> shall be <a class="property css" data-link-type="property">ipcm</a>.</p>
    <p><a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config③">Decoder_Config()</a> for IAMF-LPCM shall be as follows:</p>
-<pre>class decoder_config(lpcm) {
+<pre>class decoder_config(ipcm) {
   unsigned int (32) sample_rate;
   unsigned int (8) sample_size;
 }
@@ -4055,7 +4055,7 @@ Quantity:  One of more
     <li data-md>
      <p>For IAMF-LPCM</p>
    </ul>
-<pre>iamf.IAMF-specific-needs.lpcm
+<pre>iamf.IAMF-specific-needs.ipcm
 </pre>
    <p><b>IAMF-specific-needs</b> shall be <b>V.PV</b> as follows:</p>
    <ul>
