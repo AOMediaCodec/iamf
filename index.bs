@@ -970,7 +970,7 @@ abstract class ParamDefinition() {
 
 <dfn value noexport for="ParamDefinition()">parameter_id</dfn> indicates the unique ID in an IA sequence for a given parameter.
 
-<dfn value noexport for="ParamDefinition()">parameter_rate</dfn> specifies the rate used by this parameter, expressed as ticks per second. Time-related fields associated with this parameter, such as durations and intervals, shall be expressed in the number of ticks.
+<dfn noexport>parameter_rate</dfn> specifies the rate used by this parameter, expressed as ticks per second. Time-related fields associated with this parameter, such as durations and intervals, shall be expressed in the number of ticks.
 
 ### Audio Frame OBU Syntax and Semantics ### {#obu-audioframe}
 
@@ -1114,7 +1114,7 @@ When an audio element is composed of G(r) number of substreams, scalable channel
 - ChannelGroup #q consists of G(q)-G(q-1) number of substreams. Where, q = 1, 2, ..., r and G(0) = 0.
 - IA frame is a set of audio_frame_obus with the same sync offsets of the single audio element for scalable channel audio. Each of them comes from each substream.
 - Every IA frame shall have the same number of audio_frame_obus.
-- When r > 1, parameter_block_obu may present with IA frame. 
+- When r > 1, parameter_block_obu() may present with IA frame. 
 
 <center><img src="images/Immersive Audio Bitstream with scalable channel audio (before OBU packing).png" style="width:100%; height:auto;"></center>
 <center><figcaption>Immersive Audio Sequence with scalable channel audio (before OBU packing)</figcaption></center>
@@ -2378,8 +2378,12 @@ For M2M-Rendering,
 - The output layout of the IA renderer is set to the playback layout.
 - The IA renderer used is selected according to the following rules:
 	- If the playback layout matches a [=loudspeaker_layout=] which can be generated from the highest loudspeaker layout of the audio element according to [[#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule]], use demixing_info_parameter_data().
-		- If demixing_info_parameter_data() is not delivered, use EAR Direct Speakers renderer ([[!ITU2127-0]]).
+		- If demixing_info_parameter_data() is not delivered,
+			- If the playback layout complies with loudspeaker layouts supported by [[!ITU2051-3]], use EAR Direct Speakers renderer ([[!ITU2127-0]]).
+			- Else if the playback layout is 3.1.2ch, use the static down-mix matrices specified in [[#processing-downmixmatrix-static]].
+			- Else, use implementaion-specific renderer
 	- Else if the playback layout complies with loudspeaker layouts supported by [[!ITU2051-3]], use EAR Direct Speakers renderer ([[!ITU2127-0]]).
+	- Else if the playback layout is 3.1.2ch, use the static down-mix matrices specified in [[#processing-downmixmatrix-static]].
 	- Else, use implementation-specific renderer.
  
 For A2M-Rendering,
@@ -2387,6 +2391,7 @@ For A2M-Rendering,
 - The output layout of the IA renderer is set to the playback layout.
 - The IA renderer used is selected according to the following rules:
 	- If the playback layout complies with loudspeaker layouts supported by [[!ITU2051-3]], use EAR HOA renderer ([[!ITU2127-0]]).
+	- Else if the playback layout is 3.1.2ch, use EAR HOA renderer ([[!ITU2127-0]]) to render to 5.1.2ch, 5.1.4ch, 7.1.2ch or 7.1.4ch and then use the static down-mix matrices specified in [[#processing-downmixmatrix-static]] to render it to 3.1.2ch.
 	- Else, use implementation-specific renderer.
 		- If there is no implementation-specific Ambisonics renderer, use the EAR HOA renderer to render to the next highest [[!ITU2051-3]] layout compared to the playback layout, and then downmix using implementation-specific renderer.
 
@@ -2459,7 +2464,7 @@ This section describes how a set of parameters is animated over a segment in a p
 
 If [=animation_type=] is equal to STEP, the parameter value provided by [=start_point_value=] should be applied to all time steps in the segment.
 
-If [=animation_type=] is equal to LINEAR or BEZIER, the information provided in [=AnimatedParameterData()=] describes how the parameter is animated as a Bezier curve. Let <code>T</code> be the segment interval defined in the [=parameter_block_obu=] and <code>P0</code>, <code>P1</code> and <code>P2</code> be 2D coordinates defined as
+If [=animation_type=] is equal to LINEAR or BEZIER, the information provided in [=AnimatedParameterData()=] describes how the parameter is animated as a Bezier curve. Let <code>T</code> be the segment interval defined in the parameter_block_obu() and <code>P0</code>, <code>P1</code> and <code>P2</code> be 2D coordinates defined as
 
 ```
 P0 = (t0, start_point_value),
@@ -2552,11 +2557,31 @@ The limiter should limit the true peak of audio signal at -1 dBTP, where true pe
 ## Down-mix Matrix ## {#processing-downmixmatrix}
 
 
-### Dynamic Down-mix Matrix {#processing-downmixmatrix-dynamic}
+### Dynamic Down-mix Matrix ### {#processing-downmixmatrix-dynamic}
 
 This section recommends dynamic down-mixing matrices.
 
 The dynamic down-mixing matrics complies with the down-mixing mechanism which is specified in [[#iamfgeneration-scalablechannelaudio-downmixmechanism]].
+
+### Static Down-mix Matrix ### {#processing-downmixmatrix-static}
+
+This section specifies static down-mix matrices to render to 3.1.2ch from each of 5.1.2ch, 5.1.4ch, 7.1.2ch and 7.1.4ch.
+
+The figures below show static down-mix matrices to 3.1.2ch.
+
+<center><img src="images/3.1.2ch Down-mix Matrix for 5.1.2ch.png" style="width:80%; height:auto;"></center>
+<center><figcaption>3.1.2ch Down-mix matrix for 5.1.2ch</figcaption></center>
+
+<center><img src="images/3.1.2ch Down-mix Matrix for 5.1.4ch.png" style="width:80%; height:auto;"></center>
+<center><figcaption>3.1.2ch Down-mix matrix for 5.1.4ch</figcaption></center>
+
+<center><img src="images/3.1.2ch Down-mix Matrix for 7.1.2ch.png" style="width:100%; height:auto;"></center>
+<center><figcaption>3.1.2ch Down-mix matrix for 7.1.2ch</figcaption></center>
+
+<center><img src="images/3.1.2ch Down-mix Matrix for 7.1.4ch.png" style="width:100%; height:auto;"></center>
+<center><figcaption>3.1.2ch Down-mix matrix for 7.1.4ch</figcaption></center>
+
+Where, p1 = 0.707. Implementations may use limiter defined in [[#processing-post-limiter]] to preserve energy of audio signals instead of normalization factors.
 
 
 # IAMF Generation Process # {#iamfgeneration}
