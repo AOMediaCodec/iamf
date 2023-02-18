@@ -581,7 +581,6 @@ This section specifies the OBU payload of OBU_IA_Codec_Config.
 class codec_config_obu() {
   leb128() codec_config_id;  
   codec_config();
-
 }
 
 class codec_config() {
@@ -589,7 +588,6 @@ class codec_config() {
   leb128() num_samples_per_frame;
   signed int (16) roll_distance;
   decoder_config(codec_id);
-
 }
 ```
 
@@ -598,8 +596,6 @@ class codec_config() {
 <dfn noexport>codec_config_id</dfn> indicates a unique ID in an IA sequence for a given codec config.
 
 <dfn noexport>codec_id</dfn> indicates a ‘four-character code’ (4CC) to identify the codec used to generate the audio substreams. It shall be 'Opus' for IAMF-OPUS, 'mp4a' for IAMF-AAC-LC, 'fLaC' for IAMF-FLAC and 'ipcm' for IAMF-LPCM.
-
-For ISOBMFF encapsulation, it shall be the same as the [=boxtype=] of its AudioSampleEntry if exist. 
 
 <dfn noexport>num_samples_per_frame</dfn> indicates the frame length, in samples, of the raw coded audio provided in by audio_frame_obu(). It shall not be set to zero.
 
@@ -1831,13 +1827,10 @@ IA sequence shall comply with the bitstream which is specified in [[#profiles-si
 ### Encapsulation Scheme ### {#isobmff-singletrack-basicencapsulationscheme}
 
 During encapsulation process, OBUs of IA sequence are encapsulated into [[!ISOBMFF]] as follows:
-- Magic Code OBU: version and profile version fields shall be moved to IASampleEntry.
-- Codec Config OBU: 
-	- codec_id and decoder_config() shall move to IASampleEntry.
-	- num_samples_per_frame shall move to 'stts'.
-	- roll_distance shall be stored as [=AudioPreRollEntry=] having [=grouping_type=], 'prol'.
-- Mix Presentation OBUs and Audio Element OBUs (with OBU syntax) shall be stored as a new sample group having [=grouping_type=], [=iagd=].
-- Sync OBU: parse the input timeline using the Sync OBU information and construct a PTRO box that describes the relative offsets for each parameter block.
+
+- Each set of descriptor OBUs, specified in [[#standalone-descriptor-obus]], and the Sync OBU that immediately follows them are moved to one [=IASampleEntry=]. The descriptor OBUs are then discarded from the IA sequence. In addition,
+    - The [=num_samples_per_frame=] field in the Codec Config OBU is copied to 'stts'.
+    - The [=roll_distance=] field in the Codec Config OBU is copied to [=AudioPreRollEntry()=] with the [=grouping_type=] 'prol'.
 - Each temporal unit:
 	- Temporal Delimiter OBU: shall be discarded if present.
 	- Parameter Block OBU for demixing_info_parameter_data() (with OBU syntax) shall be stored as a new sample group having [=grouping_type=], [=demi=].
@@ -1847,10 +1840,10 @@ During encapsulation process, OBUs of IA sequence are encapsulated into [[!ISOBM
 	- If [=obu_trimming_status_flag=] of the first Audio Frame OBU of the substream is set to 1, keep parsing following Audio Frame OBUs of the substream until meets the Audio Frame OBU having [=obu_trimming_status_flag=] =  0 and sum [=num_samples_to_trim_at_start=]. Then reflect the result of the summation to 'edts'.
 	- If [=obu_trimming_status_flag=] of the last Audio Frame OBU of the substream is set to 1, then reflect num_samples_to_trim_at_end to 'stts.
 	
-
 <center><img src="images/IAC Encapsulation Guideline.png" style="width:100%; height:auto;"></center>
 <center><figcaption>IAMF Encapsulation Scheme</figcaption></center>
 
+ISSUE: TODO: update the IAMF Encapsulation Scheme figure.
 
 ### IA Sample Entry ### {#iasampleentry-section}
 
@@ -1861,82 +1854,67 @@ During encapsulation process, OBUs of IA sequence are encapsulated into [[!ISOBM
 	Quantity:          One or more.
 </pre>
 
-
-The <dfn noexport>IASampleEntry</dfn> identifies that the track contains [=IA Samples=], and uses one single [=codec specific box=].
+<dfn noexport>IASampleEntry</dfn> identifies that the track contains [=IA Samples=], and contains one IA_Descriptor.
 
 <b>Syntax</b>
 
 ```
 class IASampleEntry extends AudioSampleEntry('iamf') {
-  unsigned int (8) version;
-  unsigned int (8) profile_version;
-  CodecSpecificBox config;
+  IA_Descriptor ia_descriptor;
 }
 ```
 
-No optional boxes of AudioSampleEntry shall present.
+The [=channelcount=] and [=samplerate=] fields of AudioSampleEntry are unused.
+
+None of AudioSampleEntry's optional boxes shall be present.
 
 <b>Semantics</b>
 
-Both [=channelcount=] and [=samplerate=] fields of AudioSampleEntry shall be ignored.
+<dfn noexport>ia_descriptor</dfn> is the IA_Descriptor box in this stream.
 
-version and profile_version shall be the same as [=version=] and [=profile_version=] in magic_code_obu, respectively.
-
-
-### Codec Specific Box ### {#codecspecificbox-section}
-
-This section describes a <dfn noexport>codec specific box</dfn> for the decoding parameters, which is defined by codec_id of audio_substream_config(), to decode one single substream of IA sequence. <code>iamf</code> shall contain only one single codec specific box regardless of the number of substreams in IA sequence. So, the codec specific box is applied to all of substreams in sample data.
-
-#### OPUS Specific Box #### {#codecspecificbox-opus}
-
-This shall be [=OpusSpecificBox=] ('dOps') for 'Opus' AudioSampleEntry which is specified in [[!OPUS-IN-ISOBMFF]].
+### IA Descriptors ### {#iadescriptors-section}
 
 <pre class="def">
-	Box Type:  <dfn export>dOps</dfn>
+	Box Type:  <dfn export>iamd</dfn>
 	Container: IA Sample Entry ('iamf')
 	Mandatory: Yes
-	Quantity:  One
+	Quantity:  One or more.
 </pre>
 
-
-This box is for one single substream.
+<dfn noexport>IA_Descriptor</dfn> contains one set of IAMF Descriptor OBUs, specified using the OBU syntax.
 
 <b>Syntax</b>
 
-It shall be the same as 'dOps' box for 'Opus' with that [=ChannelMappingFamily=] shall be set to 0.
+```
+class IA_Descriptor extends Box('iamd') {
+  magic_code_obu();
+  codec_config_obu();
+
+  leb128() num_audio_elements;
+  for (i = 0; i < num_audio_elements; i++) {
+    audio_element_obu();
+  }
+
+  leb128() num_mix_presentations;
+  for (j = 0; j < num_mix_presentations; j++) {
+    mix_presentation_obu();
+  }
+}
+```
 
 <b>Semantics</b>
 
-It shall be the same as the semantics in [[!OPUS-IN-ISOBMFF]] except followings:
-- [=OutputChannelCount=] must be set to 2. [=OutputChannelCount=] can be ignored because the real value can be determined from the Audio Element OBU and from the [=opus packet=] header.
-- In case of [=num_layers=] > 1, [=OutputGain=] shall be set to 0.
-- [=ChannelMappingFamily=] shall be set to 0.
+<dfn value noexport for="IA_Descriptor">magic_code_obu()</dfn> is the [=magic_code_obu()=] in this set of descriptor OBUs.
 
-#### MP4A Specific Box #### {#codecspecificbox-mp4a}
+<dfn value noexport for="IA_Descriptor">codec_config_obu()</dfn> is the [=codec_config_obu()=] in this set of descriptor OBUs.
 
-This shall be [=ESDBox=] ('esds') for 'mp4a' which is specified in [[!MP4]].
+<dfn value noexport for="IA_Descriptor">num_audio_elements()</dfn> is the number of audio element OBUs in this set of descriptor OBUs.
 
+<dfn value noexport for="IA_Descriptor">audio_element_obu()</dfn> is the <code>i</code>-th [=audio_element_obu()=] in this set of descriptor OBUs.
 
-<pre class="def">
-	Box Type:  <dfn export>esds</dfn>
-	Container: IA Sample Entry ('iamf')
-	Mandatory: Yes
-	Quantity:  One of more
-</pre>
+<dfn value noexport for="IA_Descriptor">num_mix_presentations</dfn> is the number of mix presentation OBUs in this set of descriptor OBUs.
 
-
-This box is for one single Substream.
-
-<b>Syntax</b>
-
-It shall be the same as 'esds' box for [=Low Complexity Profile=] of [[!AAC]] (AAC-LC).
-
-<b>Semantics</b>
-
-It shall be the same as the semantics in 'esds' except followings:
-- [=channelConfiguration=] field must be set to 2. The real value can be implied from the Audio Element OBU.
-
-ISSUE: We need to add specific boxes for FLAC and LPCM.
+<dfn value noexport for="IA_Descriptor">mix_presentation_obu()</dfn> is the <code>j</code>-th [=mix_presentation_obu()=] in this set of descriptor OBUs.
 
 ### IA Sample Format ### {#iasampleformat}
 
@@ -1944,12 +1922,6 @@ For tracks using the [=IASampleEntry=], an <dfn noexport>IA Sample</dfn> has the
 - The one sample data shall be the remained OBUs of each temporal unit after processing of [[#isobmff-singletrack-basicencapsulationscheme]].
 
 ### IA Sample Group ### {#iasamplegroup}
-
-#### Global Descriptor Sample Group #### {#iasamplegroup-globaldescriptor}
-
-During encapsulation process, global descriptors shall be discarded from IA sequence. A new sample group for global descriptors shall be defined by using 'sgpd' and 'sbgp' boxes with following requirements:
-- [=grouping_type=] shall be set to <dfn noexport>iagd</dfn>.
-- [=SampleGroupDescriptionEntry=] shall be Mix Presentation OBUs and followed by Audio Element OBUs with OBU syntax.
 
 #### Demixing Info Sample Group #### {#iasamplegroup-demixing}
 
