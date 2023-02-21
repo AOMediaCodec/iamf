@@ -1880,7 +1880,7 @@ None of AudioSampleEntry's optional boxes shall be present.
 	Box Type:  <dfn export>iamd</dfn>
 	Container: IA Sample Entry ('iamf')
 	Mandatory: Yes
-	Quantity:  One or more.
+	Quantity:  One.
 </pre>
 
 <dfn noexport>IA_Descriptor</dfn> contains one set of IAMF Descriptor OBUs, specified using the OBU syntax.
@@ -1901,6 +1901,7 @@ class IA_Descriptor extends Box('iamd') {
   for (j = 0; j < num_mix_presentations; j++) {
     mix_presentation_obu();
   }
+  sync_obu();
 }
 ```
 
@@ -1918,19 +1919,12 @@ class IA_Descriptor extends Box('iamd') {
 
 <dfn value noexport for="IA_Descriptor">mix_presentation_obu()</dfn> is the <code>j</code>-th [=mix_presentation_obu()=] in this set of descriptor OBUs.
 
+<dfn value noexport for="IA_Descriptor">sync_obu()</dfn> is the [=sync_obu()=] that immediately follows this set of descriptor OBUs.
+
 ### IA Sample Format ### {#iasampleformat}
 
 For tracks using the [=IASampleEntry=], an <dfn noexport>IA Sample</dfn> has the following constraints:
 - The one sample data shall be the remained OBUs of each temporal unit after processing of [[#isobmff-singletrack-basicencapsulationscheme]].
-
-### IA Sample Group ### {#iasamplegroup}
-
-#### Demixing Info Sample Group #### {#iasamplegroup-demixing}
-
-During encapsulation process, Parameter Block OBU for demixing_info_parameter_data shall be discarded from IA sequence. A new sample group for demixing_info_parameter_data() shall be defined by using 'sgpd' and 'sbgp' boxes with following requirements:
-- [=grouping_type=] shall be set to <dfn noexport>demi</dfn>.
-- Each [=SampleGroupDescriptionEntry=] shall be Parameter Block OBU for demixing_info_parameter_data with OBU syntax.
-
 
 ## Common Encryption ## {#CommonEncryption}
 TBA
@@ -1997,27 +1991,16 @@ Below figure shows the mirroring process of the encapsulation scheme of IA seque
 
 
 During decapsulation process, IAMF file is decapsulated into IA sequences which conform to [[#obu-syntax]] as follows:
-- Step1: Reconstruction of descriptor OBUs (one Magic Code OBU, one Codec Config OBU, one or more Mix Presentation OBUs and one or more Audio Element OBUs) for the ith IA sequence.
-	- [Step1-1] Magic Code OBU: take version and profile_version fields from <code>iamf</code> sample entry and packetize it with [=ia_code=] and the pre-fixed header value (i.e. 0xF006) by OBU.
-	- [Step1-2] Codec Config OBU: generate [=codec_id=] and [=decoder_config()=] from CodecSpecificBox of <code>iamf</code> sample entry, num_samples_per_frame from 'stts' box and take roll_distance from [=AudioPreRollEntry=], and packetize it by OBU with obu_type = OBU_IA_Codec_Config.
-	- [Step1-3] Mix Presentation OBUs and Audio Element OBUs: take the ith SampleGroupDescriptionEntry as it is in SampleGroup with grouping_type, [=iagd=].
-	- [Step1-4] Figure out the offset (i1) and number (im) of Samples, which the ith SampleGroupDescriptionEntry is applied to, from the SampleGroup.
-- Step2: Prepare Sync_OBU with obu_type = OBU_IA_Sync.
+- Step1: Reconstruction of descriptor OBUs (one Magic Code OBU, one Codec Config OBU, one or more Audio Element OBUs and one or more Mix Presentation OBUs) for the ith IA sequence.
+	- Magic Code OBU: take the magic_code_obu in the ith AudioSampleEntry('iamf').
+	- Codec Config OBU: take the codec_config_obu in the ith AudioSampleEntry('iamf').
+	- Audio Element OBU(s): take the audio_element_obus in the ith AudioSampleEntry('iamf').
+	- Mix Presentation OBU(s): take the mix_presentation_obus in the ith AudioSampleEntry('iamf').
+- Step2: Reconstruction of Sync_OBU for the ith IA sequence.
+	- Take the sync_obu in the ith AudioSampleEntry('iamf').
 - Step3: Reconstructing of the jth Temporal Unit of the ith IA sequence (j = i1, i2, …, im)
-	- [Step3-1] If there is the SampleGroup with grouping_type = [=demi=], then take the parameter block OBU for the demixing_info and jth sample. Otherwise, take jth sample as it is.
-		- Parameter block OBU for demixing_info: take the SampleGroupDescriptionEntry as it is, from SampleGrouop with grouping_type = [=demi=], mapped to jth Sample.
-	- [Step3-2] Place Sync_OBU at the front of the result of Step2-2 without gap to reconstruct the jth Temporal Unit.
+	- Take jth sample as it is.
 - Step4: Place descriptor OBUs, followed by Sync OBU, and followed by Temporal Units in order (j = i1, i2, …, im) without gap, to reconstruct the ith IA sequence.
-
-[=codec_id=] and [=decoder_config()=] for IAMF-OPUS is generated as follows:
-- The syntax and values shall conform to [=ID Header=] of [[!RFC7845]] with following constraints.
-	- [=OutputChannelCount=], [=PreSkip=], [=InputSampleRate=], [=OutputGain=] and [=ChannelMappingFamily=] are copied from [=dOps=] box.
-	
-
-[=codec_id=] and [=decoder_config()=] for IAMF-AAC-LC is generated as follows:
-- [=codec_id=]: 'mp4a'
-- [=decoder_config()=] is generated from [=DecoderConfigDescriptor()=] of [=esds=] box.
-
 
 # IAMF processing # {#processing}
 
