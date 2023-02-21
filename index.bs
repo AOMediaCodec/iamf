@@ -218,7 +218,14 @@ url: https://xiph.org/flac/format.html; spec: FLAC; type: property;
 		"status": "Paper",
 		"publisher": "AES",
 		"href": "https://www.aes.org/e-lib/browse.cfm?elib=20446"
+	},
+	"AmbiX": {
+		"title": "AMBIX - A SUGGESTED AMBISONICS FORMAT",
+		"status": "Paper",
+		"publisher": "Ambisonics Symposium, June 2011",
+		"href": "https://iem.kug.ac.at/fileadmin/media/iem/projects/2011/ambisonics11_nachbar_zotter_sontacchi_deleflie.pdf"
 	}
+
 }
 </pre>
 
@@ -1203,7 +1210,7 @@ Bit position : Channel Name
 
 ### Ambisonics Config Syntax and Semantics ### {#syntax-ambisonics-config}
 
-[=ambisonics_config()=] contains information regarding the configuration of Ambisonics.
+[=ambisonics_config()=] contains information regarding the configuration of Ambisonics. In this specification, the [[!AmbiX]] format is adopted, which uses Ambisonics Channel Number (ACN) channel ordering and normalizes the channels with Schmidt Semi-Normalization (SN3D).
 
 <b>Syntax</b>
 
@@ -1245,7 +1252,7 @@ If ambisonics_mode is equal to MONO, this indicates that the Ambisonics channels
 
 If ambisonics_mode is equal to PROJECTION, this indicates that the Ambisonics channels are first linearly projected onto another subspace before coding as a mix of coupled stereo and mono substreams.
 
-<dfn noexport>output_channel_count</dfn> complies with [=channel count=] in [[!RFC8486] with following restrictions:
+<dfn noexport>output_channel_count</dfn> complies with [=channel count=] in [[!RFC8486]] with following restrictions:
 - The allowed numbers of [=output_channel_count=] are (1+n)^2, where n = 0, 1, 2, ..., 14. 
 - In other words, the scene-based audio element shall not include non-diegetic channels.
 
@@ -2241,7 +2248,7 @@ If the EAR HOA renderer is used, the following metadata should be provided to th
 2. Ambisonics degree
 3. Ambisonics normalization method
 
-In this specification, the AmbiX format is adopted, which uses SN3D normalization and ACN channel ordering. Accordingly, the Ambisonics order and degree can be computed from the channel index k as follows:
+In this specification, the [[!AmbiX]] format is adopted, which uses SN3D normalization and ACN channel ordering. Accordingly, the Ambisonics order and degree can be computed from the channel index <code>k</code> as follows:
 
 ```
 order   n = floor(sqrt(k)),
