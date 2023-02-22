@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version f043d3484, updated Fri Feb 17 10:53:48 2023 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="19d47684978a9da2c0795e6221781f773fc43696" name="document-revision">
+  <meta content="1dfdc961a25277e9d59735229a8e085c5a690745" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -3661,6 +3661,24 @@ class mix_gain_parameter_data(animation_type) {
      <p>There shall be only one unique Codec Config OBU.</p>
     <li data-md>
      <p>There shall be at most two unique Audio Element OBUs at any one time.</p>
+     <ul>
+      <li data-md>
+       <p>There shall be at most one Channel-based Audio Element having <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers④">num_layers</a> > 1 at any one time.</p>
+      <li data-md>
+       <p>There shall be at most one Scene-based Audio Element at any one time.</p>
+      <li data-md>
+       <p>In other words, following combinations of two Audio Elements are only allowed.</p>
+       <ul>
+        <li data-md>
+         <p>Channel-based Audio Element having <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers⑤">num_layers</a> = 1 + Channel-based Audio Element having <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers⑥">num_layers</a> = 1.</p>
+        <li data-md>
+         <p>Channel-based Audio Element having <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers⑦">num_layers</a> = 1 + Channel-based Audio Element having <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers⑧">num_layers</a> > 1.</p>
+        <li data-md>
+         <p>Scene-based Audio Element + Channel-based Audio Element having <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers⑨">num_layers</a> = 1.</p>
+        <li data-md>
+         <p>Scene-based Audio Element + Channel-based Audio Element having <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⓪">num_layers</a> > 1.</p>
+       </ul>
+     </ul>
     <li data-md>
      <p>There may be more than one unique set of Descriptor OBUs.</p>
     <li data-md>
@@ -3675,10 +3693,10 @@ class mix_gain_parameter_data(animation_type) {
       <li data-md>
        <p>All flags of itur_bs2127_direct_speakers_config() shall be set to 0 for this profile.</p>
       <li data-md>
-       <p>For a given Mix Presentation OBU, it shall include at most one scene-based audio element and it shall include at most one channel-based audio element with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers④">num_layers</a> > 1 for this profile.</p>
+       <p>For a given Mix Presentation OBU, it shall include at most one scene-based audio element and it shall include at most one channel-based audio element with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①①">num_layers</a> > 1 for this profile.</p>
      </ul>
     <li data-md>
-     <p><a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers⑤">num_layers</a> shall be set to 1 or up to 6 for Channel-based audio element (i.e. scalable channel audio)</p>
+     <p><a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①②">num_layers</a> shall be set to 1 or up to 6 for Channel-based audio element (i.e. scalable channel audio)</p>
      <ul>
       <li data-md>
        <p>In this case, <a data-link-type="dfn" href="#demixing_info_parameter_data" id="ref-for-demixing_info_parameter_data①">demixing_info_parameter_data()</a> and <a data-link-type="dfn" href="#recon_gain_info_parameter_data" id="ref-for-recon_gain_info_parameter_data①">recon_gain_info_parameter_data()</a> may be present in the IA sequence.</p>
@@ -3730,7 +3748,7 @@ class mix_gain_parameter_data(animation_type) {
        <p>The combination of <a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id⑧">codec_id</a> = <a class="property css" data-link-type="property" href="https://xiph.org/flac/format.html" id="ref-for-c568d8f4de8d80029804bf1eecb28b4c①⓪">fLaC</a> for one substream and <a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id⑨">codec_id</a> = <a class="property css" data-link-type="property" href="https://www.iso.org/standard/79110.html#" id="ref-for-48e47e0f5189469fa73e92a00c751a02③">mp4a</a> for another substream shall not be allowed.</p>
      </ul>
     <li data-md>
-     <p><a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers⑥">num_layers</a> shall be set to 1 or up to 6 for Channel-based audio element (i.e. scalable channel audio)</p>
+     <p><a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①③">num_layers</a> shall be set to 1 or up to 6 for Channel-based audio element (i.e. scalable channel audio)</p>
      <ul>
       <li data-md>
        <p>In this case, <a data-link-type="dfn" href="#demixing_info_parameter_data" id="ref-for-demixing_info_parameter_data⑤">demixing_info_parameter_data()</a> and <a data-link-type="dfn" href="#recon_gain_info_parameter_data" id="ref-for-recon_gain_info_parameter_data③">recon_gain_info_parameter_data()</a> may be present.</p>
@@ -3987,7 +4005,7 @@ Quantity:  One
     <li data-md>
      <p><a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="ref-for-1148b46dff2b25531031f0fd1fb79485①②">OutputChannelCount</a> must be set to 2. <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="ref-for-1148b46dff2b25531031f0fd1fb79485①③">OutputChannelCount</a> can be ignored because the real value can be determined from the Audio Element OBU and from the <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6716#" id="ref-for-1af30f726bd2cf5a930fcae7941981e8②">opus packet</a> header.</p>
     <li data-md>
-     <p>In case of <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers⑦">num_layers</a> > 1, <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="ref-for-1148b46dff2b25531031f0fd1fb79485①④">OutputGain</a> shall be set to 0.</p>
+     <p>In case of <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①④">num_layers</a> > 1, <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="ref-for-1148b46dff2b25531031f0fd1fb79485①④">OutputGain</a> shall be set to 0.</p>
     <li data-md>
      <p><a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="ref-for-1148b46dff2b25531031f0fd1fb79485①⑤">ChannelMappingFamily</a> shall be set to 0.</p>
    </ul>
@@ -4256,7 +4274,7 @@ Quantity:  One of more
        <p>Limiter module may limit the true peak of input channels at -1dB.</p>
      </ul>
    </ul>
-   <p>Following sections, <a href="#processing-scalablechannelaudio-gain">§ 9.2.1 Gain</a>, <a href="#processing-scalablechannelaudio-demixer">§ 9.2.2 De-mixer</a> and <a href="#processing-scalablechannelaudio-recongain">§ 9.2.3 Recon Gain</a> are only needed for decoding of scalable audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers⑧">num_layers</a> > 1.</p>
+   <p>Following sections, <a href="#processing-scalablechannelaudio-gain">§ 9.2.1 Gain</a>, <a href="#processing-scalablechannelaudio-demixer">§ 9.2.2 De-mixer</a> and <a href="#processing-scalablechannelaudio-recongain">§ 9.2.3 Recon Gain</a> are only needed for decoding of scalable audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⑤">num_layers</a> > 1.</p>
    <h4 class="heading settled" data-level="9.2.1" id="processing-scalablechannelaudio-gain"><span class="secno">9.2.1. </span><span class="content">Gain</span><a class="self-link" href="#processing-scalablechannelaudio-gain"></a></h4>
    <p>Gain module is the mirror process of Attenuation module. It recovers the reduced sample values using Output_Gain when its flag for ChannelGroup #j is on. When its flag is off, then this module shall be bypassed for ChannelGroup #j. Output_Gain(j) for ChannelGroup #j shall be applied to all samples of the mixed channels in the ChannelGroup #j. Where, mixed channels means the mixed channels from an input channel audio (i.e. a channel audio for CL #n).</p>
    <p>To apply the gain, an implementation MUST use the following:</p>
@@ -4264,7 +4282,7 @@ Quantity:  One of more
 </pre>
    <p>Where, Output_Gain(j) is the raw 16-bit value for jth layer which is specified in <a data-link-type="dfn" href="#channel_audio_layer_config" id="ref-for-channel_audio_layer_config①">channel_audio_layer_config()</a>.</p>
    <h4 class="heading settled" data-level="9.2.2" id="processing-scalablechannelaudio-demixer"><span class="secno">9.2.2. </span><span class="content">De-mixer</span><a class="self-link" href="#processing-scalablechannelaudio-demixer"></a></h4>
-   <p>For scalable channel audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers⑨">num_layers</a> > 1, some channels of <a data-link-type="dfn" href="#down-mixed-audio" id="ref-for-down-mixed-audio">down-mixed audio</a> for CL #i are delivered as is but the rest are mixed with other channels for CL #i-1.</p>
+   <p>For scalable channel audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⑥">num_layers</a> > 1, some channels of <a data-link-type="dfn" href="#down-mixed-audio" id="ref-for-down-mixed-audio">down-mixed audio</a> for CL #i are delivered as is but the rest are mixed with other channels for CL #i-1.</p>
    <p>De-mixer module reconstructs the rest of the down-mixed audio for CL #i from the mixed channels, which is passed by Gain module, and its relevant non-mixed channels using its relevant demixing parameters.</p>
    <p>De-mixing for down-mixed audio for CL #i shall comply with the result by the combination of following surround and top de-mixers:</p>
    <ul>
@@ -4423,7 +4441,7 @@ Ltf = Ltf3 - w(k) x (L2 - 0.707 x C - L5) and Rtf = Rtf3 - w(k) x (R2 - 0.707 x 
      <p>The input layout of the IA renderer is set as follows:</p>
      <ul>
       <li data-md>
-       <p>If <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⓪">num_layers</a> = 1, use the <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout①①">loudspeaker_layout</a> of the audio element.</p>
+       <p>If <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⑦">num_layers</a> = 1, use the <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout①①">loudspeaker_layout</a> of the audio element.</p>
       <li data-md>
        <p>Else, if there is a <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout⑧">loudness_layout</a> that matches the playback layout, use it.</p>
       <li data-md>
@@ -4691,9 +4709,9 @@ gamma = n0 - n.
        <p>It may output parameter blocks</p>
        <ul>
         <li data-md>
-         <p>For channel-based audio element with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①①">num_layers</a> = 1, it may output parameter blocks for demixing info.</p>
+         <p>For channel-based audio element with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⑧">num_layers</a> = 1, it may output parameter blocks for demixing info.</p>
         <li data-md>
-         <p>For channel-based audio element with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①②">num_layers</a> > 1, it outputs parameter blocks for demixing_info_parameter_data and recon_gain_info_parameter_data.</p>
+         <p>For channel-based audio element with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⑨">num_layers</a> > 1, it outputs parameter blocks for demixing_info_parameter_data and recon_gain_info_parameter_data.</p>
         <li data-md>
          <p>It may further output parameter blocks for post processing such as Loudness and DRC control.</p>
        </ul>
@@ -4797,7 +4815,7 @@ gamma = n0 - n.
      <p>Pre-processor outputs one or more ChannelGroups, descriptors and parameter blocks. It is composed of Down-mix parameter generator, Down-mixer, Loudness, ChannelGroup generator, Attenuation and Meta generator.</p>
      <ul>
       <li data-md>
-       <p>For non-scalable channel audio (i.e. <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①③">num_layers</a> = 1):</p>
+       <p>For non-scalable channel audio (i.e. <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②⓪">num_layers</a> = 1):</p>
        <ul>
         <li data-md>
          <p>Parameter blocks for recon_gain_info_parameter_data is not be generated.</p>
@@ -4813,7 +4831,7 @@ gamma = n0 - n.
       <li data-md>
        <p>Loudness module should output the loudness level (<a data-link-type="dfn" href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#" id="ref-for-132da473010a02d5cd59128d0f02deeb①">LKFS</a>) of each down-mixed audio based on <a data-link-type="biblio" href="#biblio-itu1770-4" title="Algorithms to measure audio programme loudness and true-peak audio level">[ITU1770-4]</a>.</p>
       <li data-md>
-       <p>ChannelGroup generator shall transform the input channel audio to ChannelGroups for scalable channel audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①④">num_layers</a> > 1 scalability by using the down-mix parameters and the list of channel layouts.</p>
+       <p>ChannelGroup generator shall transform the input channel audio to ChannelGroups for scalable channel audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②①">num_layers</a> > 1 scalability by using the down-mix parameters and the list of channel layouts.</p>
       <li data-md>
        <p>Attenuation module shall apply a gain to the transformed ChannelGroups to prevent clipping.</p>
       <li data-md>
@@ -4823,7 +4841,7 @@ gamma = n0 - n.
          <p>descriptors shall be set to as follows:</p>
          <ul>
           <li data-md>
-           <p><a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⑤">num_layers</a> shall be set to the number of channel layouts.</p>
+           <p><a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②②">num_layers</a> shall be set to the number of channel layouts.</p>
           <li data-md>
            <p><a data-link-type="dfn" href="#channel_audio_layer_config" id="ref-for-channel_audio_layer_config②">channel_audio_layer_config()</a> shall be set to as follows:</p>
            <ul>
@@ -4832,7 +4850,7 @@ gamma = n0 - n.
             <li data-md>
              <p><a data-link-type="dfn" href="#output_gain_is_present_flag" id="ref-for-output_gain_is_present_flag">output_gain_is_present_flag</a> shall set to 1 for the ith ChannelGroup if attenuation is applied to the mixed channels of the ith ChannelGroup. Otherwise it shall be set to 0 for the ith ChannelGroup.</p>
             <li data-md>
-             <p><a data-link-type="dfn" href="#recon_gain_is_present_flag" id="ref-for-recon_gain_is_present_flag">recon_gain_is_present_flag</a> shall be set to 1 for the ith ChannelGroup if the preceding ChannelGroups has one or more mixed channels from the down-mixed audio for the ith channel layout. Otherwise, it shall be set to 0 for the ith ChannelGroup. Especially, when <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⑥">num_layers</a> = 1, this flag shall be set to 0.</p>
+             <p><a data-link-type="dfn" href="#recon_gain_is_present_flag" id="ref-for-recon_gain_is_present_flag">recon_gain_is_present_flag</a> shall be set to 1 for the ith ChannelGroup if the preceding ChannelGroups has one or more mixed channels from the down-mixed audio for the ith channel layout. Otherwise, it shall be set to 0 for the ith ChannelGroup. Especially, when <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②③">num_layers</a> = 1, this flag shall be set to 0.</p>
             <li data-md>
              <p><a data-link-type="dfn" href="#substream_count" id="ref-for-substream_count③">substream_count</a> shall be set to the number of substreams composing of the ith ChannelGroup.</p>
             <li data-md>
@@ -4913,7 +4931,7 @@ gamma = n0 - n.
    <center>
     <figcaption>IA Encoding Flowchart for Scalable Channel Audio</figcaption>
    </center>
-   <p>Following sections, <a href="#iamfgeneration-scalablechannelaudio-downmixparameter">§ 10.2.1 Down-mix parameter and Loudness</a>, <a href="#iamfgeneration-scalablechannelaudio-downmixmechanism">§ 10.2.2 Down-mix Mechanism</a>, <a href="#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule">§ 10.2.3 Channel Layout Generation Rule</a>, <a href="#iamfgeneration-scalablechannelaudio-recongaingeneration">§ 10.2.4 Recon Gain Generation</a> and <a href="#iamfgeneration-scalablechannelaudio-channelgroupgenerationrule">§ 10.2.5 ChannelGroup Generation Rule</a> do not needed for non-scalable channel audio (i.e., when <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⑦">num_layers</a> specified in <a data-link-type="dfn" href="#scalable_channel_layout_config" id="ref-for-scalable_channel_layout_config②">scalable_channel_layout_config()</a> is set to 1).</p>
+   <p>Following sections, <a href="#iamfgeneration-scalablechannelaudio-downmixparameter">§ 10.2.1 Down-mix parameter and Loudness</a>, <a href="#iamfgeneration-scalablechannelaudio-downmixmechanism">§ 10.2.2 Down-mix Mechanism</a>, <a href="#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule">§ 10.2.3 Channel Layout Generation Rule</a>, <a href="#iamfgeneration-scalablechannelaudio-recongaingeneration">§ 10.2.4 Recon Gain Generation</a> and <a href="#iamfgeneration-scalablechannelaudio-channelgroupgenerationrule">§ 10.2.5 ChannelGroup Generation Rule</a> do not needed for non-scalable channel audio (i.e., when <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②④">num_layers</a> specified in <a data-link-type="dfn" href="#scalable_channel_layout_config" id="ref-for-scalable_channel_layout_config②">scalable_channel_layout_config()</a> is set to 1).</p>
    <h4 class="heading settled" data-level="10.2.1" id="iamfgeneration-scalablechannelaudio-downmixparameter"><span class="secno">10.2.1. </span><span class="content">Down-mix parameter and Loudness</span><a class="self-link" href="#iamfgeneration-scalablechannelaudio-downmixparameter"></a></h4>
    <p>This section describes how to generate down-mix parameters and loudness level for a given channel audio and a given list of channel layouts for scalability.</p>
    <p>Below figure shows a block diagram for down-mix parameter and loudness module including down-mixer.</p>
@@ -4992,7 +5010,7 @@ T2toTF2 enc.: Ltf3 = Ltf2 + w(k) x δ(k) x Ls5 and Rtf3 = Rtf2 + w(k) x δ(k) x 
     <li data-md>
      <p>CL #i is one of <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout②⓪">loudspeaker_layouts</a> supported in this specification.</p>
    </ul>
-   <p>Down-mix paths, which conform to the above rule, shall be only allowed for scalable channel audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⑧">num_layers</a> > 1 as depicted in below figure.</p>
+   <p>Down-mix paths, which conform to the above rule, shall be only allowed for scalable channel audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②⑤">num_layers</a> > 1 as depicted in below figure.</p>
    <center><img height="716" src="images/Down-mix Path.png" style="width:90%; height:auto;" width="792"></center>
    <center>
     <figcaption>IA Down-mix Path</figcaption>
@@ -5086,13 +5104,13 @@ Recon_Gain for D_Rtb4:
     <li data-md>
      <p><a data-link-type="dfn" href="#output_mix_config" id="ref-for-output_mix_config②">output_mix_config()</a>: No parameter block for output_mix and default_mix_gain = 0dB</p>
     <li data-md>
-     <p><a data-link-type="dfn" href="#num_layouts" id="ref-for-num_layouts①">num_layouts</a>: set to <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⑨">num_layers</a></p>
+     <p><a data-link-type="dfn" href="#num_layouts" id="ref-for-num_layouts①">num_layouts</a>: set to <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②⑥">num_layers</a></p>
     <li data-md>
-     <p><a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout①④">loudness_layout</a>: set to L(1), L(2), ..., L(<a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②⓪">num_layers</a>).</p>
+     <p><a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout①④">loudness_layout</a>: set to L(1), L(2), ..., L(<a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②⑦">num_layers</a>).</p>
     <li data-md>
-     <p>loudness_info() on L(1), loudness_info on L(2), ..., loudness_info on L(<a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②①">num_layers</a>): loudness information of the rendered audio to the measured layout L(i).</p>
+     <p>loudness_info() on L(1), loudness_info on L(2), ..., loudness_info on L(<a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②⑧">num_layers</a>): loudness information of the rendered audio to the measured layout L(i).</p>
     <li data-md>
-     <p>Where L(i) is the measured layout for the ith layer and i = 1, 2, ..., <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②②">num_layers</a></p>
+     <p>Where L(i) is the measured layout for the ith layer and i = 1, 2, ..., <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②⑨">num_layers</a></p>
    </ul>
    <p>For Mix Presentation for one single scene-based audio element, Mix Presentation OBU shall follow following restrictions:</p>
    <ul>
@@ -6747,16 +6765,16 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-num_layers①">4.2.1. Scalable Channel Layout Config Syntax and Semantics</a>
     <li><a href="#ref-for-num_layers②">4.2.4. Recon Gain Info Parameter Data Syntax and Semantics</a>
     <li><a href="#ref-for-num_layers③">5.1. IA Simple Profile</a>
-    <li><a href="#ref-for-num_layers④">5.2. IA Base Profile</a> <a href="#ref-for-num_layers⑤">(2)</a>
-    <li><a href="#ref-for-num_layers⑥">5.3. IA Enhanced Profile</a>
-    <li><a href="#ref-for-num_layers⑦">7.2.4.1. OPUS Specific Box</a>
-    <li><a href="#ref-for-num_layers⑧">9.2. Scalable Channel Audio decoding</a>
-    <li><a href="#ref-for-num_layers⑨">9.2.2. De-mixer</a>
-    <li><a href="#ref-for-num_layers①⓪">9.3.2. Rendering an Audio Element</a>
-    <li><a href="#ref-for-num_layers①①">10. IAMF Generation Process</a> <a href="#ref-for-num_layers①②">(2)</a>
-    <li><a href="#ref-for-num_layers①③">10.2. Scalable Channel Audio Encoding</a> <a href="#ref-for-num_layers①④">(2)</a> <a href="#ref-for-num_layers①⑤">(3)</a> <a href="#ref-for-num_layers①⑥">(4)</a> <a href="#ref-for-num_layers①⑦">(5)</a>
-    <li><a href="#ref-for-num_layers①⑧">10.2.3. Channel Layout Generation Rule</a>
-    <li><a href="#ref-for-num_layers①⑨">10.2.6. Mix Presentation Encoding</a> <a href="#ref-for-num_layers②⓪">(2)</a> <a href="#ref-for-num_layers②①">(3)</a> <a href="#ref-for-num_layers②②">(4)</a>
+    <li><a href="#ref-for-num_layers④">5.2. IA Base Profile</a> <a href="#ref-for-num_layers⑤">(2)</a> <a href="#ref-for-num_layers⑥">(3)</a> <a href="#ref-for-num_layers⑦">(4)</a> <a href="#ref-for-num_layers⑧">(5)</a> <a href="#ref-for-num_layers⑨">(6)</a> <a href="#ref-for-num_layers①⓪">(7)</a> <a href="#ref-for-num_layers①①">(8)</a> <a href="#ref-for-num_layers①②">(9)</a>
+    <li><a href="#ref-for-num_layers①③">5.3. IA Enhanced Profile</a>
+    <li><a href="#ref-for-num_layers①④">7.2.4.1. OPUS Specific Box</a>
+    <li><a href="#ref-for-num_layers①⑤">9.2. Scalable Channel Audio decoding</a>
+    <li><a href="#ref-for-num_layers①⑥">9.2.2. De-mixer</a>
+    <li><a href="#ref-for-num_layers①⑦">9.3.2. Rendering an Audio Element</a>
+    <li><a href="#ref-for-num_layers①⑧">10. IAMF Generation Process</a> <a href="#ref-for-num_layers①⑨">(2)</a>
+    <li><a href="#ref-for-num_layers②⓪">10.2. Scalable Channel Audio Encoding</a> <a href="#ref-for-num_layers②①">(2)</a> <a href="#ref-for-num_layers②②">(3)</a> <a href="#ref-for-num_layers②③">(4)</a> <a href="#ref-for-num_layers②④">(5)</a>
+    <li><a href="#ref-for-num_layers②⑤">10.2.3. Channel Layout Generation Rule</a>
+    <li><a href="#ref-for-num_layers②⑥">10.2.6. Mix Presentation Encoding</a> <a href="#ref-for-num_layers②⑦">(2)</a> <a href="#ref-for-num_layers②⑧">(3)</a> <a href="#ref-for-num_layers②⑨">(4)</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-channel_audio_layer_config" class="dfn-panel" data-for="channel_audio_layer_config" id="infopanel-for-channel_audio_layer_config">
