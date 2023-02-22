@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version f043d3484, updated Fri Feb 17 10:53:48 2023 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="1dfdc961a25277e9d59735229a8e085c5a690745" name="document-revision">
+  <meta content="219203f5551842ee3a24a069ad45bf169b8cbd22" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2140,8 +2140,10 @@ dfn > a.self-link::before      { content: "#"; }
         <li>
          <a href="#processing-mixpresentation-rendering"><span class="secno">9.3.2</span> <span class="content">Rendering an Audio Element</span></a>
          <ol class="toc">
-          <li><a href="#processing-mixpresentation-rendering-ear-directspeakers"><span class="secno">9.3.2.1</span> <span class="content">EAR Direct Speakers renderer</span></a>
-          <li><a href="#processing-mixpresentation-rendering-ear-hoa"><span class="secno">9.3.2.2</span> <span class="content">EAR HOA renderer</span></a>
+          <li><a href="#processing-mixpresentation-rendering-m2l"><span class="secno">9.3.2.1</span> <span class="content">Rendering a channel-based audio element to loudspeakers</span></a>
+          <li><a href="#processing-mixpresentation-rendering-a2l"><span class="secno">9.3.2.2</span> <span class="content">Rendering a scene-based audio element to loudspeakers</span></a>
+          <li><a href="#processing-mixpresentation-rendering-m2b"><span class="secno">9.3.2.3</span> <span class="content">Rendering a channel-based audio element to a binaural output</span></a>
+          <li><a href="#processing-mixpresentation-rendering-a2b"><span class="secno">9.3.2.4</span> <span class="content">Rendering a scene-based audio element to a binaural output</span></a>
          </ol>
         <li><a href="#processing-mixpresentation-mixing"><span class="secno">9.3.3</span> <span class="content">Mixing Audio Elements</span></a>
        </ol>
@@ -4427,15 +4429,33 @@ Ltf = Ltf3 - w(k) x (L2 - 0.707 x C - L5) and Rtf = Rtf3 - w(k) x (R2 - 0.707 x 
      </ol>
    </ol>
    <h4 class="heading settled" data-level="9.3.2" id="processing-mixpresentation-rendering"><span class="secno">9.3.2. </span><span class="content">Rendering an Audio Element</span><a class="self-link" href="#processing-mixpresentation-rendering"></a></h4>
-   <p>This specification supports the rendering of either a multichannel or ambisonics audio element to either a target loudspeaker layout or a binaural output. The choice of the renderer to use when processing a mix presentation depends on the input audio element and the playback layout, as defined below and summarized in the following table.</p>
-   <p>After selecting a Mix Presentation, an audio element should be rendered as follows:</p>
-   <ul>
-    <li data-md>
-     <p>If the audio element is a channel-based element, apply M2M-Rendering (M2M-Rendering: Multichannel to Multichannel Rendering).</p>
-    <li data-md>
-     <p>If the audio element is a scene-based audio element, apply A2M-Rendering (A2M-Rendering: Ambisonics to Multichannel Rendering).</p>
-   </ul>
-   <p>For M2M-Rendering,</p>
+   <p>This specification supports the rendering of either a multichannel or ambisonics audio element to either a target loudspeaker layout or a binaural output.</p>
+   <p>In this section, for a given x.y.z layout, the next highest layout x'.y'.z' means that x', y' and z' are greater than or equal to x, y and z, respectively.</p>
+   <table class="def">
+    <tbody>
+     <tr>
+      <th><code>audio_element_type</code>
+      <th>Playback layout
+      <th>Section
+     <tr>
+      <td>CHANNEL_BASED
+      <td>Loudspeakers
+      <td><a href="#processing-mixpresentation-rendering-m2l">§ 9.3.2.1 Rendering a channel-based audio element to loudspeakers</a>
+     <tr>
+      <td>SCENE_BASED
+      <td>Loudspeakers
+      <td><a href="#processing-mixpresentation-rendering-a2l">§ 9.3.2.2 Rendering a scene-based audio element to loudspeakers</a>
+     <tr>
+      <td>CHANNEL_BASED
+      <td>Binaural output
+      <td><a href="#processing-mixpresentation-rendering-m2b">§ 9.3.2.3 Rendering a channel-based audio element to a binaural output</a>
+     <tr>
+      <td>SCENE_BASED
+      <td>Binaural output
+      <td><a href="#processing-mixpresentation-rendering-a2b">§ 9.3.2.4 Rendering a scene-based audio element to a binaural output</a>
+   </table>
+   <h5 class="heading settled" data-level="9.3.2.1" id="processing-mixpresentation-rendering-m2l"><span class="secno">9.3.2.1. </span><span class="content">Rendering a channel-based audio element to loudspeakers</span><a class="self-link" href="#processing-mixpresentation-rendering-m2l"></a></h5>
+   <p>This section defines the renderer to use, given a channel-based audio element and a loudspeaker playback layout.</p>
    <ul>
     <li data-md>
      <p>The input layout of the IA renderer is set as follows:</p>
@@ -4474,7 +4494,19 @@ Ltf = Ltf3 - w(k) x (L2 - 0.707 x C - L5) and Rtf = Rtf3 - w(k) x (R2 - 0.707 x 
        <p>Else, use implementation-specific renderer.</p>
      </ul>
    </ul>
-   <p>For A2M-Rendering,</p>
+   <p>If the EAR Direct Speakers renderer is used, it should be configured as follows.</p>
+   <p>In addition to the metadata provided in itur_bs2127_direct_speakers_config(), the IA renderer should provide the following to the EAR Direct Speakers renderer for each audio channel of the audio element:</p>
+   <ul>
+    <li data-md>
+     <p>speaker label: the label of the speaker position, using the same convention as "SP Label" in <a data-link-type="biblio" href="#biblio-itu2051-3" title="Advance sound system for programme production">[ITU2051-3]</a>. This is defined for each audio channel of the audio element based on the information from <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout①④">loudspeaker_layouts</a>.</p>
+    <li data-md>
+     <p>azimuth: specifies the azimuth location of the sound. This is mapped from the speaker label as defined in <a data-link-type="biblio" href="#biblio-itu2051-3" title="Advance sound system for programme production">[ITU2051-3]</a>.</p>
+    <li data-md>
+     <p>elevation: specifies the elevation location of the sound. This is mapped from the speaker label as defined in <a data-link-type="biblio" href="#biblio-itu2051-3" title="Advance sound system for programme production">[ITU2051-3]</a>.</p>
+   </ul>
+   <p>In <a data-link-type="biblio" href="#biblio-itu2051-3" title="Advance sound system for programme production">[ITU2051-3]</a>, an LFE audio channel may be identified either by an explicit label or its frequency content. In this specification, the LFE channel is identified based on the explicit label only, given by <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout①⑤">loudspeaker_layout</a>.</p>
+   <h5 class="heading settled" data-level="9.3.2.2" id="processing-mixpresentation-rendering-a2l"><span class="secno">9.3.2.2. </span><span class="content">Rendering a scene-based audio element to loudspeakers</span><a class="self-link" href="#processing-mixpresentation-rendering-a2l"></a></h5>
+   <p>This section defines the renderer to use, given a scene-based audio element and a loudspeaker playback layout.</p>
    <ul>
     <li data-md>
      <p>The input layout of the IA renderer is set to Ambisonics.</p>
@@ -4486,8 +4518,6 @@ Ltf = Ltf3 - w(k) x (L2 - 0.707 x C - L5) and Rtf = Rtf3 - w(k) x (R2 - 0.707 x 
       <li data-md>
        <p>If the playback layout complies with loudspeaker layouts supported by <a data-link-type="biblio" href="#biblio-itu2051-3" title="Advance sound system for programme production">[ITU2051-3]</a>, use EAR HOA renderer (<a data-link-type="biblio" href="#biblio-itu2127-0" title="Audio Definition Model renderer for advanced sound systems">[ITU2127-0]</a>).</p>
       <li data-md>
-       <p>Else if the playback layout is 3.1.2ch, use EAR HOA renderer (<a data-link-type="biblio" href="#biblio-itu2127-0" title="Audio Definition Model renderer for advanced sound systems">[ITU2127-0]</a>) to render to 5.1.2ch, 5.1.4ch, 7.1.2ch or 7.1.4ch and then use the static down-mix matrices specified in <a href="#processing-downmixmatrix-static">§ 9.6.2 Static Down-mix Matrix</a> to render it to 3.1.2ch.</p>
-      <li data-md>
        <p>Else, use implementation-specific renderer.</p>
        <ul>
         <li data-md>
@@ -4495,51 +4525,7 @@ Ltf = Ltf3 - w(k) x (L2 - 0.707 x C - L5) and Rtf = Rtf3 - w(k) x (R2 - 0.707 x 
        </ul>
      </ul>
    </ul>
-   <p>For a given x.y.z layout, the next highest layout x'.y'.z' means that x', y' and z' are greater than or equal to x, y and z, respectively.</p>
-   <table class="def">
-    <tbody>
-     <tr>
-      <th>audio_element_type
-      <th>Playback layout
-      <th>Renderer to use
-     <tr>
-      <td>CHANNEL_BASED
-      <td>Loudspeaker layouts supported by <a data-link-type="biblio" href="#biblio-itu2051-3" title="Advance sound system for programme production">[ITU2051-3]</a>
-      <td>If there is a playback layout that can be generated from the input layout according to <a href="#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule">§ 10.2.3 Channel Layout Generation Rule</a>, use the provided demixing_info_parameter_data().<br><br> If demixing_info_parameter_data() is not provided, use the EAR Direct Speakers renderer (<a data-link-type="biblio" href="#biblio-itu2127-0" title="Audio Definition Model renderer for advanced sound systems">[ITU2127-0]</a>).
-     <tr>
-      <td>CHANNEL_BASED
-      <td>Loudspeaker layouts not supported by <a data-link-type="biblio" href="#biblio-itu2051-3" title="Advance sound system for programme production">[ITU2051-3]</a>
-      <td>Implementation-specific loudspeaker renderer.
-     <tr>
-      <td>SCENE_BASED
-      <td>Loudspeaker layouts supported by <a data-link-type="biblio" href="#biblio-itu2051-3" title="Advance sound system for programme production">[ITU2051-3]</a>
-      <td>EAR HOA renderer (<a data-link-type="biblio" href="#biblio-itu2127-0" title="Audio Definition Model renderer for advanced sound systems">[ITU2127-0]</a>).
-     <tr>
-      <td>SCENE_BASED
-      <td>Loudspeaker layouts not supported by <a data-link-type="biblio" href="#biblio-itu2051-3" title="Advance sound system for programme production">[ITU2051-3]</a>
-      <td>Implementation-specific Ambisonics renderer.<br><br>If an implementation-specific Ambisonics renderer is not available, the EAR HOA renderer may be used to render the Ambisonics audio element to the next highest <a data-link-type="biblio" href="#biblio-itu2051-3" title="Advance sound system for programme production">[ITU2051-3]</a> layout compared to the output loudspeaker layout, and then downmixed using the implementation-specific loudspeaker renderer.
-     <tr>
-      <td>CHANNEL_BASED
-      <td>Binaural
-      <td>// TODO
-     <tr>
-      <td>SCENE_BASED
-      <td>Binaural
-      <td>// TODO
-   </table>
-   <h5 class="heading settled" data-level="9.3.2.1" id="processing-mixpresentation-rendering-ear-directspeakers"><span class="secno">9.3.2.1. </span><span class="content">EAR Direct Speakers renderer</span><a class="self-link" href="#processing-mixpresentation-rendering-ear-directspeakers"></a></h5>
-   <p>In addition to the metadata provided in itur_bs2127_direct_speakers_config(), the IA renderer should provide the following to the EAR Direct Speakers renderer for each audio channel of the audio element:</p>
-   <ul>
-    <li data-md>
-     <p>speaker label: the label of the speaker position, using the same convention as "SP Label" in <a data-link-type="biblio" href="#biblio-itu2051-3" title="Advance sound system for programme production">[ITU2051-3]</a>. This is defined for each audio channel of the audio element based on the information from <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout①④">loudspeaker_layouts</a>.</p>
-    <li data-md>
-     <p>azimuth: specifies the azimuth location of the sound. This is mapped from the speaker label as defined in <a data-link-type="biblio" href="#biblio-itu2051-3" title="Advance sound system for programme production">[ITU2051-3]</a>.</p>
-    <li data-md>
-     <p>elevation: specifies the elevation location of the sound. This is mapped from the speaker label as defined in <a data-link-type="biblio" href="#biblio-itu2051-3" title="Advance sound system for programme production">[ITU2051-3]</a>.</p>
-   </ul>
-   <p>In <a data-link-type="biblio" href="#biblio-itu2051-3" title="Advance sound system for programme production">[ITU2051-3]</a>, an LFE audio channel may be identified either by an explicit label or its frequency content. In this specification, the LFE channel is identified based on the explicit label only, given by <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout①⑤">loudspeaker_layout</a>.</p>
-   <h5 class="heading settled" data-level="9.3.2.2" id="processing-mixpresentation-rendering-ear-hoa"><span class="secno">9.3.2.2. </span><span class="content">EAR HOA renderer</span><a class="self-link" href="#processing-mixpresentation-rendering-ear-hoa"></a></h5>
-   <p>The IA renderer should provide the following metadata to the EAR HOA renderer for each audio channel:</p>
+   <p>If the EAR HOA renderer is used, the following metadata should be provided to the renderer for each audio channel:</p>
    <ol>
     <li data-md>
      <p>Ambisonics order</p>
@@ -4552,6 +4538,10 @@ Ltf = Ltf3 - w(k) x (L2 - 0.707 x C - L5) and Rtf = Rtf3 - w(k) x (R2 - 0.707 x 
 <pre>order   n = floor(sqrt(k)),
 degree  m = k - n * (n + 1).
 </pre>
+   <h5 class="heading settled" data-level="9.3.2.3" id="processing-mixpresentation-rendering-m2b"><span class="secno">9.3.2.3. </span><span class="content">Rendering a channel-based audio element to a binaural output</span><a class="self-link" href="#processing-mixpresentation-rendering-m2b"></a></h5>
+   <p>Given a channel-based audio element and a binaural playback layout, the Binaural EBU ADM Direct Speaker renderer <a data-link-type="biblio" href="#biblio-bear" title="Developing a Binaural Renderer for Audio Definition Model Content">[BEAR]</a> should be used. The highest layout provided in <a data-link-type="dfn" href="#scalable_channel_layout_config" id="ref-for-scalable_channel_layout_config②">scalable_channel_layout_config()</a> should be used as the input to the renderer.</p>
+   <h5 class="heading settled" data-level="9.3.2.4" id="processing-mixpresentation-rendering-a2b"><span class="secno">9.3.2.4. </span><span class="content">Rendering a scene-based audio element to a binaural output</span><a class="self-link" href="#processing-mixpresentation-rendering-a2b"></a></h5>
+   <p>Given a scene-based audio element and a binaural playback system, the Resonance Audio renderer <a data-link-type="biblio" href="#biblio-resonance-audio" title="Efficient Encoding and Decoding of Binaural Sound with Resonance Audio">[Resonance-Audio]</a> should be used.</p>
    <h4 class="heading settled" data-level="9.3.3" id="processing-mixpresentation-mixing"><span class="secno">9.3.3. </span><span class="content">Mixing Audio Elements</span><a class="self-link" href="#processing-mixpresentation-mixing"></a></h4>
    <p>Each audio element is processed individually before mixing as follows:</p>
    <ol>
@@ -4931,7 +4921,7 @@ gamma = n0 - n.
    <center>
     <figcaption>IA Encoding Flowchart for Scalable Channel Audio</figcaption>
    </center>
-   <p>Following sections, <a href="#iamfgeneration-scalablechannelaudio-downmixparameter">§ 10.2.1 Down-mix parameter and Loudness</a>, <a href="#iamfgeneration-scalablechannelaudio-downmixmechanism">§ 10.2.2 Down-mix Mechanism</a>, <a href="#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule">§ 10.2.3 Channel Layout Generation Rule</a>, <a href="#iamfgeneration-scalablechannelaudio-recongaingeneration">§ 10.2.4 Recon Gain Generation</a> and <a href="#iamfgeneration-scalablechannelaudio-channelgroupgenerationrule">§ 10.2.5 ChannelGroup Generation Rule</a> do not needed for non-scalable channel audio (i.e., when <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②④">num_layers</a> specified in <a data-link-type="dfn" href="#scalable_channel_layout_config" id="ref-for-scalable_channel_layout_config②">scalable_channel_layout_config()</a> is set to 1).</p>
+   <p>Following sections, <a href="#iamfgeneration-scalablechannelaudio-downmixparameter">§ 10.2.1 Down-mix parameter and Loudness</a>, <a href="#iamfgeneration-scalablechannelaudio-downmixmechanism">§ 10.2.2 Down-mix Mechanism</a>, <a href="#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule">§ 10.2.3 Channel Layout Generation Rule</a>, <a href="#iamfgeneration-scalablechannelaudio-recongaingeneration">§ 10.2.4 Recon Gain Generation</a> and <a href="#iamfgeneration-scalablechannelaudio-channelgroupgenerationrule">§ 10.2.5 ChannelGroup Generation Rule</a> do not needed for non-scalable channel audio (i.e., when <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②④">num_layers</a> specified in <a data-link-type="dfn" href="#scalable_channel_layout_config" id="ref-for-scalable_channel_layout_config③">scalable_channel_layout_config()</a> is set to 1).</p>
    <h4 class="heading settled" data-level="10.2.1" id="iamfgeneration-scalablechannelaudio-downmixparameter"><span class="secno">10.2.1. </span><span class="content">Down-mix parameter and Loudness</span><a class="self-link" href="#iamfgeneration-scalablechannelaudio-downmixparameter"></a></h4>
    <p>This section describes how to generate down-mix parameters and loudness level for a given channel audio and a given list of channel layouts for scalability.</p>
    <p>Below figure shows a block diagram for down-mix parameter and loudness module including down-mixer.</p>
@@ -6358,6 +6348,8 @@ Recon_Gain for D_Rtb4:
    <dd><a href="https://aomedia.org/av1/specification/conventions/"><cite>Conventions</cite></a>. Spec. URL: <a href="https://aomedia.org/av1/specification/conventions/">https://aomedia.org/av1/specification/conventions/</a>
    <dt id="biblio-bcp47">[BCP47]
    <dd><a href="https://www.rfc-editor.org/info/bcp47"><cite>BCP 47</cite></a>. Best Practice. URL: <a href="https://www.rfc-editor.org/info/bcp47">https://www.rfc-editor.org/info/bcp47</a>
+   <dt id="biblio-bear">[BEAR]
+   <dd><a href="https://www.aes.org/e-lib/browse.cfm?elib=21729"><cite>Developing a Binaural Renderer for Audio Definition Model Content</cite></a>. Paper. URL: <a href="https://www.aes.org/e-lib/browse.cfm?elib=21729">https://www.aes.org/e-lib/browse.cfm?elib=21729</a>
    <dt id="biblio-flac">[FLAC]
    <dd><a href="https://xiph.org/flac/format.html"><cite>Free Lossless Audio Codec</cite></a>. Best Practice. URL: <a href="https://xiph.org/flac/format.html">https://xiph.org/flac/format.html</a>
    <dt id="biblio-isobmff">[ISOBMFF]
@@ -6380,6 +6372,8 @@ Recon_Gain for D_Rtb4:
    <dd><a href="https://opus-codec.org/docs/opus_in_isobmff.html"><cite>Encapsulation of Opus in ISO Base Media File Format</cite></a>. Best Practice. URL: <a href="https://opus-codec.org/docs/opus_in_isobmff.html">https://opus-codec.org/docs/opus_in_isobmff.html</a>
    <dt id="biblio-q-format">[Q-Format]
    <dd><a href="https://en.wikipedia.org/wiki/Q_(number_format)"><cite>Q (number format)</cite></a>. Best Practice. URL: <a href="https://en.wikipedia.org/wiki/Q_(number_format)">https://en.wikipedia.org/wiki/Q_(number_format)</a>
+   <dt id="biblio-resonance-audio">[Resonance-Audio]
+   <dd><a href="https://www.aes.org/e-lib/browse.cfm?elib=20446"><cite>Efficient Encoding and Decoding of Binaural Sound with Resonance Audio</cite></a>. Paper. URL: <a href="https://www.aes.org/e-lib/browse.cfm?elib=20446">https://www.aes.org/e-lib/browse.cfm?elib=20446</a>
    <dt id="biblio-rfc2119">[RFC2119]
    <dd>S. Bradner. <a href="https://datatracker.ietf.org/doc/html/rfc2119"><cite>Key words for use in RFCs to Indicate Requirement Levels</cite></a>. March 1997. Best Current Practice. URL: <a href="https://datatracker.ietf.org/doc/html/rfc2119">https://datatracker.ietf.org/doc/html/rfc2119</a>
    <dt id="biblio-rfc3629">[RFC3629]
@@ -6548,7 +6542,8 @@ Recon_Gain for D_Rtb4:
    <ul>
     <li><a href="#ref-for-scalable_channel_layout_config">4.1.8. Mix Presentation OBU Syntax and Semantics</a>
     <li><a href="#ref-for-scalable_channel_layout_config①">4.2.1. Scalable Channel Layout Config Syntax and Semantics</a>
-    <li><a href="#ref-for-scalable_channel_layout_config②">10.2. Scalable Channel Audio Encoding</a>
+    <li><a href="#ref-for-scalable_channel_layout_config②">9.3.2.3. Rendering a channel-based audio element to a binaural output</a>
+    <li><a href="#ref-for-scalable_channel_layout_config③">10.2. Scalable Channel Audio Encoding</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-ambisonics_config" class="dfn-panel" data-for="ambisonics_config" id="infopanel-for-ambisonics_config">
@@ -6606,7 +6601,7 @@ Recon_Gain for D_Rtb4:
    <ul>
     <li><a href="#ref-for-loudness_layout">4.1.8. Mix Presentation OBU Syntax and Semantics</a> <a href="#ref-for-loudness_layout①">(2)</a> <a href="#ref-for-loudness_layout②">(3)</a> <a href="#ref-for-loudness_layout③">(4)</a> <a href="#ref-for-loudness_layout④">(5)</a>
     <li><a href="#ref-for-loudness_layout⑤">9.3.1. Selecting a Mix Presentation</a> <a href="#ref-for-loudness_layout⑥">(2)</a> <a href="#ref-for-loudness_layout⑦">(3)</a>
-    <li><a href="#ref-for-loudness_layout⑧">9.3.2. Rendering an Audio Element</a> <a href="#ref-for-loudness_layout⑨">(2)</a>
+    <li><a href="#ref-for-loudness_layout⑧">9.3.2.1. Rendering a channel-based audio element to loudspeakers</a> <a href="#ref-for-loudness_layout⑨">(2)</a>
     <li><a href="#ref-for-loudness_layout①⓪">9.3.3. Mixing Audio Elements</a>
     <li><a href="#ref-for-loudness_layout①①">9.5.1. Loudness Normalization</a> <a href="#ref-for-loudness_layout①②">(2)</a> <a href="#ref-for-loudness_layout①③">(3)</a>
     <li><a href="#ref-for-loudness_layout①④">10.2.6. Mix Presentation Encoding</a> <a href="#ref-for-loudness_layout①⑤">(2)</a> <a href="#ref-for-loudness_layout①⑥">(3)</a> <a href="#ref-for-loudness_layout①⑦">(4)</a> <a href="#ref-for-loudness_layout①⑧">(5)</a>
@@ -6770,7 +6765,7 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-num_layers①④">7.2.4.1. OPUS Specific Box</a>
     <li><a href="#ref-for-num_layers①⑤">9.2. Scalable Channel Audio decoding</a>
     <li><a href="#ref-for-num_layers①⑥">9.2.2. De-mixer</a>
-    <li><a href="#ref-for-num_layers①⑦">9.3.2. Rendering an Audio Element</a>
+    <li><a href="#ref-for-num_layers①⑦">9.3.2.1. Rendering a channel-based audio element to loudspeakers</a>
     <li><a href="#ref-for-num_layers①⑧">10. IAMF Generation Process</a> <a href="#ref-for-num_layers①⑨">(2)</a>
     <li><a href="#ref-for-num_layers②⓪">10.2. Scalable Channel Audio Encoding</a> <a href="#ref-for-num_layers②①">(2)</a> <a href="#ref-for-num_layers②②">(3)</a> <a href="#ref-for-num_layers②③">(4)</a> <a href="#ref-for-num_layers②④">(5)</a>
     <li><a href="#ref-for-num_layers②⑤">10.2.3. Channel Layout Generation Rule</a>
@@ -6796,8 +6791,7 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-loudspeaker_layout⑧">4.2.6.1. ITU-R BS.2127 Direct Speakers Config Syntax and Semantics</a>
     <li><a href="#ref-for-loudspeaker_layout⑨">9.2. Scalable Channel Audio decoding</a>
     <li><a href="#ref-for-loudspeaker_layout①⓪">9.3.1. Selecting a Mix Presentation</a>
-    <li><a href="#ref-for-loudspeaker_layout①①">9.3.2. Rendering an Audio Element</a> <a href="#ref-for-loudspeaker_layout①②">(2)</a> <a href="#ref-for-loudspeaker_layout①③">(3)</a>
-    <li><a href="#ref-for-loudspeaker_layout①④">9.3.2.1. EAR Direct Speakers renderer</a> <a href="#ref-for-loudspeaker_layout①⑤">(2)</a>
+    <li><a href="#ref-for-loudspeaker_layout①①">9.3.2.1. Rendering a channel-based audio element to loudspeakers</a> <a href="#ref-for-loudspeaker_layout①②">(2)</a> <a href="#ref-for-loudspeaker_layout①③">(3)</a> <a href="#ref-for-loudspeaker_layout①④">(4)</a> <a href="#ref-for-loudspeaker_layout①⑤">(5)</a>
     <li><a href="#ref-for-loudspeaker_layout①⑥">10. IAMF Generation Process</a> <a href="#ref-for-loudspeaker_layout①⑦">(2)</a> <a href="#ref-for-loudspeaker_layout①⑧">(3)</a>
     <li><a href="#ref-for-loudspeaker_layout①⑨">10.2. Scalable Channel Audio Encoding</a>
     <li><a href="#ref-for-loudspeaker_layout②⓪">10.2.3. Channel Layout Generation Rule</a>
