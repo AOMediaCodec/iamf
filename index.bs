@@ -124,6 +124,12 @@ url: https://xiph.org/flac/format.html; spec: FLAC; type: dfn;
 url: https://xiph.org/flac/format.html; spec: FLAC; type: property;
 	text: fLaC
 
+url: https://www.iso.org/standard/77752.html#; spec: MP4-PCM; type: dfn;
+	text: format_flags
+	text: PCM_sample_size
+	
+url: https://www.iso.org/standard/77752.html#; spec: MP4-PCM; type: property;
+	text: ipcm
 
 </pre>
 
@@ -224,6 +230,12 @@ url: https://xiph.org/flac/format.html; spec: FLAC; type: property;
 		"status": "Paper",
 		"publisher": "Ambisonics Symposium, June 2011",
 		"href": "https://iem.kug.ac.at/fileadmin/media/iem/projects/2011/ambisonics11_nachbar_zotter_sontacchi_deleflie.pdf"
+	},
+	"MP4-PCM": {
+		"title": "Information technology — MPEG audio technologies — Part 5: Uncompressed audio in MPEG-4 file format",
+		"status": "Standard",
+		"publisher": "ISO/IEC",
+		"href": "https://www.iso.org/standard/77752.html"
 	}
 
 }
@@ -1005,7 +1017,7 @@ class audio_frame_obu_with_no_id() {
 ```
 
 ```
-class audio_frame_obu(audio_substream_id) {
+class audio_frame_obu() {
   unsigned int (8*coded_frame_size) audio_frame();
 }
 ```
@@ -1569,16 +1581,18 @@ Substream format is [=FRAME=] of [[!FLAC]], which is composed of [=FRAME_HEADER=
 
 ```
 class decoder_config(ipcm) {
-  unsigned int (32) sample_rate;
+  unsigned int (8) sample_format_flags;
   unsigned int (8) sample_size;
+  unsigned int (32) sample_rate;
 }
 ```
+<dfn noexport>sample_format_flags</dfn> complies with [=format_flags=] specified in [[!MP4-PCM]]. In other words, 0x01 indicates little-endian PCM sample format and 0x00 indicates big-endian PCM sample format.
 
-<dfn noexport>sample_rate</dfn> indicates the sample rate of the input audio in Hz. It shall not be set to 0.
+<dfn noexport>sample_size</dfn> complies with [=PCM_sample_size=] specified in [[!MP4-PCM]]. In other words, it shall take a value from the set 16, 24 and 32. 
 
-<dfn noexport>sample_size</dfn> indicates the size of a PCM sample in bit units. The value shall be less than or equal to 24. It shall not be set to 0.
+<dfn noexport>sample_rate</dfn> indicates the sample rate of the input audio in Hz. It shall take a value from the set 44.1k, 16k, 32k, 48k and 96k.
 
-Substream format is the LPCM audio samples for the frame size. 
+Substream format is the series of PCM audio frames, every of that is [=audio_frame()=] of Audio_Frame_OBU and each PCM sample of the [=audio_frame()=] shall have the [=sample_size=] and its format shall follow the format indicated by the [=sample_format_flags=].
 
 For IAMF-LPCM, one Substream is an individual channel of input audio. For example, one Ambisonics channel of Ambisonics is one Substream and one speaker channel of channel audio is one Substream.
 
@@ -1839,7 +1853,7 @@ During encapsulation process, OBUs of IA sequence are encapsulated into [[!ISOBM
 
 - Each set of descriptor OBUs, specified in [[#standalone-descriptor-obus]], and the Sync OBU that immediately follows them are moved to one [=IASampleEntry=]. The descriptor OBUs are then discarded from the IA sequence. In addition,
     - The [=num_samples_per_frame=] field in the Codec Config OBU is copied to 'stts'.
-    - The [=roll_distance=] field in the Codec Config OBU is copied to [=AudioPreRollEntry()=] with the [=grouping_type=] 'prol'.
+    - The [=roll_distance=] field in the Codec Config OBU is copied to [=AudioPreRollEntry=] with the [=grouping_type=] 'prol'.
 - Each temporal unit:
 	- Temporal Delimiter OBU: shall be discarded if present.	
 	- Remained OBUs of each temporal unit shall be stored as one sample data without gap among OBUs.
