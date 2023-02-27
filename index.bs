@@ -517,6 +517,11 @@ It shall always be set to 0 for the following obu_type values:
 
 <dfn noexport>obu_trimming_status_flag</dfn> indicates whether this OBU has audio samples to be trimmed or not. If it is set to 0, the [=num_samples_to_trim_at_start=] and [=num_samples_to_trim_at_end=] fields shall not be present. Otherwise, the [=num_samples_to_trim_at_start=] and [=num_samples_to_trim_at_end=] fields shall be present.
 
+For a given substream, 
+- The substream may have audio samples to be trimmed only at the beginning and/or end of the substream.
+- Thus, this flag may be set to 1 only for one or more consecutive Audio Frame OBUs at the beginning of the substream and/or only for one or more consecutive Audio Frame OBUs at the end of the substream.
+- If the substream has no audio samples to be trimmed, then [=obu_trimming_status_flag=] shall be set to 0 for every Audio Frame OBU of the substream. 
+
 <dfn noexport>obu_extension_flag</dfn> indicates whether the [=extension_header_size=] field presents or not. If it set to 0, the [=extension_header_size=] field shall not be present. Otherwise, the [=extension_header_size=] field shall be present.
 
 This flag shall be set to 0 for the current version of the specification (i.e. [=version=] = 0). An IAMF-OBU parser which is conformant with the current version of the specification shall be able to parse this flag and [=extension_header_size=].
