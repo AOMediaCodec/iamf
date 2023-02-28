@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version f043d3484, updated Fri Feb 17 10:53:48 2023 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="e4b63ac6fee7dfaaae7e9ba5946207b0a94aa4e7" name="document-revision">
+  <meta content="323c78bdfcb58b225b8104f7e6f489fb90fcb8fe" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2482,6 +2482,13 @@ class Bar {
      <p>OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21</p>
    </ul>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="obu_trimming_status_flag">obu_trimming_status_flag</dfn> indicates whether this OBU has audio samples to be trimmed or not. If it is set to 0, the <a data-link-type="dfn" href="#num_samples_to_trim_at_start" id="ref-for-num_samples_to_trim_at_start">num_samples_to_trim_at_start</a> and <a data-link-type="dfn" href="#num_samples_to_trim_at_end" id="ref-for-num_samples_to_trim_at_end">num_samples_to_trim_at_end</a> fields shall not be present. Otherwise, the <a data-link-type="dfn" href="#num_samples_to_trim_at_start" id="ref-for-num_samples_to_trim_at_start①">num_samples_to_trim_at_start</a> and <a data-link-type="dfn" href="#num_samples_to_trim_at_end" id="ref-for-num_samples_to_trim_at_end①">num_samples_to_trim_at_end</a> fields shall be present.</p>
+   <p>For a given substream,</p>
+   <ul>
+    <li data-md>
+     <p>If the substream contains audio samples to be trimmed, then they shall only be at the start and/or end of the substream. Thus, <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag">obu_trimming_status_flag</a> shall be set to 1 only for one or more consecutive Audio Frame OBUs at the start of the substream and/or only for one or more consecutive Audio Frame OBUs at the end of the substream.</p>
+    <li data-md>
+     <p>Otherwise, then <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag①">obu_trimming_status_flag</a> shall be set to 0 for every Audio Frame OBU of the substream.</p>
+   </ul>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="obu_extension_flag">obu_extension_flag</dfn> indicates whether the <a data-link-type="dfn" href="#extension_header_size" id="ref-for-extension_header_size">extension_header_size</a> field presents or not. If it set to 0, the <a data-link-type="dfn" href="#extension_header_size" id="ref-for-extension_header_size①">extension_header_size</a> field shall not be present. Otherwise, the <a data-link-type="dfn" href="#extension_header_size" id="ref-for-extension_header_size②">extension_header_size</a> field shall be present.</p>
    <p>This flag shall be set to 0 for the current version of the specification (i.e. <a data-link-type="dfn" href="#version" id="ref-for-version">version</a> = 0). An IAMF-OBU parser which is conformant with the current version of the specification shall be able to parse this flag and <a data-link-type="dfn" href="#extension_header_size" id="ref-for-extension_header_size③">extension_header_size</a>.</p>
    <p class="note" role="note"><span class="marker">NOTE:</span> A future version of specification may use this flag to specify an extension header field by setting <a data-link-type="dfn" href="#obu_extension_flag" id="ref-for-obu_extension_flag">obu_extension_flag</a> = 1 and setting the size of extended header to <a data-link-type="dfn" href="#extension_header_size" id="ref-for-extension_header_size④">extension_header_size</a>.</p>
@@ -3776,9 +3783,9 @@ for (i = 0: i &lt; M(N); i++) {
       <li data-md>
        <p>Select one substream.</p>
       <li data-md>
-       <p>If <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag">obu_trimming_status_flag</a> of the first Audio Frame OBU of the substream is set to 1, keep parsing following Audio Frame OBUs of the substream until meets the Audio Frame OBU having <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag①">obu_trimming_status_flag</a> =  0 and sum <a data-link-type="dfn" href="#num_samples_to_trim_at_start" id="ref-for-num_samples_to_trim_at_start②">num_samples_to_trim_at_start</a>. Then reflect the result of the summation to <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="ref-for-aa607156e60c8b7d967c4fcd5ac4638f⑥">edts</a>.</p>
+       <p>If <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag②">obu_trimming_status_flag</a> of the first Audio Frame OBU of the substream is set to 1, keep parsing following Audio Frame OBUs of the substream until meets the Audio Frame OBU having <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag③">obu_trimming_status_flag</a> =  0 and sum <a data-link-type="dfn" href="#num_samples_to_trim_at_start" id="ref-for-num_samples_to_trim_at_start②">num_samples_to_trim_at_start</a>. Then reflect the result of the summation to <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="ref-for-aa607156e60c8b7d967c4fcd5ac4638f⑥">edts</a>.</p>
       <li data-md>
-       <p>If <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag②">obu_trimming_status_flag</a> of the last Audio Frame OBU of the substream is set to 1, then reflect num_samples_to_trim_at_end to 'stts.</p>
+       <p>If <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag④">obu_trimming_status_flag</a> of the last Audio Frame OBU of the substream is set to 1, then reflect num_samples_to_trim_at_end to 'stts.</p>
      </ul>
    </ul>
    <center><img height="243" src="images/IAC Encapsulation Guideline.png" style="width:100%; height:auto;" width="1653"></center>
@@ -5971,7 +5978,8 @@ Recon_Gain for D_Rtb4:
   <aside aria-labelledby="infopaneltitle-for-obu_trimming_status_flag" class="dfn-panel" data-for="obu_trimming_status_flag" id="infopanel-for-obu_trimming_status_flag">
    <span id="infopaneltitle-for-obu_trimming_status_flag" style="display:none">Info about the 'obu_trimming_status_flag' definition.</span><b><a href="#obu_trimming_status_flag">#obu_trimming_status_flag</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-obu_trimming_status_flag">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-obu_trimming_status_flag①">(2)</a> <a href="#ref-for-obu_trimming_status_flag②">(3)</a>
+    <li><a href="#ref-for-obu_trimming_status_flag">4.1.2. OBU Header Syntax and Semantics</a> <a href="#ref-for-obu_trimming_status_flag①">(2)</a>
+    <li><a href="#ref-for-obu_trimming_status_flag②">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-obu_trimming_status_flag③">(2)</a> <a href="#ref-for-obu_trimming_status_flag④">(3)</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-obu_extension_flag" class="dfn-panel" data-for="obu_extension_flag" id="infopanel-for-obu_extension_flag">
