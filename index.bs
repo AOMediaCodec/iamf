@@ -899,15 +899,20 @@ The metadata specified in this OBU defines the parameter values for an algorithm
 ```
 class parameter_block_obu() {
   leb128() parameter_id;
-  leb128() duration;
-  leb128() num_segments;
-  leb128() constant_segment_interval;
-
-  param_definition_type = get_param_definition_type(parameter_id);
+  
+  (param_definition_type, param_definition_mode, duration, num_segments, constant_segment_interval, segment_interval) = get_param_definition(parameter_id);
+  
+  if (param_definition_mode) {
+    leb128() duration;
+    leb128() num_segments;
+    leb128() constant_segment_interval;
+  }
 
   for (i = 0; i < num_segments; i++) {
-    if (constant_segment_interval == 0) {
-      leb128() segment_interval;
+    if (param_definition_mode) {
+      if (constant_segment_interval == 0) {
+        leb128() segment_interval;
+      }
     }
 
     if (param_definition_type == PARAMETER_DEFINITION_MIX_GAIN) {
@@ -928,23 +933,19 @@ class parameter_block_obu() {
 
 <dfn noexport>parameter_id</dfn> indicates the unique ID that is associated with a specific parameter definition. All parameter blocks that provide data for that parameter definition shall have the same parameter_id.
 
-<dfn noexport>duration</dfn> specifies the duration for which this parameter block is valid and applicable. 
+<dfn noexport>get_param_definition()</dfn> is a run-time function to get the parameter definition type, the parameter definition mode, duration, num_segments, constant_segment_interval and segment_interval mapped to the parameter_id. 
 
-<dfn noexport>num_segments</dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different segment of the timeline, contiguously.
+<dfn value noexport for="parameter_block_obu()">duration</dfn> specifies the duration for which this parameter block is valid and applicable. 
 
-<dfn noexport>constant_segment_interval</dfn> specifies the interval of each segment, in the case where all segments except the last segment have equal intervals. If all segments except the last segment do not have equal intervals, the value of constant_segment_interval shall be set to 0. 
+<dfn value noexport for="parameter_block_obu()">num_segments</dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different segment of the timeline, contiguously.
 
-<dfn noexport>get_param_definition_type()</dfn> is a run-time function to get the parameter definition type mapped to the parameter_id. 
+<dfn value noexport for="parameter_block_obu()">constant_segment_interval</dfn> specifies the interval of each segment, in the case where all segments except the last segment have equal intervals. If all segments except the last segment do not have equal intervals, the value of constant_segment_interval shall be set to 0. 
 
 Audio Element OBU and/or Mix Presentation OBU is mapping a parameter_id to the parameter definition type. So, IA decoders can know the definition type mapped to the parameter_id.
 
-<dfn noexport>segment_interval</dfn> specifies the interval for the given segment.
+<dfn value noexport for="parameter_block_obu()">segment_interval</dfn> specifies the interval for the given segment.
 
-Each value of [=duration=], [=constant_segment_interval=] and [=segment_interval=] shall be expressed as the number of ticks at the [=parameter_rate=] specified in the corresponding parameter definition.
-- When it defines <dfn noexport>D</dfn> = the value of [=duration=], <dfn noexport>NS</dfn> = the value of [=num_segments=], <dfn noexport>CSI</dfn> = the value of [=constant_segment_interval=] and <dfn noexport>SI</dfn> = the value of [=segment_interval=].
-	- When [=CSI=] != 0, [=NS=] x [=CSI=] shall be equal to or greater than [=D=].
-		- If [=NS=] x [=CSI=] > [=D=], the actual interval of the last segment shall be [=D=] - ([=NS=] - 1) x [=CSI=].
-	- When [=CSI=] = 0, the summation of all [=SI=]s in this parameter block shall be equal to [=D=].
+Each value of duration, constant_segment_interval and segment_interval shall be expressed as the number of ticks at the [=parameter_rate=] specified in the corresponding parameter definition.
 
 <dfn noexport>animation_type</dfn> specifies the type of animation applied to the parameter values in this parameter block.
 
@@ -994,6 +995,19 @@ Parameter definition classes inherits from the abstract <dfn noexport>ParamDefin
 abstract class ParamDefinition() {
   leb128() parameter_id;
   leb128() parameter_rate;
+  unsigned int (1) param_definition_mode;
+  unsigned int (7) reserved;
+  if (param_definition_mode == 0) {
+    leb128() duration;
+    leb128() num_segments;
+    leb128() constant_segment_interval;
+    if (constant_segment_interval == 0) {
+      for (i=0; i< num_segments; i++) {
+        leb128() segment_interval;
+      }
+    }
+    
+  }
 }
 ```
 
@@ -1002,6 +1016,24 @@ abstract class ParamDefinition() {
 <dfn value noexport for="ParamDefinition()">parameter_id</dfn> indicates the unique ID in an IA sequence for a given parameter.
 
 <dfn noexport>parameter_rate</dfn> specifies the rate used by this parameter, expressed as ticks per second. Time-related fields associated with this parameter, such as durations and intervals, shall be expressed in the number of ticks.
+
+<dfn noexport>param_definition_mode</dfn> indicates if this parameter definition specifies duration, num_segments, constant_segment_interval and segment_interval fields for the parameter blocks associated to the [=parameter_id=].
+- When this field is set to 0, all of duration, num_segments, constant_segment_interval and segment_interval fields shall be specified in this parameter definition mapped to the [=parameter_id=]. Instead of that, none of parameter blocks associated to this parameter definition shall specify duration, num_segments, constant_segment_interval and segment_interval fields. 
+- When this field is set to 1, none of duration, num_segments, constant_segment_interval and segment_interval fields shall be specificed in this parameter definition. Instead of that, each of parameter blocks associated to this parameter defintion shall specify its own duration, num_segments, constant_segment_interval and segment_interval fields.
+
+<dfn noexport>duration</dfn> specifies the duration for which all of parameter blocks associated to this parameter defintion are valid and applicable. 
+
+<dfn noexport>num_segments</dfn> specifies the number of different sets of parameter values specified in all of parameter blocks associated to this parameter defintion, where each set describes a different segment of the timeline, contiguously.
+
+<dfn noexport>constant_segment_interval</dfn> specifies the interval of each segment, in the case where all segments except the last segment have equal intervals. If all segments except the last segment do not have equal intervals, the value of constant_segment_interval shall be set to 0. 
+
+<dfn noexport>segment_interval</dfn> specifies the interval for the given segment.
+
+Each value of [=duration=], [=constant_segment_interval=] and [=segment_interval=] shall be expressed as the number of ticks at the [=parameter_rate=] specified in the corresponding parameter definition.
+- When it defines <dfn noexport>D</dfn> = the value of [=duration=], <dfn noexport>NS</dfn> = the value of [=num_segments=], <dfn noexport>CSI</dfn> = the value of [=constant_segment_interval=] and <dfn noexport>SI</dfn> = the value of [=segment_interval=].
+	- When [=CSI=] != 0, [=NS=] x [=CSI=] shall be equal to or greater than [=D=].
+		- If [=NS=] x [=CSI=] > [=D=], the actual interval of the last segment shall be [=D=] - ([=NS=] - 1) x [=CSI=].
+	- When [=CSI=] = 0, the summation of all [=SI=]s in this parameter block shall be equal to [=D=].
 
 ### Audio Frame OBU Syntax and Semantics ### {#obu-audioframe}
 
