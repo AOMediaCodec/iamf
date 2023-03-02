@@ -1019,11 +1019,11 @@ abstract class ParamDefinition() {
 
 <dfn noexport>param_definition_mode</dfn> indicates if this parameter definition specifies duration, num_segments, constant_segment_interval and segment_interval fields for the parameter blocks associated to the [=parameter_id=].
 - When this field is set to 0, all of duration, num_segments, constant_segment_interval and segment_interval fields shall be specified in this parameter definition mapped to the [=parameter_id=]. Instead of that, none of parameter blocks associated to this parameter definition shall specify duration, num_segments, constant_segment_interval and segment_interval fields. 
-- When this field is set to 1, none of duration, num_segments, constant_segment_interval and segment_interval fields shall be specificed in this parameter definition. Instead of that, each of parameter blocks associated to this parameter defintion shall specify its own duration, num_segments, constant_segment_interval and segment_interval fields.
+- When this field is set to 1, none of duration, num_segments, constant_segment_interval and segment_interval fields shall be specificed in this parameter definition. Instead of that, each of parameter blocks associated to this parameter definition shall specify its own duration, num_segments, constant_segment_interval and segment_interval fields.
 
-<dfn noexport>duration</dfn> specifies the duration for which all of parameter blocks associated to this parameter defintion are valid and applicable. 
+<dfn noexport>duration</dfn> specifies the duration for which all of parameter blocks associated to this parameter definition are valid and applicable. 
 
-<dfn noexport>num_segments</dfn> specifies the number of different sets of parameter values specified in all of parameter blocks associated to this parameter defintion, where each set describes a different segment of the timeline, contiguously.
+<dfn noexport>num_segments</dfn> specifies the number of different sets of parameter values specified in all of parameter blocks associated to this parameter definition, where each set describes a different segment of the timeline, contiguously.
 
 <dfn noexport>constant_segment_interval</dfn> specifies the interval of each segment, in the case where all segments except the last segment have equal intervals. If all segments except the last segment do not have equal intervals, the value of constant_segment_interval shall be set to 0. 
 
@@ -1657,6 +1657,9 @@ Restrictions on the IA sequence:
     - In case of simple scalable channel audio (e.g. mono for layer 1 & stereo for layer 2), demixing_info() and recon_gain_info() shall not be present in the bitstream.
     - When num_layers = 1, OBU_IA_Parameter_Block including demixing_info() may be present in the IA sequence and IA decoders may use the demixing_info() for dynamic down-mixing.
 - All audio frames shall have aligned frame boundaries.
+- All parameter definitons shall have the same [=param_definition_mode=].
+	- When [=param_definition_mode=] = 0, duration, num_segments, constant_segment_interval and segment_interval shall be same in all parameter definitions, respectively.
+
 
 Capabilities of the IA parser, decoder and processor:
 - They shall be able to parse an IA sequence with the MSB four bits of [=profile_version=] = 0 and the MSB four bits of [=version=] = 0 (i.e., profile_version = 0 to 15 and version = 0 to 15).
@@ -1690,6 +1693,9 @@ Restrictions on IA sequence:
     - In case of simple scalable channel audio (e.g. mono for layer 1 & stereo for layer 2), [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=] shall not be present in the bitstream.
     - When num_layers = 1, OBU_IA_Parameter_Block including [=demixing_info_parameter_data()=] may be present in the IA sequence and IA decoders may use the [=demixing_info_parameter_data()=] for dynamic down-mixing.
 - All audio frames shall have aligned frame boundaries.
+- All parameter definitons shall have the same [=param_definition_mode=].
+	- When [=param_definition_mode=] = 0, duration, num_segments, constant_segment_interval and segment_interval shall be same in all parameter definitions, respectively.
+
 
 Capabilities of the IA parser, decoder and processor:
 - They shall be able to parse an IA sequence with the MSB four bits of [=profile_version=] = 0 or 1 and the MSB four bits of [=version=] = 0 (i.e., profile_version = 0 to 31 and version = 0 to 15).
@@ -1889,7 +1895,7 @@ During encapsulation process, OBUs of IA sequence are encapsulated into [[!ISOBM
 
 - Each set of descriptor OBUs, specified in [[#standalone-descriptor-obus]], and the Sync OBU that immediately follows them are moved to one [=IASampleEntry=]. The descriptor OBUs are then discarded from the IA sequence. In addition,
     - The [=num_samples_per_frame=] field in the Codec Config OBU is copied to 'stts'.
-    - The [=roll_distance=] field in the Codec Config OBU is copied to [=AudioRollRecoveryEntry()=] with the [=grouping_type=] 'rol1'.
+    - The [=roll_distance=] field in the Codec Config OBU is copied to [=AudioRollRecoveryEntry=] with the [=grouping_type=] 'rol1'.
 - Each temporal unit:
 	- Temporal Delimiter OBU: shall be discarded if present.	
 	- Remained OBUs of each temporal unit shall be stored as one sample data without gap among OBUs.
