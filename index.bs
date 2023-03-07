@@ -921,8 +921,7 @@ class parameter_block_obu() {
     }
 
     if (param_definition_type == PARAMETER_DEFINITION_MIX_GAIN) {
-      leb128() animation_type;
-      mix_gain_parameter_data(animation_type);
+      mix_gain_parameter_data();
     }
     if (param_definition_type == PARAMETER_DEFINITION_DEMIXING) {
       demixing_info_parameter_data();
@@ -951,44 +950,6 @@ Audio Element OBU and/or Mix Presentation OBU is mapping a parameter_id to the p
 <dfn value noexport for="parameter_block_obu()">segment_interval</dfn> specifies the interval for the given segment.
 
 Each value of duration, constant_segment_interval and segment_interval shall be expressed as the number of ticks at the [=parameter_rate=] specified in the corresponding parameter definition.
-
-<dfn noexport>animation_type</dfn> specifies the type of animation applied to the parameter values in this parameter block.
-
-<pre class = "def">
-animation_type : Animation Type
-       0       : STEP
-       1       : LINEAR
-       2       : BEZIER
-</pre>
-
-Classes that take [=animation_type=] as an input argument use the <dfn noexport>AnimatedParameterData()</dfn> function template. The method of applying the animation is described in [[#processing-animated-params]].
-
-```
-template <class T>
-class AnimatedParameterData(animation_type) {
-  if (animation_type == STEP) {
-    T start_point_value;
-  }
-  if (animation_type == LINEAR) {
-    T start_point_value;
-    T end_point_value;
-  }
-  if (animation_type == BEZIER) {
-    T start_point_value;
-    T end_point_value;
-    T control_point_value;
-    unsigned int (8) control_point_relative_time;
-  }
-}
-```
-
-<dfn noexport>start_point_value</dfn> specifies the parameter value that is applied at the start of the segment.
-
-<dfn noexport>end_point_value</dfn> specifies the parameter value that is applied at the end of the segment.
-
-<dfn noexport>control_point_value</dfn> specifies the parameter value of the middle control point of a quadratic Bezier curve, i.e. its y-axis value.
-
-<dfn noexport>control_point_relative_time</dfn> specifies the time of the middle control point of a quadratic Bezier curve, i.e. its x-axis value. This value is expressed as a fraction of the parameter segment interval with valid values in the range of 0 and 1, inclusively. A value equal to 0 or 1 indicates that this animation implements a linear Bezier curve, in which case control_point_value shall be ignored by the IA parser. It is stored as an 8-bit, unsigned, fixed-point value with 8 fractional bits (i.e. Q0.8 in [[!Q-Format]]).
 
 #### Parameter Definition Syntax and Semantics #### {#parameter-definition}
 
@@ -1553,7 +1514,8 @@ class MixGainParamDefinition extends ParamDefinition() {
   signed int (16) default_mix_gain;
 }
 
-class mix_gain_parameter_data(animation_type) {
+class mix_gain_parameter_data() {
+  leb128() animation_type;
   AnimatedParameterData<signed int (16)> param_data;
 }
 ```
@@ -1562,8 +1524,45 @@ class mix_gain_parameter_data(animation_type) {
 
 <dfn noexport>default_mix_gain</dfn> specifies the default mix gain value to apply when there are no mix gain parameter blocks provided. This value is expressed in dB and shall be applied to all channels in the rendered audio element. It is stored as a 16-bit, signed, two's complement fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]).
 
+<dfn noexport>animation_type</dfn> specifies the type of animation applied to the parameter values.
+
 <dfn noexport>param_data</dfn> uses the AnimatedParameterData function template. Each of the values defined within this instance (start_point_value, end_point_value and control_point_value) is expressed in dB and shall be applied to all channels in the rendered audio element. They are stored as 16-bit, signed, two's complement fixed-point values with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]).
 
+<pre class = "def">
+animation_type : Animation Type
+       0       : STEP
+       1       : LINEAR
+       2       : BEZIER
+</pre>
+
+Classes that take [=animation_type=] as an input argument use the <dfn noexport>AnimatedParameterData()</dfn> function template. The method of applying the animation is described in [[#processing-animated-params]].
+
+```
+template <class T>
+class AnimatedParameterData(animation_type) {
+  if (animation_type == STEP) {
+    T start_point_value;
+  }
+  if (animation_type == LINEAR) {
+    T start_point_value;
+    T end_point_value;
+  }
+  if (animation_type == BEZIER) {
+    T start_point_value;
+    T end_point_value;
+    T control_point_value;
+    unsigned int (8) control_point_relative_time;
+  }
+}
+```
+
+<dfn noexport>start_point_value</dfn> specifies the parameter value that is applied at the start of the segment.
+
+<dfn noexport>end_point_value</dfn> specifies the parameter value that is applied at the end of the segment.
+
+<dfn noexport>control_point_value</dfn> specifies the parameter value of the middle control point of a quadratic Bezier curve, i.e. its y-axis value.
+
+<dfn noexport>control_point_relative_time</dfn> specifies the time of the middle control point of a quadratic Bezier curve, i.e. its x-axis value. This value is expressed as a fraction of the parameter segment interval with valid values in the range of 0 and 1, inclusively. A value equal to 0 or 1 indicates that this animation implements a linear Bezier curve, in which case control_point_value shall be ignored by the IA parser. It is stored as an 8-bit, unsigned, fixed-point value with 8 fractional bits (i.e. Q0.8 in [[!Q-Format]]).
 
 ## Codec Specific ## {#codec-specific}
 
