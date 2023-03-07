@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 077497365, updated Thu Mar 2 15:15:29 2023 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="9be8596186189f253bf566713032ab7e98ae6e35" name="document-revision">
+  <meta content="69c98aaa99aaeeb6050e6b18fd272ebde229f5c0" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2469,7 +2469,7 @@ class Bar {
   9~30  : OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21
    31   : OBU_IA_Magic_Code
 </pre>
-   <p><dfn data-dfn-type="dfn" data-noexport id="obu_redundant_copy">obu_redundant_copy<a class="self-link" href="#obu_redundant_copy"></a></dfn> indicates whether this OBU is a redundant copy of the previous OBU in the IA sequence with the same obu_type. A value of 1 indicates that it is a redundant copy, while a value of 0 indicates that it is not.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="obu_redundant_copy">obu_redundant_copy</dfn> indicates whether this OBU is a redundant copy of the previous OBU in the IA sequence with the same obu_type. A value of 1 indicates that it is a redundant copy, while a value of 0 indicates that it is not.</p>
    <p>It shall always be set to 0 for the following obu_type values:</p>
    <ul>
     <li data-md>
@@ -2509,7 +2509,7 @@ class Bar {
    <p>The reserved OBU allows the extension of this specification with additional OBU types in a way that allows IAMF-OBU parsers compliant to this version of specification to ignore them.</p>
    <h4 class="heading settled" data-level="4.1.5" id="obu-magiccode"><span class="secno">4.1.5. </span><span class="content">Magic Code OBU Syntax and Semantics</span><a class="self-link" href="#obu-magiccode"></a></h4>
    <p>This section specifies obu payload of OBU_IA_Magic_Code.</p>
-   <p>For this obu, the obu header (2 bytes) shall be set to 0xF006.</p>
+   <p>For this obu, the obu header (2 bytes) shall be set to 0xF807 (in case of <a data-link-type="dfn" href="#obu_redundant_copy" id="ref-for-obu_redundant_copy">obu_redundant_copy</a> = 0) or FC07 (in case of <a data-link-type="dfn" href="#obu_redundant_copy" id="ref-for-obu_redundant_copy①">obu_redundant_copy</a> = 1) for this version of the specification.</p>
    <p><b>Syntax</b></p>
 <pre>class magic_code_obu() {
   unsigned int (32) ia_code;
@@ -5961,6 +5961,12 @@ Recon_Gain for D_Rtb4:
    <ul>
     <li><a href="#ref-for-obu_type">10.2.7.1. Multiple Audio Elements with One Codec Config</a>
     <li><a href="#ref-for-obu_type①">10.2.7.2. Multiple Audio Elements with Multiple Codec Config</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-obu_redundant_copy" class="dfn-panel" data-for="obu_redundant_copy" id="infopanel-for-obu_redundant_copy">
+   <span id="infopaneltitle-for-obu_redundant_copy" style="display:none">Info about the 'obu_redundant_copy' definition.</span><b><a href="#obu_redundant_copy">#obu_redundant_copy</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-obu_redundant_copy">4.1.5. Magic Code OBU Syntax and Semantics</a> <a href="#ref-for-obu_redundant_copy①">(2)</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-obu_trimming_status_flag" class="dfn-panel" data-for="obu_trimming_status_flag" id="infopanel-for-obu_trimming_status_flag">
