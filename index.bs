@@ -1669,32 +1669,6 @@ Capabilities of the IA parser, decoder and processor:
 - They shall be able to mix two audio elements.
 - They shall be able to process short-lived audio elements.
 
-## IA Enhanced Profile ## {#profiles-enhanced}
-
-This section specifies the conformance points of the enhanced profile.
-
-Restrictions on IA sequence:
-- There may be more than one unique Codec Config OBUs.
-- There may be more than one unique Audio Element OBUs.
-- There may be more than one unique Mix Presentation OBUs.
-- There shall not be Temporal Delimiter OBUs present.
-- [=version=] shall be set to 0 for this version of specification.
-- [=profile_version=] shall be set to 32 for this version of specification.
-- The different Codec Config OBUs may have different [=codec_id=]s specified with the following constraints:
-    - The combination of [=codec_id=] = 'fLaC' for one substream and [=codec_id=] = 'Opus' for another substream shall not be allowed.
-    - The combination of [=codec_id=] = 'fLaC' for one substream and [=codec_id=] = 'mp4a' for another substream shall not be allowed.
-- [=num_layers=] shall be set to 1 or up to 6 for Channel-based audio element (i.e. scalable channel audio)
-    - In this case, [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=] may be present.
-    - In case of simple scalable channel audio (e.g. mono for layer 1 & stereo for layer 2), [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=] shall not be present.
-
-Capabilities of the IA parser, decoder and processor:
-- They shall be able to parse an IA sequence with the MSB four bits of [=profile_version=] = 0, 1 or 2 and the MSB four bits of [=version=] = 0 (i.e., profile_version = 0 to 47 and version = 0 to 15).
-- They shall be able to support the capabilities of the base profile.
-- They shall be able to decode and process up to 36 channels.
-- They shall be able to decode one or more different audio codecs in the same sequence, with the exception of the following combinations:
-    - IAMF-FLAC and IAMF-OPUS
-    - IAMF-FLAC and IAMF-AAC-LC
-- IA decoder which is conformant to this profile shall be able to synchronize two or more audio elements with different frame sizes.
 
 # Standalone IAMF Representation # {#standalone}
 
@@ -2757,31 +2731,6 @@ Step2: ith temporal unit is generated as follows:
 
 Step3: Generate IA sequence which starts descriptor OBUs and followed by temporal units in order.
 
-#### Multiple Audio Elements with Multiple Codec Config #### {#iamfgeneration-multipleaudioelements-multiplecodec}
-
-This section provides a way how to generate IA sequence having multiple audio elements from two IA simple or base profiles with the different codec config OBUs. However, the result shall comply with the enhanced profile of IA sequence.
-
-Step1: Descriptor OBUs are generated as follows:
-- Magic Code OBU: get the larger version field and the larger profile version field, respectively.
-- Codec Config OBU: just take one Codec Config OBU per [=codec_id=].
-- Audio Element OBUs: just take all of them except followings:
-	- codec_config_id in each Audio Element OBU is updated to indicate [=codec_config_id=] specified in the taken Codec Config OBU.
-	- [=audio_element_id=]s are updated to be unique in all of Audio Element OBUs.
-	- [=audio_substream_id=]s are updated to be unique in all of Audio Element OBUs. 
-	- parameter_ids in Audio Element OBUs are updated to be unique in all of Audio Element OBUs.
-- Mix Presentation OBUs: just take all of them and generate ones which are used after mixing of multiple audio elements if needed except following:
-	- audio_element_ids in each Mix Presentation OBU are updated to indicate the [=audio_element_id=]s specified in Audio Element OBUs.
-
-Step2: Data OBUs are generated as follows:
-- Place Temporal Units from multiple audio elements in timing order.
-	- [=obu_type=]s are updated to be aligned according to [=audio_substream_id=]s specified in Audio Element OBUs.
-	- [=parameter_id=]s in Parameter Block OBUs are updated to be aligned according to parameter_ids in Audio Element OBUs.
-- Add Sync OBU in front of Temporal Unit, frequently.
-	- New Sync OBU is generated based on Sync OBUs from each IA sequence and updated [=audio_substream_id=]s and [=parameter_id=]s.
-- It may have the immediately preceding temporal delimiter OBU for each audio element,
-
-Step3: Generate IA sequence which starts descriptor OBUs and followed by Temporal Units in order.
-
 ### Post Processing ### {#iamfgeneration-postprocessing}
 
 This section provides a guideline to generate algorithms for post processing.
@@ -2803,32 +2752,6 @@ This section provide a guideline to generate drc_config().
 
 ISSUE: TODO. Fill in example workflows.
 
-# Annex A: Audio Substream Gaps
-
-This annex describes a number of scenarios where a gap may exist in the audio signals, where a gap is defined as no audio frames for some period of time.
-
-## A gap within an audio substream
-
-A gap within an audio substream may be expressed via the Sync OBU offsets. A decoder encountering such a gap may either:
-
-1. insert silent audio frames in the gap without reinitializing, or
-2. reinitialize before decoding the audio frames after the gap.
-
-The appropriate behaviour in this case is signalled via the [=reinitialize_decoder=] field in the Sync OBU.
-
-In this version of the specification, gaps within an audio substream are not supported.
-
-## A gap between two audio substreams
-
-A gap may occur if there is a period of time between the end of one substream and the start of another. Such a gap may be expressed via the Sync OBU offsets. Similar to the case of a gap within an audio substream, the behaviour of the decoder is determined by the [=reinitialize_decoder=] field in the Sync OBU.
-
-A gap may further occur if there is a period of time between the end of all substreams and the start of another. This case may be expressed by setting a non-zero value for the [=global_offset=] field in the Sync OBU.
-
-## A gap due to packet loss
-
-In the case where a gap is not signalled by the Sync OBUs, any unexpected absence of audio frames shall be interpreted as packet loss. The IAMF parser is unable to guarantee the correctness of following OBUs received until the next set of Descriptor OBUs.
-
-In this version of the specification, gaps in the audio substreams are not supported so if a gap is encountered, it can always be interpreted as packet loss.
 
 # Annex B: Short-lived Audio
 
@@ -2839,3 +2762,5 @@ An IA sequence may contain audio elements which are short-lived, where the audio
 2. The second method uses Sync OBUs, without requiring a new Mix Presentation OBU. The Mix Presentation OBU contains an Audio Element OBU for each of A and B, and a Mix Presentation OBU that references both A and B. The first Sync OBU placed immediately after the Mix Presentation OBU includes both A and B. When the audio element B has ended, a new Sync OBU is placed in the IA stream which includes only A, indicating that B is no longer present in the timeline that comes immediately afterwards.
 
 In both cases, relevant parameter blocks must be updated in a way to match the timing of the short-lived audio elements if necessary to ensure that the processed audio output is correct.
+
+NOTE: The first method is only applicable to IA Simple and Base profiles for this version of the specification.
