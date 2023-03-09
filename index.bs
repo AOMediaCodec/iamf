@@ -2795,18 +2795,15 @@ Step3: Generate IA sequence which starts descriptor OBUs and followed by tempora
 
 This section provides a guideline to generate algorithms for post processing.
 
-#### Loudness Config ####  {#iamfgeneration-postprocessing-drc}
+#### Loudness Information ####  {#iamfgeneration-postprocessing-loudness}
 
-This section provide a guideline to generate loudness_config().
-
-//To Do: Fill in how to generate loudness_config()
-
-#### DRC Config ####  {#iamfgeneration-postprocessing-drc}
-
-This section provide a guideline to generate drc_config().
-
-//To Do: Fill in how to generate drc_config()
-
+This section provide a guideline to generate loudness_info().
+		
+For a given Mix Presentation OBU and a given [=loudness_layout=] of a sub-mix of the given Mix Presentation OBU, followings are processed in order to produce loudness_info().
+- Each of Audio Elements specified in the sub-mix of the give Mix Presentation OBU is rendered to the given [=loudness_layout=] according to [=rendering_config()=] for the Audio Element.
+- Each of Audio Elements specified in the sub-mix of the give Mix Presentation OBU applies [=mix_gain=] according to [=element_mix_config()=] for the Audio Element.
+- All of Audio Elements specified in the sub-mix of the give Mix Presentation OBU are summed, and then applies [=mix_gain=] according to [=output_mix_config()=] for the sub-mix.
+- Generate loudness_info() of the mixed audio according to [[#obu-mixpresentation-loudness]].
 
 # Consumption of IAMF bitstream # {#iamfconsumption}
 
