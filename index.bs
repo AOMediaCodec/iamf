@@ -617,7 +617,7 @@ class codec_config() {
 
 <b>Semantics</b>
 
-<dfn noexport>codec_config_id</dfn> indicates a unique ID in an IA sequence for a given codec config.
+<dfn noexport>codec_config_id</dfn> indicates an unique obu_id with [=obu_type=] = OBU_IA_Codec_Config in IA sequences for a given codec config.
 
 <dfn noexport>codec_id</dfn> indicates a ‘four-character code’ (4CC) to identify the codec used to generate the audio substreams. It shall be 'Opus' for IAMF-OPUS, 'mp4a' for IAMF-AAC-LC, 'fLaC' for IAMF-FLAC and 'ipcm' for IAMF-LPCM.
 
@@ -683,7 +683,7 @@ class ReconGainParamDefinition() extends ParamDefinition() {
 
 <b>Semantics</b>
 
-<dfn noexport>audio_element_id</dfn> indicates a unique ID in an IA sequence for a given audio element.
+<dfn noexport>audio_element_id</dfn> indicates an unique obu_id with [=obu_type=] = OBU_IA_Audio_Element in IA sequences for a given audio element.
 
 <dfn noexport>audio_element_type</dfn> specifies the audio representation of this audio element which is constructed from one or more audio substreams.
 
@@ -694,11 +694,11 @@ audio_element_type: The type of audio representation.
   2~7   : Reserved
 </pre>
 
-<dfn value noexport for="audio_element_obu()">codec_config_id</dfn> indicates the unique ID for the codec config which this audio element refers to.
+<dfn value noexport for="audio_element_obu()">codec_config_id</dfn> indicates the obu_id for the codec config which this audio element refers to.
 
 <dfn noexport>num_substreams</dfn> specifies the number of audio substreams that are used to reconstruct this audio element.
 
-<dfn value noexport for="audio_element_obu()">audio_substream_id</dfn> specifies the unique ID associated with the audio substream that is used to reconstruct this audio element.
+<dfn value noexport for="audio_element_obu()">audio_substream_id</dfn> specifies the obu_id associated with the audio substream that is used to reconstruct this audio element.
 
 Let a particular ChannelGroup's substream be indexed as [<dfn noexport>c</dfn>, <dfn noexport>n_c</dfn>], where
 - [=c=] = [1, ..., C] is the ChannelGroup index and C is the number of ChannelGroups.
@@ -777,7 +777,7 @@ class mix_presentation_obu() {
 
 <b>Semantics</b>
 
-<dfn noexport>mix_presentation_id</dfn> indicates a unique ID in an IA sequence for a given mix presentation.
+<dfn noexport>mix_presentation_id</dfn> indicates an unique obu_id with [=obu_type=] = OBU_IA_Mix_Presentation in IA sequences for a given mix presentation.
 
 <dfn noexport>mix_presentation_annotations()</dfn> is a class that provides informational metadata that an IA parser should refer to when selecting the mix presentation to use. The metadata may also be used by the playback system to display information to the user, but is not used in the rendering or mixing process to generate the final output audio signal.
 
@@ -786,7 +786,7 @@ class mix_presentation_obu() {
 
 <dfn noexport>num_audio_elements</dfn> specifies the number of audio elements that are used in this mix presentation to generate the final output audio signal for playback.
 
-<dfn value noexport for ="mix_presentation_obu()">audio_element_id</dfn> indicates the unique ID associated with a specific audio element that is used in this mix presentation.
+<dfn value noexport for ="mix_presentation_obu()">audio_element_id</dfn> indicates the obu_id associated with a specific audio element that is used in this mix presentation.
 
 <dfn noexport>rendering_config()</dfn> is a class that provides the metadata required for rendering the referenced audio element. 
 
@@ -927,7 +927,7 @@ class parameter_block_obu() {
 
 <b>Semantics</b>
 
-<dfn noexport>parameter_id</dfn> indicates the unique ID that is associated with a specific parameter definition. All parameter blocks that provide data for that parameter definition shall have the same parameter_id.
+<dfn noexport>parameter_id</dfn> indicates an unique obu_id with [=obu_type=] = OBU_IA_Parameter_Block that is associated with a specific parameter definition. All parameter blocks that provide data for that parameter definition shall have the same parameter_id.
 
 <dfn noexport>duration</dfn> specifies the duration for which this parameter block is valid and applicable. 
 
@@ -1000,7 +1000,7 @@ abstract class ParamDefinition() {
 
 <b>Semantics</b>
 
-<dfn value noexport for="ParamDefinition()">parameter_id</dfn> indicates the unique ID in an IA sequence for a given parameter.
+<dfn value noexport for="ParamDefinition()">parameter_id</dfn> indicates the obu_id in an IA sequence for a given parameter.
 
 <dfn noexport>parameter_rate</dfn> specifies the rate used by this parameter, expressed as ticks per second. Time-related fields associated with this parameter, such as durations and intervals, shall be expressed in the number of ticks.
 
@@ -1008,7 +1008,7 @@ abstract class ParamDefinition() {
 
 This section specifies OBU payloads of OBU_IA_Audio_Frame and OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21. 
 
-The first 22 audio substreams in an IA sequence may use the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21, which have predefined audio substream IDs associated with them. This avoids the need to manually specify an [=audio_substream_id=].
+The first 22 audio substreams in an IA sequence may use the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21, which have predefined audio substream obu_ids associated with them. This avoids the need to manually specify an [=audio_substream_id=].
 
 [=audio_substream_id=] = 0 to [=audio_substream_id=] = 21 shall be assigned to Audio Frame OBUs with the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21, respectively. 
 
@@ -1029,7 +1029,7 @@ class audio_frame_obu() {
 
 <b>Semantics</b>
 
-<dfn noexport>audio_substream_id</dfn> indicates a unique ID in an IA sequence for a given substream. All Audio Frame OBUs of the same substream shall have the same audio_substream_id.
+<dfn noexport>audio_substream_id</dfn> indicates an unique obu_id with [=obu_type=] = OBU_IA_Audio_Frame in IA sequences for a given substream. All Audio Frame OBUs of the same substream shall have the same audio_substream_id.
 
 This value must be greater or equal to 22, in order to avoid collision with the reserved IDs for the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21.
 
