@@ -2020,6 +2020,21 @@ During decapsulation process, IAMF file is decapsulated into IA sequences which 
 	- Take jth sample as it is.
 - Step4: Place descriptor OBUs, followed by Sync OBU, and followed by Temporal Units in order (j = i1, i2, …, im) without gap, to reconstruct the ith IA sequence.
 
+### Recommended handling of Trimming Information ### {#isobmff-decapsulation-singletrack-trimming}
+
+This section recommends how to handle trimming information of IAMF-ISOBMFF file.
+
+<center><img src="images/ISOBMFF Trimming Handling.png" style="width:80%; height:auto;"></center>
+<center><figcaption>Recommendation for IAMF-ISOBMFF Trimming Information Handling</figcaption></center>
+
+As depicted in the above figure, 
+- IAMF file parser (or IAMF-ISOBMFF parser ) passes descriptor OBUs, PTS1 and Samples to IAMF decoder.
+- IAMF file parser (or IAMF-ISOBMFF parser ) passes zero trimming information regardless of trimming related information of IAMF file to IAMF file player (or IAMF-ISOBMFF player). 
+- IAMF decoder passes audio samples after trimming and PTS2 to IAMF file parser (or IAMF-ISOBMFF parser ) passes.
+	- IAMF decoder trims the audio samples to be trimmed based on the trimming information within Audio Frame OBUs of each Sample.
+	- IAMF decoder updates from PTS1 to PTS2 based on the amount of the trimmed audio samples at the start of the IAMF file.
+- IAMF file player (or IAMF-ISOBMFF player) passes Audio Samples starting at PTS2 to Loudspeakers.
+
 # IAMF processing # {#processing}
 
 This section provides a guideline for IA decoding for a given [=IA sequence=].
