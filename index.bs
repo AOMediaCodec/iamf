@@ -408,28 +408,32 @@ The IA sequence supports the description of multiple audio substreams and algori
 - <dfn noexport>Temporal Delimiter OBU</dfn> identifies the temporal units.
 
 
-The below figure shows the linking scheme among [=obu_id=]s in obu_header and ids in obu payload.
+The below figure shows the linking scheme among IDs in obu_header or ids in obu payload.
 
 <center><img src="images/ID Linking Example.png" style="width:100%; height:auto;"></center>
 <center><figcaption>ID Linking Scheme</figcaption></center>
 
 In the above figure, 
-- codec config obu is saying that there are two audio elements (audio_element_id = 11 and 12) which are coded by using the codec_config() in the obu.
-	- The audio element having audio_element_id = 11 is linked to the audio element obu having audio_element_id = 11.
-		- The audio element obu is saying that there are two substreams (substream_id = 31 and 32) which composing of this audio element.
-			- The audio substream having substream_id = 31 is linked to the audio frame obus having id = 31.
-			- The audio substream having substream_id = 32 is linked to the audio frame obus having id = 32.
-		- The audio element obu is saying that there are one parameter block (parameter_id = 71) for demixing_info_parameter_data() which is applied to the audio element.
-			- The parameter block having parameter_id = 71 is linked to the parameter block obu having parameter_id = 71.
-		- IAMF decoders applies the parameter block to the audio substreams after decoding by substream decoders.
-	- The audio element having audio_element_id = 12 is linked to the audio element obu having obu_id = 12.
-		- The audio element obu is saying that there are one substream (substream_id = 33) which composing of this audio element. 
-			- The audio substream having substream_id = 33 is linked to the audio frame obus having id = 33.
-		- Substream decoder do decoding the substream.
-- mix presentation obu is saying that there are two audio elements (audio_element_id = 11 and 12) which need to be mixed.
-	- The audio element having audio_element_id = 11 and the audio element having audio_element_id = 12 are mixed after decoding each of them.
-	- Then IAMF decoders may do process loudness and drc controls by using mix_loudness_info() and drc_config().		
-
+- Codec Config OBU with codec_config_id  = 0 is providing codec_id and its decoder_config().
+- Mix Presentation OBU with mix_presentation_id  = 21 is saying:
+	- There are two Audio Elements(audio_element_id = 11 and 12) which need to be mixed. The audio_element_id = 11 and the audio_element_id = 12 are linked to the Audio Element OBUs with audio_element_id = 11 and audio_element_id = 12, respectively.
+		- There is Paramter Block OBU with parameter_id = 32 to be used for mixing of the Audio Element with audio_element_id = 11. 
+		- There is Paramter Block OBU with parameter_id = 33 to be used for mixing of the Audio Element with audio_element_id = 12.
+	- There is Parameter Block OBU with parameter_id = 34 to be used for mixing of the two Audio Elements.
+- Audio Element OBU with audio_element_id = 11 is saying:
+	- This audio element has been coded by using Codec Config OBU with codec_config_id = 0. 
+	- There are two Substreams (audio_substream_id = 0 and 1) which are composing of this audio element. The audio_substream_id = 0 and the audio_substream_id = 1 are linked to the Audio Frame OBUs with audio_substream_id = 0 and audio_substream_id = 1(i.e. obu_type = OBU_IA_Audio_Frame_ID0 and obu_type = OBU_IA_Audio_Frame_ID1), respectively.
+	- There is one Parameter Block OBU with parameter_id = 31 to be used for demixing of this audio element.
+- Audio Element OBU with audio_element_id = 12 is saying:
+	- This audio element has been coded by using Codec Config OBU with codec_config_id = 0.
+	- There is one Substream (audio_substream_id = 2) which is composing of this audio element. The audio_substream_id = 2 is linked to the Audio Frame OBUs with audio_substream_id = 2 (i.e. obu_type = OBU_IA_Audio_Frame_ID2).
+- Audio Frame OBU with ID = 0 (i.e. obu_type = OBU_IA_Audio_Frame_ID0) is providing the coded data which has been coded by using Codec Config OBU with codec_config_id = 0 of Substream with audio_substream_id = 0.
+- Audio Frame OBU with ID = 1 (i.e. obu_type = OBU_IA_Audio_Frame_ID1) is providing the coded data which has been coded by using Codec Config OBU with codec_config_id = 0 of Substream with audio_substream_id = 1.
+- Audio Frame OBU with ID = 2 (i.e. obu_type = OBU_IA_Audio_Frame_ID2) is providing the coded data which has been coded by using Codec Config OBU with codec_config_id = 0 of Substream with audio_substream_id = 2.
+- Parameter Block OBU with parameter_id = 31 is providing demixing_info_parameter_data() to be applied for demixing of the Audio Element with audio_element_id = 11.
+- Parameter Block OBU with parameter_id = 32 is providing mix_gain_parameter_data() to be applied to the rendered audio element after rendering according to render_config() of the Audio Element with audio_element_id = 11.
+- Parameter Block OBU with parameter_id = 33 is providing mix_gain_parameter_data() to be applied to the rendered audio element after rendering according to render_config() of the Audio Element with audio_element_id = 12.
+- Parameter Block OBU with parameter_id = 34 is providing mix_gain_parameter_data() to be applied to the mixed audio of the two rendered audios.
 
 
 # Open Bitstream Unit (OBU) Syntax and Semantics # {#obu-syntax}
