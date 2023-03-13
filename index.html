@@ -1487,9 +1487,9 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version 077497365, updated Thu Mar 2 15:15:29 2023 -0800" name="generator">
+  <meta content="Bikeshed version d9f9c3533, updated Fri Mar 10 11:31:29 2023 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="4621c4825d45d0c7d7b0e898bf4b69c10cfc8949" name="document-revision">
+  <meta content="d9a29e50a4f90f5058c1a54e955e3778bdb33ef5" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -3385,9 +3385,11 @@ class mix_gain_parameter_data(animation_type) {
     <li data-md>
      <p><a data-link-type="dfn" href="https://tools.ietf.org/html/rfc8486#" id="ref-for-e6206c888cf9e6d61d1c6238c6ddc859①">Channel Count</a> must be set to 2. <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc8486#" id="ref-for-e6206c888cf9e6d61d1c6238c6ddc859②">Channel Count</a> can be ignored because the real value can be determined from the Audio Element OBU and from the opus packet header.</p>
     <li data-md>
-     <p><a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="ref-for-9c64449471d3c3ade62706e1b26a3baf①">Output Gain</a> shall not be used. In other words, it shall be set to 0dB.</p>
+     <p><a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="ref-for-9c64449471d3c3ade62706e1b26a3baf①">Pre-skip</a> shall be same as the number of audio samples to be trimmed at the start of substreams.</p>
     <li data-md>
-     <p>The byte order of each field in <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="ref-for-9c64449471d3c3ade62706e1b26a3baf②">ID Header</a> is converted to big endian.</p>
+     <p><a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="ref-for-9c64449471d3c3ade62706e1b26a3baf②">Output Gain</a> shall not be used. In other words, it shall be set to 0dB.</p>
+    <li data-md>
+     <p>The byte order of each field in <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="ref-for-9c64449471d3c3ade62706e1b26a3baf③">ID Header</a> is converted to big endian.</p>
    </ul>
    <p>Substream format is <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6716#" id="ref-for-1af30f726bd2cf5a930fcae7941981e8①">opus packet</a> of <a data-link-type="biblio" href="#biblio-rfc6716" title="Definition of the Opus Audio Codec">[RFC6716]</a> which contains only one single frame of mono or stereo channels and which has non-delimiting frame structure.</p>
    <h4 class="heading settled" data-level="4.3.2" id="iamf-aac-lc-specific"><span class="secno">4.3.2. </span><span class="content">IAMF-AAC-LC Specific</span><a class="self-link" href="#iamf-aac-lc-specific"></a></h4>
@@ -3448,6 +3450,10 @@ class mix_gain_parameter_data(animation_type) {
      <p>There shall be only one unique Codec Config OBU.</p>
     <li data-md>
      <p>There shall be only one unique Audio Element OBU.</p>
+     <ul>
+      <li data-md>
+       <p>All of substreams shall have the same trimming information.</p>
+     </ul>
     <li data-md>
      <p>There shall be only one unique set of Descriptor OBUs.</p>
     <li data-md>
@@ -3511,6 +3517,8 @@ class mix_gain_parameter_data(animation_type) {
         <li data-md>
          <p>Scene-based Audio Element + Channel-based Audio Element having <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⓪">num_layers</a> > 1.</p>
        </ul>
+      <li data-md>
+       <p>All of substreams shall have the same trimming information.</p>
      </ul>
     <li data-md>
      <p>There may be more than one unique set of Descriptor OBUs.</p>
@@ -5757,13 +5765,19 @@ Recon_Gain for D_Rtb4:
   <aside aria-labelledby="infopaneltitle-for-9c64449471d3c3ade62706e1b26a3baf" class="dfn-panel" data-for="9c64449471d3c3ade62706e1b26a3baf" id="infopanel-for-9c64449471d3c3ade62706e1b26a3baf">
    <span id="infopaneltitle-for-9c64449471d3c3ade62706e1b26a3baf" style="display:none">Info about the 'id header' external reference.</span><a href="https://tools.ietf.org/html/rfc7845#">https://tools.ietf.org/html/rfc7845#</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">4.3.1. IAMF-OPUS Specific</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(2)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(3)</a>
+    <li><a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">4.3.1. IAMF-OPUS Specific</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(2)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(3)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(4)</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-d52f528bf16da2c6410d5c21732ab0e1" class="dfn-panel" data-for="d52f528bf16da2c6410d5c21732ab0e1" id="infopanel-for-d52f528bf16da2c6410d5c21732ab0e1">
    <span id="infopaneltitle-for-d52f528bf16da2c6410d5c21732ab0e1" style="display:none">Info about the 'output gain' external reference.</span><a href="https://tools.ietf.org/html/rfc7845#">https://tools.ietf.org/html/rfc7845#</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">4.3.1. IAMF-OPUS Specific</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(2)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(3)</a>
+    <li><a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">4.3.1. IAMF-OPUS Specific</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(2)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(3)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(4)</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-2f218c31268ef7a2b712a9ef64927c5e" class="dfn-panel" data-for="2f218c31268ef7a2b712a9ef64927c5e" id="infopanel-for-2f218c31268ef7a2b712a9ef64927c5e">
+   <span id="infopaneltitle-for-2f218c31268ef7a2b712a9ef64927c5e" style="display:none">Info about the 'pre-skip' external reference.</span><a href="https://tools.ietf.org/html/rfc7845#">https://tools.ietf.org/html/rfc7845#</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">4.3.1. IAMF-OPUS Specific</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(2)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(3)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(4)</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-e6206c888cf9e6d61d1c6238c6ddc859" class="dfn-panel" data-for="e6206c888cf9e6d61d1c6238c6ddc859" id="infopanel-for-e6206c888cf9e6d61d1c6238c6ddc859">
@@ -5881,6 +5895,7 @@ Recon_Gain for D_Rtb4:
     <ul>
      <li><span class="dfn-paneled" id="9c64449471d3c3ade62706e1b26a3baf">id header</span>
      <li><span class="dfn-paneled" id="d52f528bf16da2c6410d5c21732ab0e1">output gain</span>
+     <li><span class="dfn-paneled" id="2f218c31268ef7a2b712a9ef64927c5e">pre-skip</span>
     </ul>
    <li>
     <a data-link-type="biblio">[RFC8486]</a> defines the following terms:
