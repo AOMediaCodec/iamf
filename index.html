@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version d9f9c3533, updated Fri Mar 10 11:31:29 2023 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="36e3e7997333514da9831ea55cd3bbaf432a86f4" name="document-revision">
+  <meta content="380aefd13fb94dcf47874cbcb7eaa9b61db104d0" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2533,7 +2533,7 @@ class codec_config() {
 }
 </pre>
    <p><b>Semantics</b></p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="codec_config_id">codec_config_id</dfn> indicates a unique ID in an IA sequence for a given codec config.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="codec_config_id">codec_config_id</dfn> indicates an unique obu_id with <a data-link-type="dfn" href="#obu_type" id="ref-for-obu_type">obu_type</a> = OBU_IA_Codec_Config in IA sequences for a given codec config.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="codec_id">codec_id</dfn> indicates a ‘four-character code’ (4CC) to identify the codec used to generate the audio substreams. It shall be <a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="ref-for-1148b46dff2b25531031f0fd1fb79485">Opus</a> for IAMF-OPUS, <a class="property css" data-link-type="property" href="https://www.iso.org/standard/79110.html#" id="ref-for-48e47e0f5189469fa73e92a00c751a02">mp4a</a> for IAMF-AAC-LC, <a class="property css" data-link-type="property" href="https://xiph.org/flac/format.html" id="ref-for-c568d8f4de8d80029804bf1eecb28b4c">fLaC</a> for IAMF-FLAC and <a class="property css" data-link-type="property" href="https://www.iso.org/standard/77752.html#" id="ref-for-41c4b6a338908de4fcad02babe72a382">ipcm</a> for IAMF-LPCM.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_samples_per_frame">num_samples_per_frame</dfn> indicates the frame length, in samples, of the raw coded audio provided in by audio_frame_obu(). It shall not be set to zero.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="roll_distance">roll_distance</dfn> is a signed integer that gives the number of frames that need to be decoded in order for a frame to be decoded correctly. A negative value indicates the number of frames before the frame to be decoded corrently.</p>
@@ -2593,16 +2593,16 @@ class codec_config() {
 
 </pre>
    <p><b>Semantics</b></p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_element_id">audio_element_id</dfn> indicates a unique ID in an IA sequence for a given audio element.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_element_id">audio_element_id</dfn> indicates an unique obu_id with <a data-link-type="dfn" href="#obu_type" id="ref-for-obu_type①">obu_type</a> = OBU_IA_Audio_Element in IA sequences for a given audio element.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="audio_element_type">audio_element_type<a class="self-link" href="#audio_element_type"></a></dfn> specifies the audio representation of this audio element which is constructed from one or more audio substreams.</p>
 <pre class="def">audio_element_type: The type of audio representation.
    0    : CHANNEL_BASED
    1    : SCENE_BASED
   2~7   : Reserved
 </pre>
-   <p><dfn class="css" data-dfn-for="audio_element_obu()" data-dfn-type="value" data-noexport id="valdef-audio_element_obu-codec_config_id">codec_config_id<a class="self-link" href="#valdef-audio_element_obu-codec_config_id"></a></dfn> indicates the unique ID for the codec config which this audio element refers to.</p>
+   <p><dfn class="css" data-dfn-for="audio_element_obu()" data-dfn-type="value" data-noexport id="valdef-audio_element_obu-codec_config_id">codec_config_id<a class="self-link" href="#valdef-audio_element_obu-codec_config_id"></a></dfn> indicates the obu_id for the codec config which this audio element refers to.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_substreams">num_substreams</dfn> specifies the number of audio substreams that are used to reconstruct this audio element.</p>
-   <p><dfn class="css" data-dfn-for="audio_element_obu()" data-dfn-type="value" data-noexport id="valdef-audio_element_obu-audio_substream_id">audio_substream_id<a class="self-link" href="#valdef-audio_element_obu-audio_substream_id"></a></dfn> specifies the unique ID associated with the audio substream that is used to reconstruct this audio element.</p>
+   <p><dfn class="css" data-dfn-for="audio_element_obu()" data-dfn-type="value" data-noexport id="valdef-audio_element_obu-audio_substream_id">audio_substream_id<a class="self-link" href="#valdef-audio_element_obu-audio_substream_id"></a></dfn> specifies the obu_id associated with the audio substream that is used to reconstruct this audio element.</p>
    <p>Let a particular ChannelGroup’s substream be indexed as [<dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="c">c</dfn>, <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="n_c">n_c</dfn>], where</p>
    <ul>
     <li data-md>
@@ -2670,11 +2670,11 @@ class codec_config() {
 }  
 </pre>
    <p><b>Semantics</b></p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="mix_presentation_id">mix_presentation_id<a class="self-link" href="#mix_presentation_id"></a></dfn> indicates a unique ID in an IA sequence for a given mix presentation.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="mix_presentation_id">mix_presentation_id<a class="self-link" href="#mix_presentation_id"></a></dfn> indicates an unique obu_id with <a data-link-type="dfn" href="#obu_type" id="ref-for-obu_type②">obu_type</a> = OBU_IA_Mix_Presentation in IA sequences for a given mix presentation.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="mix_presentation_annotations">mix_presentation_annotations()<a class="self-link" href="#mix_presentation_annotations"></a></dfn> is a class that provides informational metadata that an IA parser should refer to when selecting the mix presentation to use. The metadata may also be used by the playback system to display information to the user, but is not used in the rendering or mixing process to generate the final output audio signal.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_sub_mixes">num_sub_mixes</dfn> specifies the number of sub-mixes.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_audio_elements">num_audio_elements</dfn> specifies the number of audio elements that are used in this mix presentation to generate the final output audio signal for playback.</p>
-   <p><dfn class="css" data-dfn-for="mix_presentation_obu()" data-dfn-type="value" data-noexport id="valdef-mix_presentation_obu-audio_element_id">audio_element_id<a class="self-link" href="#valdef-mix_presentation_obu-audio_element_id"></a></dfn> indicates the unique ID associated with a specific audio element that is used in this mix presentation.</p>
+   <p><dfn class="css" data-dfn-for="mix_presentation_obu()" data-dfn-type="value" data-noexport id="valdef-mix_presentation_obu-audio_element_id">audio_element_id<a class="self-link" href="#valdef-mix_presentation_obu-audio_element_id"></a></dfn> indicates the obu_id associated with a specific audio element that is used in this mix presentation.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="rendering_config">rendering_config()<a class="self-link" href="#rendering_config"></a></dfn> is a class that provides the metadata required for rendering the referenced audio element.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="element_mix_config">element_mix_config()</dfn> is a class that provides the metadata required for applying any processing to the referenced and rendered audio element before being summed with other processed audio elements.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="output_mix_config">output_mix_config()</dfn> is a class that provides the metadata required for post-processing the mixed audio signal to generate the audio signal for playback.</p>
@@ -2770,7 +2770,7 @@ class codec_config() {
 }
 </pre>
    <p><b>Semantics</b></p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="parameter_id">parameter_id</dfn> indicates the unique ID that is associated with a specific parameter definition. All parameter blocks that provide data for that parameter definition shall have the same parameter_id.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="parameter_id">parameter_id</dfn> indicates an unique obu_id with <a data-link-type="dfn" href="#obu_type" id="ref-for-obu_type③">obu_type</a> = OBU_IA_Parameter_Block that is associated with a specific parameter definition. All parameter blocks that provide data for that parameter definition shall have the same parameter_id.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="duration">duration</dfn> specifies the duration for which this parameter block is valid and applicable.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_segments">num_segments</dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different segment of the timeline, contiguously.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="constant_segment_interval">constant_segment_interval</dfn> specifies the interval of each segment, in the case where all segments except the last segment have equal intervals. If all segments except the last segment do not have equal intervals, the value of constant_segment_interval shall be set to 0.</p>
@@ -2829,11 +2829,11 @@ class AnimatedParameterData(animation_type) {
 }
 </pre>
    <p><b>Semantics</b></p>
-   <p><dfn class="css" data-dfn-for="ParamDefinition()" data-dfn-type="value" data-noexport id="valdef-paramdefinition-parameter_id">parameter_id<a class="self-link" href="#valdef-paramdefinition-parameter_id"></a></dfn> indicates the unique ID in an IA sequence for a given parameter.</p>
+   <p><dfn class="css" data-dfn-for="ParamDefinition()" data-dfn-type="value" data-noexport id="valdef-paramdefinition-parameter_id">parameter_id<a class="self-link" href="#valdef-paramdefinition-parameter_id"></a></dfn> indicates the obu_id in an IA sequence for a given parameter.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="parameter_rate">parameter_rate</dfn> specifies the rate used by this parameter, expressed as ticks per second. Time-related fields associated with this parameter, such as durations and intervals, shall be expressed in the number of ticks.</p>
    <h4 class="heading settled" data-level="4.1.10" id="obu-audioframe"><span class="secno">4.1.10. </span><span class="content">Audio Frame OBU Syntax and Semantics</span><a class="self-link" href="#obu-audioframe"></a></h4>
    <p>This section specifies OBU payloads of OBU_IA_Audio_Frame and OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21.</p>
-   <p>The first 22 audio substreams in an IA sequence may use the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21, which have predefined audio substream IDs associated with them. This avoids the need to manually specify an <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id">audio_substream_id</a>.</p>
+   <p>The first 22 audio substreams in an IA sequence may use the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21, which have predefined audio substream obu_ids associated with them. This avoids the need to manually specify an <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id">audio_substream_id</a>.</p>
    <p><a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id①">audio_substream_id</a> = 0 to <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id②">audio_substream_id</a> = 21 shall be assigned to Audio Frame OBUs with the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21, respectively.</p>
    <p><b>Syntax</b></p>
 <pre>class audio_frame_obu_with_no_id() {
@@ -2846,7 +2846,7 @@ class AnimatedParameterData(animation_type) {
 }
 </pre>
    <p><b>Semantics</b></p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_substream_id">audio_substream_id</dfn> indicates a unique ID in an IA sequence for a given substream. All Audio Frame OBUs of the same substream shall have the same audio_substream_id.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_substream_id">audio_substream_id</dfn> indicates an unique obu_id with <a data-link-type="dfn" href="#obu_type" id="ref-for-obu_type④">obu_type</a> = OBU_IA_Audio_Frame in IA sequences for a given substream. All Audio Frame OBUs of the same substream shall have the same audio_substream_id.</p>
    <p>This value must be greater or equal to 22, in order to avoid collision with the reserved IDs for the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="coded_frame_size">coded_frame_size<a class="self-link" href="#coded_frame_size"></a></dfn> is the size of <a data-link-type="dfn" href="#audio_frame" id="ref-for-audio_frame">audio_frame()</a> in bytes.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_frame">audio_frame()</dfn> is the raw coded audio data for the frame. It shall be <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6716#" id="ref-for-1af30f726bd2cf5a930fcae7941981e8">opus packet</a> of <a data-link-type="biblio" href="#biblio-rfc6716" title="Definition of the Opus Audio Codec">[RFC6716]</a> for IAMF-OPUS, <a data-link-type="dfn" href="https://www.iso.org/standard/43345.html#" id="ref-for-eac87231ca66dad4375d600c066d991c">raw_data_block()</a> of <a data-link-type="biblio" href="#biblio-aac" title="Information technology — Generic coding of moving pictures and associated audio information — Part 7: Advanced Audio Coding (AAC)">[AAC]</a> for IAMF-AAC-LC and <a data-link-type="dfn" href="https://xiph.org/flac/format.html" id="ref-for-c568d8f4de8d80029804bf1eecb28b4c①">FRAME</a> of <a data-link-type="biblio" href="#biblio-flac" title="Free Lossless Audio Codec">[FLAC]</a> for IAMF-FLAC.</p>
@@ -4933,7 +4933,7 @@ Recon_Gain for D_Rtb4:
      <p>Just take all of temporal units for ith frames from each audio element and keep the order of temporal units as the order of audio element OBUs in descriptor OBUs except following:</p>
      <ul>
       <li data-md>
-       <p><a data-link-type="dfn" href="#obu_type" id="ref-for-obu_type">obu_type</a>s are updated to be aligned according to <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id④">audio_substream_id</a>s specified in Audio Element OBUs.</p>
+       <p><a data-link-type="dfn" href="#obu_type" id="ref-for-obu_type⑤">obu_type</a>s are updated to be aligned according to <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id④">audio_substream_id</a>s specified in Audio Element OBUs.</p>
       <li data-md>
        <p><a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id">parameter_id</a>s in Parameter Block OBUs are updated to be aligned according to parameter_ids in Audio Element OBUs.</p>
      </ul>
@@ -5866,7 +5866,12 @@ Recon_Gain for D_Rtb4:
   <aside aria-labelledby="infopaneltitle-for-obu_type" class="dfn-panel" data-for="obu_type" id="infopanel-for-obu_type">
    <span id="infopaneltitle-for-obu_type" style="display:none">Info about the 'obu_type' definition.</span><b><a href="#obu_type">#obu_type</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-obu_type">10.2.7.1. Multiple Audio Elements with One Codec Config</a>
+    <li><a href="#ref-for-obu_type">4.1.6. Codec Config OBU Syntax and Semantics</a>
+    <li><a href="#ref-for-obu_type①">4.1.7. Audio Element OBU Syntax and Semantics</a>
+    <li><a href="#ref-for-obu_type②">4.1.8. Mix Presentation OBU Syntax and Semantics</a>
+    <li><a href="#ref-for-obu_type③">4.1.9. Parameter Block OBU Syntax and Semantics</a>
+    <li><a href="#ref-for-obu_type④">4.1.10. Audio Frame OBU Syntax and Semantics</a>
+    <li><a href="#ref-for-obu_type⑤">10.2.7.1. Multiple Audio Elements with One Codec Config</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-obu_redundant_copy" class="dfn-panel" data-for="obu_redundant_copy" id="infopanel-for-obu_redundant_copy">
