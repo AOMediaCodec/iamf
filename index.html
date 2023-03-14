@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version d9f9c3533, updated Fri Mar 10 11:31:29 2023 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="d9a29e50a4f90f5058c1a54e955e3778bdb33ef5" name="document-revision">
+  <meta content="218fbe7671720ceac52e6fe66ef66279d60ac326" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2104,7 +2104,11 @@ dfn > a.self-link::before      { content: "#"; }
     <li>
      <a href="#isobmff-decapsulation"><span class="secno">8</span> <span class="content">ISOBMFF IAMF Decapsulation</span></a>
      <ol class="toc">
-      <li><a href="#isobmff-decapsulation-singletrack"><span class="secno">8.1</span> <span class="content">ISOBMFF IAMF Decapsulation with single track</span></a>
+      <li>
+       <a href="#isobmff-decapsulation-singletrack"><span class="secno">8.1</span> <span class="content">ISOBMFF IAMF Decapsulation with single track</span></a>
+       <ol class="toc">
+        <li><a href="#isobmff-decapsulation-singletrack-trimming"><span class="secno">8.1.1</span> <span class="content">Recommended handling of Trimming Information</span></a>
+       </ol>
      </ol>
     <li>
      <a href="#processing"><span class="secno">9</span> <span class="content">IAMF processing</span></a>
@@ -3954,6 +3958,29 @@ Quantity:  One.
      </ul>
     <li data-md>
      <p>Step4: Place descriptor OBUs, followed by Sync OBU, and followed by Temporal Units in order (j = i1, i2, …, im) without gap, to reconstruct the ith IA sequence.</p>
+   </ul>
+   <h4 class="heading settled" data-level="8.1.1" id="isobmff-decapsulation-singletrack-trimming"><span class="secno">8.1.1. </span><span class="content">Recommended handling of Trimming Information</span><a class="self-link" href="#isobmff-decapsulation-singletrack-trimming"></a></h4>
+   <p>This section recommends how to handle trimming information of IAMF-ISOBMFF file.</p>
+   <center><img height="520" src="images/ISOBMFF Trimming Handling.png" style="width:80%; height:auto;" width="693"></center>
+   <center>
+    <figcaption>Recommendation for IAMF-ISOBMFF Trimming Information Handling</figcaption>
+   </center>
+   <p>As depicted in the above figure,</p>
+   <ul>
+    <li data-md>
+     <p>IAMF file parser (or IAMF-ISOBMFF parser ) passes descriptor OBUs, PTS1 and Samples to IAMF decoder.</p>
+    <li data-md>
+     <p>IAMF file parser (or IAMF-ISOBMFF parser ) passes zero trimming information regardless of trimming related information of IAMF file to IAMF file player (or IAMF-ISOBMFF player).</p>
+    <li data-md>
+     <p>IAMF decoder passes audio samples after trimming and PTS2 to IAMF file parser (or IAMF-ISOBMFF parser ) passes.</p>
+     <ul>
+      <li data-md>
+       <p>IAMF decoder trims the audio samples to be trimmed based on the trimming information within Audio Frame OBUs of each Sample.</p>
+      <li data-md>
+       <p>IAMF decoder updates from PTS1 to PTS2 based on the amount of the trimmed audio samples at the start of the IAMF file.</p>
+     </ul>
+    <li data-md>
+     <p>IAMF file player (or IAMF-ISOBMFF player) passes Audio Samples starting at PTS2 to Loudspeakers.</p>
    </ul>
    <h2 class="heading settled" data-level="9" id="processing"><span class="secno">9. </span><span class="content">IAMF processing</span><a class="self-link" href="#processing"></a></h2>
    <p>This section provides a guideline for IA decoding for a given <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence">IA sequence</a>.</p>
