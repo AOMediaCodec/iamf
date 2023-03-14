@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version d9f9c3533, updated Fri Mar 10 11:31:29 2023 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="380aefd13fb94dcf47874cbcb7eaa9b61db104d0" name="document-revision">
+  <meta content="bc90968d93d1a33df63613c5e19932542b4fea9d" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2745,15 +2745,20 @@ class codec_config() {
    <p><b>Syntax</b></p>
 <pre>class parameter_block_obu() {
   leb128() parameter_id;
-  leb128() duration;
-  leb128() num_segments;
-  leb128() constant_segment_interval;
-
-  param_definition_type = get_param_definition_type(parameter_id);
+  
+  (param_definition_type, param_definition_mode, duration, num_segments, constant_segment_interval, segment_interval) = get_param_definition(parameter_id);
+  
+  if (param_definition_mode) {
+    leb128() duration;
+    leb128() num_segments;
+    leb128() constant_segment_interval;
+  }
 
   for (i = 0; i &lt; num_segments; i++) {
-    if (constant_segment_interval == 0) {
-      leb128() segment_interval;
+    if (param_definition_mode) {
+      if (constant_segment_interval == 0) {
+        leb128() segment_interval;
+      }
     }
 
     if (param_definition_type == PARAMETER_DEFINITION_MIX_GAIN) {
@@ -2771,27 +2776,13 @@ class codec_config() {
 </pre>
    <p><b>Semantics</b></p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="parameter_id">parameter_id</dfn> indicates an unique obu_id with <a data-link-type="dfn" href="#obu_type" id="ref-for-obu_type③">obu_type</a> = OBU_IA_Parameter_Block that is associated with a specific parameter definition. All parameter blocks that provide data for that parameter definition shall have the same parameter_id.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="duration">duration</dfn> specifies the duration for which this parameter block is valid and applicable.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_segments">num_segments</dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different segment of the timeline, contiguously.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="constant_segment_interval">constant_segment_interval</dfn> specifies the interval of each segment, in the case where all segments except the last segment have equal intervals. If all segments except the last segment do not have equal intervals, the value of constant_segment_interval shall be set to 0.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="get_param_definition_type">get_param_definition_type()<a class="self-link" href="#get_param_definition_type"></a></dfn> is a run-time function to get the parameter definition type mapped to the parameter_id.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="get_param_definition">get_param_definition()<a class="self-link" href="#get_param_definition"></a></dfn> is a run-time function to get the parameter definition type, the parameter definition mode, duration, num_segments, constant_segment_interval and segment_interval mapped to the parameter_id.</p>
+   <p><dfn class="css" data-dfn-for="parameter_block_obu()" data-dfn-type="value" data-noexport id="valdef-parameter_block_obu-duration">duration<a class="self-link" href="#valdef-parameter_block_obu-duration"></a></dfn> specifies the duration for which this parameter block is valid and applicable.</p>
+   <p><dfn class="css" data-dfn-for="parameter_block_obu()" data-dfn-type="value" data-noexport id="valdef-parameter_block_obu-num_segments">num_segments<a class="self-link" href="#valdef-parameter_block_obu-num_segments"></a></dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different segment of the timeline, contiguously.</p>
+   <p><dfn class="css" data-dfn-for="parameter_block_obu()" data-dfn-type="value" data-noexport id="valdef-parameter_block_obu-constant_segment_interval">constant_segment_interval<a class="self-link" href="#valdef-parameter_block_obu-constant_segment_interval"></a></dfn> specifies the interval of each segment, in the case where all segments except the last segment have equal intervals. If all segments except the last segment do not have equal intervals, the value of constant_segment_interval shall be set to 0.</p>
    <p>Audio Element OBU and/or Mix Presentation OBU is mapping a parameter_id to the parameter definition type. So, IA decoders can know the definition type mapped to the parameter_id.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="segment_interval">segment_interval</dfn> specifies the interval for the given segment.</p>
-   <p>Each value of <a data-link-type="dfn" href="#duration" id="ref-for-duration">duration</a>, <a data-link-type="dfn" href="#constant_segment_interval" id="ref-for-constant_segment_interval">constant_segment_interval</a> and <a data-link-type="dfn" href="#segment_interval" id="ref-for-segment_interval">segment_interval</a> shall be expressed as the number of ticks at the <a data-link-type="dfn" href="#parameter_rate" id="ref-for-parameter_rate">parameter_rate</a> specified in the corresponding parameter definition.</p>
-   <ul>
-    <li data-md>
-     <p>When it defines <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="d">D</dfn> = the value of <a data-link-type="dfn" href="#duration" id="ref-for-duration①">duration</a>, <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="ns">NS</dfn> = the value of <a data-link-type="dfn" href="#num_segments" id="ref-for-num_segments">num_segments</a>, <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="csi">CSI</dfn> = the value of <a data-link-type="dfn" href="#constant_segment_interval" id="ref-for-constant_segment_interval①">constant_segment_interval</a> and <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="si">SI</dfn> = the value of <a data-link-type="dfn" href="#segment_interval" id="ref-for-segment_interval①">segment_interval</a>.</p>
-     <ul>
-      <li data-md>
-       <p>When <a data-link-type="dfn" href="#csi" id="ref-for-csi">CSI</a> != 0, <a data-link-type="dfn" href="#ns" id="ref-for-ns">NS</a> x <a data-link-type="dfn" href="#csi" id="ref-for-csi①">CSI</a> shall be equal to or greater than <a data-link-type="dfn" href="#d" id="ref-for-d">D</a>.</p>
-       <ul>
-        <li data-md>
-         <p>If <a data-link-type="dfn" href="#ns" id="ref-for-ns①">NS</a> x <a data-link-type="dfn" href="#csi" id="ref-for-csi②">CSI</a> > <a data-link-type="dfn" href="#d" id="ref-for-d①">D</a>, the actual interval of the last segment shall be <a data-link-type="dfn" href="#d" id="ref-for-d②">D</a> - (<a data-link-type="dfn" href="#ns" id="ref-for-ns②">NS</a> - 1) x <a data-link-type="dfn" href="#csi" id="ref-for-csi③">CSI</a>.</p>
-       </ul>
-      <li data-md>
-       <p>When <a data-link-type="dfn" href="#csi" id="ref-for-csi④">CSI</a> = 0, the summation of all <a data-link-type="dfn" href="#si" id="ref-for-si">SI</a>s in this parameter block shall be equal to <a data-link-type="dfn" href="#d" id="ref-for-d③">D</a>.</p>
-     </ul>
-   </ul>
+   <p><dfn class="css" data-dfn-for="parameter_block_obu()" data-dfn-type="value" data-noexport id="valdef-parameter_block_obu-segment_interval">segment_interval<a class="self-link" href="#valdef-parameter_block_obu-segment_interval"></a></dfn> specifies the interval for the given segment.</p>
+   <p>Each value of duration, constant_segment_interval and segment_interval shall be expressed as the number of ticks at the <a data-link-type="dfn" href="#parameter_rate" id="ref-for-parameter_rate">parameter_rate</a> specified in the corresponding parameter definition.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="animation_type">animation_type</dfn> specifies the type of animation applied to the parameter values in this parameter block.</p>
 <pre class="def">animation_type : Animation Type
        0       : STEP
@@ -2826,11 +2817,50 @@ class AnimatedParameterData(animation_type) {
 <pre>abstract class ParamDefinition() {
   leb128() parameter_id;
   leb128() parameter_rate;
+  unsigned int (1) param_definition_mode;
+  unsigned int (7) reserved;
+  if (param_definition_mode == 0) {
+    leb128() duration;
+    leb128() num_segments;
+    leb128() constant_segment_interval;
+    if (constant_segment_interval == 0) {
+      for (i=0; i&lt; num_segments; i++) {
+        leb128() segment_interval;
+      }
+    }
+    
+  }
 }
 </pre>
    <p><b>Semantics</b></p>
    <p><dfn class="css" data-dfn-for="ParamDefinition()" data-dfn-type="value" data-noexport id="valdef-paramdefinition-parameter_id">parameter_id<a class="self-link" href="#valdef-paramdefinition-parameter_id"></a></dfn> indicates the obu_id in an IA sequence for a given parameter.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="parameter_rate">parameter_rate</dfn> specifies the rate used by this parameter, expressed as ticks per second. Time-related fields associated with this parameter, such as durations and intervals, shall be expressed in the number of ticks.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="param_definition_mode">param_definition_mode</dfn> indicates if this parameter definition specifies duration, num_segments, constant_segment_interval and segment_interval fields for the parameter blocks associated to the <a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id">parameter_id</a>.</p>
+   <ul>
+    <li data-md>
+     <p>When this field is set to 0, all of duration, num_segments, constant_segment_interval and segment_interval fields shall be specified in this parameter definition mapped to the <a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id①">parameter_id</a>. In that case, none of parameter blocks associated to this parameter definition shall specify duration, num_segments, constant_segment_interval and segment_interval fields.</p>
+    <li data-md>
+     <p>When this field is set to 1, none of duration, num_segments, constant_segment_interval and segment_interval fields shall be specificed in this parameter definition. In that case, each of parameter blocks associated to this parameter definition shall specify its own duration, num_segments, constant_segment_interval and segment_interval fields.</p>
+   </ul>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="duration">duration</dfn> specifies the duration for which all of parameter blocks associated to this parameter definition are valid and applicable.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_segments">num_segments</dfn> specifies the number of different sets of parameter values specified in all of parameter blocks associated to this parameter definition, where each set describes a different segment of the timeline, contiguously.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="constant_segment_interval">constant_segment_interval</dfn> specifies the interval of each segment, in the case where all segments except the last segment have equal intervals. If all segments except the last segment do not have equal intervals, the value of constant_segment_interval shall be set to 0.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="segment_interval">segment_interval</dfn> specifies the interval for the given segment.</p>
+   <p>Each value of <a data-link-type="dfn" href="#duration" id="ref-for-duration">duration</a>, <a data-link-type="dfn" href="#constant_segment_interval" id="ref-for-constant_segment_interval">constant_segment_interval</a> and <a data-link-type="dfn" href="#segment_interval" id="ref-for-segment_interval">segment_interval</a> shall be expressed as the number of ticks at the <a data-link-type="dfn" href="#parameter_rate" id="ref-for-parameter_rate①">parameter_rate</a> specified in the corresponding parameter definition.</p>
+   <ul>
+    <li data-md>
+     <p>When it defines <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="d">D</dfn> = the value of <a data-link-type="dfn" href="#duration" id="ref-for-duration①">duration</a>, <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="ns">NS</dfn> = the value of <a data-link-type="dfn" href="#num_segments" id="ref-for-num_segments">num_segments</a>, <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="csi">CSI</dfn> = the value of <a data-link-type="dfn" href="#constant_segment_interval" id="ref-for-constant_segment_interval①">constant_segment_interval</a> and <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="si">SI</dfn> = the value of <a data-link-type="dfn" href="#segment_interval" id="ref-for-segment_interval①">segment_interval</a>.</p>
+     <ul>
+      <li data-md>
+       <p>When <a data-link-type="dfn" href="#csi" id="ref-for-csi">CSI</a> != 0, <a data-link-type="dfn" href="#ns" id="ref-for-ns">NS</a> x <a data-link-type="dfn" href="#csi" id="ref-for-csi①">CSI</a> shall be equal to or greater than <a data-link-type="dfn" href="#d" id="ref-for-d">D</a>.</p>
+       <ul>
+        <li data-md>
+         <p>If <a data-link-type="dfn" href="#ns" id="ref-for-ns①">NS</a> x <a data-link-type="dfn" href="#csi" id="ref-for-csi②">CSI</a> > <a data-link-type="dfn" href="#d" id="ref-for-d①">D</a>, the actual interval of the last segment shall be <a data-link-type="dfn" href="#d" id="ref-for-d②">D</a> - (<a data-link-type="dfn" href="#ns" id="ref-for-ns②">NS</a> - 1) x <a data-link-type="dfn" href="#csi" id="ref-for-csi③">CSI</a>.</p>
+       </ul>
+      <li data-md>
+       <p>When <a data-link-type="dfn" href="#csi" id="ref-for-csi④">CSI</a> = 0, the summation of all <a data-link-type="dfn" href="#si" id="ref-for-si">SI</a>s in this parameter block shall be equal to <a data-link-type="dfn" href="#d" id="ref-for-d③">D</a>.</p>
+     </ul>
+   </ul>
    <h4 class="heading settled" data-level="4.1.10" id="obu-audioframe"><span class="secno">4.1.10. </span><span class="content">Audio Frame OBU Syntax and Semantics</span><a class="self-link" href="#obu-audioframe"></a></h4>
    <p>This section specifies OBU payloads of OBU_IA_Audio_Frame and OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21.</p>
    <p>The first 22 audio substreams in an IA sequence may use the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21, which have predefined audio substream obu_ids associated with them. This avoids the need to manually specify an <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id">audio_substream_id</a>.</p>
@@ -2890,7 +2920,7 @@ class AnimatedParameterData(animation_type) {
    <p>For this version of the specification, the value of reinitialize_decoder shall be set to 0. If a value of 1 is seen, the IA sequence shall be rejected as invalid.</p>
    <p><dfn class="css" data-dfn-for="sync_obu()" data-dfn-type="value" data-noexport id="valdef-sync_obu-reserved">reserved<a class="self-link" href="#valdef-sync_obu-reserved"></a></dfn> shall be set to 0. Reserved units are for future use and shall be ignored by an IAMF-OBU parser.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="relative_offset">relative_offset<a class="self-link" href="#relative_offset"></a></dfn> is the offset to position the first audio frame (before trimming) or parameter block with the referenced obu_id that comes after this Sync OBU with respect to the timeline generated before this Sync OBU. If this Sync OBU is the first one, it is the offset from 0. Otherwise, it is the offset from the end of the timeline of Substreams generated from the previous Sync OBU.</p>
-   <p>The offset shall be indicated in the number of ticks at the <a data-link-type="dfn" href="#parameter_rate" id="ref-for-parameter_rate①">parameter_rate</a> specified in the corresponding substream or parameter definition.</p>
+   <p>The offset shall be indicated in the number of ticks at the <a data-link-type="dfn" href="#parameter_rate" id="ref-for-parameter_rate②">parameter_rate</a> specified in the corresponding substream or parameter definition.</p>
    <p>IA encoder and decoder operations related to this field are specified in <a href="#standalone-synchronizing-data-obus">§ 6.2 Synchronizing Data OBUs</a>.</p>
    <h3 class="heading settled" data-level="4.2" id="syntax-detailed"><span class="secno">4.2. </span><span class="content">Detailed OBU Syntax and Semantics</span><a class="self-link" href="#syntax-detailed"></a></h3>
    <h4 class="heading settled" data-level="4.2.1" id="syntax-scalable-channel-layout-config"><span class="secno">4.2.1. </span><span class="content">Scalable Channel Layout Config Syntax and Semantics</span><a class="self-link" href="#syntax-scalable-channel-layout-config"></a></h4>
@@ -3475,6 +3505,12 @@ class mix_gain_parameter_data(animation_type) {
      </ul>
     <li data-md>
      <p>All audio frames shall have aligned frame boundaries.</p>
+    <li data-md>
+     <p>All parameter definitons shall have the same <a data-link-type="dfn" href="#param_definition_mode" id="ref-for-param_definition_mode">param_definition_mode</a>.</p>
+     <ul>
+      <li data-md>
+       <p>When <a data-link-type="dfn" href="#param_definition_mode" id="ref-for-param_definition_mode①">param_definition_mode</a> = 0, duration, num_segments, constant_segment_interval and segment_interval shall be same in all parameter definitions, respectively.</p>
+     </ul>
    </ul>
    <p>Capabilities of the IA parser, decoder and processor:</p>
    <ul>
@@ -3543,6 +3579,12 @@ class mix_gain_parameter_data(animation_type) {
      </ul>
     <li data-md>
      <p>All audio frames shall have aligned frame boundaries.</p>
+    <li data-md>
+     <p>All parameter definitons shall have the same <a data-link-type="dfn" href="#param_definition_mode" id="ref-for-param_definition_mode②">param_definition_mode</a>.</p>
+     <ul>
+      <li data-md>
+       <p>When <a data-link-type="dfn" href="#param_definition_mode" id="ref-for-param_definition_mode③">param_definition_mode</a> = 0, duration, num_segments, constant_segment_interval and segment_interval shall be same in all parameter definitions, respectively.</p>
+     </ul>
    </ul>
    <p>Capabilities of the IA parser, decoder and processor:</p>
    <ul>
@@ -3706,11 +3748,11 @@ for (i = 0: i &lt; M(N); i++) {
     <li data-md>
      <p>It shall contain at least one track using an <a data-link-type="dfn" href="#iasampleentry" id="ref-for-iasampleentry">IASampleEntry</a></p>
     <li data-md>
-     <p>It SHOULD indicate a structural ISOBMFF brand among the compatible brands array of the FileTypeBox, such as <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="ref-for-74c2884bef95a9e95eb117bba8ad6e2f">iso6</a></p>
+     <p>It SHOULD indicate a structural ISOBMFF brand among the compatible brands array of the FileTypeBox, such as <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3">iso6</a></p>
     <li data-md>
      <p>It MAY indicate other brands not specified in this specification provided that the associated requirements do not conflict with those given in this specification</p>
    </ul>
-   <p>Parsers shall support the structures required by the <code><a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="ref-for-74c2884bef95a9e95eb117bba8ad6e2f①">iso6</a></code> brand and MAY support structures required by further ISOBMFF structural brands.</p>
+   <p>Parsers shall support the structures required by the <code><a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3①">iso6</a></code> brand and MAY support structures required by further ISOBMFF structural brands.</p>
    <h3 class="heading settled" data-level="7.2" id="isobmff-singletrack"><span class="secno">7.2. </span><span class="content">ISOBMFF IAMF Encapsulation with single track</span><a class="self-link" href="#isobmff-singletrack"></a></h3>
    <p>This section describes the basic data structures used to signal encapsulation of IA sequence in <a data-link-type="biblio" href="#biblio-isobmff" title="Information technology — Coding of audio-visual objects — Part 12: ISO Base Media File Format">[ISOBMFF]</a> containers.</p>
    <h4 class="heading settled" data-level="7.2.1" id="isobmff-singletrack-iasequence"><span class="secno">7.2.1. </span><span class="content">Requirement of IA sequence</span><a class="self-link" href="#isobmff-singletrack-iasequence"></a></h4>
@@ -3722,9 +3764,9 @@ for (i = 0: i &lt; M(N); i++) {
      <p>Each set of descriptor OBUs, specified in <a href="#standalone-descriptor-obus">§ 6.1.1 Descriptor OBUs</a>, and the Sync OBU that immediately follows them are moved to one <a data-link-type="dfn" href="#iasampleentry" id="ref-for-iasampleentry①">IASampleEntry</a>. The descriptor OBUs are then discarded from the IA sequence. In addition,</p>
      <ul>
       <li data-md>
-       <p>The <a data-link-type="dfn" href="#num_samples_per_frame" id="ref-for-num_samples_per_frame">num_samples_per_frame</a> field in the Codec Config OBU is copied to <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="ref-for-74c2884bef95a9e95eb117bba8ad6e2f②">stts</a>.</p>
+       <p>The <a data-link-type="dfn" href="#num_samples_per_frame" id="ref-for-num_samples_per_frame">num_samples_per_frame</a> field in the Codec Config OBU is copied to <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3②">stts</a>.</p>
       <li data-md>
-       <p>The <a data-link-type="dfn" href="#roll_distance" id="ref-for-roll_distance">roll_distance</a> field in the Codec Config OBU is copied to <a data-link-type="dfn">AudioRollRecoveryEntry()</a> with the <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="ref-for-74c2884bef95a9e95eb117bba8ad6e2f③">grouping_type</a> <a class="property css" data-link-type="property">rol1</a>.</p>
+       <p>The <a data-link-type="dfn" href="#roll_distance" id="ref-for-roll_distance">roll_distance</a> field in the Codec Config OBU is copied to <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3③">AudioRollRecoveryEntry</a> with the <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3④">grouping_type</a> <a class="property css" data-link-type="property">rol1</a>.</p>
      </ul>
     <li data-md>
      <p>Each temporal unit:</p>
@@ -3740,7 +3782,7 @@ for (i = 0: i &lt; M(N); i++) {
       <li data-md>
        <p>Select one substream.</p>
       <li data-md>
-       <p>If <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag②">obu_trimming_status_flag</a> of the first Audio Frame OBU of the substream is set to 1, keep parsing following Audio Frame OBUs of the substream until meets the Audio Frame OBU having <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag③">obu_trimming_status_flag</a> =  0 and sum <a data-link-type="dfn" href="#num_samples_to_trim_at_start" id="ref-for-num_samples_to_trim_at_start②">num_samples_to_trim_at_start</a>. Then reflect the result of the summation to <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="ref-for-74c2884bef95a9e95eb117bba8ad6e2f④">edts</a>.</p>
+       <p>If <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag②">obu_trimming_status_flag</a> of the first Audio Frame OBU of the substream is set to 1, keep parsing following Audio Frame OBUs of the substream until meets the Audio Frame OBU having <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag③">obu_trimming_status_flag</a> =  0 and sum <a data-link-type="dfn" href="#num_samples_to_trim_at_start" id="ref-for-num_samples_to_trim_at_start②">num_samples_to_trim_at_start</a>. Then reflect the result of the summation to <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3⑤">edts</a>.</p>
       <li data-md>
        <p>If <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag④">obu_trimming_status_flag</a> of the last Audio Frame OBU of the substream is set to 1, then reflect num_samples_to_trim_at_end to 'stts.</p>
      </ul>
@@ -3762,7 +3804,7 @@ Quantity:          One or more.
   IA_Descriptor descriptor;
 }
 </pre>
-   <p>The <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="ref-for-74c2884bef95a9e95eb117bba8ad6e2f⑤">channelcount</a> and <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="ref-for-74c2884bef95a9e95eb117bba8ad6e2f⑥">samplerate</a> fields of AudioSampleEntry are unused.</p>
+   <p>The <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3⑥">channelcount</a> and <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3⑦">samplerate</a> fields of AudioSampleEntry are unused.</p>
    <p>None of AudioSampleEntry’s optional boxes shall be present.</p>
    <p><b>Semantics</b></p>
    <p><dfn data-dfn-type="dfn" data-noexport id="descriptor">descriptor<a class="self-link" href="#descriptor"></a></dfn> is the IA_Descriptor box in this stream.</p>
@@ -4315,7 +4357,7 @@ P2 = (t2, end_point_value),
    <p>where <code>t0 = 0</code> is the segment start time, <code>t2 = T - 1</code> and <code>t1</code> is the control point time given by</p>
 <pre>t1 = round(T * control_point_relative_time) - 1.
 </pre>
-   <p>The values of <code>t0</code>, <code>t1</code> and <code>t2</code> are expressed as ticks at the <a data-link-type="dfn" href="#parameter_rate" id="ref-for-parameter_rate②">parameter_rate</a> given in the associated parameter definition.</p>
+   <p>The values of <code>t0</code>, <code>t1</code> and <code>t2</code> are expressed as ticks at the <a data-link-type="dfn" href="#parameter_rate" id="ref-for-parameter_rate③">parameter_rate</a> given in the associated parameter definition.</p>
    <p>If <a data-link-type="dfn" href="#animation_type" id="ref-for-animation_type③">animation_type</a> is equal to LINEAR, the parameter value is linearly interpolated between <a data-link-type="dfn" href="#start_point_value" id="ref-for-start_point_value①">start_point_value</a> and <a data-link-type="dfn" href="#end_point_value" id="ref-for-end_point_value">end_point_value</a> at a given point in time as:</p>
 <pre>B_linear(a) = (1 - a) * P0 + a * P2,
 0 &lt;= a &lt;= 1,
@@ -4326,7 +4368,7 @@ P2 = (t2, end_point_value),
 0 &lt;= a &lt;= 1.
 </pre>
    <p>where <code>B_quad(a) = (t, y)</code> is a 2D coordinate with parameter value <code>y</code> at time <code>t</code>.</p>
-   <p>To apply the parameter values to the audio samples in the segment without interpolation, the <a data-link-type="dfn" href="#parameter_rate" id="ref-for-parameter_rate③">parameter_rate</a> is first resampled to the audio sample rate to give:</p>
+   <p>To apply the parameter values to the audio samples in the segment without interpolation, the <a data-link-type="dfn" href="#parameter_rate" id="ref-for-parameter_rate④">parameter_rate</a> is first resampled to the audio sample rate to give:</p>
 <pre>n0 = t0 * audio_sample_rate / parameter_rate,
 n1 = t1 * audio_sample_rate / parameter_rate,
 n2 = t2 * audio_sample_rate / parameter_rate.
@@ -4935,13 +4977,13 @@ Recon_Gain for D_Rtb4:
       <li data-md>
        <p><a data-link-type="dfn" href="#obu_type" id="ref-for-obu_type⑤">obu_type</a>s are updated to be aligned according to <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id④">audio_substream_id</a>s specified in Audio Element OBUs.</p>
       <li data-md>
-       <p><a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id">parameter_id</a>s in Parameter Block OBUs are updated to be aligned according to parameter_ids in Audio Element OBUs.</p>
+       <p><a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id②">parameter_id</a>s in Parameter Block OBUs are updated to be aligned according to parameter_ids in Audio Element OBUs.</p>
      </ul>
     <li data-md>
      <p>Add Sync OBU in front of ith temporal unit if needed.</p>
      <ul>
       <li data-md>
-       <p>New Sync OBU is generated based on Sync OBUs of each IA sequence and updated <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id⑤">audio_substream_id</a>s and <a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id①">parameter_id</a>s.</p>
+       <p>New Sync OBU is generated based on Sync OBUs of each IA sequence and updated <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id⑤">audio_substream_id</a>s and <a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id③">parameter_id</a>s.</p>
      </ul>
     <li data-md>
      <p>It may have the immediately preceding temporal delimiter OBU for each temporal unit.</p>
@@ -5166,13 +5208,18 @@ Recon_Gain for D_Rtb4:
    <li><a href="#codec_specific_info">Codec_Specific_Info</a><span>, in § 4.3</span>
    <li><a href="#coded_frame_size">coded_frame_size</a><span>, in § 4.1.10</span>
    <li><a href="#concatenation-rule">Concatenation Rule</a><span>, in § 6.2</span>
-   <li><a href="#constant_segment_interval">constant_segment_interval</a><span>, in § 4.1.9</span>
+   <li>
+    constant_segment_interval
+    <ul>
+     <li><a href="#constant_segment_interval">definition of</a><span>, in § 4.1.9.1</span>
+     <li><a href="#valdef-parameter_block_obu-constant_segment_interval">value for parameter_block_obu()</a><span>, in § 4.1.9</span>
+    </ul>
    <li><a href="#control_point_relative_time">control_point_relative_time</a><span>, in § 4.1.9</span>
    <li><a href="#control_point_value">control_point_value</a><span>, in § 4.1.9</span>
    <li><a href="#coupled-channels">Coupled channels</a><span>, in § 10</span>
    <li><a href="#coupled_substream_count">coupled_substream_count</a><span>, in § 4.2.1</span>
-   <li><a href="#csi">CSI</a><span>, in § 4.1.9</span>
-   <li><a href="#d">D</a><span>, in § 4.1.9</span>
+   <li><a href="#csi">CSI</a><span>, in § 4.1.9.1</span>
+   <li><a href="#d">D</a><span>, in § 4.1.9.1</span>
    <li><a href="#decoder_config">decoder_config()</a><span>, in § 4.1.6</span>
    <li><a href="#default_mix_gain">default_mix_gain</a><span>, in § 4.2.7.1</span>
    <li><a href="#delta">delta</a><span>, in § 4.2.3</span>
@@ -5183,12 +5230,17 @@ Recon_Gain for D_Rtb4:
    <li><a href="#digital_peak">digital_peak</a><span>, in § 4.1.8.4</span>
    <li><a href="#dmixp_mode">dmixp_mode</a><span>, in § 4.2.3</span>
    <li><a href="#down-mixed-audio">down-mixed audio</a><span>, in § 10.2.2</span>
-   <li><a href="#duration">duration</a><span>, in § 4.1.9</span>
+   <li>
+    duration
+    <ul>
+     <li><a href="#duration">definition of</a><span>, in § 4.1.9.1</span>
+     <li><a href="#valdef-parameter_block_obu-duration">value for parameter_block_obu()</a><span>, in § 4.1.9</span>
+    </ul>
    <li><a href="#element_mix_config">element_mix_config()</a><span>, in § 4.1.8</span>
    <li><a href="#end_point_value">end_point_value</a><span>, in § 4.1.9</span>
    <li><a href="#extension_header_size">extension_header_size</a><span>, in § 4.1.2</span>
    <li><a href="#gamma">gamma</a><span>, in § 4.2.3</span>
-   <li><a href="#get_param_definition_type">get_param_definition_type()</a><span>, in § 4.1.9</span>
+   <li><a href="#get_param_definition">get_param_definition()</a><span>, in § 4.1.9</span>
    <li><a href="#global_offset">global_offset</a><span>, in § 4.1.12</span>
    <li><a href="#ia_code">ia_code</a><span>, in § 4.1.5</span>
    <li><a href="#ia_descriptor">IA_Descriptor</a><span>, in § 7.2.4</span>
@@ -5221,7 +5273,7 @@ Recon_Gain for D_Rtb4:
    <li><a href="#n_c">n_c</a><span>, in § 4.1.7</span>
    <li><a href="#n-i">n(i)</a><span>, in § 4.2.4</span>
    <li><a href="#non-coupled-substream">non-coupled substream</a><span>, in § 10</span>
-   <li><a href="#ns">NS</a><span>, in § 4.1.9</span>
+   <li><a href="#ns">NS</a><span>, in § 4.1.9.1</span>
    <li><a href="#num_audio_elements">num_audio_elements</a><span>, in § 4.1.8</span>
    <li><a href="#num_layers">num_layers</a><span>, in § 4.2.1</span>
    <li><a href="#num_layouts">num_layouts</a><span>, in § 4.1.8</span>
@@ -5231,7 +5283,12 @@ Recon_Gain for D_Rtb4:
    <li><a href="#num_samples_per_frame">num_samples_per_frame</a><span>, in § 4.1.6</span>
    <li><a href="#num_samples_to_trim_at_end">num_samples_to_trim_at_end</a><span>, in § 4.1.2</span>
    <li><a href="#num_samples_to_trim_at_start">num_samples_to_trim_at_start</a><span>, in § 4.1.2</span>
-   <li><a href="#num_segments">num_segments</a><span>, in § 4.1.9</span>
+   <li>
+    num_segments
+    <ul>
+     <li><a href="#num_segments">definition of</a><span>, in § 4.1.9.1</span>
+     <li><a href="#valdef-parameter_block_obu-num_segments">value for parameter_block_obu()</a><span>, in § 4.1.9</span>
+    </ul>
    <li><a href="#num_sub_mixes">num_sub_mixes</a><span>, in § 4.1.8</span>
    <li><a href="#num_substreams">num_substreams</a><span>, in § 4.1.7</span>
    <li><a href="#obu_data_type">obu_data_type</a><span>, in § 4.1.12</span>
@@ -5249,6 +5306,7 @@ Recon_Gain for D_Rtb4:
    <li><a href="#output_mix_gain">output_mix_gain</a><span>, in § 4.1.8.3</span>
    <li><a href="#param_data">param_data</a><span>, in § 4.2.7.1</span>
    <li><a href="#paramdefinition">ParamDefinition()</a><span>, in § 4.1.9.1</span>
+   <li><a href="#param_definition_mode">param_definition_mode</a><span>, in § 4.1.9.1</span>
    <li><a href="#param_definition_type">param_definition_type</a><span>, in § 4.1.7</span>
    <li><a href="#parameter-block-obu">Parameter Block OBU</a><span>, in § 3.2.2</span>
    <li>
@@ -5279,8 +5337,13 @@ Recon_Gain for D_Rtb4:
    <li><a href="#sample_rate">sample_rate</a><span>, in § 4.3.4</span>
    <li><a href="#sample_size">sample_size</a><span>, in § 4.3.4</span>
    <li><a href="#scalable_channel_layout_config">scalable_channel_layout_config()</a><span>, in § 4.1.7</span>
-   <li><a href="#segment_interval">segment_interval</a><span>, in § 4.1.9</span>
-   <li><a href="#si">SI</a><span>, in § 4.1.9</span>
+   <li>
+    segment_interval
+    <ul>
+     <li><a href="#segment_interval">definition of</a><span>, in § 4.1.9.1</span>
+     <li><a href="#valdef-parameter_block_obu-segment_interval">value for parameter_block_obu()</a><span>, in § 4.1.9</span>
+    </ul>
+   <li><a href="#si">SI</a><span>, in § 4.1.9.1</span>
    <li><a href="#sound_system">sound_system</a><span>, in § 4.2.5</span>
    <li><a href="#sp_label">sp_label</a><span>, in § 4.2.5</span>
    <li><a href="#start_point_value">start_point_value</a><span>, in § 4.1.9</span>
@@ -5383,52 +5446,60 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-48e47e0f5189469fa73e92a00c751a02">4.3.2. IAMF-AAC-LC Specific</a> <a href="#ref-for-48e47e0f5189469fa73e92a00c751a02">(2)</a>
    </ul>
   </aside>
+  <aside aria-labelledby="infopaneltitle-for-9101e41bc1e2a010b149c5b0a70a83c3" class="dfn-panel" data-for="9101e41bc1e2a010b149c5b0a70a83c3" id="infopanel-for-9101e41bc1e2a010b149c5b0a70a83c3">
+   <span id="infopaneltitle-for-9101e41bc1e2a010b149c5b0a70a83c3" style="display:none">Info about the 'audiorollrecoveryentry' external reference.</span><a href="https://www.iso.org/standard/68960.html#">https://www.iso.org/standard/68960.html#</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.3. IA Sample Entry</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
+   </ul>
+  </aside>
   <aside aria-labelledby="infopaneltitle-for-74c2884bef95a9e95eb117bba8ad6e2f" class="dfn-panel" data-for="74c2884bef95a9e95eb117bba8ad6e2f" id="infopanel-for-74c2884bef95a9e95eb117bba8ad6e2f">
    <span id="infopaneltitle-for-74c2884bef95a9e95eb117bba8ad6e2f" style="display:none">Info about the 'channelcount' external reference.</span><a href="https://www.iso.org/standard/68960.html#">https://www.iso.org/standard/68960.html#</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">(2)</a>
-    <li><a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">(2)</a> <a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">(3)</a>
-    <li><a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">7.2.3. IA Sample Entry</a> <a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">(2)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.3. IA Sample Entry</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-71b4d0c6c7ea7103e8c7cf480743851a" class="dfn-panel" data-for="71b4d0c6c7ea7103e8c7cf480743851a" id="infopanel-for-71b4d0c6c7ea7103e8c7cf480743851a">
    <span id="infopaneltitle-for-71b4d0c6c7ea7103e8c7cf480743851a" style="display:none">Info about the 'edts' external reference.</span><a href="https://www.iso.org/standard/68960.html#">https://www.iso.org/standard/68960.html#</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">(2)</a>
-    <li><a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">(2)</a> <a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">(3)</a>
-    <li><a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">7.2.3. IA Sample Entry</a> <a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">(2)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.3. IA Sample Entry</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-bcd7518a3a972b32274876f4f1629bf4" class="dfn-panel" data-for="bcd7518a3a972b32274876f4f1629bf4" id="infopanel-for-bcd7518a3a972b32274876f4f1629bf4">
    <span id="infopaneltitle-for-bcd7518a3a972b32274876f4f1629bf4" style="display:none">Info about the 'grouping_type' external reference.</span><a href="https://www.iso.org/standard/68960.html#">https://www.iso.org/standard/68960.html#</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">(2)</a>
-    <li><a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">(2)</a> <a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">(3)</a>
-    <li><a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">7.2.3. IA Sample Entry</a> <a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">(2)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.3. IA Sample Entry</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-295c612b69b22d9306c1004b4766efa2" class="dfn-panel" data-for="295c612b69b22d9306c1004b4766efa2" id="infopanel-for-295c612b69b22d9306c1004b4766efa2">
    <span id="infopaneltitle-for-295c612b69b22d9306c1004b4766efa2" style="display:none">Info about the 'iso6' external reference.</span><a href="https://www.iso.org/standard/68960.html#">https://www.iso.org/standard/68960.html#</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">(2)</a>
-    <li><a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">(2)</a> <a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">(3)</a>
-    <li><a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">7.2.3. IA Sample Entry</a> <a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">(2)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.3. IA Sample Entry</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-54dd4fd14d3b535833b0bd2f0694c6ea" class="dfn-panel" data-for="54dd4fd14d3b535833b0bd2f0694c6ea" id="infopanel-for-54dd4fd14d3b535833b0bd2f0694c6ea">
    <span id="infopaneltitle-for-54dd4fd14d3b535833b0bd2f0694c6ea" style="display:none">Info about the 'samplerate' external reference.</span><a href="https://www.iso.org/standard/68960.html#">https://www.iso.org/standard/68960.html#</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">(2)</a>
-    <li><a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">(2)</a> <a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">(3)</a>
-    <li><a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">7.2.3. IA Sample Entry</a> <a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">(2)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.3. IA Sample Entry</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-df4776861ec698bf18e6ccbf73b0e00b" class="dfn-panel" data-for="df4776861ec698bf18e6ccbf73b0e00b" id="infopanel-for-df4776861ec698bf18e6ccbf73b0e00b">
    <span id="infopaneltitle-for-df4776861ec698bf18e6ccbf73b0e00b" style="display:none">Info about the 'stts' external reference.</span><a href="https://www.iso.org/standard/68960.html#">https://www.iso.org/standard/68960.html#</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">(2)</a>
-    <li><a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">(2)</a> <a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">(3)</a>
-    <li><a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">7.2.3. IA Sample Entry</a> <a href="#ref-for-74c2884bef95a9e95eb117bba8ad6e2f">(2)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.3. IA Sample Entry</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-132da473010a02d5cd59128d0f02deeb" class="dfn-panel" data-for="132da473010a02d5cd59128d0f02deeb" id="infopanel-for-132da473010a02d5cd59128d0f02deeb">
@@ -5711,6 +5782,7 @@ Recon_Gain for D_Rtb4:
    <li>
     <a data-link-type="biblio">[ISOBMFF]</a> defines the following terms:
     <ul>
+     <li><span class="dfn-paneled" id="9101e41bc1e2a010b149c5b0a70a83c3">audiorollrecoveryentry</span>
      <li><span class="dfn-paneled" id="74c2884bef95a9e95eb117bba8ad6e2f">channelcount</span>
      <li><span class="dfn-paneled" id="71b4d0c6c7ea7103e8c7cf480743851a">edts</span>
      <li><span class="dfn-paneled" id="bcd7518a3a972b32274876f4f1629bf4">grouping_type</span>
@@ -6081,55 +6153,8 @@ Recon_Gain for D_Rtb4:
   <aside aria-labelledby="infopaneltitle-for-parameter_id" class="dfn-panel" data-for="parameter_id" id="infopanel-for-parameter_id">
    <span id="infopaneltitle-for-parameter_id" style="display:none">Info about the 'parameter_id' definition.</span><b><a href="#parameter_id">#parameter_id</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-parameter_id">10.2.7.1. Multiple Audio Elements with One Codec Config</a> <a href="#ref-for-parameter_id①">(2)</a>
-   </ul>
-  </aside>
-  <aside aria-labelledby="infopaneltitle-for-duration" class="dfn-panel" data-for="duration" id="infopanel-for-duration">
-   <span id="infopaneltitle-for-duration" style="display:none">Info about the 'duration' definition.</span><b><a href="#duration">#duration</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-duration">4.1.9. Parameter Block OBU Syntax and Semantics</a> <a href="#ref-for-duration①">(2)</a>
-   </ul>
-  </aside>
-  <aside aria-labelledby="infopaneltitle-for-num_segments" class="dfn-panel" data-for="num_segments" id="infopanel-for-num_segments">
-   <span id="infopaneltitle-for-num_segments" style="display:none">Info about the 'num_segments' definition.</span><b><a href="#num_segments">#num_segments</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-num_segments">4.1.9. Parameter Block OBU Syntax and Semantics</a>
-   </ul>
-  </aside>
-  <aside aria-labelledby="infopaneltitle-for-constant_segment_interval" class="dfn-panel" data-for="constant_segment_interval" id="infopanel-for-constant_segment_interval">
-   <span id="infopaneltitle-for-constant_segment_interval" style="display:none">Info about the 'constant_segment_interval' definition.</span><b><a href="#constant_segment_interval">#constant_segment_interval</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-constant_segment_interval">4.1.9. Parameter Block OBU Syntax and Semantics</a> <a href="#ref-for-constant_segment_interval①">(2)</a>
-   </ul>
-  </aside>
-  <aside aria-labelledby="infopaneltitle-for-segment_interval" class="dfn-panel" data-for="segment_interval" id="infopanel-for-segment_interval">
-   <span id="infopaneltitle-for-segment_interval" style="display:none">Info about the 'segment_interval' definition.</span><b><a href="#segment_interval">#segment_interval</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-segment_interval">4.1.9. Parameter Block OBU Syntax and Semantics</a> <a href="#ref-for-segment_interval①">(2)</a>
-   </ul>
-  </aside>
-  <aside aria-labelledby="infopaneltitle-for-d" class="dfn-panel" data-for="d" id="infopanel-for-d">
-   <span id="infopaneltitle-for-d" style="display:none">Info about the 'D' definition.</span><b><a href="#d">#d</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-d">4.1.9. Parameter Block OBU Syntax and Semantics</a> <a href="#ref-for-d①">(2)</a> <a href="#ref-for-d②">(3)</a> <a href="#ref-for-d③">(4)</a>
-   </ul>
-  </aside>
-  <aside aria-labelledby="infopaneltitle-for-ns" class="dfn-panel" data-for="ns" id="infopanel-for-ns">
-   <span id="infopaneltitle-for-ns" style="display:none">Info about the 'NS' definition.</span><b><a href="#ns">#ns</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-ns">4.1.9. Parameter Block OBU Syntax and Semantics</a> <a href="#ref-for-ns①">(2)</a> <a href="#ref-for-ns②">(3)</a>
-   </ul>
-  </aside>
-  <aside aria-labelledby="infopaneltitle-for-csi" class="dfn-panel" data-for="csi" id="infopanel-for-csi">
-   <span id="infopaneltitle-for-csi" style="display:none">Info about the 'CSI' definition.</span><b><a href="#csi">#csi</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-csi">4.1.9. Parameter Block OBU Syntax and Semantics</a> <a href="#ref-for-csi①">(2)</a> <a href="#ref-for-csi②">(3)</a> <a href="#ref-for-csi③">(4)</a> <a href="#ref-for-csi④">(5)</a>
-   </ul>
-  </aside>
-  <aside aria-labelledby="infopaneltitle-for-si" class="dfn-panel" data-for="si" id="infopanel-for-si">
-   <span id="infopaneltitle-for-si" style="display:none">Info about the 'SI' definition.</span><b><a href="#si">#si</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-si">4.1.9. Parameter Block OBU Syntax and Semantics</a>
+    <li><a href="#ref-for-parameter_id">4.1.9.1. Parameter Definition Syntax and Semantics</a> <a href="#ref-for-parameter_id①">(2)</a>
+    <li><a href="#ref-for-parameter_id②">10.2.7.1. Multiple Audio Elements with One Codec Config</a> <a href="#ref-for-parameter_id③">(2)</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-animation_type" class="dfn-panel" data-for="animation_type" id="infopanel-for-animation_type">
@@ -6168,8 +6193,64 @@ Recon_Gain for D_Rtb4:
    <span id="infopaneltitle-for-parameter_rate" style="display:none">Info about the 'parameter_rate' definition.</span><b><a href="#parameter_rate">#parameter_rate</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-parameter_rate">4.1.9. Parameter Block OBU Syntax and Semantics</a>
-    <li><a href="#ref-for-parameter_rate①">4.1.12. Sync OBU Syntax and Semantics</a>
-    <li><a href="#ref-for-parameter_rate②">9.4. Animated Parameters</a> <a href="#ref-for-parameter_rate③">(2)</a>
+    <li><a href="#ref-for-parameter_rate①">4.1.9.1. Parameter Definition Syntax and Semantics</a>
+    <li><a href="#ref-for-parameter_rate②">4.1.12. Sync OBU Syntax and Semantics</a>
+    <li><a href="#ref-for-parameter_rate③">9.4. Animated Parameters</a> <a href="#ref-for-parameter_rate④">(2)</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-param_definition_mode" class="dfn-panel" data-for="param_definition_mode" id="infopanel-for-param_definition_mode">
+   <span id="infopaneltitle-for-param_definition_mode" style="display:none">Info about the 'param_definition_mode' definition.</span><b><a href="#param_definition_mode">#param_definition_mode</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-param_definition_mode">5.1. IA Simple Profile</a> <a href="#ref-for-param_definition_mode①">(2)</a>
+    <li><a href="#ref-for-param_definition_mode②">5.2. IA Base Profile</a> <a href="#ref-for-param_definition_mode③">(2)</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-duration" class="dfn-panel" data-for="duration" id="infopanel-for-duration">
+   <span id="infopaneltitle-for-duration" style="display:none">Info about the 'duration' definition.</span><b><a href="#duration">#duration</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-duration">4.1.9.1. Parameter Definition Syntax and Semantics</a> <a href="#ref-for-duration①">(2)</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-num_segments" class="dfn-panel" data-for="num_segments" id="infopanel-for-num_segments">
+   <span id="infopaneltitle-for-num_segments" style="display:none">Info about the 'num_segments' definition.</span><b><a href="#num_segments">#num_segments</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-num_segments">4.1.9.1. Parameter Definition Syntax and Semantics</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-constant_segment_interval" class="dfn-panel" data-for="constant_segment_interval" id="infopanel-for-constant_segment_interval">
+   <span id="infopaneltitle-for-constant_segment_interval" style="display:none">Info about the 'constant_segment_interval' definition.</span><b><a href="#constant_segment_interval">#constant_segment_interval</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-constant_segment_interval">4.1.9.1. Parameter Definition Syntax and Semantics</a> <a href="#ref-for-constant_segment_interval①">(2)</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-segment_interval" class="dfn-panel" data-for="segment_interval" id="infopanel-for-segment_interval">
+   <span id="infopaneltitle-for-segment_interval" style="display:none">Info about the 'segment_interval' definition.</span><b><a href="#segment_interval">#segment_interval</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-segment_interval">4.1.9.1. Parameter Definition Syntax and Semantics</a> <a href="#ref-for-segment_interval①">(2)</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-d" class="dfn-panel" data-for="d" id="infopanel-for-d">
+   <span id="infopaneltitle-for-d" style="display:none">Info about the 'D' definition.</span><b><a href="#d">#d</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-d">4.1.9.1. Parameter Definition Syntax and Semantics</a> <a href="#ref-for-d①">(2)</a> <a href="#ref-for-d②">(3)</a> <a href="#ref-for-d③">(4)</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-ns" class="dfn-panel" data-for="ns" id="infopanel-for-ns">
+   <span id="infopaneltitle-for-ns" style="display:none">Info about the 'NS' definition.</span><b><a href="#ns">#ns</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-ns">4.1.9.1. Parameter Definition Syntax and Semantics</a> <a href="#ref-for-ns①">(2)</a> <a href="#ref-for-ns②">(3)</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-csi" class="dfn-panel" data-for="csi" id="infopanel-for-csi">
+   <span id="infopaneltitle-for-csi" style="display:none">Info about the 'CSI' definition.</span><b><a href="#csi">#csi</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-csi">4.1.9.1. Parameter Definition Syntax and Semantics</a> <a href="#ref-for-csi①">(2)</a> <a href="#ref-for-csi②">(3)</a> <a href="#ref-for-csi③">(4)</a> <a href="#ref-for-csi④">(5)</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-si" class="dfn-panel" data-for="si" id="infopanel-for-si">
+   <span id="infopaneltitle-for-si" style="display:none">Info about the 'SI' definition.</span><b><a href="#si">#si</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-si">4.1.9.1. Parameter Definition Syntax and Semantics</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-audio_substream_id" class="dfn-panel" data-for="audio_substream_id" id="infopanel-for-audio_substream_id">
