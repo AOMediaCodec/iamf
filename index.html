@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version d9f9c3533, updated Fri Mar 10 11:31:29 2023 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="22ab2d1244d03ae7c1ebf7330379ffc66ad93ac2" name="document-revision">
+  <meta content="a30af3d0cc4b97d050ae364562fe5c223c26fb99" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2173,8 +2173,7 @@ dfn > a.self-link::before      { content: "#"; }
         <li>
          <a href="#iamfgeneration-postprocessing"><span class="secno">10.2.8</span> <span class="content">Post Processing</span></a>
          <ol class="toc">
-          <li><a href="#iamfgeneration-postprocessing-drc"><span class="secno">10.2.8.1</span> <span class="content">Loudness Config</span></a>
-          <li><a href="#iamfgeneration-postprocessing-drc①"><span class="secno">10.2.8.2</span> <span class="content">DRC Config</span></a>
+          <li><a href="#iamfgeneration-postprocessing-loudness"><span class="secno">10.2.8.1</span> <span class="content">Loudness Information</span></a>
          </ol>
        </ol>
      </ol>
@@ -2679,7 +2678,7 @@ class codec_config() {
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_sub_mixes">num_sub_mixes</dfn> specifies the number of sub-mixes.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_audio_elements">num_audio_elements</dfn> specifies the number of audio elements that are used in this mix presentation to generate the final output audio signal for playback.</p>
    <p><dfn class="css" data-dfn-for="mix_presentation_obu()" data-dfn-type="value" data-noexport id="valdef-mix_presentation_obu-audio_element_id">audio_element_id<a class="self-link" href="#valdef-mix_presentation_obu-audio_element_id"></a></dfn> indicates the obu_id associated with a specific audio element that is used in this mix presentation.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="rendering_config">rendering_config()<a class="self-link" href="#rendering_config"></a></dfn> is a class that provides the metadata required for rendering the referenced audio element.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="rendering_config">rendering_config()</dfn> is a class that provides the metadata required for rendering the referenced audio element.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="element_mix_config">element_mix_config()</dfn> is a class that provides the metadata required for applying any processing to the referenced and rendered audio element before being summed with other processed audio elements.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="output_mix_config">output_mix_config()</dfn> is a class that provides the metadata required for post-processing the mixed audio signal to generate the audio signal for playback.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_layouts">num_layouts</dfn> specifies the number of layouts for this sub-mix which the loudness informations were measured on.</p>
@@ -4996,12 +4995,19 @@ Recon_Gain for D_Rtb4:
    <p>Step3: Generate IA sequence which starts descriptor OBUs and followed by temporal units in order.</p>
    <h4 class="heading settled" data-level="10.2.8" id="iamfgeneration-postprocessing"><span class="secno">10.2.8. </span><span class="content">Post Processing</span><a class="self-link" href="#iamfgeneration-postprocessing"></a></h4>
    <p>This section provides a guideline to generate algorithms for post processing.</p>
-   <h5 class="heading settled" data-level="10.2.8.1" id="iamfgeneration-postprocessing-drc"><span class="secno">10.2.8.1. </span><span class="content">Loudness Config</span><a class="self-link" href="#iamfgeneration-postprocessing-drc"></a></h5>
-   <p>This section provide a guideline to generate loudness_config().</p>
-   <p>//To Do: Fill in how to generate loudness_config()</p>
-   <h5 class="heading settled" data-level="10.2.8.2" id="iamfgeneration-postprocessing-drc①"><span class="secno">10.2.8.2. </span><span class="content">DRC Config</span><a class="self-link" href="#iamfgeneration-postprocessing-drc①"></a></h5>
-   <p>This section provide a guideline to generate drc_config().</p>
-   <p>//To Do: Fill in how to generate drc_config()</p>
+   <h5 class="heading settled" data-level="10.2.8.1" id="iamfgeneration-postprocessing-loudness"><span class="secno">10.2.8.1. </span><span class="content">Loudness Information</span><a class="self-link" href="#iamfgeneration-postprocessing-loudness"></a></h5>
+   <p>This section provides a guideline to generate loudness_info().</p>
+   <p>For a given Mix Presentation OBU and a given <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout①⑨">loudness_layout</a> of a sub-mix of the given Mix Presentation OBU, the followings are processed in order to produce loudness_info().</p>
+   <ul>
+    <li data-md>
+     <p>Each of the Audio Elements specified in the sub-mix of the given Mix Presentation OBU is rendered to the given <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout②⓪">loudness_layout</a> according to <a data-link-type="dfn" href="#rendering_config" id="ref-for-rendering_config">rendering_config()</a> for the Audio Element.</p>
+    <li data-md>
+     <p>Each of the Audio Elements specified in the sub-mix of the given Mix Presentation OBU applies <a data-link-type="dfn" href="#mix_gain" id="ref-for-mix_gain②">mix_gain</a> according to <a data-link-type="dfn" href="#element_mix_config" id="ref-for-element_mix_config⑥">element_mix_config()</a> for the Audio Element.</p>
+    <li data-md>
+     <p>All of the Audio Elements specified in the sub-mix of the given Mix Presentation OBU are summed, and then applies <a data-link-type="dfn" href="#mix_gain" id="ref-for-mix_gain③">mix_gain</a> according to <a data-link-type="dfn" href="#output_mix_config" id="ref-for-output_mix_config⑤">output_mix_config()</a> for the sub-mix.</p>
+    <li data-md>
+     <p>Generate loudness_info() of the mixed audio according to <a href="#obu-mixpresentation-loudness">§ 4.1.8.4 Loudness Info Syntax and Semantics</a>.</p>
+   </ul>
    <h2 class="heading settled" data-level="11" id="iamfconsumption"><span class="secno">11. </span><span class="content">Consumption of IAMF bitstream</span><a class="self-link" href="#iamfconsumption"></a></h2>
    <p class="issue" id="issue-4d4ba7fc"><a class="self-link" href="#issue-4d4ba7fc"></a> TODO. Fill in example workflows.</p>
    <h2 class="heading settled" data-level="12" id="annex-b-short-lived-audio"><span class="secno">12. </span><span class="content">Annex B: Short-lived Audio</span><a class="self-link" href="#annex-b-short-lived-audio"></a></h2>
@@ -6102,6 +6108,12 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-num_audio_elements">10.2.6. Mix Presentation Encoding</a> <a href="#ref-for-num_audio_elements①">(2)</a> <a href="#ref-for-num_audio_elements②">(3)</a>
    </ul>
   </aside>
+  <aside aria-labelledby="infopaneltitle-for-rendering_config" class="dfn-panel" data-for="rendering_config" id="infopanel-for-rendering_config">
+   <span id="infopaneltitle-for-rendering_config" style="display:none">Info about the 'rendering_config()' definition.</span><b><a href="#rendering_config">#rendering_config</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-rendering_config">10.2.8.1. Loudness Information</a>
+   </ul>
+  </aside>
   <aside aria-labelledby="infopaneltitle-for-element_mix_config" class="dfn-panel" data-for="element_mix_config" id="infopanel-for-element_mix_config">
    <span id="infopaneltitle-for-element_mix_config" style="display:none">Info about the 'element_mix_config()' definition.</span><b><a href="#element_mix_config">#element_mix_config</a></b><b>Referenced in:</b>
    <ul>
@@ -6109,6 +6121,7 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-element_mix_config①">9.3.3. Mixing Audio Elements</a>
     <li><a href="#ref-for-element_mix_config②">10.2.6. Mix Presentation Encoding</a> <a href="#ref-for-element_mix_config③">(2)</a> <a href="#ref-for-element_mix_config④">(3)</a>
     <li><a href="#ref-for-element_mix_config⑤">10.2.6.1. Element Mix Config</a>
+    <li><a href="#ref-for-element_mix_config⑥">10.2.8.1. Loudness Information</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-output_mix_config" class="dfn-panel" data-for="output_mix_config" id="infopanel-for-output_mix_config">
@@ -6117,6 +6130,7 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-output_mix_config">9.3. Mix Presentation</a>
     <li><a href="#ref-for-output_mix_config①">9.3.3. Mixing Audio Elements</a>
     <li><a href="#ref-for-output_mix_config②">10.2.6. Mix Presentation Encoding</a> <a href="#ref-for-output_mix_config③">(2)</a> <a href="#ref-for-output_mix_config④">(3)</a>
+    <li><a href="#ref-for-output_mix_config⑤">10.2.8.1. Loudness Information</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-num_layouts" class="dfn-panel" data-for="num_layouts" id="infopanel-for-num_layouts">
@@ -6135,6 +6149,7 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-loudness_layout①⓪">9.3.3. Mixing Audio Elements</a>
     <li><a href="#ref-for-loudness_layout①①">9.5.1. Loudness Normalization</a> <a href="#ref-for-loudness_layout①②">(2)</a> <a href="#ref-for-loudness_layout①③">(3)</a>
     <li><a href="#ref-for-loudness_layout①④">10.2.6. Mix Presentation Encoding</a> <a href="#ref-for-loudness_layout①⑤">(2)</a> <a href="#ref-for-loudness_layout①⑥">(3)</a> <a href="#ref-for-loudness_layout①⑦">(4)</a> <a href="#ref-for-loudness_layout①⑧">(5)</a>
+    <li><a href="#ref-for-loudness_layout①⑨">10.2.8.1. Loudness Information</a> <a href="#ref-for-loudness_layout②⓪">(2)</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-loudness" class="dfn-panel" data-for="loudness" id="infopanel-for-loudness">
@@ -6408,6 +6423,7 @@ Recon_Gain for D_Rtb4:
    <span id="infopaneltitle-for-mix_gain" style="display:none">Info about the 'mix_gain' definition.</span><b><a href="#mix_gain">#mix_gain</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-mix_gain">10.2.6. Mix Presentation Encoding</a> <a href="#ref-for-mix_gain①">(2)</a>
+    <li><a href="#ref-for-mix_gain②">10.2.8.1. Loudness Information</a> <a href="#ref-for-mix_gain③">(2)</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-animation_type" class="dfn-panel" data-for="animation_type" id="infopanel-for-animation_type">
