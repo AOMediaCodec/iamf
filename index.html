@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version d9f9c3533, updated Fri Mar 10 11:31:29 2023 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="35e9f8cc0315db02828594bd225742c02852bcaa" name="document-revision">
+  <meta content="dec94e655d5f227b059472a3531159aac8646305" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2345,57 +2345,61 @@ class Bar {
     <li data-md>
      <p><dfn data-dfn-type="dfn" data-noexport id="temporal-delimiter-obu">Temporal Delimiter OBU<a class="self-link" href="#temporal-delimiter-obu"></a></dfn> identifies the temporal units.</p>
    </ul>
-   <p>The below figure shows the linking scheme among <a data-link-type="dfn" href="#obu_id" id="ref-for-obu_id">obu_id</a>s in obu_header and ids in obu payload.</p>
-   <center><img height="1071" src="images/ID Linking Example.png" style="width:100%; height:auto;" width="1496"></center>
+   <p>The below figure shows the linking scheme among IDs in obu_header or obu payload.</p>
+   <center><img height="1044" src="images/ID Linking Example.png" style="width:100%; height:auto;" width="1783"></center>
    <center>
     <figcaption>ID Linking Scheme</figcaption>
    </center>
    <p>In the above figure,</p>
    <ul>
     <li data-md>
-     <p>codec config obu is saying that there are two audio elements (audio_element_id = 11 and 12) which are coded by using the codec_config() in the obu.</p>
+     <p>Codec Config OBU with codec_config_id  = 0 is providing codec_id and its decoder_config().</p>
+    <li data-md>
+     <p>Mix Presentation OBU with mix_presentation_id  = 21 is saying:</p>
      <ul>
       <li data-md>
-       <p>The audio element having audio_element_id = 11 is linked to the audio element obu having audio_element_id = 11.</p>
+       <p>There are two Audio Elements(audio_element_id = 11 and 12) which need to be mixed. The audio_element_id = 11 and the audio_element_id = 12 are linked to the Audio Element OBUs with audio_element_id = 11 and audio_element_id = 12, respectively.</p>
        <ul>
         <li data-md>
-         <p>The audio element obu is saying that there are two substreams (substream_id = 31 and 32) which composing of this audio element.</p>
-         <ul>
-          <li data-md>
-           <p>The audio substream having substream_id = 31 is linked to the audio frame obus having id = 31.</p>
-          <li data-md>
-           <p>The audio substream having substream_id = 32 is linked to the audio frame obus having id = 32.</p>
-         </ul>
+         <p>There is one or more Parameter Block OBUs with parameter_id = 32 to be used for mixing of the Audio Element with audio_element_id = 11.</p>
         <li data-md>
-         <p>The audio element obu is saying that there are one parameter block (parameter_id = 71) for demixing_info_parameter_data() which is applied to the audio element.</p>
-         <ul>
-          <li data-md>
-           <p>The parameter block having parameter_id = 71 is linked to the parameter block obu having parameter_id = 71.</p>
-         </ul>
-        <li data-md>
-         <p>IAMF decoders applies the parameter block to the audio substreams after decoding by substream decoders.</p>
+         <p>There is one or more Parameter Block OBUs with parameter_id = 33 to be used for mixing of the Audio Element with audio_element_id = 12.</p>
        </ul>
       <li data-md>
-       <p>The audio element having audio_element_id = 12 is linked to the audio element obu having obu_id = 12.</p>
-       <ul>
-        <li data-md>
-         <p>The audio element obu is saying that there are one substream (substream_id = 33) which composing of this audio element.</p>
-         <ul>
-          <li data-md>
-           <p>The audio substream having substream_id = 33 is linked to the audio frame obus having id = 33.</p>
-         </ul>
-        <li data-md>
-         <p>Substream decoder do decoding the substream.</p>
-       </ul>
+       <p>There is one or more Parameter Block OBUs with parameter_id = 34 to be used for mixing of the two Audio Elements.</p>
      </ul>
     <li data-md>
-     <p>mix presentation obu is saying that there are two audio elements (audio_element_id = 11 and 12) which need to be mixed.</p>
+     <p>Audio Element OBU with audio_element_id = 11 is saying:</p>
      <ul>
       <li data-md>
-       <p>The audio element having audio_element_id = 11 and the audio element having audio_element_id = 12 are mixed after decoding each of them.</p>
+       <p>This audio element has been coded using Codec Config OBU with codec_config_id = 0.</p>
       <li data-md>
-       <p>Then IAMF decoders may do process loudness and drc controls by using mix_loudness_info() and drc_config().</p>
+       <p>There are two Substreams (audio_substream_id = 0 and 1) in this audio element. The audio_substream_id = 0 and the audio_substream_id = 1 are linked to the Audio Frame OBUs with audio_substream_id = 0 and audio_substream_id = 1(i.e. obu_type = OBU_IA_Audio_Frame_ID0 and obu_type = OBU_IA_Audio_Frame_ID1), respectively.</p>
+      <li data-md>
+       <p>There is one or more Parameter Block OBUs with parameter_id = 31 to be used for demixing of this audio element.</p>
      </ul>
+    <li data-md>
+     <p>Audio Element OBU with audio_element_id = 12 is saying:</p>
+     <ul>
+      <li data-md>
+       <p>This audio element has been coded by using Codec Config OBU with codec_config_id = 0.</p>
+      <li data-md>
+       <p>There is one Substream (audio_substream_id = 2) in this audio element. The audio_substream_id = 2 is linked to the Audio Frame OBUs with audio_substream_id = 2 (i.e. obu_type = OBU_IA_Audio_Frame_ID2).</p>
+     </ul>
+    <li data-md>
+     <p>Audio Frame OBU with ID = 0 (i.e. obu_type = OBU_IA_Audio_Frame_ID0) is providing the coded data which has been coded by using Codec Config OBU with codec_config_id = 0 of Substream with audio_substream_id = 0.</p>
+    <li data-md>
+     <p>Audio Frame OBU with ID = 1 (i.e. obu_type = OBU_IA_Audio_Frame_ID1) is providing the coded data which has been coded by using Codec Config OBU with codec_config_id = 0 of Substream with audio_substream_id = 1.</p>
+    <li data-md>
+     <p>Audio Frame OBU with ID = 2 (i.e. obu_type = OBU_IA_Audio_Frame_ID2) is providing the coded data which has been coded by using Codec Config OBU with codec_config_id = 0 of Substream with audio_substream_id = 2.</p>
+    <li data-md>
+     <p>Parameter Block OBU with parameter_id = 31 is providing demixing_info_parameter_data() to be applied for demixing of the Audio Element with audio_element_id = 11.</p>
+    <li data-md>
+     <p>Parameter Block OBU with parameter_id = 32 is providing mix_gain_parameter_data() to be applied to the rendered audio element after rendering according to render_config() of the Audio Element with audio_element_id = 11.</p>
+    <li data-md>
+     <p>Parameter Block OBU with parameter_id = 33 is providing mix_gain_parameter_data() to be applied to the rendered audio element after rendering according to render_config() of the Audio Element with audio_element_id = 12.</p>
+    <li data-md>
+     <p>Parameter Block OBU with parameter_id = 34 is providing mix_gain_parameter_data() to be applied to the mixed audio of the two rendered audios.</p>
    </ul>
    <h2 class="heading settled" data-level="4" id="obu-syntax"><span class="secno">4. </span><span class="content">Open Bitstream Unit (OBU) Syntax and Semantics</span><a class="self-link" href="#obu-syntax"></a></h2>
    <h3 class="heading settled" data-level="4.1" id="top-level-syntax"><span class="secno">4.1. </span><span class="content">Top Level OBU Syntax and Semantics</span><a class="self-link" href="#top-level-syntax"></a></h3>
@@ -2908,7 +2912,7 @@ class AnimatedParameterData(animation_type) {
    <p><dfn data-dfn-type="dfn" data-noexport id="global_offset">global_offset<a class="self-link" href="#global_offset"></a></dfn> specifies the offset that is applied to all substreams and parameters specified in this Sync OBU, in addition to their individual relative offsets.</p>
    <p>For this version of the specification, the value of global_offset shall be set to 0.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="num_obu_ids">num_obu_ids<a class="self-link" href="#num_obu_ids"></a></dfn> specifies the number of substream and parameter IDs that this Sync OBU specifies the offset for.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="obu_id">obu_id</dfn> specifies the unique ID associated with the substream or parameter that is being referred to.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="obu_id">obu_id<a class="self-link" href="#obu_id"></a></dfn> specifies the unique ID associated with the substream or parameter that is being referred to.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="obu_data_type">obu_data_type<a class="self-link" href="#obu_data_type"></a></dfn> specifies the type of data that is being referred to.</p>
 <pre class="def">obu_data_type : Type of OBU data
       0       : SUBSTREAM
@@ -6266,12 +6270,6 @@ Recon_Gain for D_Rtb4:
    <ul>
     <li><a href="#ref-for-audio_frame">4.1.10. Audio Frame OBU Syntax and Semantics</a> <a href="#ref-for-audio_frame①">(2)</a>
     <li><a href="#ref-for-audio_frame②">4.3.4. IAMF-LPCM Specific</a> <a href="#ref-for-audio_frame③">(2)</a>
-   </ul>
-  </aside>
-  <aside aria-labelledby="infopaneltitle-for-obu_id" class="dfn-panel" data-for="obu_id" id="infopanel-for-obu_id">
-   <span id="infopaneltitle-for-obu_id" style="display:none">Info about the 'obu_id' definition.</span><b><a href="#obu_id">#obu_id</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-obu_id">3.2.2. Data</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-num_layers" class="dfn-panel" data-for="num_layers" id="infopanel-for-num_layers">
