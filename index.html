@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version d9f9c3533, updated Fri Mar 10 11:31:29 2023 -0800" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="dec94e655d5f227b059472a3531159aac8646305" name="document-revision">
+  <meta content="22ab2d1244d03ae7c1ebf7330379ffc66ad93ac2" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2766,8 +2766,7 @@ class codec_config() {
     }
 
     if (param_definition_type == PARAMETER_DEFINITION_MIX_GAIN) {
-      leb128() animation_type;
-      mix_gain_parameter_data(animation_type);
+      mix_gain_parameter_data();
     }
     if (param_definition_type == PARAMETER_DEFINITION_DEMIXING) {
       demixing_info_parameter_data();
@@ -2787,34 +2786,6 @@ class codec_config() {
    <p>Audio Element OBU and/or Mix Presentation OBU is mapping a parameter_id to the parameter definition type. So, IA decoders can know the definition type mapped to the parameter_id.</p>
    <p><dfn class="css" data-dfn-for="parameter_block_obu()" data-dfn-type="value" data-noexport id="valdef-parameter_block_obu-segment_interval">segment_interval<a class="self-link" href="#valdef-parameter_block_obu-segment_interval"></a></dfn> specifies the interval for the given segment.</p>
    <p>Each value of duration, constant_segment_interval and segment_interval shall be expressed as the number of ticks at the <a data-link-type="dfn" href="#parameter_rate" id="ref-for-parameter_rate">parameter_rate</a> specified in the corresponding parameter definition.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="animation_type">animation_type</dfn> specifies the type of animation applied to the parameter values in this parameter block.</p>
-<pre class="def">animation_type : Animation Type
-       0       : STEP
-       1       : LINEAR
-       2       : BEZIER
-</pre>
-   <p>Classes that take <a data-link-type="dfn" href="#animation_type" id="ref-for-animation_type">animation_type</a> as an input argument use the <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="animatedparameterdata">AnimatedParameterData()</dfn> function template. The method of applying the animation is described in <a href="#processing-animated-params">§ 9.4 Animated Parameters</a>.</p>
-<pre>template &lt;class T>
-class AnimatedParameterData(animation_type) {
-  if (animation_type == STEP) {
-    T start_point_value;
-  }
-  if (animation_type == LINEAR) {
-    T start_point_value;
-    T end_point_value;
-  }
-  if (animation_type == BEZIER) {
-    T start_point_value;
-    T end_point_value;
-    T control_point_value;
-    unsigned int (8) control_point_relative_time;
-  }
-}
-</pre>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="start_point_value">start_point_value</dfn> specifies the parameter value that is applied at the start of the segment.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="end_point_value">end_point_value</dfn> specifies the parameter value that is applied at the end of the segment.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="control_point_value">control_point_value<a class="self-link" href="#control_point_value"></a></dfn> specifies the parameter value of the middle control point of a quadratic Bezier curve, i.e. its y-axis value.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="control_point_relative_time">control_point_relative_time<a class="self-link" href="#control_point_relative_time"></a></dfn> specifies the time of the middle control point of a quadratic Bezier curve, i.e. its x-axis value. This value is expressed as a fraction of the parameter segment interval with valid values in the range of 0 and 1, inclusively. A value equal to 0 or 1 indicates that this animation implements a linear Bezier curve, in which case control_point_value shall be ignored by the IA parser. It is stored as an 8-bit, unsigned, fixed-point value with 8 fractional bits (i.e. Q0.8 in <a data-link-type="biblio" href="#biblio-q-format" title="Q (number format)">[Q-Format]</a>).</p>
    <h5 class="heading settled" data-level="4.1.9.1" id="parameter-definition"><span class="secno">4.1.9.1. </span><span class="content">Parameter Definition Syntax and Semantics</span><a class="self-link" href="#parameter-definition"></a></h5>
    <p>Parameter definition classes inherits from the abstract <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="paramdefinition">ParamDefinition()</dfn> class. They may optionally further provide default parameter values, which are applied when there are no parameter blocks available.</p>
    <p><b>Syntax</b></p>
@@ -3389,13 +3360,42 @@ class ambisonics_projection_config() {
   signed int (16) default_mix_gain;
 }
 
-class mix_gain_parameter_data(animation_type) {
+class mix_gain_parameter_data() {
+  leb128() animation_type;
   AnimatedParameterData&lt;signed int (16)> param_data;
 }
 </pre>
    <p><b>Semantics</b></p>
    <p><dfn data-dfn-type="dfn" data-noexport id="default_mix_gain">default_mix_gain<a class="self-link" href="#default_mix_gain"></a></dfn> specifies the default mix gain value to apply when there are no mix gain parameter blocks provided. This value is expressed in dB and shall be applied to all channels in the rendered audio element. It is stored as a 16-bit, signed, two’s complement fixed-point value with 8 fractional bits (i.e. Q7.8 in <a data-link-type="biblio" href="#biblio-q-format" title="Q (number format)">[Q-Format]</a>).</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="animation_type">animation_type</dfn> specifies the type of animation applied to the parameter values.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="param_data">param_data<a class="self-link" href="#param_data"></a></dfn> uses the AnimatedParameterData function template. Each of the values defined within this instance (start_point_value, end_point_value and control_point_value) is expressed in dB and shall be applied to all channels in the rendered audio element. They are stored as 16-bit, signed, two’s complement fixed-point values with 8 fractional bits (i.e. Q7.8 in <a data-link-type="biblio" href="#biblio-q-format" title="Q (number format)">[Q-Format]</a>).</p>
+<pre class="def">animation_type : Animation Type
+       0       : STEP
+       1       : LINEAR
+       2       : BEZIER
+</pre>
+   <p>Classes that take <a data-link-type="dfn" href="#animation_type" id="ref-for-animation_type">animation_type</a> as an input argument use the <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="animatedparameterdata">AnimatedParameterData()</dfn> function template. The method of applying the animation is described in <a href="#processing-animated-params">§ 9.4 Animated Parameters</a>.</p>
+<pre>template &lt;class T>
+class AnimatedParameterData(animation_type) {
+  if (animation_type == STEP) {
+    T start_point_value;
+  }
+  if (animation_type == LINEAR) {
+    T start_point_value;
+    T end_point_value;
+  }
+  if (animation_type == BEZIER) {
+    T start_point_value;
+    T end_point_value;
+    T control_point_value;
+    unsigned int (8) control_point_relative_time;
+  }
+}
+</pre>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="start_point_value">start_point_value</dfn> specifies the parameter value that is applied at the start of the segment.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="end_point_value">end_point_value</dfn> specifies the parameter value that is applied at the end of the segment.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="control_point_value">control_point_value<a class="self-link" href="#control_point_value"></a></dfn> specifies the parameter value of the middle control point of a quadratic Bezier curve, i.e. its y-axis value.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="control_point_relative_time">control_point_relative_time<a class="self-link" href="#control_point_relative_time"></a></dfn> specifies the time of the middle control point of a quadratic Bezier curve, i.e. its x-axis value. This value is expressed as a fraction of the parameter segment interval with valid values in the range of 0 and 1, inclusively. A value equal to 0 or 1 indicates that this animation implements a linear Bezier curve, in which case control_point_value shall be ignored by the IA parser. It is stored as an 8-bit, unsigned, fixed-point value with 8 fractional bits (i.e. Q0.8 in <a data-link-type="biblio" href="#biblio-q-format" title="Q (number format)">[Q-Format]</a>).</p>
    <h3 class="heading settled" data-level="4.3" id="codec-specific"><span class="secno">4.3. </span><span class="content">Codec Specific</span><a class="self-link" href="#codec-specific"></a></h3>
    <p>This section defines codec specific information for Codec_Specific_Info and Substream.</p>
    <ul>
@@ -5174,8 +5174,8 @@ Recon_Gain for D_Rtb4:
    <li><a href="#alpha">alpha</a><span>, in § 4.2.3</span>
    <li><a href="#ambisonics_config">ambisonics_config()</a><span>, in § 4.1.7</span>
    <li><a href="#ambisonics_mode">ambisonics_mode</a><span>, in § 4.2.2</span>
-   <li><a href="#animatedparameterdata">AnimatedParameterData()</a><span>, in § 4.1.9</span>
-   <li><a href="#animation_type">animation_type</a><span>, in § 4.1.9</span>
+   <li><a href="#animatedparameterdata">AnimatedParameterData()</a><span>, in § 4.2.7.1</span>
+   <li><a href="#animation_type">animation_type</a><span>, in § 4.2.7.1</span>
    <li><a href="#audio-element">Audio element</a><span>, in § 3.1</span>
    <li><a href="#audio_element_friendly_label">audio_element_friendly_label</a><span>, in § 4.1.8.2</span>
    <li>
@@ -5219,8 +5219,8 @@ Recon_Gain for D_Rtb4:
      <li><a href="#constant_segment_interval">definition of</a><span>, in § 4.1.9.1</span>
      <li><a href="#valdef-parameter_block_obu-constant_segment_interval">value for parameter_block_obu()</a><span>, in § 4.1.9</span>
     </ul>
-   <li><a href="#control_point_relative_time">control_point_relative_time</a><span>, in § 4.1.9</span>
-   <li><a href="#control_point_value">control_point_value</a><span>, in § 4.1.9</span>
+   <li><a href="#control_point_relative_time">control_point_relative_time</a><span>, in § 4.2.7.1</span>
+   <li><a href="#control_point_value">control_point_value</a><span>, in § 4.2.7.1</span>
    <li><a href="#coupled-channels">Coupled channels</a><span>, in § 10</span>
    <li><a href="#coupled_substream_count">coupled_substream_count</a><span>, in § 4.2.1</span>
    <li><a href="#csi">CSI</a><span>, in § 4.1.9.1</span>
@@ -5242,7 +5242,7 @@ Recon_Gain for D_Rtb4:
      <li><a href="#valdef-parameter_block_obu-duration">value for parameter_block_obu()</a><span>, in § 4.1.9</span>
     </ul>
    <li><a href="#element_mix_config">element_mix_config()</a><span>, in § 4.1.8</span>
-   <li><a href="#end_point_value">end_point_value</a><span>, in § 4.1.9</span>
+   <li><a href="#end_point_value">end_point_value</a><span>, in § 4.2.7.1</span>
    <li><a href="#extension_header_size">extension_header_size</a><span>, in § 4.1.2</span>
    <li><a href="#gamma">gamma</a><span>, in § 4.2.3</span>
    <li><a href="#get_param_definition">get_param_definition()</a><span>, in § 4.1.9</span>
@@ -5351,7 +5351,7 @@ Recon_Gain for D_Rtb4:
    <li><a href="#si">SI</a><span>, in § 4.1.9.1</span>
    <li><a href="#sound_system">sound_system</a><span>, in § 4.2.5</span>
    <li><a href="#sp_label">sp_label</a><span>, in § 4.2.5</span>
-   <li><a href="#start_point_value">start_point_value</a><span>, in § 4.1.9</span>
+   <li><a href="#start_point_value">start_point_value</a><span>, in § 4.2.7.1</span>
    <li><a href="#stereo">Stereo</a><span>, in § 4.2.1</span>
    <li><a href="#substream_count">substream_count</a><span>, in § 4.2.1</span>
    <li><a href="#sync-obu">Sync OBU</a><span>, in § 3.2.2</span>
@@ -6162,32 +6162,6 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-parameter_id②">10.2.7.1. Multiple Audio Elements with One Codec Config</a> <a href="#ref-for-parameter_id③">(2)</a>
    </ul>
   </aside>
-  <aside aria-labelledby="infopaneltitle-for-animation_type" class="dfn-panel" data-for="animation_type" id="infopanel-for-animation_type">
-   <span id="infopaneltitle-for-animation_type" style="display:none">Info about the 'animation_type' definition.</span><b><a href="#animation_type">#animation_type</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-animation_type">4.1.9. Parameter Block OBU Syntax and Semantics</a>
-    <li><a href="#ref-for-animation_type①">9.4. Animated Parameters</a> <a href="#ref-for-animation_type②">(2)</a> <a href="#ref-for-animation_type③">(3)</a> <a href="#ref-for-animation_type④">(4)</a>
-   </ul>
-  </aside>
-  <aside aria-labelledby="infopaneltitle-for-animatedparameterdata" class="dfn-panel" data-for="animatedparameterdata" id="infopanel-for-animatedparameterdata">
-   <span id="infopaneltitle-for-animatedparameterdata" style="display:none">Info about the 'AnimatedParameterData()' definition.</span><b><a href="#animatedparameterdata">#animatedparameterdata</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-animatedparameterdata">4.1.9. Parameter Block OBU Syntax and Semantics</a>
-    <li><a href="#ref-for-animatedparameterdata①">9.4. Animated Parameters</a> <a href="#ref-for-animatedparameterdata②">(2)</a>
-   </ul>
-  </aside>
-  <aside aria-labelledby="infopaneltitle-for-start_point_value" class="dfn-panel" data-for="start_point_value" id="infopanel-for-start_point_value">
-   <span id="infopaneltitle-for-start_point_value" style="display:none">Info about the 'start_point_value' definition.</span><b><a href="#start_point_value">#start_point_value</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-start_point_value">9.4. Animated Parameters</a> <a href="#ref-for-start_point_value①">(2)</a> <a href="#ref-for-start_point_value②">(3)</a>
-   </ul>
-  </aside>
-  <aside aria-labelledby="infopaneltitle-for-end_point_value" class="dfn-panel" data-for="end_point_value" id="infopanel-for-end_point_value">
-   <span id="infopaneltitle-for-end_point_value" style="display:none">Info about the 'end_point_value' definition.</span><b><a href="#end_point_value">#end_point_value</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-end_point_value">9.4. Animated Parameters</a> <a href="#ref-for-end_point_value①">(2)</a>
-   </ul>
-  </aside>
   <aside aria-labelledby="infopaneltitle-for-paramdefinition" class="dfn-panel" data-for="paramdefinition" id="infopanel-for-paramdefinition">
    <span id="infopaneltitle-for-paramdefinition" style="display:none">Info about the 'ParamDefinition()' definition.</span><b><a href="#paramdefinition">#paramdefinition</a></b><b>Referenced in:</b>
    <ul>
@@ -6434,6 +6408,32 @@ Recon_Gain for D_Rtb4:
    <span id="infopaneltitle-for-mix_gain" style="display:none">Info about the 'mix_gain' definition.</span><b><a href="#mix_gain">#mix_gain</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-mix_gain">10.2.6. Mix Presentation Encoding</a> <a href="#ref-for-mix_gain①">(2)</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-animation_type" class="dfn-panel" data-for="animation_type" id="infopanel-for-animation_type">
+   <span id="infopaneltitle-for-animation_type" style="display:none">Info about the 'animation_type' definition.</span><b><a href="#animation_type">#animation_type</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-animation_type">4.2.7.1. Mix Gain Parameter Definition and Data Syntax and Semantics</a>
+    <li><a href="#ref-for-animation_type①">9.4. Animated Parameters</a> <a href="#ref-for-animation_type②">(2)</a> <a href="#ref-for-animation_type③">(3)</a> <a href="#ref-for-animation_type④">(4)</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-animatedparameterdata" class="dfn-panel" data-for="animatedparameterdata" id="infopanel-for-animatedparameterdata">
+   <span id="infopaneltitle-for-animatedparameterdata" style="display:none">Info about the 'AnimatedParameterData()' definition.</span><b><a href="#animatedparameterdata">#animatedparameterdata</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-animatedparameterdata">4.1.9. Parameter Block OBU Syntax and Semantics</a>
+    <li><a href="#ref-for-animatedparameterdata①">9.4. Animated Parameters</a> <a href="#ref-for-animatedparameterdata②">(2)</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-start_point_value" class="dfn-panel" data-for="start_point_value" id="infopanel-for-start_point_value">
+   <span id="infopaneltitle-for-start_point_value" style="display:none">Info about the 'start_point_value' definition.</span><b><a href="#start_point_value">#start_point_value</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-start_point_value">9.4. Animated Parameters</a> <a href="#ref-for-start_point_value①">(2)</a> <a href="#ref-for-start_point_value②">(3)</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-end_point_value" class="dfn-panel" data-for="end_point_value" id="infopanel-for-end_point_value">
+   <span id="infopaneltitle-for-end_point_value" style="display:none">Info about the 'end_point_value' definition.</span><b><a href="#end_point_value">#end_point_value</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-end_point_value">9.4. Animated Parameters</a> <a href="#ref-for-end_point_value①">(2)</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-codec_specific_info" class="dfn-panel" data-for="codec_specific_info" id="infopanel-for-codec_specific_info">
