@@ -20,7 +20,9 @@ url: https://www.iso.org/standard/68960.html#; spec: ISOBMFF; type: dfn;
 	text: channelcount
 	text: samplerate
 	text: AudioRollRecoveryEntry
-
+	text: media_time
+	text: edit_duration
+	
 url: https://www.iso.org/standard/68960.html#; spec: ISOBMFF; type: property;
 	text: iso6
 	text: sgpd
@@ -28,7 +30,10 @@ url: https://www.iso.org/standard/68960.html#; spec: ISOBMFF; type: property;
 	text: sbgp
 	text: edts
 	text: stts
-	text: prol
+	text: roll
+	text: mvhd
+	text: elst
+
 
 url: https://aomedia.org/av1/specification/conventions/; spec: AV1-Convention; type: dfn;
 	text: leb128()
@@ -1873,23 +1878,27 @@ IA sequence shall comply with the bitstream which is specified in [[#profiles-si
 
 ### Encapsulation Scheme ### {#isobmff-singletrack-basicencapsulationscheme}
 
-During encapsulation process, OBUs of IA sequence are encapsulated into [[!ISOBMFF]] as follows:
+During encapsulation process, OBUs of IA sequences are encapsulated into [[!ISOBMFF]] as follows:
 
-- Each set of descriptor OBUs, specified in [[#standalone-descriptor-obus]], and the Sync OBU that immediately follows them are moved to one [=IASampleEntry=]. The descriptor OBUs are then discarded from the IA sequence. In addition,
-    - The [=num_samples_per_frame=] field in the Codec Config OBU is copied to 'stts'.
-    - The [=roll_distance=] field in the Codec Config OBU is copied to [=AudioRollRecoveryEntry=] with the [=grouping_type=] 'rol1'.
-- Each temporal unit:
+- Movie Header and Edit
+	- Calculate the number of temporal units in the IA sequences.
+	- Calculate the number of audio samples to be trimmed at the start of the IA sequences and calculate the number of the audio samples to be trimmed at the end of the IA sequences.
+	- Reflect the calculated numbers to 'mvhd' to indicate the duration after trimming.
+	- If there is audio samples to be trimmed at the start or at the end, then 'edts' and 'elst' boxes shall be present to reflect the the number of audio samples to be trimmed at the start of the IA sequence (i.e [=media_time=]) and [=edit_duration=].
+- Sample Entry
+	- The ith set of descriptor OBUs which is not a redundant copy of the previous descriptor OBUs (i.e. the first descriptor OBUs is regarded as non-redundant copy regardless of its [=obu_redundant_copy=]), specified in [[#standalone-descriptor-obus]], and the Sync OBU that immediately follows them are moved to the ith [=IASampleEntry=]. All descriptor OBUs in the IA sequences are then discarded from the IA sequence. 
+- Decoding Time to Sample
+	- The [=num_samples_per_frame=] value in the Codec Config OBU, which indicates the duration of each sample, is reflected to 'stts' box except the last sample. 
+	- The duration of the last sample may be the duration after trimming or before trimming. 
+	- The duration of teh last sample may not be same as [=num_samples_per_frame=] even it is the duration before trimming. In this case, it is calcuated from Audio Frame OBU of the last temporal unit.
+- Sample Group
+	- The [=roll_distance=] value in the Codec Config OBU is copied to [=AudioRollRecoveryEntry=] with the [=grouping_type=] = 'roll'.
+- Sample
 	- Temporal Delimiter OBU: shall be discarded if present.	
-	- Remained OBUs of each temporal unit shall be stored as one sample data without gap among OBUs.
-- Audio Frame OBUs:
-	- Select one substream. 
-	- If [=obu_trimming_status_flag=] of the first Audio Frame OBU of the substream is set to 1, keep parsing following Audio Frame OBUs of the substream until meets the Audio Frame OBU having [=obu_trimming_status_flag=] =  0 and sum [=num_samples_to_trim_at_start=]. Then reflect the result of the summation to 'edts'.
-	- If [=obu_trimming_status_flag=] of the last Audio Frame OBU of the substream is set to 1, then reflect num_samples_to_trim_at_end to 'stts.
+	- Each temporal unit shall be stored as one sample data without gap among OBUs.
 	
-<center><img src="images/IAC Encapsulation Guideline.png" style="width:100%; height:auto;"></center>
+<center><img src="images/IAMF Encapsulation Guideline.png" style="width:100%; height:auto;"></center>
 <center><figcaption>IAMF Encapsulation Scheme</figcaption></center>
-
-ISSUE: TODO: update the IAMF Encapsulation Scheme figure.
 
 ### IA Sample Entry ### {#iasampleentry-section}
 
@@ -2022,23 +2031,12 @@ This section provides a guideline for IAMF parser to reconstruct IA sequences fr
 
 When IAMF parser feeds the reconstructed IA sequences to IAMF-OBU parser, descriptor OBUs shall be placed at the first and followed by Temporal Units.
 
-Below figure shows the mirroring process of the encapsulation scheme of IA sequence specified in [[#isobmff]].
-
-<center><img src="images/IAC Decapsulation Guideline.png" style="width:100%; height:auto;"></center>
-<center><figcaption>IAMF Decapsulation Guideline</figcaption></center>
-
-
 During decapsulation process, IAMF file is decapsulated into IA sequences which conform to [[#obu-syntax]] as follows:
-- Step1: Reconstruction of descriptor OBUs (one Magic Code OBU, one Codec Config OBU, one or more Audio Element OBUs and one or more Mix Presentation OBUs) for the ith IA sequence.
-	- Magic Code OBU: take the magic_code_obu in the ith AudioSampleEntry('iamf').
-	- Codec Config OBU: take the codec_config_obu in the ith AudioSampleEntry('iamf').
-	- Audio Element OBU(s): take the audio_element_obus in the ith AudioSampleEntry('iamf').
-	- Mix Presentation OBU(s): take the mix_presentation_obus in the ith AudioSampleEntry('iamf').
-- Step2: Reconstruction of Sync_OBU for the ith IA sequence.
-	- Take the sync_obu in the ith AudioSampleEntry('iamf').
-- Step3: Reconstructing of the jth Temporal Unit of the ith IA sequence (j = i1, i2, …, im)
-	- Take jth sample as it is.
-- Step4: Place descriptor OBUs, followed by Sync OBU, and followed by Temporal Units in order (j = i1, i2, …, im) without gap, to reconstruct the ith IA sequence.
+- The ith IA sequence is reconstructed as follows:
+	- Step1: Take the ith descriptor OBUs and Sync OBU from the ith IASampleEntry.
+	- Step2: Take jth sample as it is and add Temporal Delimiter OBU in front of the jth sample if necessary.
+	- Step3: Place the ith descriptor OBUs, followed by Sync OBU, and followed by Temporal Units in order (j = i1, i2, …, im) without gap, to reconstruct the ith IA sequence.
+- Place IA sequences in order (i = 1, 2, 3, ...) to reconstruct the IA sequences.
 
 ### Recommended handling of Trimming Information ### {#isobmff-decapsulation-singletrack-trimming}
 
