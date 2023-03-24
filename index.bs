@@ -1100,7 +1100,10 @@ For this version of the specification, the value of reinitialize_decoder shall b
 
 <dfn noexport>relative_offset</dfn> is the offset to position the first audio frame (before trimming) or parameter block with the referenced obu_id that comes after this Sync OBU with respect to the timeline generated before this Sync OBU. If this Sync OBU is the first one, it is the offset from 0. Otherwise, it is the offset from the end of the timeline of Substreams generated from the previous Sync OBU.
 
-The offset shall be indicated in the number of ticks at the [=parameter_rate=] specified in the corresponding substream or parameter definition.
+The difference, [=relative_offset=](P) - [=relative_offset=](A), shall be the offset to position the first audio sample where the first parameter value of the first parameter block that comes after this Sync OBU is applied to.
+- Where, [=relative_offset=](P) is [=relative_offset=] of [=obu_id=] for the parameter and [=relative_offset=](A) is [=relative_offset=] of [=obu_id=] for the substream which the parameter is applied to. 
+
+The offset shall be indicated in the number of ticks at the sample rate specified in the corresponding substream or Codec Config OBU. For IAMF-OPUS, the sample rate is 48000Hz.
 
 IA encoder and decoder operations related to this field are specified in [[#standalone-synchronizing-data-obus]].
 
