@@ -1487,9 +1487,9 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version d9f9c3533, updated Fri Mar 10 11:31:29 2023 -0800" name="generator">
+  <meta content="Bikeshed version d9bd89757, updated Thu Mar 23 10:06:53 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="ddaee5ca3a541aa17a93eb42863f779ed8206548" name="document-revision">
+  <meta content="a7aa1ff4dd5629b0802fa9c8d9531d9c7c65196d" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2882,7 +2882,7 @@ class codec_config() {
    <p><dfn data-dfn-type="dfn" data-noexport id="global_offset">global_offset<a class="self-link" href="#global_offset"></a></dfn> specifies the offset that is applied to all substreams and parameters specified in this Sync OBU, in addition to their individual relative offsets.</p>
    <p>For this version of the specification, the value of global_offset shall be set to 0.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="num_obu_ids">num_obu_ids<a class="self-link" href="#num_obu_ids"></a></dfn> specifies the number of substream and parameter IDs that this Sync OBU specifies the offset for.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="obu_id">obu_id<a class="self-link" href="#obu_id"></a></dfn> specifies the unique ID associated with the substream or parameter that is being referred to.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="obu_id">obu_id</dfn> specifies the unique ID associated with the substream or parameter that is being referred to.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="obu_data_type">obu_data_type<a class="self-link" href="#obu_data_type"></a></dfn> specifies the type of data that is being referred to.</p>
 <pre class="def">obu_data_type : Type of OBU data
       0       : SUBSTREAM
@@ -2893,8 +2893,13 @@ class codec_config() {
    <p>If reinitialize_decoder = 1, the decoder shall be reinitialized before decoding the audio frames after the gap. If a pre-skip is specified in the relevant Codec Config OBU, it is applicable after reinitializing the decoder.</p>
    <p>For this version of the specification, the value of reinitialize_decoder shall be set to 0. If a value of 1 is seen, the IA sequence shall be rejected as invalid.</p>
    <p><dfn class="css" data-dfn-for="sync_obu()" data-dfn-type="value" data-noexport id="valdef-sync_obu-reserved">reserved<a class="self-link" href="#valdef-sync_obu-reserved"></a></dfn> shall be set to 0. Reserved units are for future use and shall be ignored by an IAMF-OBU parser.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="relative_offset">relative_offset<a class="self-link" href="#relative_offset"></a></dfn> is the offset to position the first audio frame (before trimming) or parameter block with the referenced obu_id that comes after this Sync OBU with respect to the timeline generated before this Sync OBU. If this Sync OBU is the first one, it is the offset from 0. Otherwise, it is the offset from the end of the timeline of Substreams generated from the previous Sync OBU.</p>
-   <p>The offset shall be indicated in the number of ticks at the <a data-link-type="dfn" href="#parameter_rate" id="ref-for-parameter_rate②">parameter_rate</a> specified in the corresponding substream or parameter definition.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="relative_offset">relative_offset</dfn> is the offset to position the first audio frame (before trimming) or parameter block with the referenced obu_id that comes after this Sync OBU with respect to the timeline generated before this Sync OBU. If this Sync OBU is the first one, it is the offset from 0. Otherwise, it is the offset from the end of the timeline of Substreams generated from the previous Sync OBU.</p>
+   <p>The difference, <a data-link-type="dfn" href="#relative_offset" id="ref-for-relative_offset">relative_offset</a>(P) - <a data-link-type="dfn" href="#relative_offset" id="ref-for-relative_offset①">relative_offset</a>(A), shall be the offset to position the first audio sample where the first parameter value of the first parameter block that comes after this Sync OBU is applied to.</p>
+   <ul>
+    <li data-md>
+     <p>Where, <a data-link-type="dfn" href="#relative_offset" id="ref-for-relative_offset②">relative_offset</a>(P) is <a data-link-type="dfn" href="#relative_offset" id="ref-for-relative_offset③">relative_offset</a> of <a data-link-type="dfn" href="#obu_id" id="ref-for-obu_id">obu_id</a> for the parameter and <a data-link-type="dfn" href="#relative_offset" id="ref-for-relative_offset④">relative_offset</a>(A) is <a data-link-type="dfn" href="#relative_offset" id="ref-for-relative_offset⑤">relative_offset</a> of <a data-link-type="dfn" href="#obu_id" id="ref-for-obu_id①">obu_id</a> for the substream which the parameter is applied to.</p>
+   </ul>
+   <p>The offset shall be indicated in the number of ticks at the sample rate specified in the corresponding substream or Codec Config OBU. For IAMF-OPUS, the sample rate is 48000Hz.</p>
    <p>IA encoder and decoder operations related to this field are specified in <a href="#standalone-synchronizing-data-obus">§ 6.2 Synchronizing Data OBUs</a>.</p>
    <h3 class="heading settled" data-level="4.2" id="syntax-detailed"><span class="secno">4.2. </span><span class="content">Detailed OBU Syntax and Semantics</span><a class="self-link" href="#syntax-detailed"></a></h3>
    <h4 class="heading settled" data-level="4.2.1" id="syntax-scalable-channel-layout-config"><span class="secno">4.2.1. </span><span class="content">Scalable Channel Layout Config Syntax and Semantics</span><a class="self-link" href="#syntax-scalable-channel-layout-config"></a></h4>
@@ -4361,7 +4366,7 @@ P2 = (t2, end_point_value),
    <p>where <code>t0 = 0</code> is the segment start time, <code>t2 = T - 1</code> and <code>t1</code> is the control point time given by</p>
 <pre>t1 = round(T * control_point_relative_time) - 1.
 </pre>
-   <p>The values of <code>t0</code>, <code>t1</code> and <code>t2</code> are expressed as ticks at the <a data-link-type="dfn" href="#parameter_rate" id="ref-for-parameter_rate③">parameter_rate</a> given in the associated parameter definition.</p>
+   <p>The values of <code>t0</code>, <code>t1</code> and <code>t2</code> are expressed as ticks at the <a data-link-type="dfn" href="#parameter_rate" id="ref-for-parameter_rate②">parameter_rate</a> given in the associated parameter definition.</p>
    <p>If <a data-link-type="dfn" href="#animation_type" id="ref-for-animation_type③">animation_type</a> is equal to LINEAR, the parameter value is linearly interpolated between <a data-link-type="dfn" href="#start_point_value" id="ref-for-start_point_value①">start_point_value</a> and <a data-link-type="dfn" href="#end_point_value" id="ref-for-end_point_value">end_point_value</a> at a given point in time as:</p>
 <pre>B_linear(a) = (1 - a) * P0 + a * P2,
 0 &lt;= a &lt;= 1,
@@ -4372,7 +4377,7 @@ P2 = (t2, end_point_value),
 0 &lt;= a &lt;= 1.
 </pre>
    <p>where <code>B_quad(a) = (t, y)</code> is a 2D coordinate with parameter value <code>y</code> at time <code>t</code>.</p>
-   <p>To apply the parameter values to the audio samples in the segment without interpolation, the <a data-link-type="dfn" href="#parameter_rate" id="ref-for-parameter_rate④">parameter_rate</a> is first resampled to the audio sample rate to give:</p>
+   <p>To apply the parameter values to the audio samples in the segment without interpolation, the <a data-link-type="dfn" href="#parameter_rate" id="ref-for-parameter_rate③">parameter_rate</a> is first resampled to the audio sample rate to give:</p>
 <pre>n0 = t0 * audio_sample_rate / parameter_rate,
 n1 = t1 * audio_sample_rate / parameter_rate,
 n2 = t2 * audio_sample_rate / parameter_rate.
@@ -6193,8 +6198,7 @@ Recon_Gain for D_Rtb4:
    <ul>
     <li><a href="#ref-for-parameter_rate">4.1.9. Parameter Block OBU Syntax and Semantics</a>
     <li><a href="#ref-for-parameter_rate①">4.1.9.1. Parameter Definition Syntax and Semantics</a>
-    <li><a href="#ref-for-parameter_rate②">4.1.12. Sync OBU Syntax and Semantics</a>
-    <li><a href="#ref-for-parameter_rate③">9.4. Animated Parameters</a> <a href="#ref-for-parameter_rate④">(2)</a>
+    <li><a href="#ref-for-parameter_rate②">9.4. Animated Parameters</a> <a href="#ref-for-parameter_rate③">(2)</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-param_definition_mode" class="dfn-panel" data-for="param_definition_mode" id="infopanel-for-param_definition_mode">
@@ -6264,6 +6268,18 @@ Recon_Gain for D_Rtb4:
    <ul>
     <li><a href="#ref-for-audio_frame">4.1.10. Audio Frame OBU Syntax and Semantics</a> <a href="#ref-for-audio_frame①">(2)</a>
     <li><a href="#ref-for-audio_frame②">4.3.4. IAMF-LPCM Specific</a> <a href="#ref-for-audio_frame③">(2)</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-obu_id" class="dfn-panel" data-for="obu_id" id="infopanel-for-obu_id">
+   <span id="infopaneltitle-for-obu_id" style="display:none">Info about the 'obu_id' definition.</span><b><a href="#obu_id">#obu_id</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-obu_id">4.1.12. Sync OBU Syntax and Semantics</a> <a href="#ref-for-obu_id①">(2)</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-relative_offset" class="dfn-panel" data-for="relative_offset" id="infopanel-for-relative_offset">
+   <span id="infopaneltitle-for-relative_offset" style="display:none">Info about the 'relative_offset' definition.</span><b><a href="#relative_offset">#relative_offset</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-relative_offset">4.1.12. Sync OBU Syntax and Semantics</a> <a href="#ref-for-relative_offset①">(2)</a> <a href="#ref-for-relative_offset②">(3)</a> <a href="#ref-for-relative_offset③">(4)</a> <a href="#ref-for-relative_offset④">(5)</a> <a href="#ref-for-relative_offset⑤">(6)</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-num_layers" class="dfn-panel" data-for="num_layers" id="infopanel-for-num_layers">
