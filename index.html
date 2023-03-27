@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version d9bd89757, updated Thu Mar 23 10:06:53 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="0137d1f95e443f560d4f27b49e803faee81459e5" name="document-revision">
+  <meta content="4fa5092ea8a7e0f33209d3e85e9be8ae5b331422" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -3412,21 +3412,23 @@ class AnimatedParameterData(animation_type) {
    </ul>
    <h4 class="heading settled" data-level="4.3.1" id="iamf-opus-specific"><span class="secno">4.3.1. </span><span class="content">IAMF-OPUS Specific</span><a class="self-link" href="#iamf-opus-specific"></a></h4>
    <p><a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id①">Codec_ID</a> shall be <a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="ref-for-1148b46dff2b25531031f0fd1fb79485③">Opus</a>.</p>
-   <p>Codec_Specific_Info for IAMF-OPUS conforms to <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="ref-for-9c64449471d3c3ade62706e1b26a3baf">ID Header</a> with <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="ref-for-1148b46dff2b25531031f0fd1fb79485④">ChannelMappingFamily</a> = 0 of <a data-link-type="biblio" href="#biblio-rfc7845" title="Ogg Encapsulation for the Opus Audio Codec">[RFC7845]</a> with following constraints:</p>
+   <p><a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config①">Decoder_Config()</a> for IAMF-OPUS conforms to <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="ref-for-9c64449471d3c3ade62706e1b26a3baf">ID Header</a> with <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="ref-for-1148b46dff2b25531031f0fd1fb79485④">ChannelMappingFamily</a> = 0 of <a data-link-type="biblio" href="#biblio-rfc7845" title="Ogg Encapsulation for the Opus Audio Codec">[RFC7845]</a> with following constraints:</p>
    <ul>
     <li data-md>
-     <p><a data-link-type="dfn" href="https://tools.ietf.org/html/rfc8486#" id="ref-for-e6206c888cf9e6d61d1c6238c6ddc859①">Channel Count</a> must be set to 2. <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc8486#" id="ref-for-e6206c888cf9e6d61d1c6238c6ddc859②">Channel Count</a> can be ignored because the real value can be determined from the Audio Element OBU and from the opus packet header.</p>
+     <p><a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="ref-for-9c64449471d3c3ade62706e1b26a3baf①">Magic Signature</a> shall not be present.</p>
     <li data-md>
-     <p><a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="ref-for-9c64449471d3c3ade62706e1b26a3baf①">Pre-skip</a> shall be same as the number of audio samples to be trimmed at the start of substreams.</p>
+     <p><a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="ref-for-9c64449471d3c3ade62706e1b26a3baf②">Output Channel Count</a> must be set to 2. <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="ref-for-9c64449471d3c3ade62706e1b26a3baf③">Output Channel Count</a> can be ignored because the real value can be determined from the Audio Element OBU and from the opus packet header.</p>
     <li data-md>
-     <p><a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="ref-for-9c64449471d3c3ade62706e1b26a3baf②">Output Gain</a> shall not be used. In other words, it shall be set to 0dB.</p>
+     <p><a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="ref-for-9c64449471d3c3ade62706e1b26a3baf④">Pre-skip</a> shall be same as the number of audio samples to be trimmed at the start of substreams.</p>
     <li data-md>
-     <p>The byte order of each field in <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="ref-for-9c64449471d3c3ade62706e1b26a3baf③">ID Header</a> is converted to big endian.</p>
+     <p><a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="ref-for-9c64449471d3c3ade62706e1b26a3baf⑤">Output Gain</a> shall not be used. In other words, it shall be set to 0dB.</p>
+    <li data-md>
+     <p>The byte order of each field in <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7845#" id="ref-for-9c64449471d3c3ade62706e1b26a3baf⑥">ID Header</a> is converted to big endian.</p>
    </ul>
    <p>Substream format is <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6716#" id="ref-for-1af30f726bd2cf5a930fcae7941981e8①">opus packet</a> of <a data-link-type="biblio" href="#biblio-rfc6716" title="Definition of the Opus Audio Codec">[RFC6716]</a> which contains only one single frame of mono or stereo channels and which has non-delimiting frame structure.</p>
    <h4 class="heading settled" data-level="4.3.2" id="iamf-aac-lc-specific"><span class="secno">4.3.2. </span><span class="content">IAMF-AAC-LC Specific</span><a class="self-link" href="#iamf-aac-lc-specific"></a></h4>
    <p><a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id②">Codec_ID</a> shall be <a class="property css" data-link-type="property" href="https://www.iso.org/standard/79110.html#" id="ref-for-48e47e0f5189469fa73e92a00c751a02①">mp4a</a>.</p>
-   <p><a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config①">Decoder_Config()</a> for IAMF-AAC-LC is <a data-link-type="dfn" href="https://www.iso.org/standard/55688.html#" id="ref-for-9b6ea8be45b8366f585149d9f52a90bf①">DecoderConfigDescriptor()</a> of <a data-link-type="biblio" href="#biblio-mp4-systems" title="Information technology — Coding of audio-visual objects — Part 1: Systems">[MP4-Systems]</a>, which is a subset of <a data-link-type="dfn" href="https://www.iso.org/standard/79110.html#" id="ref-for-48e47e0f5189469fa73e92a00c751a02②">ESDBox</a> for <a data-link-type="biblio" href="#biblio-mp4-audio" title="Information technology — Coding of audio-visual objects — Part 3: Audio">[MP4-Audio]</a>, with following constraints:</p>
+   <p><a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config②">Decoder_Config()</a> for IAMF-AAC-LC is <a data-link-type="dfn" href="https://www.iso.org/standard/55688.html#" id="ref-for-9b6ea8be45b8366f585149d9f52a90bf①">DecoderConfigDescriptor()</a> of <a data-link-type="biblio" href="#biblio-mp4-systems" title="Information technology — Coding of audio-visual objects — Part 1: Systems">[MP4-Systems]</a>, which is a subset of <a data-link-type="dfn" href="https://www.iso.org/standard/79110.html#" id="ref-for-48e47e0f5189469fa73e92a00c751a02②">ESDBox</a> for <a data-link-type="biblio" href="#biblio-mp4-audio" title="Information technology — Coding of audio-visual objects — Part 3: Audio">[MP4-Audio]</a>, with following constraints:</p>
    <ul>
     <li data-md>
      <p><a data-link-type="dfn" href="https://www.iso.org/standard/55688.html#" id="ref-for-9b6ea8be45b8366f585149d9f52a90bf②">objectTypeIndication</a> = 0x40</p>
@@ -3456,11 +3458,11 @@ class AnimatedParameterData(animation_type) {
    <p>Substream format is one single <a data-link-type="dfn" href="https://www.iso.org/standard/43345.html#" id="ref-for-eac87231ca66dad4375d600c066d991c①">raw_data_block()</a> of <a data-link-type="biblio" href="#biblio-aac" title="Information technology — Generic coding of moving pictures and associated audio information — Part 7: Advanced Audio Coding (AAC)">[AAC]</a> which contains only one single frame of mono or stereo channels.</p>
    <h4 class="heading settled" data-level="4.3.3" id="iamf-flac-specific"><span class="secno">4.3.3. </span><span class="content">IAMF-FLAC Specific</span><a class="self-link" href="#iamf-flac-specific"></a></h4>
    <p><a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id③">Codec_ID</a> shall be <a class="property css" data-link-type="property" href="https://xiph.org/flac/format.html" id="ref-for-c568d8f4de8d80029804bf1eecb28b4c②">fLaC</a>, the FLAC stream marker in ASCII, meaning byte 0 of the stream is 0x66, followed by 0x4C 0x61 0x43.</p>
-   <p><a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config②">Decoder_Config()</a> for IAMF-FLAC is <a data-link-type="dfn" href="https://xiph.org/flac/format.html" id="ref-for-c568d8f4de8d80029804bf1eecb28b4c③">METADATA_BLOCK</a> of <a data-link-type="biblio" href="#biblio-flac" title="Free Lossless Audio Codec">[FLAC]</a>.</p>
+   <p><a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config③">Decoder_Config()</a> for IAMF-FLAC is <a data-link-type="dfn" href="https://xiph.org/flac/format.html" id="ref-for-c568d8f4de8d80029804bf1eecb28b4c③">METADATA_BLOCK</a> of <a data-link-type="biblio" href="#biblio-flac" title="Free Lossless Audio Codec">[FLAC]</a>.</p>
    <p>Substream format is <a data-link-type="dfn" href="https://xiph.org/flac/format.html" id="ref-for-c568d8f4de8d80029804bf1eecb28b4c④">FRAME</a> of <a data-link-type="biblio" href="#biblio-flac" title="Free Lossless Audio Codec">[FLAC]</a>, which is composed of <a data-link-type="dfn" href="https://xiph.org/flac/format.html" id="ref-for-c568d8f4de8d80029804bf1eecb28b4c⑤">FRAME_HEADER</a>, followed by <a data-link-type="dfn" href="https://xiph.org/flac/format.html" id="ref-for-c568d8f4de8d80029804bf1eecb28b4c⑥">SUBFRAME</a>(s) (one <a data-link-type="dfn" href="https://xiph.org/flac/format.html" id="ref-for-c568d8f4de8d80029804bf1eecb28b4c⑦">SUBFRAME</a> per channel) and followed by <a data-link-type="dfn" href="https://xiph.org/flac/format.html" id="ref-for-c568d8f4de8d80029804bf1eecb28b4c⑧">FRAME_FOOTER</a>.</p>
    <h4 class="heading settled" data-level="4.3.4" id="iamf-lpcm-specific"><span class="secno">4.3.4. </span><span class="content">IAMF-LPCM Specific</span><a class="self-link" href="#iamf-lpcm-specific"></a></h4>
    <p><a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id④">Codec_ID</a> shall be <a class="property css" data-link-type="property" href="https://www.iso.org/standard/77752.html#" id="ref-for-41c4b6a338908de4fcad02babe72a382①">ipcm</a>.</p>
-   <p><a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config③">Decoder_Config()</a> for IAMF-LPCM is as follows:</p>
+   <p><a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config④">Decoder_Config()</a> for IAMF-LPCM is as follows:</p>
 <pre>class decoder_config(ipcm) {
   unsigned int (8) sample_format_flags;
   unsigned int (8) sample_size;
@@ -4048,7 +4050,7 @@ Quantity:  One.
    <p>For a given loudspeaker layout (i.e. CL #i) among the list of <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout⑧">loudspeaker_layout</a> in scalable channel layout config,</p>
    <ul>
     <li data-md>
-     <p>OBU Parser shall get substreams for ChannelGroup #1 ~ ChannelGroup #i and pass them to Codec decoder with <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config④">Decoder_Config()</a>.</p>
+     <p>OBU Parser shall get substreams for ChannelGroup #1 ~ ChannelGroup #i and pass them to Codec decoder with <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config⑤">Decoder_Config()</a>.</p>
     <li data-md>
      <p>Codec decoder shall output decoded channels (PCM) in the transmission order.</p>
      <ul>
@@ -4695,7 +4697,7 @@ gamma = n0 - n.
      <p>OBU packetizer generates descriptor OBUs which consists of one Magic Code OBU, one Codec Config OBU, one Audio Element OBU and zero or more Mix Presentation OBU.</p>
      <ul>
       <li data-md>
-       <p>Codec Config OBU is generated based on <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config⑤">decoder_config()</a>.</p>
+       <p>Codec Config OBU is generated based on <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config⑥">decoder_config()</a>.</p>
      </ul>
     <li data-md>
      <p>OBU packetizer generates zero or more parameter block OBUs for each frame which contains demixing_info_parameter_data and recon_gain_info_parameter_data.</p>
@@ -5752,26 +5754,37 @@ Recon_Gain for D_Rtb4:
   <aside aria-labelledby="infopaneltitle-for-9c64449471d3c3ade62706e1b26a3baf" class="dfn-panel" data-for="9c64449471d3c3ade62706e1b26a3baf" id="infopanel-for-9c64449471d3c3ade62706e1b26a3baf">
    <span id="infopaneltitle-for-9c64449471d3c3ade62706e1b26a3baf" style="display:none">Info about the 'id header' external reference.</span><a href="https://tools.ietf.org/html/rfc7845#">https://tools.ietf.org/html/rfc7845#</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">4.3.1. IAMF-OPUS Specific</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(2)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(3)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(4)</a>
+    <li><a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">4.3.1. IAMF-OPUS Specific</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(2)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(3)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(4)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(5)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(6)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(7)</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-b23f6ac6d4d99b8b4a80026b46ddcedb" class="dfn-panel" data-for="b23f6ac6d4d99b8b4a80026b46ddcedb" id="infopanel-for-b23f6ac6d4d99b8b4a80026b46ddcedb">
+   <span id="infopaneltitle-for-b23f6ac6d4d99b8b4a80026b46ddcedb" style="display:none">Info about the 'magic signature' external reference.</span><a href="https://tools.ietf.org/html/rfc7845#">https://tools.ietf.org/html/rfc7845#</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">4.3.1. IAMF-OPUS Specific</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(2)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(3)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(4)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(5)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(6)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(7)</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-324a5524fae6ed2e0bf3f143e5bbf623" class="dfn-panel" data-for="324a5524fae6ed2e0bf3f143e5bbf623" id="infopanel-for-324a5524fae6ed2e0bf3f143e5bbf623">
+   <span id="infopaneltitle-for-324a5524fae6ed2e0bf3f143e5bbf623" style="display:none">Info about the 'output channel count' external reference.</span><a href="https://tools.ietf.org/html/rfc7845#">https://tools.ietf.org/html/rfc7845#</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">4.3.1. IAMF-OPUS Specific</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(2)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(3)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(4)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(5)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(6)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(7)</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-d52f528bf16da2c6410d5c21732ab0e1" class="dfn-panel" data-for="d52f528bf16da2c6410d5c21732ab0e1" id="infopanel-for-d52f528bf16da2c6410d5c21732ab0e1">
    <span id="infopaneltitle-for-d52f528bf16da2c6410d5c21732ab0e1" style="display:none">Info about the 'output gain' external reference.</span><a href="https://tools.ietf.org/html/rfc7845#">https://tools.ietf.org/html/rfc7845#</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">4.3.1. IAMF-OPUS Specific</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(2)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(3)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(4)</a>
+    <li><a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">4.3.1. IAMF-OPUS Specific</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(2)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(3)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(4)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(5)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(6)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(7)</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-2f218c31268ef7a2b712a9ef64927c5e" class="dfn-panel" data-for="2f218c31268ef7a2b712a9ef64927c5e" id="infopanel-for-2f218c31268ef7a2b712a9ef64927c5e">
    <span id="infopaneltitle-for-2f218c31268ef7a2b712a9ef64927c5e" style="display:none">Info about the 'pre-skip' external reference.</span><a href="https://tools.ietf.org/html/rfc7845#">https://tools.ietf.org/html/rfc7845#</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">4.3.1. IAMF-OPUS Specific</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(2)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(3)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(4)</a>
+    <li><a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">4.3.1. IAMF-OPUS Specific</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(2)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(3)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(4)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(5)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(6)</a> <a href="#ref-for-9c64449471d3c3ade62706e1b26a3baf">(7)</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-e6206c888cf9e6d61d1c6238c6ddc859" class="dfn-panel" data-for="e6206c888cf9e6d61d1c6238c6ddc859" id="infopanel-for-e6206c888cf9e6d61d1c6238c6ddc859">
    <span id="infopaneltitle-for-e6206c888cf9e6d61d1c6238c6ddc859" style="display:none">Info about the 'channel count' external reference.</span><a href="https://tools.ietf.org/html/rfc8486#">https://tools.ietf.org/html/rfc8486#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-e6206c888cf9e6d61d1c6238c6ddc859">4.2.2. Ambisonics Config Syntax and Semantics</a>
-    <li><a href="#ref-for-e6206c888cf9e6d61d1c6238c6ddc859">4.3.1. IAMF-OPUS Specific</a> <a href="#ref-for-e6206c888cf9e6d61d1c6238c6ddc859">(2)</a>
    </ul>
   </aside>
   <h3 class="no-num no-ref heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
@@ -5882,6 +5895,8 @@ Recon_Gain for D_Rtb4:
     <a data-link-type="biblio">[RFC7845]</a> defines the following terms:
     <ul>
      <li><span class="dfn-paneled" id="9c64449471d3c3ade62706e1b26a3baf">id header</span>
+     <li><span class="dfn-paneled" id="b23f6ac6d4d99b8b4a80026b46ddcedb">magic signature</span>
+     <li><span class="dfn-paneled" id="324a5524fae6ed2e0bf3f143e5bbf623">output channel count</span>
      <li><span class="dfn-paneled" id="d52f528bf16da2c6410d5c21732ab0e1">output gain</span>
      <li><span class="dfn-paneled" id="2f218c31268ef7a2b712a9ef64927c5e">pre-skip</span>
     </ul>
@@ -6052,11 +6067,12 @@ Recon_Gain for D_Rtb4:
    <span id="infopaneltitle-for-decoder_config" style="display:none">Info about the 'decoder_config()' definition.</span><b><a href="#decoder_config">#decoder_config</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-decoder_config">4.3. Codec Specific</a>
-    <li><a href="#ref-for-decoder_config①">4.3.2. IAMF-AAC-LC Specific</a>
-    <li><a href="#ref-for-decoder_config②">4.3.3. IAMF-FLAC Specific</a>
-    <li><a href="#ref-for-decoder_config③">4.3.4. IAMF-LPCM Specific</a>
-    <li><a href="#ref-for-decoder_config④">9.2. Scalable Channel Audio decoding</a>
-    <li><a href="#ref-for-decoder_config⑤">10.2. Scalable Channel Audio Encoding</a>
+    <li><a href="#ref-for-decoder_config①">4.3.1. IAMF-OPUS Specific</a>
+    <li><a href="#ref-for-decoder_config②">4.3.2. IAMF-AAC-LC Specific</a>
+    <li><a href="#ref-for-decoder_config③">4.3.3. IAMF-FLAC Specific</a>
+    <li><a href="#ref-for-decoder_config④">4.3.4. IAMF-LPCM Specific</a>
+    <li><a href="#ref-for-decoder_config⑤">9.2. Scalable Channel Audio decoding</a>
+    <li><a href="#ref-for-decoder_config⑥">10.2. Scalable Channel Audio Encoding</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-audio_element_id" class="dfn-panel" data-for="audio_element_id" id="infopanel-for-audio_element_id">
