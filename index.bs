@@ -1888,21 +1888,22 @@ During encapsulation process, OBUs of IA sequences are encapsulated into [[!ISOB
 
 - Movie Header and Edit
 	- Calculate the number of temporal units in the IA sequences.
-	- Calculate the number of audio samples to be trimmed at the start of the IA sequences and calculate the number of the audio samples to be trimmed at the end of the IA sequences.
-	- Reflect the calculated numbers to 'mvhd' to indicate the duration after trimming.
+	- Take the number of trimmed samples from the IA sequence and converting it to the sample rate used by the 'elst' boxes.
+	- Reflect the converted numbers to 'mvhd' to indicate the duration after trimming.
 	- If there is audio samples to be trimmed at the start or at the end, then 'edts' and 'elst' boxes shall be present to reflect the the number of audio samples to be trimmed at the start of the IA sequence (i.e [=media_time=]) and [=edit_duration=].
 - Sample Entry
 	- The ith set of descriptor OBUs which is not a redundant copy of the previous descriptor OBUs (i.e. the first descriptor OBUs is regarded as non-redundant copy regardless of its [=obu_redundant_copy=]), specified in [[#standalone-descriptor-obus]], and the Sync OBU that immediately follows them are moved to the ith [=IASampleEntry=]. All descriptor OBUs in the IA sequences are then discarded from the IA sequence. 
 - Decoding Time to Sample
 	- The [=num_samples_per_frame=] value in the Codec Config OBU, which indicates the duration of each sample, is reflected to 'stts' box except the last sample. 
-	- The duration of the last sample may be the duration after trimming or before trimming. 
-	- The duration of teh last sample may not be same as [=num_samples_per_frame=] even it is the duration before trimming. In this case, it is calcuated from Audio Frame OBU of the last temporal unit.
+	- The duration of the last sample is duration including samples trimmed at the beginning but excluding samples trimmed at the end. 
+	- The duration of the last sample may not be same as [=num_samples_per_frame=]. In this case, it is calcuated from Audio Frame OBU of the last temporal unit.
 - Sample Group
 	- The [=roll_distance=] value in the Codec Config OBU is copied to [=AudioRollRecoveryEntry=] with the [=grouping_type=] = 'roll'.
 - Sample
 	- Temporal Delimiter OBU: shall be discarded if present.	
-	- Each temporal unit shall be stored as one sample data without gap among OBUs.
-	
+		- Temporal Unit that has no OBUs is discarded
+	- Temporal units shall be placed in consecutive samples in order.
+		
 <center><img src="images/IAMF Encapsulation Guideline.png" style="width:100%; height:auto;"></center>
 <center><figcaption>IAMF Encapsulation Scheme</figcaption></center>
 
@@ -2039,7 +2040,8 @@ When IAMF parser feeds the reconstructed IA sequences to IAMF-OBU parser, descri
 During decapsulation process, IAMF file is decapsulated into IA sequences which conform to [[#obu-syntax]] as follows:
 - The ith IA sequence is reconstructed as follows:
 	- Step1: Take the ith descriptor OBUs and Sync OBU from the ith IASampleEntry.
-	- Step2: Take jth sample as it is and add Temporal Delimiter OBU in front of the jth sample if necessary.
+	- Step2: Take jth sample as it is and add Temporal Delimiter OBU in front of the jth sample.
+		- Every Temporal Unit shall have Temporal Delimiter OBU or no Temporal Unit shall have Temporal Delimiter OBU.
 	- Step3: Place the ith descriptor OBUs, followed by Sync OBU, and followed by Temporal Units in order (j = i1, i2, …, im) without gap, to reconstruct the ith IA sequence.
 - Place IA sequences in order (i = 1, 2, 3, ...) to reconstruct the IA sequences.
 
