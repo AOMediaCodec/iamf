@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version d9bd89757, updated Thu Mar 23 10:06:53 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="4fa5092ea8a7e0f33209d3e85e9be8ae5b331422" name="document-revision">
+  <meta content="1e2895b0b6b8febcb0be4cf72fb35b20796cae07" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2466,7 +2466,7 @@ class Bar {
   9~30  : OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21
    31   : OBU_IA_Magic_Code
 </pre>
-   <p><dfn data-dfn-type="dfn" data-noexport id="obu_redundant_copy">obu_redundant_copy<a class="self-link" href="#obu_redundant_copy"></a></dfn> indicates whether this OBU is a redundant copy of the previous OBU in the IA sequence with the same obu_type. A value of 1 indicates that it is a redundant copy, while a value of 0 indicates that it is not.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="obu_redundant_copy">obu_redundant_copy</dfn> indicates whether this OBU is a redundant copy of the previous OBU in the IA sequence with the same obu_type. A value of 1 indicates that it is a redundant copy, while a value of 0 indicates that it is not.</p>
    <p>It shall always be set to 0 for the following obu_type values:</p>
    <ul>
     <li data-md>
@@ -3768,40 +3768,59 @@ for (i = 0: i &lt; M(N); i++) {
    <h4 class="heading settled" data-level="7.2.1" id="isobmff-singletrack-iasequence"><span class="secno">7.2.1. </span><span class="content">Requirement of IA sequence</span><a class="self-link" href="#isobmff-singletrack-iasequence"></a></h4>
    <p>IA sequence shall comply with the bitstream which is specified in <a href="#profiles-simple">§ 5.1 IA Simple Profile</a> or <a href="#profiles-base">§ 5.2 IA Base Profile</a> for encapsulation of ISOBMFF with single track.</p>
    <h4 class="heading settled" data-level="7.2.2" id="isobmff-singletrack-basicencapsulationscheme"><span class="secno">7.2.2. </span><span class="content">Encapsulation Scheme</span><a class="self-link" href="#isobmff-singletrack-basicencapsulationscheme"></a></h4>
-   <p>During encapsulation process, OBUs of IA sequence are encapsulated into <a data-link-type="biblio" href="#biblio-isobmff" title="Information technology — Coding of audio-visual objects — Part 12: ISO Base Media File Format">[ISOBMFF]</a> as follows:</p>
+   <p>During encapsulation process, OBUs of IA sequences are encapsulated into <a data-link-type="biblio" href="#biblio-isobmff" title="Information technology — Coding of audio-visual objects — Part 12: ISO Base Media File Format">[ISOBMFF]</a> as follows:</p>
    <ul>
     <li data-md>
-     <p>Each set of descriptor OBUs, specified in <a href="#standalone-descriptor-obus">§ 6.1.1 Descriptor OBUs</a>, and the Sync OBU that immediately follows them are moved to one <a data-link-type="dfn" href="#iasampleentry" id="ref-for-iasampleentry①">IASampleEntry</a>. The descriptor OBUs are then discarded from the IA sequence. In addition,</p>
+     <p>Movie Header and Edit</p>
      <ul>
       <li data-md>
-       <p>The <a data-link-type="dfn" href="#num_samples_per_frame" id="ref-for-num_samples_per_frame">num_samples_per_frame</a> field in the Codec Config OBU is copied to <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3②">stts</a>.</p>
+       <p>Calculate the number of temporal units in the IA sequences.</p>
       <li data-md>
-       <p>The <a data-link-type="dfn" href="#roll_distance" id="ref-for-roll_distance">roll_distance</a> field in the Codec Config OBU is copied to <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3③">AudioRollRecoveryEntry</a> with the <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3④">grouping_type</a> <a class="property css" data-link-type="property">rol1</a>.</p>
+       <p>Take the number of trimmed samples from the IA sequence and converting it to the sample rate used by the <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3②">elst</a> boxes.</p>
+      <li data-md>
+       <p>Reflect the converted numbers to <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3③">mvhd</a> to indicate the duration after trimming.</p>
+      <li data-md>
+       <p>If there is audio samples to be trimmed at the start or at the end, then <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3④">edts</a> and <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3⑤">elst</a> boxes shall be present to reflect the the number of audio samples to be trimmed at the start of the IA sequence (i.e <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3⑥">media_time</a>) and <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3⑦">edit_duration</a>.</p>
      </ul>
     <li data-md>
-     <p>Each temporal unit:</p>
+     <p>Sample Entry</p>
+     <ul>
+      <li data-md>
+       <p>The ith set of descriptor OBUs which is not a redundant copy of the previous descriptor OBUs (i.e. the first descriptor OBUs is regarded as non-redundant copy regardless of its <a data-link-type="dfn" href="#obu_redundant_copy" id="ref-for-obu_redundant_copy">obu_redundant_copy</a>), specified in <a href="#standalone-descriptor-obus">§ 6.1.1 Descriptor OBUs</a>, and the Sync OBU that immediately follows them are moved to the ith <a data-link-type="dfn" href="#iasampleentry" id="ref-for-iasampleentry①">IASampleEntry</a>. All descriptor OBUs in the IA sequences are then discarded from the IA sequence.</p>
+     </ul>
+    <li data-md>
+     <p>Decoding Time to Sample</p>
+     <ul>
+      <li data-md>
+       <p>The <a data-link-type="dfn" href="#num_samples_per_frame" id="ref-for-num_samples_per_frame">num_samples_per_frame</a> value in the Codec Config OBU, which indicates the duration of each sample, is reflected to <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3⑧">stts</a> box except the last sample.</p>
+      <li data-md>
+       <p>The duration of the last sample is duration including samples trimmed at the beginning but excluding samples trimmed at the end.</p>
+      <li data-md>
+       <p>The duration of the last sample may not be same as <a data-link-type="dfn" href="#num_samples_per_frame" id="ref-for-num_samples_per_frame①">num_samples_per_frame</a>. In this case, it is calcuated from Audio Frame OBU of the last temporal unit.</p>
+     </ul>
+    <li data-md>
+     <p>Sample Group</p>
+     <ul>
+      <li data-md>
+       <p>The <a data-link-type="dfn" href="#roll_distance" id="ref-for-roll_distance">roll_distance</a> value in the Codec Config OBU is copied to <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3⑨">AudioRollRecoveryEntry</a> with the <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3①⓪">grouping_type</a> = <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3①①">roll</a>.</p>
+     </ul>
+    <li data-md>
+     <p>Sample</p>
      <ul>
       <li data-md>
        <p>Temporal Delimiter OBU: shall be discarded if present.</p>
+       <ul>
+        <li data-md>
+         <p>Temporal Unit that has no OBUs is discarded</p>
+       </ul>
       <li data-md>
-       <p>Remained OBUs of each temporal unit shall be stored as one sample data without gap among OBUs.</p>
-     </ul>
-    <li data-md>
-     <p>Audio Frame OBUs:</p>
-     <ul>
-      <li data-md>
-       <p>Select one substream.</p>
-      <li data-md>
-       <p>If <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag②">obu_trimming_status_flag</a> of the first Audio Frame OBU of the substream is set to 1, keep parsing following Audio Frame OBUs of the substream until meets the Audio Frame OBU having <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag③">obu_trimming_status_flag</a> =  0 and sum <a data-link-type="dfn" href="#num_samples_to_trim_at_start" id="ref-for-num_samples_to_trim_at_start②">num_samples_to_trim_at_start</a>. Then reflect the result of the summation to <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3⑤">edts</a>.</p>
-      <li data-md>
-       <p>If <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag④">obu_trimming_status_flag</a> of the last Audio Frame OBU of the substream is set to 1, then reflect num_samples_to_trim_at_end to 'stts.</p>
+       <p>Temporal units shall be placed in consecutive samples in order.</p>
      </ul>
    </ul>
-   <center><img height="243" src="images/IAC Encapsulation Guideline.png" style="width:100%; height:auto;" width="1653"></center>
+   <center><img height="252" src="images/IAMF Encapsulation Guideline.png" style="width:100%; height:auto;" width="1398"></center>
    <center>
     <figcaption>IAMF Encapsulation Scheme</figcaption>
    </center>
-   <p class="issue" id="issue-08e4f894"><a class="self-link" href="#issue-08e4f894"></a> TODO: update the IAMF Encapsulation Scheme figure.</p>
    <h4 class="heading settled" data-level="7.2.3" id="iasampleentry-section"><span class="secno">7.2.3. </span><span class="content">IA Sample Entry</span><a class="self-link" href="#iasampleentry-section"></a></h4>
 <pre class="def">Sample Entry Type: <dfn data-dfn-for="IASampleEntry" data-dfn-type="value" data-export id="valdef-iasampleentry-iamf">iamf<a class="self-link" href="#valdef-iasampleentry-iamf"></a></dfn>
 Container:         Sample Description Box ('stsd')
@@ -3814,7 +3833,7 @@ Quantity:          One or more.
   IA_Descriptor descriptor;
 }
 </pre>
-   <p>The <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3⑥">channelcount</a> and <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3⑦">samplerate</a> fields of AudioSampleEntry are unused.</p>
+   <p>The <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3①②">channelcount</a> and <a data-link-type="dfn" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3①③">samplerate</a> fields of AudioSampleEntry are unused.</p>
    <p>None of AudioSampleEntry’s optional boxes shall be present.</p>
    <p><b>Semantics</b></p>
    <p><dfn data-dfn-type="dfn" data-noexport id="descriptor">descriptor<a class="self-link" href="#descriptor"></a></dfn> is the IA_Descriptor box in this stream.</p>
@@ -3847,11 +3866,12 @@ Quantity:  One.
    <p><dfn class="css" data-dfn-for="IA_Descriptor" data-dfn-type="value" data-noexport id="valdef-ia_descriptor-mix_presentation_obu">mix_presentation_obu()<a class="self-link" href="#valdef-ia_descriptor-mix_presentation_obu"></a></dfn> is the <code>j</code>-th <a data-link-type="dfn">mix_presentation_obu()</a> in this set of descriptor OBUs.</p>
    <p><dfn class="css" data-dfn-for="IA_Descriptor" data-dfn-type="value" data-noexport id="valdef-ia_descriptor-sync_obu">sync_obu()<a class="self-link" href="#valdef-ia_descriptor-sync_obu"></a></dfn> is the <a data-link-type="dfn">sync_obu()</a> that immediately follows this set of descriptor OBUs.</p>
    <h4 class="heading settled" data-level="7.2.5" id="iasampleformat"><span class="secno">7.2.5. </span><span class="content">IA Sample Format</span><a class="self-link" href="#iasampleformat"></a></h4>
-   <p>For tracks using the <a data-link-type="dfn" href="#iasampleentry" id="ref-for-iasampleentry②">IASampleEntry</a>, an <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="ia-sample">IA Sample</dfn> has the following constraints:</p>
+   <p>For tracks using the <a data-link-type="dfn" href="#iasampleentry" id="ref-for-iasampleentry②">IASampleEntry</a>(s), an <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="ia-sample">IA Sample</dfn> has the following constraints:</p>
    <ul>
     <li data-md>
-     <p>The one sample data shall be the remained OBUs of each temporal unit after processing of <a href="#isobmff-singletrack-basicencapsulationscheme">§ 7.2.2 Encapsulation Scheme</a>.</p>
+     <p>The one sample data shall be one temporal unit after removing Temporal Delimiter OBU if present.</p>
    </ul>
+   <p>A temporal unit consists of all the data OBUs that are associated with a specific, distinct time instant. It consists of zero or one Temporal Delimiter OBU, and followed by one or more Audio Frame OBUs and zero or more Parameter Block OBUs.</p>
    <h3 class="heading settled" data-level="7.3" id="codecsparameter"><span class="secno">7.3. </span><span class="content">Codecs Parameter String</span><a class="self-link" href="#codecsparameter"></a></h3>
     DASH and other applications require defined values for the <a class="property css" data-link-type="property" href="https://tools.ietf.org/html/rfc6381#" id="ref-for-df8441526d3bbb5086bd93c1fae005b3">Codecs</a> parameter specified in <a data-link-type="biblio" href="#biblio-rfc6381" title="The &apos;Codecs&apos; and &apos;Profiles&apos; Parameters for &quot;Bucket&quot; Media Types">[RFC6381]</a> for ISO Media tracks. The codecs parameter string for the AOM IA codec shall be: 
    <ul>
@@ -3914,39 +3934,24 @@ Quantity:  One.
    <h3 class="heading settled" data-level="8.1" id="isobmff-decapsulation-singletrack"><span class="secno">8.1. </span><span class="content">ISOBMFF IAMF Decapsulation with single track</span><a class="self-link" href="#isobmff-decapsulation-singletrack"></a></h3>
    <p>This section provides a guideline for IAMF parser to reconstruct IA sequences from IAMF file.</p>
    <p>When IAMF parser feeds the reconstructed IA sequences to IAMF-OBU parser, descriptor OBUs shall be placed at the first and followed by Temporal Units.</p>
-   <p>Below figure shows the mirroring process of the encapsulation scheme of IA sequence specified in <a href="#isobmff">§ 7 ISOBMFF IAMF Encapsulation</a>.</p>
-   <center><img height="294" src="images/IAC Decapsulation Guideline.png" style="width:100%; height:auto;" width="1652"></center>
-   <center>
-    <figcaption>IAMF Decapsulation Guideline</figcaption>
-   </center>
    <p>During decapsulation process, IAMF file is decapsulated into IA sequences which conform to <a href="#obu-syntax">§ 4 Open Bitstream Unit (OBU) Syntax and Semantics</a> as follows:</p>
    <ul>
     <li data-md>
-     <p>Step1: Reconstruction of descriptor OBUs (one Magic Code OBU, one Codec Config OBU, one or more Audio Element OBUs and one or more Mix Presentation OBUs) for the ith IA sequence.</p>
+     <p>The ith IA sequence is reconstructed as follows:</p>
      <ul>
       <li data-md>
-       <p>Magic Code OBU: take the magic_code_obu in the ith AudioSampleEntry(<a class="property css" data-link-type="property">iamf</a>).</p>
+       <p>Step1: Take the ith descriptor OBUs and Sync OBU from the ith IASampleEntry.</p>
       <li data-md>
-       <p>Codec Config OBU: take the codec_config_obu in the ith AudioSampleEntry(<a class="property css" data-link-type="property">iamf</a>).</p>
+       <p>Step2: Take jth sample as it is and add Temporal Delimiter OBU in front of the jth sample.</p>
+       <ul>
+        <li data-md>
+         <p>Every Temporal Unit shall have Temporal Delimiter OBU or no Temporal Unit shall have Temporal Delimiter OBU.</p>
+       </ul>
       <li data-md>
-       <p>Audio Element OBU(s): take the audio_element_obus in the ith AudioSampleEntry(<a class="property css" data-link-type="property">iamf</a>).</p>
-      <li data-md>
-       <p>Mix Presentation OBU(s): take the mix_presentation_obus in the ith AudioSampleEntry(<a class="property css" data-link-type="property">iamf</a>).</p>
+       <p>Step3: Place the ith descriptor OBUs, followed by Sync OBU, and followed by Temporal Units in order (j = i1, i2, …, im) without gap, to reconstruct the ith IA sequence.</p>
      </ul>
     <li data-md>
-     <p>Step2: Reconstruction of Sync_OBU for the ith IA sequence.</p>
-     <ul>
-      <li data-md>
-       <p>Take the sync_obu in the ith AudioSampleEntry(<a class="property css" data-link-type="property">iamf</a>).</p>
-     </ul>
-    <li data-md>
-     <p>Step3: Reconstructing of the jth Temporal Unit of the ith IA sequence (j = i1, i2, …, im)</p>
-     <ul>
-      <li data-md>
-       <p>Take jth sample as it is.</p>
-     </ul>
-    <li data-md>
-     <p>Step4: Place descriptor OBUs, followed by Sync OBU, and followed by Temporal Units in order (j = i1, i2, …, im) without gap, to reconstruct the ith IA sequence.</p>
+     <p>Place IA sequences in order (i = 1, 2, 3, ...) to reconstruct the IA sequences.</p>
    </ul>
    <h4 class="heading settled" data-level="8.1.1" id="isobmff-decapsulation-singletrack-trimming"><span class="secno">8.1.1. </span><span class="content">Recommended handling of Trimming Information</span><a class="self-link" href="#isobmff-decapsulation-singletrack-trimming"></a></h4>
    <p>This section recommends how to handle trimming information of IAMF-ISOBMFF file.</p>
@@ -5465,7 +5470,7 @@ Recon_Gain for D_Rtb4:
    <span id="infopaneltitle-for-9101e41bc1e2a010b149c5b0a70a83c3" style="display:none">Info about the 'audiorollrecoveryentry' external reference.</span><a href="https://www.iso.org/standard/68960.html#">https://www.iso.org/standard/68960.html#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
-    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(5)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(6)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(7)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(8)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(9)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(10)</a>
     <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.3. IA Sample Entry</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
    </ul>
   </aside>
@@ -5473,7 +5478,15 @@ Recon_Gain for D_Rtb4:
    <span id="infopaneltitle-for-74c2884bef95a9e95eb117bba8ad6e2f" style="display:none">Info about the 'channelcount' external reference.</span><a href="https://www.iso.org/standard/68960.html#">https://www.iso.org/standard/68960.html#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
-    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(5)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(6)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(7)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(8)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(9)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(10)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.3. IA Sample Entry</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-5b125c212851c47910b4743eec738e1e" class="dfn-panel" data-for="5b125c212851c47910b4743eec738e1e" id="infopanel-for-5b125c212851c47910b4743eec738e1e">
+   <span id="infopaneltitle-for-5b125c212851c47910b4743eec738e1e" style="display:none">Info about the 'edit_duration' external reference.</span><a href="https://www.iso.org/standard/68960.html#">https://www.iso.org/standard/68960.html#</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(5)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(6)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(7)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(8)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(9)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(10)</a>
     <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.3. IA Sample Entry</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
    </ul>
   </aside>
@@ -5481,7 +5494,15 @@ Recon_Gain for D_Rtb4:
    <span id="infopaneltitle-for-71b4d0c6c7ea7103e8c7cf480743851a" style="display:none">Info about the 'edts' external reference.</span><a href="https://www.iso.org/standard/68960.html#">https://www.iso.org/standard/68960.html#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
-    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(5)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(6)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(7)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(8)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(9)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(10)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.3. IA Sample Entry</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-e833bff9958f1373a4d3b9cd1ca3c3ae" class="dfn-panel" data-for="e833bff9958f1373a4d3b9cd1ca3c3ae" id="infopanel-for-e833bff9958f1373a4d3b9cd1ca3c3ae">
+   <span id="infopaneltitle-for-e833bff9958f1373a4d3b9cd1ca3c3ae" style="display:none">Info about the 'elst' external reference.</span><a href="https://www.iso.org/standard/68960.html#">https://www.iso.org/standard/68960.html#</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(5)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(6)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(7)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(8)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(9)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(10)</a>
     <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.3. IA Sample Entry</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
    </ul>
   </aside>
@@ -5489,7 +5510,7 @@ Recon_Gain for D_Rtb4:
    <span id="infopaneltitle-for-bcd7518a3a972b32274876f4f1629bf4" style="display:none">Info about the 'grouping_type' external reference.</span><a href="https://www.iso.org/standard/68960.html#">https://www.iso.org/standard/68960.html#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
-    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(5)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(6)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(7)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(8)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(9)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(10)</a>
     <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.3. IA Sample Entry</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
    </ul>
   </aside>
@@ -5497,7 +5518,31 @@ Recon_Gain for D_Rtb4:
    <span id="infopaneltitle-for-295c612b69b22d9306c1004b4766efa2" style="display:none">Info about the 'iso6' external reference.</span><a href="https://www.iso.org/standard/68960.html#">https://www.iso.org/standard/68960.html#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
-    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(5)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(6)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(7)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(8)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(9)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(10)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.3. IA Sample Entry</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-7d1374624e7eb0619df0cbeddbde9676" class="dfn-panel" data-for="7d1374624e7eb0619df0cbeddbde9676" id="infopanel-for-7d1374624e7eb0619df0cbeddbde9676">
+   <span id="infopaneltitle-for-7d1374624e7eb0619df0cbeddbde9676" style="display:none">Info about the 'media_time' external reference.</span><a href="https://www.iso.org/standard/68960.html#">https://www.iso.org/standard/68960.html#</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(5)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(6)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(7)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(8)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(9)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(10)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.3. IA Sample Entry</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-6209b192aef2427a32d5a0c845935928" class="dfn-panel" data-for="6209b192aef2427a32d5a0c845935928" id="infopanel-for-6209b192aef2427a32d5a0c845935928">
+   <span id="infopaneltitle-for-6209b192aef2427a32d5a0c845935928" style="display:none">Info about the 'mvhd' external reference.</span><a href="https://www.iso.org/standard/68960.html#">https://www.iso.org/standard/68960.html#</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(5)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(6)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(7)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(8)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(9)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(10)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.3. IA Sample Entry</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-d5f6936f8ed5ac38a6c3adb449fb6ac4" class="dfn-panel" data-for="d5f6936f8ed5ac38a6c3adb449fb6ac4" id="infopanel-for-d5f6936f8ed5ac38a6c3adb449fb6ac4">
+   <span id="infopaneltitle-for-d5f6936f8ed5ac38a6c3adb449fb6ac4" style="display:none">Info about the 'roll' external reference.</span><a href="https://www.iso.org/standard/68960.html#">https://www.iso.org/standard/68960.html#</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(5)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(6)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(7)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(8)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(9)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(10)</a>
     <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.3. IA Sample Entry</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
    </ul>
   </aside>
@@ -5505,7 +5550,7 @@ Recon_Gain for D_Rtb4:
    <span id="infopaneltitle-for-54dd4fd14d3b535833b0bd2f0694c6ea" style="display:none">Info about the 'samplerate' external reference.</span><a href="https://www.iso.org/standard/68960.html#">https://www.iso.org/standard/68960.html#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
-    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(5)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(6)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(7)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(8)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(9)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(10)</a>
     <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.3. IA Sample Entry</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
    </ul>
   </aside>
@@ -5513,7 +5558,7 @@ Recon_Gain for D_Rtb4:
    <span id="infopaneltitle-for-df4776861ec698bf18e6ccbf73b0e00b" style="display:none">Info about the 'stts' external reference.</span><a href="https://www.iso.org/standard/68960.html#">https://www.iso.org/standard/68960.html#</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.1. General Requirements &amp; Brands</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
-    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a>
+    <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(3)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(4)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(5)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(6)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(7)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(8)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(9)</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(10)</a>
     <li><a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">7.2.3. IA Sample Entry</a> <a href="#ref-for-9101e41bc1e2a010b149c5b0a70a83c3">(2)</a>
    </ul>
   </aside>
@@ -5821,9 +5866,14 @@ Recon_Gain for D_Rtb4:
     <ul>
      <li><span class="dfn-paneled" id="9101e41bc1e2a010b149c5b0a70a83c3">audiorollrecoveryentry</span>
      <li><span class="dfn-paneled" id="74c2884bef95a9e95eb117bba8ad6e2f">channelcount</span>
+     <li><span class="dfn-paneled" id="5b125c212851c47910b4743eec738e1e">edit_duration</span>
      <li><span class="dfn-paneled" id="71b4d0c6c7ea7103e8c7cf480743851a">edts</span>
+     <li><span class="dfn-paneled" id="e833bff9958f1373a4d3b9cd1ca3c3ae">elst</span>
      <li><span class="dfn-paneled" id="bcd7518a3a972b32274876f4f1629bf4">grouping_type</span>
      <li><span class="dfn-paneled" id="295c612b69b22d9306c1004b4766efa2">iso6</span>
+     <li><span class="dfn-paneled" id="7d1374624e7eb0619df0cbeddbde9676">media_time</span>
+     <li><span class="dfn-paneled" id="6209b192aef2427a32d5a0c845935928">mvhd</span>
+     <li><span class="dfn-paneled" id="d5f6936f8ed5ac38a6c3adb449fb6ac4">roll</span>
      <li><span class="dfn-paneled" id="54dd4fd14d3b535833b0bd2f0694c6ea">samplerate</span>
      <li><span class="dfn-paneled" id="df4776861ec698bf18e6ccbf73b0e00b">stts</span>
     </ul>
@@ -5985,11 +6035,16 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-obu_type⑤">10.4.1. Multiple Audio Elements with One Codec Config</a>
    </ul>
   </aside>
+  <aside aria-labelledby="infopaneltitle-for-obu_redundant_copy" class="dfn-panel" data-for="obu_redundant_copy" id="infopanel-for-obu_redundant_copy">
+   <span id="infopaneltitle-for-obu_redundant_copy" style="display:none">Info about the 'obu_redundant_copy' definition.</span><b><a href="#obu_redundant_copy">#obu_redundant_copy</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-obu_redundant_copy">7.2.2. Encapsulation Scheme</a>
+   </ul>
+  </aside>
   <aside aria-labelledby="infopaneltitle-for-obu_trimming_status_flag" class="dfn-panel" data-for="obu_trimming_status_flag" id="infopanel-for-obu_trimming_status_flag">
    <span id="infopaneltitle-for-obu_trimming_status_flag" style="display:none">Info about the 'obu_trimming_status_flag' definition.</span><b><a href="#obu_trimming_status_flag">#obu_trimming_status_flag</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-obu_trimming_status_flag">4.1.2. OBU Header Syntax and Semantics</a> <a href="#ref-for-obu_trimming_status_flag①">(2)</a>
-    <li><a href="#ref-for-obu_trimming_status_flag②">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-obu_trimming_status_flag③">(2)</a> <a href="#ref-for-obu_trimming_status_flag④">(3)</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-obu_extension_flag" class="dfn-panel" data-for="obu_extension_flag" id="infopanel-for-obu_extension_flag">
@@ -6002,7 +6057,6 @@ Recon_Gain for D_Rtb4:
    <span id="infopaneltitle-for-num_samples_to_trim_at_start" style="display:none">Info about the 'num_samples_to_trim_at_start' definition.</span><b><a href="#num_samples_to_trim_at_start">#num_samples_to_trim_at_start</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-num_samples_to_trim_at_start">4.1.2. OBU Header Syntax and Semantics</a> <a href="#ref-for-num_samples_to_trim_at_start①">(2)</a>
-    <li><a href="#ref-for-num_samples_to_trim_at_start②">7.2.2. Encapsulation Scheme</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-num_samples_to_trim_at_end" class="dfn-panel" data-for="num_samples_to_trim_at_end" id="infopanel-for-num_samples_to_trim_at_end">
@@ -6054,7 +6108,7 @@ Recon_Gain for D_Rtb4:
   <aside aria-labelledby="infopaneltitle-for-num_samples_per_frame" class="dfn-panel" data-for="num_samples_per_frame" id="infopanel-for-num_samples_per_frame">
    <span id="infopaneltitle-for-num_samples_per_frame" style="display:none">Info about the 'num_samples_per_frame' definition.</span><b><a href="#num_samples_per_frame">#num_samples_per_frame</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-num_samples_per_frame">7.2.2. Encapsulation Scheme</a>
+    <li><a href="#ref-for-num_samples_per_frame">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-num_samples_per_frame①">(2)</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-roll_distance" class="dfn-panel" data-for="roll_distance" id="infopanel-for-roll_distance">
