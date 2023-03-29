@@ -1643,10 +1643,8 @@ class decoder_config(ipcm) {
 
 <dfn noexport>sample_rate</dfn> indicates the sample rate of the input audio in Hz. It shall take a value from the set 44.1k, 16k, 32k, 48k and 96k.
 
-Substream format is the series of PCM audio frames, every of that is [=audio_frame()=] of Audio_Frame_OBU and each PCM sample of the [=audio_frame()=] shall have the [=sample_size=] and its format shall follow the format indicated by the [=sample_format_flags=].
-
-For IAMF-LPCM, one Substream is an individual channel of input audio. For example, one Ambisonics channel of Ambisonics is one Substream and one speaker channel of channel audio is one Substream.
-
+Substream format is one [=audio_frame()=] of Audio_Frame_OBU which contains only one single PCM audio frame of mono or stereo channels.
+	- In case of that [=audio_frame=] contains one single PCM audio frame of stereo channels, the ith audio sample of the left channel is followed by the ith audio sample of the right channel, and then the (i+1)th audio sample of the left channel is followed by the (i+1)th audio sample of the right channel, where i = 1, 2, ..., [=num_samples_per_frame=] - 1.
 
 # Profiles # {#profiles}
 
@@ -2515,15 +2513,12 @@ The IA encoder is composed of Pre-processor, Codec encoder and OBU packetizer.
 The order of substreams in each ChannelGroup shall be as follows:
 - In ChannelGroup for Ambisonics: The order shall conform to [[RFC8486]].
 - In ChannelGroup for Scalable Channel Audio: The order shall conform to following rules:
-	- For IAMF-OPUS, IAMF-AAC-LC and IAMF-FLAC,
-		- Coupled Substreams comes first and followed by non-coupled Substreams.
-		- Coupled Substreams for surround channels comes first and followed by one(s) for top channels.
-		- Coupled Substreams for front channels comes first and followed by one(s) for side, rear and back channels.
-		- Coupled Substreams for side channels comes first and followed by one(s) for rear channels.
-		- Center channel comes first and followed by LFE and followed by the other one.
-		- Where, <dfn noexport>non-coupled substream</dfn> is a coded substream from one of non-coupled channels.
-	- For IAMF-LPCM,
-		- The order of substreams in ChannelGroup complies with "Loudspeaker Location Ordering" specified in [=loudspeaker_layout=].
+	- Coupled Substreams comes first and followed by non-coupled Substreams.
+	- Coupled Substreams for surround channels comes first and followed by one(s) for top channels.
+	- Coupled Substreams for front channels comes first and followed by one(s) for side, rear and back channels.
+	- Coupled Substreams for side channels comes first and followed by one(s) for rear channels.
+	- Center channel comes first and followed by LFE and followed by the other one.
+	- Where, <dfn noexport>non-coupled substream</dfn> is a coded substream from one of non-coupled channels.
 
 ## Ambisonics Encoding ## {#iamfgeneration-ambisonics}
 
