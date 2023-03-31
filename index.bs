@@ -2500,13 +2500,13 @@ The IA encoder is composed of Pre-processor, Codec encoder and OBU packetizer.
 	- It may output parameter blocks
 		- For channel-based audio element with [=num_layers=] = 1, it may output parameter blocks for demixing info.
 		- For channel-based audio element with [=num_layers=] > 1, it outputs parameter blocks for demixing_info_parameter_data and recon_gain_info_parameter_data.
-		- It may further output parameter blocks for post processing such as Loudness and DRC control.
+		- It may further output parameter blocks for mixing gain.
 - Codec encoder generates one or more substreams from each ChannelGroup based on Codec Config.
 	- Mono or stereo coding shall be only allowed.
 		- Channel Audio format: each pair of coupled channels in the same ChannelGroup shall be coded as stereo mode to generate one single substream and each of non-coupled channels in the same ChannelGroup shall be coded as mono mode to generate one single substream.
 			- <dfn noexport>Coupled channels</dfn>: L/R, Ls/Rs, Lss/Rss, Lrs/Rrs, Ltf/Rtf, Ltb/Rtb
 			- <dnf noexport>Non-coupled channels</dfn>: C, LFE, L
-- OBU packetizer packetize descriptors, parameter blocks and audio frames by OBU, and outputs IA sequence.
+- OBU packetizer packetize descriptors, sync information, parameter blocks and audio frames by OBU, and outputs IA sequence.
 	- Temporal unit generator generates temporal unit for each frame from audio frame OBUs and parameter block OBUs (if present).
 
 <center><img src="images/IA Encoder Configuration.png" style="width:100%; height:auto;"></center>
@@ -2553,7 +2553,7 @@ For Scalable Channel Audio encoding:
 	- Loudness module should output the loudness level ([=LKFS=]) of each down-mixed audio based on [[ITU1770-4]].
 	- ChannelGroup generator shall transform the input channel audio to ChannelGroups for scalable channel audio with [=num_layers=] > 1 scalability by using the down-mix parameters and the list of channel layouts.
 	- Attenuation module shall apply a gain to the transformed ChannelGroups to prevent clipping.
-	- Meta generator generates descriptors, and parameter blocks for each frame.
+	- Meta generator generates descriptors and parameter block(s) for each frame.
 		- descriptors shall be set to as follows:
 			- [=num_layers=] shall be set to the number of channel layouts.
 			- [=channel_audio_layer_config()=] shall be set to as follows:
@@ -2586,9 +2586,9 @@ Below figure shows IA encoding flowchart for Scalable Channel Audio.
 - OBU packetizer generates zero or more parameter block OBUs for each frame which contains demixing_info_parameter_data and recon_gain_info_parameter_data.
 - OBU packetizer generates audio frame OBUs for each frame of the substreams.
 - OBU packetizer generates temporal unit for each frame.
-	- Temporal unit consists of audio frame OBUs and followed by zero or more parameter block OBUs and audio frame OBUs.
+	- Temporal unit consists of audio frame OBUs and followed by zero or more parameter block OBUs.
 		- It may have the immediately preceding temporal delimiter OBU, 
-- OBU Packetizer outputs IA sequence which is composed of OBUs for descriptor OBUs and followed by OBUs for temporal units.
+- OBU Packetizer outputs IA sequence which is composed of OBUs for descriptor OBUs, followed by sync OBU and followed by OBUs for temporal units.
 
 <center><img src="images/IA Encoding Flowchart for Channel Audio Format.png" style="width:80%; height:auto;"></center>
 <center><figcaption>IA Encoding Flowchart for Scalable Channel Audio</figcaption></center>
@@ -2781,19 +2781,21 @@ Step1: Descriptor OBUs are generated as follows:
 	- codec_config_id in each Audio Element OBU is updated to indicate [=codec_config_id=] specified in the taken Codec Config OBU.
 	- [=audio_element_id=]s are updated to be unique in all of Audio Element OBUs.
 	- [=audio_substream_id=]s are updated to be unique in all of Audio Element OBUs. 
-	- parameter_ids in Audio Element OBUs are updated to be unique in all of Audio Element OBUs.
+	- parameter_id in [=ParamDefinition()=] carried in each Audio Element OBU is updated to refer its associated parameters correctly.
 - Mix Presentation OBUs: just take all of them and generate new ones which are used for mixing of multiple audio elements if needed except following:
 	- audio_element_ids in each Mix Presentation OBU are updated to indicate the [=audio_element_id=]s specified in Audio Element OBUs.
+	- parameter_ids in [=ParamDefinition()=]s carried in each Mix Presentation OBU are updated to refer its associated parameters correctly.
 
 Step2: ith temporal unit is generated as follows:
 - Just take all of temporal units for ith frames from each audio element and keep the order of temporal units as the order of audio element OBUs in descriptor OBUs except following:
 	- [=obu_type=]s are updated to be aligned according to [=audio_substream_id=]s specified in Audio Element OBUs.
-	- [=parameter_id=]s in Parameter Block OBUs are updated to be aligned according to parameter_ids in Audio Element OBUs.
-- Add Sync OBU in front of ith temporal unit if needed.
-	- New Sync OBU is generated based on Sync OBUs of each IA sequence and updated [=audio_substream_id=]s and [=parameter_id=]s.
+	- [=parameter_id=]s in Parameter Block OBUs are updated to uniquely indentify the parameter in IA sequence and based on the parameter_ids in [=ParamDefinition()=]s carried in Descriptor OBUs.
 - It may have the immediately preceding temporal delimiter OBU for each temporal unit.
 
-Step3: Generate IA sequence which starts descriptor OBUs and followed by temporal units in order.
+Step3: Update Sync OBU.
+	- Sync OBU is updated based on Sync OBUs of each IA sequence and updated [=audio_substream_id=]s and [=parameter_id=]s.
+
+Step4: Generate IA sequence which starts descriptor OBUs, followed by Sync OBU and followed by temporal units in order.
 
 ## Post Processing ## {#iamfgeneration-postprocessing}
 
