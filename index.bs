@@ -2071,7 +2071,7 @@ IA decoding can be done by using the combination of following decoding processin
 - Rendering and mixing of each audio element before mixing of multiple audio elements.
 	- It may include re-sampling of each audio element.
 - Mixing of multiple audio elements with synchronization
-- Post processing such as Loudness, DRC and Limiter.
+- Post processing such as Loudness and Limiter.
 
 <b>Ambisonics decoding</b>, it shall conform to [[!RFC8486]] except codec specific processing and shall output Ambisonics channels in ACN (Ambisonics Channel Number) order.
 
@@ -2080,12 +2080,10 @@ IA decoding can be done by using the combination of following decoding processin
 IA decoder is composed of OBU parser, Codec decoder, Audio Element Renderer and Post-processor as depicted in below figure.
 - OBU parser shall depacketize IA sequence to output one or more substreams with one or more Decoder_Config() but one decoder_config() per audio element, descriptors and parameters.
 - Codec decoder for each substream shall output decoded channels.
-- Audio Element Renderer reconstructs audio channels from decoded channels of Codec decoders according to the type of audio element which is specified audio element OBU.
-	- For scene-based audio element, it shall output ambisonics channels.
-	- For channel-based audio element, it shall output audio channels for the given loudspeaker layout.
-- Post-processor outputs audio channels according to the target loudspeaker layout after processing optional rendering, mixing and post processing such as DRC, Loudness and Limiter.
-	- For a given scene-based audio element, one of mix presentations shall be used to render the given scene-based audio element.
-	- To mix a given multiple audio elements, one of mix presentations shall be used to render each of the given multiple audio elements.
+- Audio Element Renderer reconstructs audio channels from decoded channels of Codec decoders according to the type of audio element which is specified audio element OBU, and renders the audio channels to the target loudspeaker layout.
+	- For scene-based audio element, it shall output audio channels for the target loudspeaker layout from the reconstructed ambisonics channels.
+	- For channel-based audio element, it shall output audio channels for the target loudspeaker layout from the reconstructed audio channels.
+- Post-processor outputs audio channels according to the target loudspeaker layout after processing mixing and post processing such as Loudness and Limiter.
 	
 <center><img src="images/IA Decoder Configuration.png" style="width:100%; height:auto;"></center>
 <center><figcaption>IA Decoder Configuration</figcaption></center>
@@ -2124,7 +2122,6 @@ For a given loudspeaker layout (i.e. CL #i) among the list of [=loudspeaker_layo
 	- The order for Non-mixed channels and Smoothed channels shall be converted to the loudspeaker location order for CL #i after going through necessary modules such as Gain, De-Mixer, Recon_Gain etc..
 - Following may be further processed
 	- Loudness normalization module may output loudness normalized channels at -24 LKFS from non-mixed channels and smoothed channels (if present) by using loudness value for CL #i.
-	- DRC control module may apply the pre-defined DRC compression to the loudness normalized channels, after that it outputs loudness normalized channels at -16 LKFS.
 	- Limiter module may limit the true peak of input channels at -1dB.
 
 Following sections, [[#processing-scalablechannelaudio-gain]], [[#processing-scalablechannelaudio-demixer]] and [[#processing-scalablechannelaudio-recongain]] are only needed for decoding of scalable audio with [=num_layers=] > 1.
@@ -2500,7 +2497,7 @@ The IA encoder is composed of Pre-processor, Codec encoder and OBU packetizer.
 	- It may output parameter blocks
 		- For channel-based audio element with [=num_layers=] = 1, it may output parameter blocks for demixing info.
 		- For channel-based audio element with [=num_layers=] > 1, it outputs parameter blocks for demixing_info_parameter_data and recon_gain_info_parameter_data.
-		- It may further output parameter blocks for post processing such as Loudness and DRC control.
+		- It may further output parameter blocks for post processing such as Loudness and Limitor.
 - Codec encoder generates one or more substreams from each ChannelGroup based on Codec Config.
 	- Mono or stereo coding shall be only allowed.
 		- Channel Audio format: each pair of coupled channels in the same ChannelGroup shall be coded as stereo mode to generate one single substream and each of non-coupled channels in the same ChannelGroup shall be coded as mono mode to generate one single substream.
