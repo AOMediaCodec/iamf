@@ -1322,6 +1322,8 @@ class demixing_info_parameter_data() {
 
 <dfn noexport>recon_gain_info_parameter_data()</dfn> contains recon gain values for demixed channels.
 
+NOTE: [=recon_gain_info_parameter_data()=] is required to compensate the propagated errors by De-mixer and Gain modules specified in [[#processing-scalablechannelaudio-demixer]] and [[#processing-scalablechannelaudio-gain]] due to the error caused by lossy codecs such as IAMF-OPUS and IAMF-AAC-LC. However, it is not required for lossless codecs such as IAMF-FLAC and IAMf-LPCM because the propagated errors are negligible.
+
 <b>Syntax</b>
 
 ```
@@ -2552,6 +2554,7 @@ For Scalable Channel Audio encoding:
 				- [=loudspeaker_layout=] shall be set to the ith list of channel layouts for the ith ChannelGroup.
 				- [=output_gain_is_present_flag=] shall set to 1 for the ith ChannelGroup if attenuation is applied to the mixed channels of the ith ChannelGroup. Otherwise it shall be set to 0 for the ith ChannelGroup.
 				- [=recon_gain_is_present_flag=] shall be set to 1 for the ith ChannelGroup if the preceding ChannelGroups has one or more mixed channels from the down-mixed audio for the ith channel layout. Otherwise, it shall be set to 0 for the ith ChannelGroup. Especially, when [=num_layers=] = 1, this flag shall be set to 0.
+					- This flag shall be set to 0 for lossless codecs including IAMF-LPCM.
 				- [=substream_count=] shall be set to the number of substreams composing of the ith ChannelGroup.
 				- [=coupled_substream_count=] shall be set to the number of coupled substreams among the substreams composing of the ith ChannelGroup.
 				- [=loudness=] shall be set to the loudness ([=LKFS=]) of the down-mixed audio for the ith channel layout for the ith ChannelGroup.
