@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version d9bd89757, updated Thu Mar 23 10:06:53 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="658c2e45849c1327e54048057875cbacd6f3a8af" name="document-revision">
+  <meta content="6954b26d72a8782918ee16b7bd53e3370dedd47f" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -3469,11 +3469,14 @@ class AnimatedParameterData(animation_type) {
   unsigned int (32) sample_rate;
 }
 </pre>
-   <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="sample_format_flags">sample_format_flags</dfn> complies with <a data-link-type="dfn" href="https://www.iso.org/standard/77752.html#" id="ref-for-41c4b6a338908de4fcad02babe72a382②">format_flags</a> specified in <a data-link-type="biblio" href="#biblio-mp4-pcm" title="Information technology — MPEG audio technologies — Part 5: Uncompressed audio in MPEG-4 file format">[MP4-PCM]</a>. In other words, 0x01 indicates little-endian PCM sample format and 0x00 indicates big-endian PCM sample format. 
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="sample_size">sample_size</dfn> complies with <a data-link-type="dfn" href="https://www.iso.org/standard/77752.html#" id="ref-for-41c4b6a338908de4fcad02babe72a382③">PCM_sample_size</a> specified in <a data-link-type="biblio" href="#biblio-mp4-pcm" title="Information technology — MPEG audio technologies — Part 5: Uncompressed audio in MPEG-4 file format">[MP4-PCM]</a>. In other words, it shall take a value from the set 16, 24 and 32.</p>
+   <dfn data-dfn-type="dfn" data-noexport id="sample_format_flags">sample_format_flags<a class="self-link" href="#sample_format_flags"></a></dfn> complies with <a data-link-type="dfn" href="https://www.iso.org/standard/77752.html#" id="ref-for-41c4b6a338908de4fcad02babe72a382②">format_flags</a> specified in <a data-link-type="biblio" href="#biblio-mp4-pcm" title="Information technology — MPEG audio technologies — Part 5: Uncompressed audio in MPEG-4 file format">[MP4-PCM]</a>. In other words, 0x01 indicates little-endian PCM sample format and 0x00 indicates big-endian PCM sample format. 
+   <p><dfn data-dfn-type="dfn" data-noexport id="sample_size">sample_size<a class="self-link" href="#sample_size"></a></dfn> complies with <a data-link-type="dfn" href="https://www.iso.org/standard/77752.html#" id="ref-for-41c4b6a338908de4fcad02babe72a382③">PCM_sample_size</a> specified in <a data-link-type="biblio" href="#biblio-mp4-pcm" title="Information technology — MPEG audio technologies — Part 5: Uncompressed audio in MPEG-4 file format">[MP4-PCM]</a>. In other words, it shall take a value from the set 16, 24 and 32.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="sample_rate">sample_rate<a class="self-link" href="#sample_rate"></a></dfn> indicates the sample rate of the input audio in Hz. It shall take a value from the set 44.1k, 16k, 32k, 48k and 96k.</p>
-   <p>Substream format is the series of PCM audio frames, every of that is <a data-link-type="dfn" href="#audio_frame" id="ref-for-audio_frame②">audio_frame()</a> of Audio_Frame_OBU and each PCM sample of the <a data-link-type="dfn" href="#audio_frame" id="ref-for-audio_frame③">audio_frame()</a> shall have the <a data-link-type="dfn" href="#sample_size" id="ref-for-sample_size">sample_size</a> and its format shall follow the format indicated by the <a data-link-type="dfn" href="#sample_format_flags" id="ref-for-sample_format_flags">sample_format_flags</a>.</p>
-   <p>For IAMF-LPCM, one Substream is an individual channel of input audio. For example, one Ambisonics channel of Ambisonics is one Substream and one speaker channel of channel audio is one Substream.</p>
+   <p>Substream format is one <a data-link-type="dfn" href="#audio_frame" id="ref-for-audio_frame②">audio_frame()</a> of Audio_Frame_OBU which contains only one single PCM audio frame of mono or stereo channels.</p>
+   <ul>
+    <li data-md>
+     <p>In case of that <a data-link-type="dfn" href="#audio_frame" id="ref-for-audio_frame③">audio_frame()</a> contains one single PCM audio frame of stereo channels, the ith audio sample of the left channel is followed by the ith audio sample of the right channel, and then the (i+1)th audio sample of the left channel is followed by the (i+1)th audio sample of the right channel, where i = 1, 2, ..., <a data-link-type="dfn" href="#num_samples_per_frame" id="ref-for-num_samples_per_frame">num_samples_per_frame</a>.</p>
+   </ul>
    <h2 class="heading settled" data-level="5" id="profiles"><span class="secno">5. </span><span class="content">Profiles</span><a class="self-link" href="#profiles"></a></h2>
    <p>The IA Profiles define a set of capabilities that are required to parse, decode and process the corresponding IA sequence.</p>
    <p class="note" role="note"><span class="marker">NOTE:</span> In this section and subsections, the meaning of an unique OBU is that it is still unique if it only varies by reduntant flag.</p>
@@ -3792,11 +3795,11 @@ for (i = 0: i &lt; M(N); i++) {
      <p>Decoding Time to Sample</p>
      <ul>
       <li data-md>
-       <p>The <a data-link-type="dfn" href="#num_samples_per_frame" id="ref-for-num_samples_per_frame">num_samples_per_frame</a> value in the Codec Config OBU, which indicates the duration of each sample, is reflected to <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3⑧">stts</a> box except the last sample.</p>
+       <p>The <a data-link-type="dfn" href="#num_samples_per_frame" id="ref-for-num_samples_per_frame①">num_samples_per_frame</a> value in the Codec Config OBU, which indicates the duration of each sample, is reflected to <a class="property css" data-link-type="property" href="https://www.iso.org/standard/68960.html#" id="ref-for-9101e41bc1e2a010b149c5b0a70a83c3⑧">stts</a> box except the last sample.</p>
       <li data-md>
        <p>The duration of the last sample is duration including samples trimmed at the beginning but excluding samples trimmed at the end.</p>
       <li data-md>
-       <p>The duration of the last sample may not be same as <a data-link-type="dfn" href="#num_samples_per_frame" id="ref-for-num_samples_per_frame①">num_samples_per_frame</a>. In this case, it is calcuated from Audio Frame OBU of the last temporal unit.</p>
+       <p>The duration of the last sample may not be same as <a data-link-type="dfn" href="#num_samples_per_frame" id="ref-for-num_samples_per_frame②">num_samples_per_frame</a>. In this case, it is calcuated from Audio Frame OBU of the last temporal unit.</p>
      </ul>
     <li data-md>
      <p>Sample Group</p>
@@ -4545,27 +4548,17 @@ gamma = n0 - n.
      <p>In ChannelGroup for Scalable Channel Audio: The order shall conform to following rules:</p>
      <ul>
       <li data-md>
-       <p>For IAMF-OPUS, IAMF-AAC-LC and IAMF-FLAC,</p>
-       <ul>
-        <li data-md>
-         <p>Coupled Substreams comes first and followed by non-coupled Substreams.</p>
-        <li data-md>
-         <p>Coupled Substreams for surround channels comes first and followed by one(s) for top channels.</p>
-        <li data-md>
-         <p>Coupled Substreams for front channels comes first and followed by one(s) for side, rear and back channels.</p>
-        <li data-md>
-         <p>Coupled Substreams for side channels comes first and followed by one(s) for rear channels.</p>
-        <li data-md>
-         <p>Center channel comes first and followed by LFE and followed by the other one.</p>
-        <li data-md>
-         <p>Where, <dfn data-dfn-type="dfn" data-noexport id="non-coupled-substream">non-coupled substream<a class="self-link" href="#non-coupled-substream"></a></dfn> is a coded substream from one of non-coupled channels.</p>
-       </ul>
+       <p>Coupled Substreams comes first and followed by non-coupled Substreams.</p>
       <li data-md>
-       <p>For IAMF-LPCM,</p>
-       <ul>
-        <li data-md>
-         <p>The order of substreams in ChannelGroup complies with "Loudspeaker Location Ordering" specified in <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout①⑦">loudspeaker_layout</a>.</p>
-       </ul>
+       <p>Coupled Substreams for surround channels comes first and followed by one(s) for top channels.</p>
+      <li data-md>
+       <p>Coupled Substreams for front channels comes first and followed by one(s) for side, rear and back channels.</p>
+      <li data-md>
+       <p>Coupled Substreams for side channels comes first and followed by one(s) for rear channels.</p>
+      <li data-md>
+       <p>Center channel comes first and followed by LFE and followed by the other one.</p>
+      <li data-md>
+       <p>Where, <dfn data-dfn-type="dfn" data-noexport id="non-coupled-substream">non-coupled substream<a class="self-link" href="#non-coupled-substream"></a></dfn> is a coded substream from one of non-coupled channels.</p>
      </ul>
    </ul>
    <h3 class="heading settled" data-level="10.1" id="iamfgeneration-ambisonics"><span class="secno">10.1. </span><span class="content">Ambisonics Encoding</span><a class="self-link" href="#iamfgeneration-ambisonics"></a></h3>
@@ -4640,7 +4633,7 @@ gamma = n0 - n.
            <p><a data-link-type="dfn" href="#channel_audio_layer_config" id="ref-for-channel_audio_layer_config②">channel_audio_layer_config()</a> shall be set to as follows:</p>
            <ul>
             <li data-md>
-             <p><a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout①⑧">loudspeaker_layout</a> shall be set to the ith list of channel layouts for the ith ChannelGroup.</p>
+             <p><a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout①⑦">loudspeaker_layout</a> shall be set to the ith list of channel layouts for the ith ChannelGroup.</p>
             <li data-md>
              <p><a data-link-type="dfn" href="#output_gain_is_present_flag" id="ref-for-output_gain_is_present_flag">output_gain_is_present_flag</a> shall set to 1 for the ith ChannelGroup if attenuation is applied to the mixed channels of the ith ChannelGroup. Otherwise it shall be set to 0 for the ith ChannelGroup.</p>
             <li data-md>
@@ -4802,7 +4795,7 @@ T2toTF2 enc.: Ltf3 = Ltf2 + w(k) x δ(k) x Ls5 and Rtf3 = Rtf2 + w(k) x δ(k) x 
     <li data-md>
      <p>Si ≤ Si+1 and Wi ≤ Wi+1 and Ti ≤ Ti+1 except Si = Si+1 and Wi = Wi+1 and Ti = Ti+1 for i = n-1, n-2, …, 1. Where ith Channel Layout CL #i = Si.Wi.Ti.</p>
     <li data-md>
-     <p>CL #i is one of <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout①⑨">loudspeaker_layouts</a> supported in this specification.</p>
+     <p>CL #i is one of <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout①⑧">loudspeaker_layouts</a> supported in this specification.</p>
    </ul>
    <p>Down-mix paths, which conform to the above rule, shall be only allowed for scalable channel audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②③">num_layers</a> > 1 as depicted in below figure.</p>
    <center><img height="716" src="images/Down-mix Path.png" style="width:90%; height:auto;" width="792"></center>
@@ -6108,7 +6101,8 @@ Recon_Gain for D_Rtb4:
   <aside aria-labelledby="infopaneltitle-for-num_samples_per_frame" class="dfn-panel" data-for="num_samples_per_frame" id="infopanel-for-num_samples_per_frame">
    <span id="infopaneltitle-for-num_samples_per_frame" style="display:none">Info about the 'num_samples_per_frame' definition.</span><b><a href="#num_samples_per_frame">#num_samples_per_frame</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-num_samples_per_frame">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-num_samples_per_frame①">(2)</a>
+    <li><a href="#ref-for-num_samples_per_frame">4.3.4. IAMF-LPCM Specific</a>
+    <li><a href="#ref-for-num_samples_per_frame①">7.2.2. Encapsulation Scheme</a> <a href="#ref-for-num_samples_per_frame②">(2)</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-roll_distance" class="dfn-panel" data-for="roll_distance" id="infopanel-for-roll_distance">
@@ -6385,9 +6379,9 @@ Recon_Gain for D_Rtb4:
     <li><a href="#ref-for-loudspeaker_layout⑧">9.2. Scalable Channel Audio decoding</a>
     <li><a href="#ref-for-loudspeaker_layout⑨">9.3.1. Selecting a Mix Presentation</a>
     <li><a href="#ref-for-loudspeaker_layout①⓪">9.3.2.1. Rendering a channel-based audio element to loudspeakers</a> <a href="#ref-for-loudspeaker_layout①①">(2)</a> <a href="#ref-for-loudspeaker_layout①②">(3)</a> <a href="#ref-for-loudspeaker_layout①③">(4)</a> <a href="#ref-for-loudspeaker_layout①④">(5)</a>
-    <li><a href="#ref-for-loudspeaker_layout①⑤">10. IAMF Generation Process</a> <a href="#ref-for-loudspeaker_layout①⑥">(2)</a> <a href="#ref-for-loudspeaker_layout①⑦">(3)</a>
-    <li><a href="#ref-for-loudspeaker_layout①⑧">10.2. Scalable Channel Audio Encoding</a>
-    <li><a href="#ref-for-loudspeaker_layout①⑨">10.2.3. Channel Layout Generation Rule</a>
+    <li><a href="#ref-for-loudspeaker_layout①⑤">10. IAMF Generation Process</a> <a href="#ref-for-loudspeaker_layout①⑥">(2)</a>
+    <li><a href="#ref-for-loudspeaker_layout①⑦">10.2. Scalable Channel Audio Encoding</a>
+    <li><a href="#ref-for-loudspeaker_layout①⑧">10.2.3. Channel Layout Generation Rule</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-714ch" class="dfn-panel" data-for="714ch" id="infopanel-for-714ch">
@@ -6544,18 +6538,6 @@ Recon_Gain for D_Rtb4:
    <span id="infopaneltitle-for-codec_specific_info" style="display:none">Info about the 'Codec_Specific_Info' definition.</span><b><a href="#codec_specific_info">#codec_specific_info</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-codec_specific_info">4.1.6. Codec Config OBU Syntax and Semantics</a> <a href="#ref-for-codec_specific_info①">(2)</a> <a href="#ref-for-codec_specific_info②">(3)</a> <a href="#ref-for-codec_specific_info③">(4)</a>
-   </ul>
-  </aside>
-  <aside aria-labelledby="infopaneltitle-for-sample_format_flags" class="dfn-panel" data-for="sample_format_flags" id="infopanel-for-sample_format_flags">
-   <span id="infopaneltitle-for-sample_format_flags" style="display:none">Info about the 'sample_format_flags' definition.</span><b><a href="#sample_format_flags">#sample_format_flags</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-sample_format_flags">4.3.4. IAMF-LPCM Specific</a>
-   </ul>
-  </aside>
-  <aside aria-labelledby="infopaneltitle-for-sample_size" class="dfn-panel" data-for="sample_size" id="infopanel-for-sample_size">
-   <span id="infopaneltitle-for-sample_size" style="display:none">Info about the 'sample_size' definition.</span><b><a href="#sample_size">#sample_size</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-sample_size">4.3.4. IAMF-LPCM Specific</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-iasampleentry" class="dfn-panel" data-for="iasampleentry" id="infopanel-for-iasampleentry">
