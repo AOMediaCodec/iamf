@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version d9bd89757, updated Thu Mar 23 10:06:53 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="cdc4facafd2149ce6795431ec22b92c905332abd" name="document-revision">
+  <meta content="88affb1cda69fc1024f6194c2e934239812edcb5" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -4503,7 +4503,7 @@ gamma = n0 - n.
         <li data-md>
          <p>For channel-based audio element with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⑦">num_layers</a> > 1, it outputs parameter blocks for demixing_info_parameter_data and recon_gain_info_parameter_data.</p>
         <li data-md>
-         <p>It may further output parameter blocks for post processing such as Loudness and DRC control.</p>
+         <p>It may further output parameter blocks for mixing gain.</p>
        </ul>
      </ul>
     <li data-md>
@@ -4523,7 +4523,7 @@ gamma = n0 - n.
        </ul>
      </ul>
     <li data-md>
-     <p>OBU packetizer packetize descriptors, parameter blocks and audio frames by OBU, and outputs IA sequence.</p>
+     <p>OBU packetizer packetize descriptors, sync information, parameter blocks and audio frames by OBU, and outputs IA sequence.</p>
      <ul>
       <li data-md>
        <p>Temporal unit generator generates temporal unit for each frame from audio frame OBUs and parameter block OBUs (if present).</p>
@@ -4615,7 +4615,7 @@ gamma = n0 - n.
       <li data-md>
        <p>Attenuation module shall apply a gain to the transformed ChannelGroups to prevent clipping.</p>
       <li data-md>
-       <p>Meta generator generates descriptors, and parameter blocks for each frame.</p>
+       <p>Meta generator generates descriptors and parameter block(s) for each frame.</p>
        <ul>
         <li data-md>
          <p>descriptors shall be set to as follows:</p>
@@ -4702,14 +4702,14 @@ gamma = n0 - n.
      <p>OBU packetizer generates temporal unit for each frame.</p>
      <ul>
       <li data-md>
-       <p>Temporal unit consists of audio frame OBUs and followed by zero or more parameter block OBUs and audio frame OBUs.</p>
+       <p>Temporal unit consists of audio frame OBUs and followed by zero or more parameter block OBUs.</p>
        <ul>
         <li data-md>
          <p>It may have the immediately preceding temporal delimiter OBU,</p>
        </ul>
      </ul>
     <li data-md>
-     <p>OBU Packetizer outputs IA sequence which is composed of OBUs for descriptor OBUs and followed by OBUs for temporal units.</p>
+     <p>OBU Packetizer outputs IA sequence which is composed of OBUs for descriptor OBUs, followed by sync OBU and followed by OBUs for temporal units.</p>
    </ul>
    <center><img height="551" src="images/IA Encoding Flowchart for Channel Audio Format.png" style="width:80%; height:auto;" width="800"></center>
    <center>
@@ -4963,13 +4963,15 @@ Recon_Gain for D_Rtb4:
       <li data-md>
        <p><a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id③">audio_substream_id</a>s are updated to be unique in all of Audio Element OBUs.</p>
       <li data-md>
-       <p>parameter_ids in Audio Element OBUs are updated to be unique in all of Audio Element OBUs.</p>
+       <p>parameter_ids in <a data-link-type="dfn" href="#paramdefinition" id="ref-for-paramdefinition①">ParamDefinition()</a>s carried in each Audio Element OBU are updated to refer its associated parameters correctly.</p>
      </ul>
     <li data-md>
      <p>Mix Presentation OBUs: just take all of them and generate new ones which are used for mixing of multiple audio elements if needed except following:</p>
      <ul>
       <li data-md>
        <p>audio_element_ids in each Mix Presentation OBU are updated to indicate the <a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id④">audio_element_id</a>s specified in Audio Element OBUs.</p>
+      <li data-md>
+       <p>parameter_ids in <a data-link-type="dfn" href="#paramdefinition" id="ref-for-paramdefinition②">ParamDefinition()</a>s carried in each Mix Presentation OBU are updated to refer its associated parameters correctly.</p>
      </ul>
    </ul>
    <p>Step2: ith temporal unit is generated as follows:</p>
@@ -4980,18 +4982,17 @@ Recon_Gain for D_Rtb4:
       <li data-md>
        <p><a data-link-type="dfn" href="#obu_type" id="ref-for-obu_type⑤">obu_type</a>s are updated to be aligned according to <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id④">audio_substream_id</a>s specified in Audio Element OBUs.</p>
       <li data-md>
-       <p><a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id②">parameter_id</a>s in Parameter Block OBUs are updated to be aligned according to parameter_ids in Audio Element OBUs.</p>
-     </ul>
-    <li data-md>
-     <p>Add Sync OBU in front of ith temporal unit if needed.</p>
-     <ul>
-      <li data-md>
-       <p>New Sync OBU is generated based on Sync OBUs of each IA sequence and updated <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id⑤">audio_substream_id</a>s and <a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id③">parameter_id</a>s.</p>
+       <p><a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id②">parameter_id</a>s in Parameter Block OBUs are updated to uniquely indentify the parameter in IA sequence and based on the parameter_ids in <a data-link-type="dfn" href="#paramdefinition" id="ref-for-paramdefinition③">ParamDefinition()</a>s carried in Descriptor OBUs.</p>
      </ul>
     <li data-md>
      <p>It may have the immediately preceding temporal delimiter OBU for each temporal unit.</p>
    </ul>
-   <p>Step3: Generate IA sequence which starts descriptor OBUs and followed by temporal units in order.</p>
+   <p>Step3: Update Sync OBU.</p>
+   <ul>
+    <li data-md>
+     <p>Sync OBU is updated based on Sync OBUs of each IA sequence and updated <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id⑤">audio_substream_id</a>s and <a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id③">parameter_id</a>s.</p>
+   </ul>
+   <p>Step4: Generate IA sequence which starts descriptor OBUs, followed by Sync OBU and followed by temporal units in order.</p>
    <h3 class="heading settled" data-level="10.5" id="iamfgeneration-postprocessing"><span class="secno">10.5. </span><span class="content">Post Processing</span><a class="self-link" href="#iamfgeneration-postprocessing"></a></h3>
    <p>This section provides a guideline to generate algorithms for post processing.</p>
    <h4 class="heading settled" data-level="10.5.1" id="iamfgeneration-postprocessing-loudness"><span class="secno">10.5.1. </span><span class="content">Loudness Information</span><a class="self-link" href="#iamfgeneration-postprocessing-loudness"></a></h4>
@@ -6249,6 +6250,7 @@ Recon_Gain for D_Rtb4:
    <span id="infopaneltitle-for-paramdefinition" style="display:none">Info about the 'ParamDefinition()' definition.</span><b><a href="#paramdefinition">#paramdefinition</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-paramdefinition">4.1.9. Parameter Block OBU Syntax and Semantics</a>
+    <li><a href="#ref-for-paramdefinition①">10.4.1. Multiple Audio Elements with One Codec Config</a> <a href="#ref-for-paramdefinition②">(2)</a> <a href="#ref-for-paramdefinition③">(3)</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-parameter_rate" class="dfn-panel" data-for="parameter_rate" id="infopanel-for-parameter_rate">
