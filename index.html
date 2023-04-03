@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version d9bd89757, updated Thu Mar 23 10:06:53 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="01b64335c96a3bff5fd8f0d5daa8c1d2971f53e6" name="document-revision">
+  <meta content="d4b622db6d99ed1a8201deafa74d80206b27bc4f" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -3996,7 +3996,7 @@ Quantity:  One.
     <li data-md>
      <p>Mixing of multiple audio elements with synchronization</p>
     <li data-md>
-     <p>Post processing such as Loudness, DRC and Limiter.</p>
+     <p>Post processing such as Loudness and Limiter.</p>
    </ul>
    <p><b>Ambisonics decoding</b>, it shall conform to <a data-link-type="biblio" href="#biblio-rfc8486" title="Ambisonics in an Ogg Opus Container">[RFC8486]</a> except codec specific processing and shall output Ambisonics channels in ACN (Ambisonics Channel Number) order.</p>
    <p><b>Scalable Channel Audio decoding</b>, it shall output the channel audio (e.g. 3.1.2ch or 7.1.4ch) for the target channel layout.</p>
@@ -4007,21 +4007,15 @@ Quantity:  One.
     <li data-md>
      <p>Codec decoder for each substream shall output decoded channels.</p>
     <li data-md>
-     <p>Audio Element Renderer reconstructs audio channels from decoded channels of Codec decoders according to the type of audio element which is specified audio element OBU.</p>
+     <p>Audio Element Renderer reconstructs audio channels from decoded channels of Codec decoders according to the type of audio element which is specified audio element OBU, and renders the audio channels to the target loudspeaker layout.</p>
      <ul>
       <li data-md>
-       <p>For scene-based audio element, it shall output ambisonics channels.</p>
+       <p>For scene-based audio element, it shall output audio channels for the target loudspeaker layout from the reconstructed ambisonics channels.</p>
       <li data-md>
-       <p>For channel-based audio element, it shall output audio channels for the given loudspeaker layout.</p>
+       <p>For channel-based audio element, it shall output audio channels for the target loudspeaker layout from the reconstructed audio channels.</p>
      </ul>
     <li data-md>
-     <p>Post-processor outputs audio channels according to the target loudspeaker layout after processing optional rendering, mixing and post processing such as DRC, Loudness and Limiter.</p>
-     <ul>
-      <li data-md>
-       <p>For a given scene-based audio element, one of mix presentations shall be used to render the given scene-based audio element.</p>
-      <li data-md>
-       <p>To mix a given multiple audio elements, one of mix presentations shall be used to render each of the given multiple audio elements.</p>
-     </ul>
+     <p>Post-processor outputs audio channels according to the target loudspeaker layout after processing mixing and post processing such as Loudness and Limiter.</p>
    </ul>
    <center><img height="694" src="images/IA Decoder Configuration.png" style="width:100%; height:auto;" width="1844"></center>
    <center>
@@ -4082,8 +4076,6 @@ Quantity:  One.
      <ul>
       <li data-md>
        <p>Loudness normalization module may output loudness normalized channels at -24 LKFS from non-mixed channels and smoothed channels (if present) by using loudness value for CL #i.</p>
-      <li data-md>
-       <p>DRC control module may apply the pre-defined DRC compression to the loudness normalized channels, after that it outputs loudness normalized channels at -16 LKFS.</p>
       <li data-md>
        <p>Limiter module may limit the true peak of input channels at -1dB.</p>
      </ul>
