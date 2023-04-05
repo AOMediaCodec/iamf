@@ -344,53 +344,42 @@ round(x) = floor(x + 0.5).
 
 # Introduction # {#introduction}
 
-The <dfn noexport>IA sequence</dfn> is a bitstream to represent immersive audio for presentation on a wide range of devices in both dynamic streaming and offline applications. These applications include internet audio streaming, multicasting/broadcasting services, file download, gaming, communication, virtual and augmented reality, and others. In these applications, audio may be played back on a wide range of devices, e.g. headsets, mobile phones, tablets, TVs, sound bars, home theater systems and big screens.
+The <dfn noexport>immersive audio</dfn> means the combination of 3D audio signals recreating a sound experience close to that of a natural environment.
 
-The bitstream comprises a number of coded audio substreams and the metadata that describes how to decode, render and mix the substreams to generate an audio signal for playback. The bitstream format itself is codec-agnostic; any supported audio codec may be used to code the audio substreams.
+This specification defines a model for representing [=immersive audio=] contents based on coded audio substreams contributing to audio elements meant to be rendered and mixed to form one or more immersive presentations as depicted in the figure below.
 
-The immersive audio media and format (<dfn noexport>IAMF</dfn>) is the model and format for immersive audio (IA).
+<center><img src="images/decoding_flow_cropped.png" style="width:100%; height:auto;"></center>
+<center><figcaption>Processing flow to decode, reconstruct, render and mix the audio signals for immersive audio playback.</figcaption></center>
 
-The figure below shows the conceptual IAMF architecture.
+Based on the model, this specification defines a hypothetical immersive audio model and format (<dfn noexport>IAMF</dfn>) architecture as depicted in the figure below.
 
-<center><img src="images/Conceptual IAC Architecture.png"></center>
-<center><figcaption>Conceptual IAMF Architecture</figcaption></center>
+<center><img src="images/Hypothetical IAMF Architecture.png" style="width:100%; height:auto;"></center>
+<center><figcaption>Hypothetical IAMF Architecture</figcaption></center>
 
 For a given input 3D audio,
-- Pre-Processor generates Pre-Processed Audio and Codec Agnostic Metadata for immersive audio (IA).
-- Audio Codec Enc generates Codec-Dependent Bitstream, which consists of the coded streams, coded from Pre-Processed Audio.
-- File Packager generates IAMF File by encapsulating IA sequence, which consists of Codec-Dependent Bitstream and Codec Agnostic Metadata, into [[!ISOBMFF]] tracks.
+- Pre-Processor generates Pre-Processed Audio and Codec Agnostic Metadata for [=immersive audio=] (IA).
+	- Pre-Processed Audio is composed of one or more substreams.
+	- Metadata is determined to drive the rendering and mixing
+- Audio Codec Enc generates Codec-Dependent Bitstream, which consists of the coded substreams.
+- Bitstream Packager generates IA sequence from Codec-Dependent Bitstream and Codec Agnostic Metadata.
+- File Packager generates IAMF File by encapsulating IA sequence into [[!ISOBMFF]] tracks.
 - File Parser reconstructs IA sequence by decapsulating IAMF File.
+- Bitstream Parser outputs Codec-Dependent Bitstream and Codec Agnostic Metadata.
 - Audio Codec Dec outputs a decoded Pre-Processed Audio after decoding of Codec-Dependent Bitstream.
 - Post-Processor outputs Immersive 3D Audio by using the decoded Pre-Processed Audio and Codec Agnostic Metadata.
 
+## IA sequence Components ## {#iasequence-components}
 
-The rest of this specification is formulated as follows:
-- [[#overview]] describes the high level IA sequence architecture and introduces its components.
-- [[#obu-syntax]] specifies the syntax and semantics of the top level IA components and detailed IA components.
-- [[#profiles]] specifies the profiles for IA sequences and IA decoders.
-- [[#standalone]] specifies the representation of a standalone IA sequence.
-- [[#isobmff]] specifies the encapsulation of an IA sequence into [[!ISOBMFF]] tracks.
-- [[#processing]] specifies how the IA sequence should be decoded to generate the output immersive 3D audio.
-- [[#iamfgeneration]] provides a guideline for generating the IA sequence.
-- [[#iamfconsumption]] provides a guideline for consuming the IA sequence, for different use-cases.
+The <dfn noexport>IA sequence</dfn> is a bitstream to represent [=immersive audio=] for presentation on a wide range of devices in both dynamic streaming and offline applications. These applications include internet audio streaming, multicasting/broadcasting services, file download, gaming, communication, virtual and augmented reality, and others. In these applications, audio may be played back on a wide range of devices, e.g. headsets, mobile phones, tablets, TVs, sound bars, home theater systems and big screens.
 
+The bitstream comprises a number of coded audio substreams and the metadata that describes how to decode, render and mix the substreams to generate an audio signal for playback. The bitstream format itself is codec-agnostic; any supported audio codec may be used to code the audio substreams.
 
-# Overview # {#overview}
-
-## IA sequence Components ## {#iab-components}
-
-The IA sequence includes one or more audio elements, each of which consists of one or more audio substreams. The IA sequence further include mix presentations and parameters.
+The IA sequence includes one or more audio elements, each of which consists of one or more audio substreams. The IA sequence further includes mix presentations and parameters.
 
 - <dfn noexport>Audio substream</dfn> is the actual audio signal, which may be encoded with any compatible audio codec.
 - <dfn noexport>Audio element</dfn> is the 3D representation of the audio signals, and are constructed from one or more audio substreams and the metadata describing them. The audio substreams associated with one audio element use the same audio codec.
 - <dfn noexport>Mix presentations</dfn> contain metadata that describe how the audio elements are rendered and mixed together for playback through physical loudspeakers or headphones. Multiple mix presentations can be defined as alternatives to each other within the same IA sequence. Furthermore, the choice of which mix presentation to use at playback is left to the user. For example, multi-language support is implemented by defining different mix presentations, where the first mix describes the use of the audio element with English dialogue, and the second mix describes the use of the audio element with French dialogue.
 - <dfn noexport>Parameters</dfn> are the values that are associated with the algorithms used for decoding, reconstructing, rendering and mixing. Parameters may change their values over time and may further be animated; for example, any changes in values may be smoothed over some time interval. Their rate of change is specific to its respective algorithm, and is independent of other algorithms and the frame rates associated with the audio substreams. As such, they may be viewed as a 1D signal that have different metadata specified for different time intervals.
-
-
-The figure below shows the relationship between the audio substreams, audio elements and mix presentations and the processing flow to obtain the immersive audio playback.
-
-<center><img src="images/decoding_flow_cropped.png" style="width:100%; height:auto;"></center>
-<center><figcaption>Processing flow to decode, reconstruct, render and mix the audio signals for immersive audio playback.</figcaption></center>
 
 ## Use of OBU Syntax ## {#use-of-obu}
 
@@ -413,35 +402,6 @@ The IA sequence supports the description of multiple audio substreams and algori
 - <dfn noexport>Parameter Block OBU</dfn> provides the time-varying parameter values for an algorithm used in any of the decoding, reconstruction, rendering or mixing steps.
 - <dfn noexport>Sync OBU</dfn> provides relative timestamp offsets to synchronize audio frames and parameter blocks.
 - <dfn noexport>Temporal Delimiter OBU</dfn> identifies the temporal units.
-
-
-The below figure shows the linking scheme among IDs in obu_header or obu payload.
-
-<center><img src="images/ID Linking Example.png" style="width:100%; height:auto;"></center>
-<center><figcaption>ID Linking Scheme</figcaption></center>
-
-In the above figure, 
-- Codec Config OBU with codec_config_id  = 0 is providing codec_id and its decoder_config().
-- Mix Presentation OBU with mix_presentation_id  = 21 is saying:
-	- There are two Audio Elements(audio_element_id = 11 and 12) which need to be mixed. The audio_element_id = 11 and the audio_element_id = 12 are linked to the Audio Element OBUs with audio_element_id = 11 and audio_element_id = 12, respectively.
-		- There is one or more Parameter Block OBUs with parameter_id = 32 to be used for mixing of the Audio Element with audio_element_id = 11. 
-		- There is one or more Parameter Block OBUs with parameter_id = 33 to be used for mixing of the Audio Element with audio_element_id = 12.
-	- There is one or more Parameter Block OBUs with parameter_id = 34 to be used for mixing of the two Audio Elements.
-- Audio Element OBU with audio_element_id = 11 is saying:
-	- This audio element has been coded using Codec Config OBU with codec_config_id = 0. 
-	- There are two Substreams (audio_substream_id = 0 and 1) in this audio element. The audio_substream_id = 0 and the audio_substream_id = 1 are linked to the Audio Frame OBUs with audio_substream_id = 0 and audio_substream_id = 1(i.e. obu_type = OBU_IA_Audio_Frame_ID0 and obu_type = OBU_IA_Audio_Frame_ID1), respectively.
-	- There is one or more Parameter Block OBUs with parameter_id = 31 to be used for demixing of this audio element.
-- Audio Element OBU with audio_element_id = 12 is saying:
-	- This audio element has been coded by using Codec Config OBU with codec_config_id = 0.
-	- There is one Substream (audio_substream_id = 2) in this audio element. The audio_substream_id = 2 is linked to the Audio Frame OBUs with audio_substream_id = 2 (i.e. obu_type = OBU_IA_Audio_Frame_ID2).
-- Audio Frame OBU with ID = 0 (i.e. obu_type = OBU_IA_Audio_Frame_ID0) is providing the coded data which has been coded by using Codec Config OBU with codec_config_id = 0 of Substream with audio_substream_id = 0.
-- Audio Frame OBU with ID = 1 (i.e. obu_type = OBU_IA_Audio_Frame_ID1) is providing the coded data which has been coded by using Codec Config OBU with codec_config_id = 0 of Substream with audio_substream_id = 1.
-- Audio Frame OBU with ID = 2 (i.e. obu_type = OBU_IA_Audio_Frame_ID2) is providing the coded data which has been coded by using Codec Config OBU with codec_config_id = 0 of Substream with audio_substream_id = 2.
-- Parameter Block OBU with parameter_id = 31 is providing demixing_info_parameter_data() to be applied for demixing of the Audio Element with audio_element_id = 11.
-- Parameter Block OBU with parameter_id = 32 is providing mix_gain_parameter_data() to be applied to the rendered audio element after rendering according to render_config() of the Audio Element with audio_element_id = 11.
-- Parameter Block OBU with parameter_id = 33 is providing mix_gain_parameter_data() to be applied to the rendered audio element after rendering according to render_config() of the Audio Element with audio_element_id = 12.
-- Parameter Block OBU with parameter_id = 34 is providing mix_gain_parameter_data() to be applied to the mixed audio of the two rendered audios.
-
 
 # Open Bitstream Unit (OBU) Syntax and Semantics # {#obu-syntax}
 
@@ -2810,8 +2770,38 @@ For a given Mix Presentation OBU and a given [=loudness_layout=] of a sub-mix of
 
 ISSUE: TODO. Fill in example workflows.
 
+# Annex
 
-# Annex B: Short-lived Audio
+## Annex A: ID Linking Scheme
+
+The below figure shows the linking scheme among IDs in obu_header or obu payload.
+
+<center><img src="images/ID Linking Example.png" style="width:100%; height:auto;"></center>
+<center><figcaption>ID Linking Scheme</figcaption></center>
+
+In the above figure, 
+- Codec Config OBU with codec_config_id  = 0 is providing codec_id and its decoder_config().
+- Mix Presentation OBU with mix_presentation_id  = 21 is saying:
+	- There are two Audio Elements(audio_element_id = 11 and 12) which need to be mixed. The audio_element_id = 11 and the audio_element_id = 12 are linked to the Audio Element OBUs with audio_element_id = 11 and audio_element_id = 12, respectively.
+		- There is one or more Parameter Block OBUs with parameter_id = 32 to be used for mixing of the Audio Element with audio_element_id = 11. 
+		- There is one or more Parameter Block OBUs with parameter_id = 33 to be used for mixing of the Audio Element with audio_element_id = 12.
+	- There is one or more Parameter Block OBUs with parameter_id = 34 to be used for mixing of the two Audio Elements.
+- Audio Element OBU with audio_element_id = 11 is saying:
+	- This audio element has been coded using Codec Config OBU with codec_config_id = 0. 
+	- There are two Substreams (audio_substream_id = 0 and 1) in this audio element. The audio_substream_id = 0 and the audio_substream_id = 1 are linked to the Audio Frame OBUs with audio_substream_id = 0 and audio_substream_id = 1(i.e. obu_type = OBU_IA_Audio_Frame_ID0 and obu_type = OBU_IA_Audio_Frame_ID1), respectively.
+	- There is one or more Parameter Block OBUs with parameter_id = 31 to be used for demixing of this audio element.
+- Audio Element OBU with audio_element_id = 12 is saying:
+	- This audio element has been coded by using Codec Config OBU with codec_config_id = 0.
+	- There is one Substream (audio_substream_id = 2) in this audio element. The audio_substream_id = 2 is linked to the Audio Frame OBUs with audio_substream_id = 2 (i.e. obu_type = OBU_IA_Audio_Frame_ID2).
+- Audio Frame OBU with ID = 0 (i.e. obu_type = OBU_IA_Audio_Frame_ID0) is providing the coded data which has been coded by using Codec Config OBU with codec_config_id = 0 of Substream with audio_substream_id = 0.
+- Audio Frame OBU with ID = 1 (i.e. obu_type = OBU_IA_Audio_Frame_ID1) is providing the coded data which has been coded by using Codec Config OBU with codec_config_id = 0 of Substream with audio_substream_id = 1.
+- Audio Frame OBU with ID = 2 (i.e. obu_type = OBU_IA_Audio_Frame_ID2) is providing the coded data which has been coded by using Codec Config OBU with codec_config_id = 0 of Substream with audio_substream_id = 2.
+- Parameter Block OBU with parameter_id = 31 is providing demixing_info_parameter_data() to be applied for demixing of the Audio Element with audio_element_id = 11.
+- Parameter Block OBU with parameter_id = 32 is providing mix_gain_parameter_data() to be applied to the rendered audio element after rendering according to render_config() of the Audio Element with audio_element_id = 11.
+- Parameter Block OBU with parameter_id = 33 is providing mix_gain_parameter_data() to be applied to the rendered audio element after rendering according to render_config() of the Audio Element with audio_element_id = 12.
+- Parameter Block OBU with parameter_id = 34 is providing mix_gain_parameter_data() to be applied to the mixed audio of the two rendered audios.
+
+## Annex B: Short-lived Audio
 
 An IA sequence may contain audio elements which are short-lived, where the audio element may not exist for the entire timeline of the IA sequence. There are two methods for signalling this. Consider the example with two audio elements, A and B, present at the start of the IA sequence, where B is a short-lived audio element with a length shorter than A.
 
