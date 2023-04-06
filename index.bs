@@ -748,13 +748,14 @@ abstract class ParamDefinition() {
 
 <dfn noexport>constant_segment_interval</dfn> specifies the interval of each segment, in the case where all segments except the last segment have equal intervals. If all segments except the last segment do not have equal intervals, the value of constant_segment_interval shall be set to 0. 
 
+When it defines <dfn noexport>D</dfn> = the value of [=duration=], <dfn noexport>NS</dfn> = the value of [=num_segments=], <dfn noexport>CSI</dfn> = the value of [=constant_segment_interval=] and <dfn noexport>SI</dfn> = the value of [=segment_interval=].
+- When [=CSI=] != 0, [=NS=] x [=CSI=] shall be equal to or greater than [=D=].
+	- If [=NS=] x [=CSI=] > [=D=], the actual interval of the last segment shall be [=D=] - ([=NS=] - 1) x [=CSI=].
+- When [=CSI=] = 0, the summation of all [=SI=]s in this parameter block shall be equal to [=D=].
+
 <dfn noexport>segment_interval</dfn> specifies the interval for the given segment.
 
 Each value of [=duration=], [=constant_segment_interval=] and [=segment_interval=] shall be expressed as the number of ticks at the [=parameter_rate=] specified in the corresponding parameter definition.
-- When it defines <dfn noexport>D</dfn> = the value of [=duration=], <dfn noexport>NS</dfn> = the value of [=num_segments=], <dfn noexport>CSI</dfn> = the value of [=constant_segment_interval=] and <dfn noexport>SI</dfn> = the value of [=segment_interval=].
-	- When [=CSI=] != 0, [=NS=] x [=CSI=] shall be equal to or greater than [=D=].
-		- If [=NS=] x [=CSI=] > [=D=], the actual interval of the last segment shall be [=D=] - ([=NS=] - 1) x [=CSI=].
-	- When [=CSI=] = 0, the summation of all [=SI=]s in this parameter block shall be equal to [=D=].
 
 ### Scalable Channel Layout Config Syntax and Semantics ### {#syntax-scalable-channel-layout-config}
 
