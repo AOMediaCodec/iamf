@@ -720,11 +720,11 @@ abstract class ParamDefinition() {
   unsigned int (7) reserved;
   if (param_definition_mode == 0) {
     leb128() duration;
-    leb128() num_segments;
-    leb128() constant_segment_interval;
-    if (constant_segment_interval == 0) {
-      for (i=0; i< num_segments; i++) {
-        leb128() segment_interval;
+    leb128() num_subblocks;
+    leb128() constant_subblock_interval;
+    if (constant_subblock_interval == 0) {
+      for (i=0; i< num_subblocks; i++) {
+        leb128() subblock_interval;
       }
     }
     
@@ -738,24 +738,24 @@ abstract class ParamDefinition() {
 
 <dfn noexport>parameter_rate</dfn> specifies the rate used by this parameter, expressed as ticks per second. Time-related fields associated with this parameter, such as durations and intervals, shall be expressed in the number of ticks.
 
-<dfn noexport>param_definition_mode</dfn> indicates if this parameter definition specifies duration, num_segments, constant_segment_interval and segment_interval fields for the parameter blocks associated to the [=parameter_id=].
-- When this field is set to 0, all of duration, num_segments, constant_segment_interval and segment_interval fields shall be specified in this parameter definition mapped to the [=parameter_id=]. In that case, none of parameter blocks associated to this parameter definition shall specify duration, num_segments, constant_segment_interval and segment_interval fields. 
-- When this field is set to 1, none of duration, num_segments, constant_segment_interval and segment_interval fields shall be specificed in this parameter definition. In that case, each of parameter blocks associated to this parameter definition shall specify its own duration, num_segments, constant_segment_interval and segment_interval fields.
+<dfn noexport>param_definition_mode</dfn> indicates if this parameter definition specifies duration, num_subblocks, constant_subblock_interval and subblock_interval fields for the parameter blocks associated to the [=parameter_id=].
+- When this field is set to 0, all of duration, num_subblocks, constant_subblock_interval and subblock_interval fields shall be specified in this parameter definition mapped to the [=parameter_id=]. In that case, none of parameter blocks associated to this parameter definition shall specify duration, num_subblocks, constant_subblock_interval and subblock_interval fields. 
+- When this field is set to 1, none of duration, num_subblocks, constant_subblock_interval and subblock_interval fields shall be specificed in this parameter definition. In that case, each of parameter blocks associated to this parameter definition shall specify its own duration, num_subblocks, constant_subblock_interval and subblock_interval fields.
 
 <dfn noexport>duration</dfn> specifies the duration for which all of parameter blocks associated to this parameter definition are valid and applicable. 
 
-<dfn noexport>num_segments</dfn> specifies the number of different sets of parameter values specified in all of parameter blocks associated to this parameter definition, where each set describes a different segment of the timeline, contiguously.
+<dfn noexport>num_subblocks</dfn> specifies the number of different sets of parameter values specified in all of parameter blocks associated to this parameter definition, where each set describes a different subblock of the timeline, contiguously.
 
-<dfn noexport>constant_segment_interval</dfn> specifies the interval of each segment, in the case where all segments except the last segment have equal intervals. If all segments except the last segment do not have equal intervals, the value of constant_segment_interval shall be set to 0. 
+<dfn noexport>constant_subblock_interval</dfn> specifies the interval of each subblock, in the case where all subblocks except the last subblock have equal intervals. If all subblocks except the last subblock do not have equal intervals, the value of constant_subblock_interval shall be set to 0. 
 
-When it defines <dfn noexport>D</dfn> = the value of [=duration=], <dfn noexport>NS</dfn> = the value of [=num_segments=], <dfn noexport>CSI</dfn> = the value of [=constant_segment_interval=] and <dfn noexport>SI</dfn> = the value of [=segment_interval=].
+When it defines <dfn noexport>D</dfn> = the value of [=duration=], <dfn noexport>NS</dfn> = the value of [=num_subblocks=], <dfn noexport>CSI</dfn> = the value of [=constant_subblock_interval=] and <dfn noexport>SI</dfn> = the value of [=subblock_interval=].
 - When [=CSI=] != 0, [=NS=] x [=CSI=] shall be equal to or greater than [=D=].
-	- If [=NS=] x [=CSI=] > [=D=], the actual interval of the last segment shall be [=D=] - ([=NS=] - 1) x [=CSI=].
+	- If [=NS=] x [=CSI=] > [=D=], the actual interval of the last subblock shall be [=D=] - ([=NS=] - 1) x [=CSI=].
 - When [=CSI=] = 0, the summation of all [=SI=]s in this parameter block shall be equal to [=D=].
 
-<dfn noexport>segment_interval</dfn> specifies the interval for the given segment.
+<dfn noexport>subblock_interval</dfn> specifies the interval for the given subblock.
 
-Each value of [=duration=], [=constant_segment_interval=] and [=segment_interval=] shall be expressed as the number of ticks at the [=parameter_rate=] specified in the corresponding parameter definition.
+Each value of [=duration=], [=constant_subblock_interval=] and [=subblock_interval=] shall be expressed as the number of ticks at the [=parameter_rate=] specified in the corresponding parameter definition.
 
 ### Scalable Channel Layout Config Syntax and Semantics ### {#syntax-scalable-channel-layout-config}
 
@@ -1264,18 +1264,18 @@ The metadata specified in this OBU defines the parameter values for an algorithm
 class parameter_block_obu() {
   leb128() parameter_id;
   
-  (param_definition_type, param_definition_mode, duration, num_segments, constant_segment_interval, segment_interval) = get_param_definition(parameter_id);
+  (param_definition_type, param_definition_mode, duration, num_subblocks, constant_subblock_interval, subblock_interval) = get_param_definition(parameter_id);
   
   if (param_definition_mode) {
     leb128() duration;
-    leb128() num_segments;
-    leb128() constant_segment_interval;
+    leb128() num_subblocks;
+    leb128() constant_subblock_interval;
   }
 
-  for (i = 0; i < num_segments; i++) {
+  for (i = 0; i < num_subblocks; i++) {
     if (param_definition_mode) {
-      if (constant_segment_interval == 0) {
-        leb128() segment_interval;
+      if (constant_subblock_interval == 0) {
+        leb128() subblock_interval;
       }
     }
 
@@ -1296,19 +1296,19 @@ class parameter_block_obu() {
 
 <dfn noexport>parameter_id</dfn> indicates an unique obu_id with [=obu_type=] = OBU_IA_Parameter_Block that is associated with a specific parameter definition. All parameter blocks that provide data for that parameter definition shall have the same parameter_id.
 
-<dfn noexport>get_param_definition()</dfn> is a run-time function to get the parameter definition type, the parameter definition mode, duration, num_segments, constant_segment_interval and segment_interval mapped to the parameter_id. 
+<dfn noexport>get_param_definition()</dfn> is a run-time function to get the parameter definition type, the parameter definition mode, duration, num_subblocks, constant_subblock_interval and subblock_interval mapped to the parameter_id. 
 
 <dfn value noexport for="parameter_block_obu()">duration</dfn> specifies the duration for which this parameter block is valid and applicable. 
 
-<dfn value noexport for="parameter_block_obu()">num_segments</dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different segment of the timeline, contiguously.
+<dfn value noexport for="parameter_block_obu()">num_subblocks</dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different subblock of the timeline, contiguously.
 
-<dfn value noexport for="parameter_block_obu()">constant_segment_interval</dfn> specifies the interval of each segment, in the case where all segments except the last segment have equal intervals. If all segments except the last segment do not have equal intervals, the value of constant_segment_interval shall be set to 0. 
+<dfn value noexport for="parameter_block_obu()">constant_subblock_interval</dfn> specifies the interval of each subblock, in the case where all subblocks except the last subblock have equal intervals. If all subblocks except the last subblock do not have equal intervals, the value of constant_subblock_interval shall be set to 0. 
 
 Audio Element OBU and/or Mix Presentation OBU is mapping a parameter_id to the parameter definition type. So, IA decoders can know the definition type mapped to the parameter_id.
 
-<dfn value noexport for="parameter_block_obu()">segment_interval</dfn> specifies the interval for the given segment.
+<dfn value noexport for="parameter_block_obu()">subblock_interval</dfn> specifies the interval for the given subblock.
 
-Each value of duration, constant_segment_interval and segment_interval shall be expressed as the number of ticks at the [=parameter_rate=] specified in the corresponding parameter definition.
+Each value of duration, constant_subblock_interval and subblock_interval shall be expressed as the number of ticks at the [=parameter_rate=] specified in the corresponding parameter definition.
 
 ### Mix Gain Parameter Data Syntax and Semantics ### {#syntax-mix-gain-param}
 
@@ -1355,13 +1355,13 @@ class AnimatedParameterData(animation_type) {
 }
 ```
 
-<dfn noexport>start_point_value</dfn> specifies the parameter value that is applied at the start of the segment.
+<dfn noexport>start_point_value</dfn> specifies the parameter value that is applied at the start of the subblock.
 
-<dfn noexport>end_point_value</dfn> specifies the parameter value that is applied at the end of the segment.
+<dfn noexport>end_point_value</dfn> specifies the parameter value that is applied at the end of the subblock.
 
 <dfn noexport>control_point_value</dfn> specifies the parameter value of the middle control point of a quadratic Bezier curve, i.e. its y-axis value.
 
-<dfn noexport>control_point_relative_time</dfn> specifies the time of the middle control point of a quadratic Bezier curve, i.e. its x-axis value. This value is expressed as a fraction of the parameter segment interval with valid values in the range of 0 and 1, inclusively. A value equal to 0 or 1 indicates that this animation implements a linear Bezier curve, in which case control_point_value shall be ignored by the IA parser. It is stored as an 8-bit, unsigned, fixed-point value with 8 fractional bits (i.e. Q0.8 in [[!Q-Format]]).
+<dfn noexport>control_point_relative_time</dfn> specifies the time of the middle control point of a quadratic Bezier curve, i.e. its x-axis value. This value is expressed as a fraction of the parameter subblock interval with valid values in the range of 0 and 1, inclusively. A value equal to 0 or 1 indicates that this animation implements a linear Bezier curve, in which case control_point_value shall be ignored by the IA parser. It is stored as an 8-bit, unsigned, fixed-point value with 8 fractional bits (i.e. Q0.8 in [[!Q-Format]]).
 
 ### Demixing Info Parameter Data Syntax and Semantics ### {#syntax-demixing-info}
 
@@ -1637,7 +1637,7 @@ Restrictions on the IA sequence:
     - When num_layers = 1, OBU_IA_Parameter_Block including demixing_info() may be present in the IA sequence and IA decoders may use the demixing_info() for dynamic down-mixing.
 - All audio frames shall have aligned frame boundaries.
 - All parameter definitons shall have the same [=param_definition_mode=].
-	- When [=param_definition_mode=] = 0, duration, num_segments, constant_segment_interval and segment_interval shall be same in all parameter definitions, respectively.
+	- When [=param_definition_mode=] = 0, duration, num_subblocks, constant_subblock_interval and subblock_interval shall be same in all parameter definitions, respectively.
 
 
 Capabilities of the IA parser, decoder and processor:
@@ -1674,7 +1674,7 @@ Restrictions on IA sequence:
     - When num_layers = 1, OBU_IA_Parameter_Block including [=demixing_info_parameter_data()=] may be present in the IA sequence and IA decoders may use the [=demixing_info_parameter_data()=] for dynamic down-mixing.
 - All audio frames shall have aligned frame boundaries.
 - All parameter definitons shall have the same [=param_definition_mode=].
-	- When [=param_definition_mode=] = 0, duration, num_segments, constant_segment_interval and segment_interval shall be same in all parameter definitions, respectively.
+	- When [=param_definition_mode=] = 0, duration, num_subblocks, constant_subblock_interval and subblock_interval shall be same in all parameter definitions, respectively.
 
 
 Capabilities of the IA parser, decoder and processor:
@@ -2294,11 +2294,11 @@ The rendered and processed audio elements are then summed, and then apply [=outp
 
 ## Animated Parameters ## {#processing-animated-params}
 
-This section describes how a set of parameters is animated over a segment in a parameter block and applied to the corresponding audio samples, using the information provided in [=AnimatedParameterData()=].
+This section describes how a set of parameters is animated over a subblock in a parameter block and applied to the corresponding audio samples, using the information provided in [=AnimatedParameterData()=].
 
-If [=animation_type=] is equal to STEP, the parameter value provided by [=start_point_value=] should be applied to all time steps in the segment.
+If [=animation_type=] is equal to STEP, the parameter value provided by [=start_point_value=] should be applied to all time steps in the subblock.
 
-If [=animation_type=] is equal to LINEAR or BEZIER, the information provided in [=AnimatedParameterData()=] describes how the parameter is animated as a Bezier curve. Let <code>T</code> be the segment interval defined in the parameter_block_obu() and <code>P0</code>, <code>P1</code> and <code>P2</code> be 2D coordinates defined as
+If [=animation_type=] is equal to LINEAR or BEZIER, the information provided in [=AnimatedParameterData()=] describes how the parameter is animated as a Bezier curve. Let <code>T</code> be the subblock interval defined in the parameter_block_obu() and <code>P0</code>, <code>P1</code> and <code>P2</code> be 2D coordinates defined as
 
 ```
 P0 = (t0, start_point_value),
@@ -2306,7 +2306,7 @@ P1 = (t1, control_point_value),
 P2 = (t2, end_point_value),
 ```
 
-where <code>t0 = 0</code> is the segment start time, <code>t2 = D</code> is the segment end time and <code>t1</code> is the control point time given by
+where <code>t0 = 0</code> is the subblock start time, <code>t2 = D</code> is the subblock end time and <code>t1</code> is the control point time given by
 
 ```
 t1 = round(D * control_point_relative_time).
@@ -2332,7 +2332,7 @@ B_quad(a) = (1 - a)^2 * P0 + 2 * (1 - a) * a * P1 + a^2 * P2,
 
 where <code>B_quad(a) = (t, y)</code> is a 2D coordinate with parameter value <code>y</code> at time <code>t</code>.
 
-To apply the parameter values to the audio samples in the segment without interpolation, the [=parameter_rate=] is first resampled to the audio sample rate to give:
+To apply the parameter values to the audio samples in the subblock without interpolation, the [=parameter_rate=] is first resampled to the audio sample rate to give:
 
 ```
 n0 = t0 * audio_sample_rate / parameter_rate,
