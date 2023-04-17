@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version d9bd89757, updated Thu Mar 23 10:06:53 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="48ece085bf494a36de4ab1e9a52ba479b3c25124" name="document-revision">
+  <meta content="17ece77f8913efc7f0368fbedbff48117a52f9da" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -3281,7 +3281,7 @@ class AnimatedParameterData(animation_type) {
    <p>This value must be greater or equal to 22, in order to avoid collision with the reserved IDs for the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="coded_frame_size">coded_frame_size<a class="self-link" href="#coded_frame_size"></a></dfn> is the size of <a data-link-type="dfn" href="#audio_frame" id="ref-for-audio_frame">audio_frame()</a> in bytes.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_frame">audio_frame()</dfn> is the raw coded audio data for the frame. It shall be <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6716#" id="ref-for-1af30f726bd2cf5a930fcae7941981e8">opus packet</a> of <a data-link-type="biblio" href="#biblio-rfc6716" title="Definition of the Opus Audio Codec">[RFC6716]</a> for IAMF-OPUS, <a data-link-type="dfn" href="https://www.iso.org/standard/43345.html#" id="ref-for-eac87231ca66dad4375d600c066d991c">raw_data_block()</a> of <a data-link-type="biblio" href="#biblio-aac" title="Information technology — Generic coding of moving pictures and associated audio information — Part 7: Advanced Audio Coding (AAC)">[AAC]</a> for IAMF-AAC-LC and <a data-link-type="dfn" href="https://xiph.org/flac/format.html" id="ref-for-c568d8f4de8d80029804bf1eecb28b4c①">FRAME</a> of <a data-link-type="biblio" href="#biblio-flac" title="Free Lossless Audio Codec">[FLAC]</a> for IAMF-FLAC.</p>
-   <p>For IAMF-LPCM, <a data-link-type="dfn" href="#audio_frame" id="ref-for-audio_frame①">audio_frame()</a> shall be LPCM samples. When more than one byte is used to represent a LPCM sample, the byte order is in little endian.</p>
+   <p>For IAMF-LPCM, <a data-link-type="dfn" href="#audio_frame" id="ref-for-audio_frame①">audio_frame()</a> shall be LPCM samples. When more than one byte is used to represent a LPCM sample, the byte order is indicated in <a data-link-type="dfn" href="#sample_format_flags" id="ref-for-sample_format_flags">sample_format_flags</a>.</p>
    <h3 class="heading settled" data-level="3.11" id="obu-temporaldelimiter"><span class="secno">3.11. </span><span class="content">Temporal Delimiter OBU Syntax and Semantics</span><a class="self-link" href="#obu-temporaldelimiter"></a></h3>
    <p>This section specifies the OBU payload of OBU_IA_Temporal_Delimiter.</p>
    <p><b>Syntax</b></p>
@@ -3397,7 +3397,7 @@ class AnimatedParameterData(animation_type) {
   unsigned int (32) sample_rate;
 }
 </pre>
-   <dfn data-dfn-type="dfn" data-noexport id="sample_format_flags">sample_format_flags<a class="self-link" href="#sample_format_flags"></a></dfn> complies with <a data-link-type="dfn" href="https://www.iso.org/standard/77752.html#" id="ref-for-41c4b6a338908de4fcad02babe72a382②">format_flags</a> specified in <a data-link-type="biblio" href="#biblio-mp4-pcm" title="Information technology — MPEG audio technologies — Part 5: Uncompressed audio in MPEG-4 file format">[MP4-PCM]</a>. In other words, 0x01 indicates little-endian PCM sample format and 0x00 indicates big-endian PCM sample format. 
+   <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="sample_format_flags">sample_format_flags</dfn> complies with <a data-link-type="dfn" href="https://www.iso.org/standard/77752.html#" id="ref-for-41c4b6a338908de4fcad02babe72a382②">format_flags</a> specified in <a data-link-type="biblio" href="#biblio-mp4-pcm" title="Information technology — MPEG audio technologies — Part 5: Uncompressed audio in MPEG-4 file format">[MP4-PCM]</a>. In other words, 0x01 indicates little-endian PCM sample format and 0x00 indicates big-endian PCM sample format. 
    <p><dfn data-dfn-type="dfn" data-noexport id="sample_size">sample_size<a class="self-link" href="#sample_size"></a></dfn> complies with <a data-link-type="dfn" href="https://www.iso.org/standard/77752.html#" id="ref-for-41c4b6a338908de4fcad02babe72a382③">PCM_sample_size</a> specified in <a data-link-type="biblio" href="#biblio-mp4-pcm" title="Information technology — MPEG audio technologies — Part 5: Uncompressed audio in MPEG-4 file format">[MP4-PCM]</a>. In other words, it shall take a value from the set 16, 24 and 32.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="sample_rate">sample_rate<a class="self-link" href="#sample_rate"></a></dfn> indicates the sample rate of the input audio in Hz. It shall take a value from the set 44.1k, 16k, 32k, 48k and 96k.</p>
    <p>Substream format is one <a data-link-type="dfn" href="#audio_frame" id="ref-for-audio_frame②">audio_frame()</a> of Audio_Frame_OBU which contains only one single PCM audio frame of mono or stereo channels.</p>
@@ -6541,6 +6541,12 @@ Recon_Gain for D_Rtb4:
    <span id="infopaneltitle-for-codec_specific_info" style="display:none">Info about the 'Codec_Specific_Info' definition.</span><b><a href="#codec_specific_info">#codec_specific_info</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-codec_specific_info">3.6. Codec Config OBU Syntax and Semantics</a> <a href="#ref-for-codec_specific_info①">(2)</a> <a href="#ref-for-codec_specific_info②">(3)</a> <a href="#ref-for-codec_specific_info③">(4)</a>
+   </ul>
+  </aside>
+  <aside aria-labelledby="infopaneltitle-for-sample_format_flags" class="dfn-panel" data-for="sample_format_flags" id="infopanel-for-sample_format_flags">
+   <span id="infopaneltitle-for-sample_format_flags" style="display:none">Info about the 'sample_format_flags' definition.</span><b><a href="#sample_format_flags">#sample_format_flags</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-sample_format_flags">3.10. Audio Frame OBU Syntax and Semantics</a>
    </ul>
   </aside>
   <aside aria-labelledby="infopaneltitle-for-iasampleentry" class="dfn-panel" data-for="iasampleentry" id="infopanel-for-iasampleentry">
