@@ -1854,16 +1854,16 @@ During encapsulation process, OBUs of IA sequences are encapsulated into [[!ISOB
 	- If there is audio samples to be trimmed at the start or at the end, then 'edts' and 'elst' boxes shall be present to reflect the the number of audio samples to be trimmed at the start of the IA sequence (i.e [=media_time=]) and [=edit_duration=].
 - Sample Entry
 	- The ith set of descriptor OBUs which is not a redundant copy of the previous descriptor OBUs (i.e. the first descriptor OBUs is regarded as non-redundant copy regardless of its [=obu_redundant_copy=]), specified in [[#standalone-descriptor-obus]], and the Sync OBU that immediately follows them are moved to the ith [=IASampleEntry=]. All descriptor OBUs in the IA sequences are then discarded from the IA sequence. 
-- Decoding Time to Sample
-	- The [=num_samples_per_frame=] value in the Codec Config OBU, which indicates the duration of each sample, is reflected in the 'stts' or 'trun' box except the last sample. 
-	- The duration of the last sample is duration including samples trimmed at the beginning but excluding samples trimmed at the end. 
-	- The duration of the last sample may not be same as [=num_samples_per_frame=]. In this case, it is calcuated from Audio Frame OBU of the last temporal unit.
+- Decoding Time to IA Sample
+	- The [=num_samples_per_frame=] value in the Codec Config OBU, which indicates the duration of one audio frame, is reflected in the 'stts' or 'trun' box based on [=IA Sample=] except the last [=IA Sample=]. 
+	- The duration of [=IA Sample=] is duration including samples trimmed at the beginning but excluding samples trimmed at the end. 
+	- The duration of the last [=IA Sample=] may not be same as that of the other [=IA Sample=]s. In this case, it is calcuated from Audio Frame OBU of the last temporal unit.
 - Sample Group
 	- The [=roll_distance=] value in the Codec Config OBU is copied to [=AudioRollRecoveryEntry=] with the [=grouping_type=] = 'roll'.
-- Sample
+- IA Sample
 	- Temporal Delimiter OBU: shall be discarded if present.	
 		- Temporal Unit that has no OBUs is discarded
-	- Temporal units shall be placed in consecutive samples in order.
+	- Temporal units shall be placed in consecutive IA Samples in order.
 		
 <center><img src="images/IAMF Encapsulation Guideline.png" style="width:100%; height:auto;"></center>
 <center><figcaption>IAMF Encapsulation Scheme</figcaption></center>
@@ -1939,9 +1939,12 @@ class IA_Descriptor extends Box('iamd') {
 ### IA Sample Format ### {#iasampleformat}
 
 For tracks using the [=IASampleEntry=](s), an <dfn noexport>IA Sample</dfn> has the following constraints:
-- The one sample data shall be one temporal unit after removing Temporal Delimiter OBU if present.
+- The one IA Sample data shall be N (N > 0) consecutive temporal units (after removing Temporal Delimiter OBU if present) for every IA Sample to be sync sample. And, every IA Sample except the last IA Sample shall have the same number of temporal units.
+	- In other words, IA Sample consists of all the data OBUs that are associated with a specific, distinct time instant so that it consists of N consecutive Audio Frame OBUs per substream and one or more Parameter Block OBUs per parameter (if present), whose total duration is same as that of the N consecutive Audio Frame OBUs. 
+- In every IA Sample, the relative offset of each substream or each parameter (if present) is idenfied by its associated [=relative_offset=] field of the sync_obu() in [=IA_Descriptor=].
+	- In other words, [=relative_offset=](s) in sync_obu() is (are) applicable to every IA Sample in its associated [=IASampleEntry=].
 
-A temporal unit consists of all the data OBUs that are associated with a specific, distinct time instant. It consists of zero or one Temporal Delimiter OBU, and followed by one or more Audio Frame OBUs and zero or more Parameter Block OBUs.
+A temporal unit consists of zero or one Temporal Delimiter OBU, and followed by one Audio Frame OBU per substream and zero or one one Parameter Block OBU per parameter.
 
 ## Codecs Parameter String ## {#codecsparameter}
 DASH and other applications require defined values for the 'Codecs' parameter specified in [[!RFC6381]] for ISO Media tracks. The codecs parameter string for the AOM IA codec shall be:
