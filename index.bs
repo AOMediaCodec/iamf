@@ -1711,7 +1711,6 @@ One Sync OBU shall be placed immediately after the Descriptor OBUs. This shall b
 
 - Audio Frame OBUs and Parameter Block OBUs must be ordered by their implied timestamp in the timeline, and may be interleaved.
 - If there are multiple Audio Frame OBUs that have the same implied start timestamp, they must be grouped by audio elements.
-- A new Sync OBU may be inserted anywhere in the sequence of data OBUs, as frequently as needed.
 - Between two Sync OBUs, a sequence of audio frames or parameter blocks must be gapless.
 - If an Audio Frame OBU or Parameter Block OBU has a substream or parameter ID that is not defined in the most recent Sync OBU, it must not appear in the bitstream, until a new Sync OBU is provided that specifies them.
 - A Temporal Delimiter OBU may be inserted at the beginning of a temporal unit, defined as a set of all audio frames with the same start timestamp and the same duration from all substreams and all non-redundant parameter blocks with the start timestamp within the duration. A temporal unit may include redundant parameter blocks.
@@ -2805,12 +2804,8 @@ In the above figure,
 
 ## Annex B: Short-lived Audio
 
-An IA sequence may contain audio elements which are short-lived, where the audio element may not exist for the entire timeline of the IA sequence. There are two methods for signalling this. Consider the example with two audio elements, A and B, present at the start of the IA sequence, where B is a short-lived audio element with a length shorter than A.
+An IA sequence may contain audio elements which are short-lived, where the audio element may not exist for the entire timeline of the IA sequence. There is a method for signalling this. Consider the example with two audio elements, A and B, present at the start of the IA sequence, where B is a short-lived audio element with a length shorter than A.
 
-1. The first method uses a new set of Descriptor OBUs. The first set of Descriptor OBUs includes an Audio Element OBU for each of A and B, and a Mix Presentation OBU that references both A and B. When the audio element B has ended, a second set of Descriptor OBUs is placed in the IA stream, which includes an Audio Element for only A, and a Mix Presentation OBU that references only A.
+1. The method uses a new set of Descriptor OBUs. The first set of Descriptor OBUs includes an Audio Element OBU for each of A and B, and a Mix Presentation OBU that references both A and B. When the audio element B has ended, a second set of Descriptor OBUs is placed in the IA stream, which includes an Audio Element for only A, and a Mix Presentation OBU that references only A.
 
-2. The second method uses Sync OBUs, without requiring a new Mix Presentation OBU. The Mix Presentation OBU contains an Audio Element OBU for each of A and B, and a Mix Presentation OBU that references both A and B. The first Sync OBU placed immediately after the Mix Presentation OBU includes both A and B. When the audio element B has ended, a new Sync OBU is placed in the IA stream which includes only A, indicating that B is no longer present in the timeline that comes immediately afterwards.
-
-In both cases, relevant parameter blocks must be updated in a way to match the timing of the short-lived audio elements if necessary to ensure that the processed audio output is correct.
-
-NOTE: The first method is only applicable to IA Simple and Base profiles for this version of the specification.
+In the case, relevant parameter blocks must be updated in a way to match the timing of the short-lived audio elements if necessary to ensure that the processed audio output is correct.
