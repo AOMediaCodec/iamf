@@ -2015,12 +2015,14 @@ This section recommends how to handle trimming information of IAMF-ISOBMFF file.
 <center><figcaption>Recommendation for IAMF-ISOBMFF Trimming Information Handling</figcaption></center>
 
 As depicted in the above figure, 
-- IAMF file parser (or IAMF-ISOBMFF parser ) passes descriptor OBUs, PTS1 and Samples to IAMF decoder.
-- IAMF file parser (or IAMF-ISOBMFF parser ) passes zero trimming information regardless of trimming related information of IAMF file to IAMF file player (or IAMF-ISOBMFF player). 
-- IAMF decoder passes audio samples after trimming and PTS2 to IAMF file parser (or IAMF-ISOBMFF parser ) passes.
-	- IAMF decoder trims the audio samples to be trimmed based on the trimming information within Audio Frame OBUs of each Sample.
-	- IAMF decoder updates from PTS1 to PTS2 based on the amount of the trimmed audio samples at the start of the IAMF file.
-- IAMF file player (or IAMF-ISOBMFF player) passes Audio Samples starting at PTS2 to Loudspeakers.
+- IAMF-ISOBMFF parser passes descriptor OBUs, PTS1 and Samples (or Temporal Units) to IAMF decoder.
+- IAMF-ISOBMFF parser passes PTS1 and trimming information to IAMF-ISOBMFF player. 
+- IAMF decoder passes PTS and audio samples after decoding to IAMF-ISOBMFF player.
+	- If IAMF decoder trims the audio samples to be trimmed based on the trimming information within Audio Frame OBUs, then IAMF decoder passes PTS2 and audio samples after trimming.
+	- If IAMF decoder does not trim, then IAMF decoder passes PTS1 and audio samples before trimming.
+- IAMF-ISOBMFF player playbacks audio samples starting at PTS2 to Loudspeakers.
+
+Where, PTS1 is the presentation time stamp of the first audio sample before trimming and PTS2 is the presentation time stamp of the first audio sample after trimming.
 
 # IAMF processing # {#processing}
 
