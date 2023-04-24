@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version bf22245b8, updated Tue Apr 18 15:53:37 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="fd91faf0a870b54e047e4a405811baca1e5e0425" name="document-revision">
+  <meta content="ae1ab0338a88c336388d44fef3b8674b1673a774" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -3571,14 +3571,12 @@ class AnimatedParameterData(animation_type) {
      <p>All Mix Presentation OBUs</p>
    </ol>
    <h4 class="heading settled" data-level="5.1.2" id="standalone-data-obus"><span class="secno">5.1.2. </span><span class="content">Data OBUs</span><a class="self-link" href="#standalone-data-obus"></a></h4>
-   <p>One Sync OBU shall be placed immediately after the Descriptor OBUs. This shall be followed by a sequence of Audio Frame OBUs, Parameter Block OBUs, one or more additional Sync OBUs and one or more Temporal Delimiter OBUs, according to the rules below:</p>
+   <p>One Sync OBU shall be placed immediately after the Descriptor OBUs. This shall be followed by a sequence of Audio Frame OBUs, Parameter Block OBUs and Temporal Delimiter OBUs (if present), according to the rules below:</p>
    <ul>
     <li data-md>
      <p>Audio Frame OBUs and Parameter Block OBUs must be ordered by their implied timestamp in the timeline, and may be interleaved.</p>
     <li data-md>
      <p>If there are multiple Audio Frame OBUs that have the same implied start timestamp, they must be grouped by audio elements.</p>
-    <li data-md>
-     <p>A new Sync OBU may be inserted anywhere in the sequence of data OBUs, as frequently as needed.</p>
     <li data-md>
      <p>Between two Sync OBUs, a sequence of audio frames or parameter blocks must be gapless.</p>
     <li data-md>
@@ -5002,15 +5000,12 @@ Recon_Gain for D_Rtb4:
      <p>Parameter Block OBU with parameter_id = 34 is providing mix_gain_parameter_data() to be applied to the mixed audio of the two rendered audios.</p>
    </ul>
    <h3 class="heading settled" data-level="11.2" id="annex-b-short-lived-audio"><span class="secno">11.2. </span><span class="content">Annex B: Short-lived Audio</span><a class="self-link" href="#annex-b-short-lived-audio"></a></h3>
-   <p>An IA sequence may contain audio elements which are short-lived, where the audio element may not exist for the entire timeline of the IA sequence. There are two methods for signalling this. Consider the example with two audio elements, A and B, present at the start of the IA sequence, where B is a short-lived audio element with a length shorter than A.</p>
+   <p>An IA sequence may contain audio elements which are short-lived, where the audio element may not exist for the entire timeline of the IA sequence. There is a method for signalling this. Consider the example with two audio elements, A and B, present at the start of the IA sequence, where B is a short-lived audio element with a length shorter than A.</p>
    <ol>
     <li data-md>
-     <p>The first method uses a new set of Descriptor OBUs. The first set of Descriptor OBUs includes an Audio Element OBU for each of A and B, and a Mix Presentation OBU that references both A and B. When the audio element B has ended, a second set of Descriptor OBUs is placed in the IA stream, which includes an Audio Element for only A, and a Mix Presentation OBU that references only A.</p>
-    <li data-md>
-     <p>The second method uses Sync OBUs, without requiring a new Mix Presentation OBU. The Mix Presentation OBU contains an Audio Element OBU for each of A and B, and a Mix Presentation OBU that references both A and B. The first Sync OBU placed immediately after the Mix Presentation OBU includes both A and B. When the audio element B has ended, a new Sync OBU is placed in the IA stream which includes only A, indicating that B is no longer present in the timeline that comes immediately afterwards.</p>
+     <p>The method uses a new set of Descriptor OBUs. The first set of Descriptor OBUs includes an Audio Element OBU for each of A and B, and a Mix Presentation OBU that references both A and B. When the audio element B has ended, a second set of Descriptor OBUs is placed in the IA stream, which includes an Audio Element for only A, and a Mix Presentation OBU that references only A.</p>
    </ol>
-   <p>In both cases, relevant parameter blocks must be updated in a way to match the timing of the short-lived audio elements if necessary to ensure that the processed audio output is correct.</p>
-   <p class="note" role="note"><span class="marker">NOTE:</span> The first method is only applicable to IA Simple and Base profiles for this version of the specification.</p>
+   <p>In the case, relevant parameter blocks must be updated in a way to match the timing of the short-lived audio elements if necessary to ensure that the processed audio output is correct.</p>
   </main>
   <div data-fill-with="conformance">
    <h2 class="no-ref no-num heading settled" id="conformance"><span class="content"> Conformance</span><a class="self-link" href="#conformance"></a></h2>
