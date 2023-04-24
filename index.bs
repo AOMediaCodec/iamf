@@ -173,7 +173,7 @@ url: https://www.iso.org/standard/77752.html#; spec: MP4-PCM; type: property;
 		"publisher": "IETF",
 		"href": "https://opus-codec.org/docs/opus_in_isobmff.html"
 	},
-	"ISO/IEC 23091-3:2018": {
+	"ISOIEC-23091-3-2018": {
 	  "title": "Information Technology - Coding-Independent Code Points - Part 3: Audio",
 	  "status" : "Standard",
 	  "publisher" : "ISO/IEC",
@@ -1239,7 +1239,7 @@ class loudness_info() {
   }
 
   if (info_type & 2) {
-    leb128() num_anchored_loudness;
+    unsigned int (8) num_anchored_loudness;
     for (i = 0; i < num_anchored_loudness; i++) {
       unsigned int (8) anchor_element;
       signed int (16) anchored_loudness;
@@ -1265,7 +1265,7 @@ class loudness_info() {
 
 <dfn noexport>true_peak</dfn> specifies the true peak of the audio signal, specified in dBFS and measured according to [[!ITU1770-4]].
 
-<dfn noexport>anchor_element</dfn> specifies the anchor element used in computation of the anchored_loudness which follows, as defined in [[!ISO/IEC 23091-3:2018]], as follows:
+<dfn noexport>anchor_element</dfn> specifies the anchor element used in computation of the anchored_loudness which follows, as defined in [[!ISOIEC-23091-3-2018]], as follows:
 
 <pre class = "def">
    0   : Unknown
@@ -2401,7 +2401,7 @@ gamma = n0 - n.
 
 ### Loudness Normalization ### {#processing-post-loudness}
 
-Loudness normalization should be done by adjusting the loudness level to a target output level using information provided in [[#obu-mixpresentation-loudness]].  A control may be provided to set unique target output levels for each anchored loudness and for the integrated loudness.  If loudness normalization increases the output level, a peak limiter to prevent saturation and/or clipping may be necessary; [=true_peak=] or [digital_peak=] may be used to determine if peak limiting is needed.
+Loudness normalization should be done by adjusting the loudness level to a target output level using information provided in [[#obu-mixpresentation-loudness]].  A control may be provided to set unique target output levels for each anchored loudness and/or the integrated loudness.  If loudness normalization increases the output level, a peak limiter to prevent saturation and/or clipping may be necessary; [=true_peak=] or [=digital_peak=] may be used to determine if peak limiting is needed.  Alternately, the total amount of normalization may be limited.
 
 The rendered layouts that were used to measure the loudness information of a sub-mix are provided by [=loudness_layout=]s. 
 
