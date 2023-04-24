@@ -173,6 +173,12 @@ url: https://www.iso.org/standard/77752.html#; spec: MP4-PCM; type: property;
 		"publisher": "IETF",
 		"href": "https://opus-codec.org/docs/opus_in_isobmff.html"
 	},
+	"ISO/IEC 23091-3:2018": {
+	  "title": "Information Technology - Coding-Independent Code Points - Part 3: Audio",
+	  "status" : "Standard",
+	  "publisher" : "ISO/IEC",
+	  "href" : "https://www.iso.org/standard/73413.html"
+	},
 	"ITU1770-4": {
 		"title": "Algorithms to measure audio programme loudness and true-peak audio level",
 		"status": "Standard",
@@ -1231,6 +1237,14 @@ class loudness_info() {
   if (info_type & 1) {
     signed int (16) true_peak;
   }
+
+  if (info_type & 2) {
+    leb128() num_anchored_loudness;
+    for (i = 0; i < num_anchored_loudness; i++) {
+      unsigned int (8) anchor_element;
+      signed int (16) anchored_loudness;
+    }
+  }
 }
 ```
 
@@ -1241,14 +1255,26 @@ class loudness_info() {
 <pre class = "def">
  Bit : Type of information provided
   0  : True peak
- 1~7 : Reserved
+  1  : Anchored Loudness (one or more)
+ 2~7 : Reserved
 </pre>
 
-<dfn noexport>integrated_loudness</dfn> provides the integrated loudness information, specified in [=LKFS=] as defined in [[!ITU1770-4]], and measured according to [[!ITU1770-4]].
+<dfn noexport>integrated_loudness</dfn> provides the program integrated loudness information, specified in [=LKFS=] as defined in [[!ITU1770-4]], and measured according to [[!ITU1770-4]].
 
 <dfn noexport>digital_peak</dfn> specifies the digital (sampled) peak value of the audio signal, specified in dBFS.
 
 <dfn noexport>true_peak</dfn> specifies the true peak of the audio signal, specified in dBFS and measured according to [[!ITU1770-4]].
+
+<dfn noexport>anchor_element</dfn> specifies the anchor element used in computation of the anchored_loudness which follows, as defined in [[!ISO/IEC 23091-3:2018]], as follows:
+
+<pre class = "def">
+   0   : Unknown
+   1   : Dialogue
+   2   : Album
+ 3~127 : Reserved
+</pre>
+
+<dfn noexport>anchored_loudness</dfn> specifies the loudness information according to the anchor element, specified in [=LKFS=] as defined in [[!ITU1770-4]].
 
 NOTE: [[!ITU1770-4]] adopts the convention of using the dBov unit for dBFS, where the RMS value of a full-scale square wave is 0 dBov. The same convention is adopted here.
 
