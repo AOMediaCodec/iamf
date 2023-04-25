@@ -859,6 +859,19 @@ Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
 
 <dfn noexport>coupled_substream_count</dfn> specifies the number of referenced substreams that are coded as coupled stereo channels.
 
+Mono or stereo coding shall be only allowed for the version of this specification.
+- Each pair of coupled stereo channels in the same ChannelGroup shall be coded as stereo mode to generate one single substream and each of non-coupled channels in the same ChannelGroup shall be coded as mono mode to generate one single substream.
+	- <dfn noexport>Coupled stereo channels</dfn>: L/R, Ls/Rs, Lss/Rss, Lrs/Rrs, Ltf/Rtf, Ltb/Rtb
+	- <dnf noexport>Non-coupled channels</dfn>: C, LFE, L
+
+The order of substreams in each ChannelGroup shall be as follows:
+- Coupled Substreams comes first and followed by non-coupled Substreams.
+- Coupled Substreams for surround channels comes first and followed by one(s) for top channels.
+- Coupled Substreams for front channels comes first and followed by one(s) for side, rear and back channels.
+- Coupled Substreams for side channels comes first and followed by one(s) for rear channels.
+- Center channel comes first and followed by LFE and followed by the other one.
+- Where, <dfn noexport>non-coupled substream</dfn> is a coded substream from one of non-coupled channels.
+
 <dfn noexport>output_gain_flags</dfn> indicates the channels which output_gain is applied to. If a bit set to 1, output_gain shall be applied to the channel. Otherwise, output_gain shall not be applied to the channel.
 
 
@@ -931,6 +944,8 @@ If ambisonics_mode is equal to PROJECTION, this indicates that the Ambisonics ch
 [=coupled_substream_count=] specifies the number of referenced substreams that are coded as coupled stereo channels, where M <= N.
 
 <dfn noexport>demixing_matrix</dfn> complies with the one for [=ChannelMappingFamily=] = 3 in [[!RFC8486]] except the byte order of each of matrix coefficients is converted to big endian.
+
+The order of substreams in ChannelGroup shall conform to [[RFC8486]].
 
 
 ## Mix Presentation OBU Syntax and Semantics ## {#obu-mixpresentation}
@@ -2432,7 +2447,7 @@ Where, p1 = 0.707. Implementations may use limiter defined in [[#processing-post
 
 # IAMF Generation Process # {#iamfgeneration}
 
-This section provides a guideline for IA encoding for a given input audio format.
+This section provides a process for IA encoding for a given input audio format.
 
 Recommended input audio format for IA encoding is as follows:
 - Ambisonics format: It shall conform to [=ChannelMappingFamily=] = 2 or 3 of [[RFC8486]].
@@ -2473,25 +2488,11 @@ The IA encoder is composed of Pre-processor, Codec encoder and OBU packetizer.
 		- For channel-based audio element with [=num_layers=] > 1, it outputs parameter blocks for demixing_info_parameter_data and recon_gain_info_parameter_data.
 		- It may further output parameter blocks for mixing gain.
 - Codec encoder generates one or more substreams from each ChannelGroup based on Codec Config.
-	- Mono or stereo coding shall be only allowed.
-		- Channel Audio format: each pair of coupled channels in the same ChannelGroup shall be coded as stereo mode to generate one single substream and each of non-coupled channels in the same ChannelGroup shall be coded as mono mode to generate one single substream.
-			- <dfn noexport>Coupled channels</dfn>: L/R, Ls/Rs, Lss/Rss, Lrs/Rrs, Ltf/Rtf, Ltb/Rtb
-			- <dnf noexport>Non-coupled channels</dfn>: C, LFE, L
 - OBU packetizer packetize descriptors, sync information, parameter blocks and audio frames by OBU, and outputs IA sequence.
 	- Temporal unit generator generates temporal unit for each frame from audio frame OBUs and parameter block OBUs (if present).
 
 <center><img src="images/IA Encoder Configuration.png" style="width:100%; height:auto;"></center>
 <center><figcaption>IA Encoder Configuration</figcaption></center>
-
-The order of substreams in each ChannelGroup shall be as follows:
-- In ChannelGroup for Ambisonics: The order shall conform to [[RFC8486]].
-- In ChannelGroup for Scalable Channel Audio: The order shall conform to following rules:
-	- Coupled Substreams comes first and followed by non-coupled Substreams.
-	- Coupled Substreams for surround channels comes first and followed by one(s) for top channels.
-	- Coupled Substreams for front channels comes first and followed by one(s) for side, rear and back channels.
-	- Coupled Substreams for side channels comes first and followed by one(s) for rear channels.
-	- Center channel comes first and followed by LFE and followed by the other one.
-	- Where, <dfn noexport>non-coupled substream</dfn> is a coded substream from one of non-coupled channels.
 
 ## Ambisonics Encoding ## {#iamfgeneration-ambisonics}
 
