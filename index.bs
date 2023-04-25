@@ -1859,9 +1859,8 @@ During encapsulation process, OBUs of IA sequences are encapsulated into [[!ISOB
 - Sample Entry
 	- The ith set of descriptor OBUs which is not a redundant copy of the previous descriptor OBUs (i.e. the first descriptor OBUs is regarded as non-redundant copy regardless of its [=obu_redundant_copy=]), specified in [[#standalone-descriptor-obus]], and the Sync OBU that immediately follows them are moved to the ith [=IASampleEntry=]. All descriptor OBUs in the IA sequences are then discarded from the IA sequence. 
 - Decoding Time to IA Sample
-	- The [=num_samples_per_frame=] value in the Codec Config OBU, which indicates the duration of one audio frame, is reflected in the 'stts' or 'trun' box based on [=IA Sample=] except the last [=IA Sample=]. 
+	- The duratin of [=IA Sample=], which is reflected in 'stts' or 'trun' box, is calculated based on the number of audio frames which [=IA Sample=] includes and the [=num_samples_per_frame=] value in the Codec Config OBU, which indicates the duration of one audio frame. 
 	- The duration of [=IA Sample=] is duration including samples trimmed at the beginning but excluding samples trimmed at the end. 
-	- The duration of the last [=IA Sample=] may not be same as that of the other [=IA Sample=]s. In this case, it is calcuated from Audio Frame OBU of the last temporal unit.
 - Sample Group
 	- The [=roll_distance=] value in the Codec Config OBU is copied to [=AudioRollRecoveryEntry=] with the [=grouping_type=] = 'roll'.
 - IA Sample
