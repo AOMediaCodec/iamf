@@ -2051,7 +2051,7 @@ Where, PTS1 is the presentation time stamp of the first audio sample before trim
 
 # IAMF processing # {#processing}
 
-This section provides a guideline for IA decoding for a given [=IA sequence=].
+This section provides processes for IA decoding for a given [=IA sequence=].
 
 
 IA decoding can be done by using the combination of following decoding processing.
@@ -2447,7 +2447,7 @@ Where, p1 = 0.707. Implementations may use limiter defined in [[#processing-post
 
 # IAMF Generation Process # {#iamfgeneration}
 
-This section provides a guideline for IA encoding for a given input audio format.
+This section provides processes for IA encoding for a given input audio format.
 
 Recommended input audio format for IA encoding is as follows:
 - Ambisonics format: It shall conform to [=ChannelMappingFamily=] = 2 or 3 of [[RFC8486]].
@@ -2729,7 +2729,7 @@ For Mix Presentation for N (>1) audio elements (when num_sub-mixes = 1), Mix Pre
 - Where L(i) is the measured layout for the ith loudness information and i = 1, 2, ..., M2.
 - This Mix Presentation is authored by using the highest [=loudness_layout=].
 
-### Element Mix Config ###  {#iamfgeneration-mixpresentation-mix}
+### Element Mix Config (Informative) ###  {#iamfgeneration-mixpresentation-mix}
 
 This section provide a guideline to generate element_mix_config().
 
@@ -2737,9 +2737,9 @@ An IA multiplexer may merge two or more IA sequences. In this case, it should ad
 
 ## Multiple Audio Elements Encoding ## {#iamfgeneration-multipleaudioelements}
 
-This section provide a guideline to generate IA sequence having multiple audio elements from two IA simple or base profiles.
+This section provide a way to generate IA sequence having multiple audio elements from two IA simple or base profiles.
 
-### Multiple Audio Elements with One Codec Config ### {#iamfgeneration-multipleaudioelements-onecodec}
+### Multiple Audio Elements with One Codec Config (Informative) ### {#iamfgeneration-multipleaudioelements-onecodec}
 
 This section provides a way how to generate IA sequence having multiple audio elements from two IA simple profiles with the same codec config OBU. However, the result shall comply with the base profile of IA sequence.
 
@@ -2769,11 +2769,11 @@ Step4: Generate IA sequence which starts descriptor OBUs, followed by Sync OBU a
 
 ## Post Processing ## {#iamfgeneration-postprocessing}
 
-This section provides a guideline to generate algorithms for post processing.
+This section provides a way to generate algorithms for post processing.
 
 ### Loudness Information ###  {#iamfgeneration-postprocessing-loudness}
 
-This section provides a guideline to generate loudness_info().
+This section provides a way to generate loudness_info().
 		
 For a given Mix Presentation OBU and a given [=loudness_layout=] of a sub-mix of the given Mix Presentation OBU, the followings are processed in order to produce loudness_info().
 - Each of the Audio Elements specified in the sub-mix of the given Mix Presentation OBU is rendered to the given [=loudness_layout=] according to [=rendering_config()=] for the Audio Element.
@@ -2787,7 +2787,7 @@ ISSUE: TODO. Fill in example workflows.
 
 # Annex
 
-## Annex A: ID Linking Scheme
+## Annex A: ID Linking Scheme (Informative)
 
 The below figure shows the linking scheme among IDs in obu_header or obu payload.
 
@@ -2816,7 +2816,7 @@ In the above figure,
 - Parameter Block OBU with parameter_id = 33 is providing mix_gain_parameter_data() to be applied to the rendered audio element after rendering according to render_config() of the Audio Element with audio_element_id = 12.
 - Parameter Block OBU with parameter_id = 34 is providing mix_gain_parameter_data() to be applied to the mixed audio of the two rendered audios.
 
-## Annex B: Short-lived Audio
+## Annex B: Short-lived Audio (Normative)
 
 An IA sequence may contain audio elements which are short-lived, where the audio element may not exist for the entire timeline of the IA sequence. There is a method for signalling this. Consider the example with two audio elements, A and B, present at the start of the IA sequence, where B is a short-lived audio element with a length shorter than A.
 
