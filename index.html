@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 3383f409d, updated Fri Apr 28 15:49:22 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="af7bdbf005112843685c77cf9bb8909e7a8d061b" name="document-revision">
+  <meta content="3445e297c288cc30acd36f935571af8f8eafbc68" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2737,6 +2737,32 @@ Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
    </ul>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="substream_count">substream_count</dfn> specifies the number of audio substreams. It must be the same as <a data-link-type="dfn" href="#num_substreams" id="ref-for-num_substreams">num_substreams</a> in its corresponding audio_element().</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="coupled_substream_count">coupled_substream_count</dfn> specifies the number of referenced substreams that are coded as coupled stereo channels.</p>
+   <p>Mono or stereo coding shall be only allowed for the version of this specification.</p>
+   <ul>
+    <li data-md>
+     <p>Each pair of coupled stereo channels in the same ChannelGroup shall be coded as stereo mode to generate one single substream and each of non-coupled channels in the same ChannelGroup shall be coded as mono mode to generate one single substream.</p>
+     <ul>
+      <li data-md>
+       <p><dfn data-dfn-type="dfn" data-noexport id="coupled-stereo-channels">Coupled stereo channels<a class="self-link" href="#coupled-stereo-channels"></a></dfn>: L/R, Ls/Rs, Lss/Rss, Lrs/Rrs, Ltf/Rtf, Ltb/Rtb</p>
+      <li data-md>
+       <dnf>Non-coupled channels: C, LFE, L </dnf>
+     </ul>
+   </ul>
+   <p>The order of substreams in each ChannelGroup shall be as follows:</p>
+   <ul>
+    <li data-md>
+     <p>Coupled Substreams comes first and followed by non-coupled Substreams.</p>
+    <li data-md>
+     <p>Coupled Substreams for surround channels comes first and followed by one(s) for top channels.</p>
+    <li data-md>
+     <p>Coupled Substreams for front channels comes first and followed by one(s) for side, rear and back channels.</p>
+    <li data-md>
+     <p>Coupled Substreams for side channels comes first and followed by one(s) for rear channels.</p>
+    <li data-md>
+     <p>Center channel comes first and followed by LFE and followed by the other one.</p>
+    <li data-md>
+     <p>Where, <dfn data-dfn-type="dfn" data-noexport id="non-coupled-substream">non-coupled substream<a class="self-link" href="#non-coupled-substream"></a></dfn> is a coded substream from one of non-coupled channels.</p>
+   </ul>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="output_gain_flags">output_gain_flags</dfn> indicates the channels which output_gain is applied to. If a bit set to 1, output_gain shall be applied to the channel. Otherwise, output_gain shall not be applied to the channel.</p>
 <pre class="def">Bit position : Channel Name
     b5(MSB)  : Left channel (L1, L2, L3)
@@ -2792,6 +2818,7 @@ class ambisonics_projection_config() {
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="channel_mapping">channel_mapping</dfn> complies with the one for <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="ref-for-something①⑨">ChannelMappingFamily</a> = 2 in <a data-link-type="biblio" href="#biblio-rfc8486" title="Ambisonics in an Ogg Opus Container">[RFC8486]</a>.</p>
    <p><a data-link-type="dfn" href="#coupled_substream_count" id="ref-for-coupled_substream_count">coupled_substream_count</a> specifies the number of referenced substreams that are coded as coupled stereo channels, where M &lt;= N.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="demixing_matrix">demixing_matrix</dfn> complies with the one for <a data-link-type="dfn" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="ref-for-something②⓪">ChannelMappingFamily</a> = 3 in <a data-link-type="biblio" href="#biblio-rfc8486" title="Ambisonics in an Ogg Opus Container">[RFC8486]</a> except the byte order of each of matrix coefficients is converted to big endian.</p>
+   <p>The order of substreams in ChannelGroup shall conform to <a data-link-type="biblio" href="#biblio-rfc8486" title="Ambisonics in an Ogg Opus Container">[RFC8486]</a>.</p>
    <h3 class="heading settled" data-level="3.8" id="obu-mixpresentation"><span class="secno">3.8. </span><span class="content">Mix Presentation OBU Syntax and Semantics</span><a class="self-link" href="#obu-mixpresentation"></a></h3>
    <p>This section specifies the OBU payload of OBU_IA_Mix_Presentation.</p>
    <p>The metadata in mix_presentation() specifies how to render, process and mix one or more audio elements, with details provided in <a href="#processing-mixpresentation">§ 8.3 Mix Presentation</a>.</p>
@@ -4469,20 +4496,6 @@ gamma = n0 - n.
      </ul>
     <li data-md>
      <p>Codec encoder generates one or more substreams from each ChannelGroup based on Codec Config.</p>
-     <ul>
-      <li data-md>
-       <p>Mono or stereo coding shall be only allowed.</p>
-       <ul>
-        <li data-md>
-         <p>Channel Audio format: each pair of coupled channels in the same ChannelGroup shall be coded as stereo mode to generate one single substream and each of non-coupled channels in the same ChannelGroup shall be coded as mono mode to generate one single substream.</p>
-         <ul>
-          <li data-md>
-           <p><dfn data-dfn-type="dfn" data-noexport id="coupled-channels">Coupled channels<a class="self-link" href="#coupled-channels"></a></dfn>: L/R, Ls/Rs, Lss/Rss, Lrs/Rrs, Ltf/Rtf, Ltb/Rtb</p>
-          <li data-md>
-           <dnf>Non-coupled channels: C, LFE, L </dnf>
-         </ul>
-       </ul>
-     </ul>
     <li data-md>
      <p>OBU packetizer packetize descriptors, sync information, parameter blocks and audio frames by OBU, and outputs IA sequence.</p>
      <ul>
@@ -4494,27 +4507,6 @@ gamma = n0 - n.
    <center>
     <figcaption>IA Encoder Configuration</figcaption>
    </center>
-   <p>The order of substreams in each ChannelGroup shall be as follows:</p>
-   <ul>
-    <li data-md>
-     <p>In ChannelGroup for Ambisonics: The order shall conform to <a data-link-type="biblio" href="#biblio-rfc8486" title="Ambisonics in an Ogg Opus Container">[RFC8486]</a>.</p>
-    <li data-md>
-     <p>In ChannelGroup for Scalable Channel Audio: The order shall conform to following rules:</p>
-     <ul>
-      <li data-md>
-       <p>Coupled Substreams comes first and followed by non-coupled Substreams.</p>
-      <li data-md>
-       <p>Coupled Substreams for surround channels comes first and followed by one(s) for top channels.</p>
-      <li data-md>
-       <p>Coupled Substreams for front channels comes first and followed by one(s) for side, rear and back channels.</p>
-      <li data-md>
-       <p>Coupled Substreams for side channels comes first and followed by one(s) for rear channels.</p>
-      <li data-md>
-       <p>Center channel comes first and followed by LFE and followed by the other one.</p>
-      <li data-md>
-       <p>Where, <dfn data-dfn-type="dfn" data-noexport id="non-coupled-substream">non-coupled substream<a class="self-link" href="#non-coupled-substream"></a></dfn> is a coded substream from one of non-coupled channels.</p>
-     </ul>
-   </ul>
    <h3 class="heading settled" data-level="9.1" id="iamfgeneration-ambisonics"><span class="secno">9.1. </span><span class="content">Ambisonics Encoding</span><a class="self-link" href="#iamfgeneration-ambisonics"></a></h3>
    <p>For Ambisonics encoding:</p>
    <ul>
@@ -5243,7 +5235,7 @@ Recon_Gain for D_Rtb4:
     </ul>
    <li><a href="#control_point_relative_time">control_point_relative_time</a><span>, in § 3.9.1</span>
    <li><a href="#control_point_value">control_point_value</a><span>, in § 3.9.1</span>
-   <li><a href="#coupled-channels">Coupled channels</a><span>, in § 9</span>
+   <li><a href="#coupled-stereo-channels">Coupled stereo channels</a><span>, in § 3.7.2</span>
    <li><a href="#coupled_substream_count">coupled_substream_count</a><span>, in § 3.7.2</span>
    <li><a href="#csi">CSI</a><span>, in § 3.7.1</span>
    <li><a href="#d">D</a><span>, in § 3.7.1</span>
@@ -5300,7 +5292,7 @@ Recon_Gain for D_Rtb4:
    <li><a href="#mix-presentations">Mix presentations</a><span>, in § 2.1</span>
    <li><a href="#n_c">n_c</a><span>, in § 3.7</span>
    <li><a href="#n-i">n(i)</a><span>, in § 3.9.3</span>
-   <li><a href="#non-coupled-substream">non-coupled substream</a><span>, in § 9</span>
+   <li><a href="#non-coupled-substream">non-coupled substream</a><span>, in § 3.7.2</span>
    <li><a href="#ns">NS</a><span>, in § 3.7.1</span>
    <li><a href="#num_audio_elements">num_audio_elements</a><span>, in § 3.8</span>
    <li><a href="#num_layers">num_layers</a><span>, in § 3.7.2</span>
