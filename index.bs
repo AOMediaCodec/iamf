@@ -73,6 +73,7 @@ url: https://www.iso.org/standard/76383.html#; spec: MP4-Audio; type: dfn;
 	text: frameLengthFlag
 	text: dependsOnCoreCoder
 	text: extensionFlag
+	text: samplingFrequencyIndex
 
 url: https://www.iso.org/standard/79110.html#; spec: MP4; type: dfn;
 	text: ESDBox
@@ -1629,6 +1630,7 @@ For legacy codecs, Decoder_Config() shall be exactly the same information as the
 
 Substream format is [=opus packet=] of [[!RFC6716]] which contains only one single frame of mono or stereo channels and which has non-delimiting frame structure.
 
+The sample rate used for computing offsets shall be 48 kHz.
 
 ### IAMF-AAC-LC Specific ### {#iamf-aac-lc-specific}
 
@@ -1648,6 +1650,8 @@ Substream format is [=opus packet=] of [[!RFC6716]] which contains only one sing
 
 Substream format is one single [=raw_data_block()=] of [[!AAC]] which contains only one single frame of mono or stereo channels.
 
+The sample rate used for computing offsets shall be the rate indicated by the [=samplingFrequencyIndex=] in [=GASpecificConfig()=]
+
 ### IAMF-FLAC Specific ### {#iamf-flac-specific}
 
 [=Codec_ID=] shall be 'fLaC', the FLAC stream marker in ASCII, meaning byte 0 of the stream is 0x66, followed by 0x4C 0x61 0x43.
@@ -1655,6 +1659,8 @@ Substream format is one single [=raw_data_block()=] of [[!AAC]] which contains o
 [=Decoder_Config()=] for IAMF-FLAC is [=METADATA_BLOCK=] of [[!FLAC]].
 
 Substream format is [=FRAME=] of [[!FLAC]], which is composed of [=FRAME_HEADER=], followed by [=SUBFRAME=](s) (one [=SUBFRAME=] per channel) and followed by [=FRAME_FOOTER=].
+
+The sample rate used for computing offsets shall be the sampling rate indicated in the [=METADATA_BLOCK=].
 
 ### IAMF-LPCM Specific ### {#iamf-lpcm-specific}
 
@@ -1677,6 +1683,8 @@ class decoder_config(ipcm) {
 
 Substream format is one [=audio_frame()=] of Audio_Frame_OBU which contains only one single PCM audio frame of mono or stereo channels.
 	- In case of that [=audio_frame()=] contains one single PCM audio frame of stereo channels, the ith audio sample of the left channel is followed by the ith audio sample of the right channel, and then the (i+1)th audio sample of the left channel is followed by the (i+1)th audio sample of the right channel, where i = 1, 2, ..., [=num_samples_per_frame=].
+
+The sample rate used for computing offsets shall be <dfn noexport>sample_rate</dfn>.
 
 # Profiles # {#profiles}
 
