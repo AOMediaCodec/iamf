@@ -551,7 +551,13 @@ The reserved OBU allows the extension of this specification with additional OBU 
 
 ## Magic Code OBU Syntax and Semantics ## {#obu-magiccode}
 
-This section specifies obu payload of OBU_IA_Magic_Code.
+This section specifies obu payload of OBU_IA_Magic_Code. 
+
+This OBU is used to indicate the start of IA Sequence. So, the first OBU of IA Sequence shall be OBU_IA_Magic_Code.
+
+This OBU may be placed frequently within one single IA Sequence for an application such as broadcasting or multicasting scenario. In that case, the other Magic Code OBUs except the first one shall be marked as redundant (i.e. [=obu_redundant_copy=] = 1).
+
+NOTE: Non-redundant Magic Code OBU (i.e. [=obu_redundant_copy=] = 0) coming after the first Magic Code OBU is regarded as the start of a new IA sequence. This could happen when concatenating 2 IA Sequences together.
 
 <b>Syntax</b>
 
@@ -565,7 +571,9 @@ class magic_code_obu() {
 
 <b>Semantics</b>
 
-<dfn noexport>ia_code</dfn> indicates a ‘four-character code’ (4CC) to identify the start of the IA sequence. It shall be ‘iamf’.
+<dfn noexport>ia_code</dfn> indicates a ‘four-character code’ (4CC), ‘iamf’. The OBU header for this OBU and this field are used as in-band signal (i.e. sync pattern) to indicate the start of IA Sequence.
+
+NOTE: For example, when [=obu_extention_flag=] = 0, the value of this OBU header is 0xF806 or 0xFC06. So, the sync pattern is 0xF806 + ‘iamf’ or 0xFC06 + ‘iamf’.
 
 <dfn noexport>version</dfn> indicates the version of an IA sequence. It shall be set to 0 for this version of the specification. Implementations should treat IA sequences where the MSB four bits of the version number match that of a recognized specification as backwards compatible with that specification. That is, the version number can be split into "major" and "minor" version sub-fields, with changes to the minor sub-field (in the LSB four bits) signaling compatible changes. For example, an implementation of this specification should accept any stream with a version number of ’15’ or less, and should assume any stream with a version number ’16’ or
 greater is incompatible.
