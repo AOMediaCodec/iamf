@@ -547,7 +547,7 @@ class byte_alignment() {
 
 ## Reserved OBU Syntax and Semantics ## {#obu-reserved}
 
-The reserved OBU allows the extension of this specification with additional OBU types in a way that allows IAMF-OBU parsers compliant to this version of specification to ignore them.
+The reserved OBU allows the extension of this specification with additional OBU types in a way that allows OBU parsers compliant to this version of specification to ignore them.
 
 
 ## IA Sequence Header OBU Syntax and Semantics ## {#obu-iasequenceheader}
@@ -612,18 +612,22 @@ class codec_config() {
 
 <dfn noexport>codec_config_id</dfn> defines an identifier for a codec configuration. Within an IA Sequence, there shall be exactly one non-redundant Codec Config OBU with a given identifier. Audio Elements that need a decoder configuration based on this codec configuration refer to this identifier.
 
-<dfn noexport>codec_id</dfn> indicates a ‘four-character code’ (4CC) to identify the codec used to generate the audio substreams. It shall be 'Opus' for IAMF-OPUS, 'mp4a' for IAMF-AAC-LC, 'fLaC' for IAMF-FLAC and 'ipcm' for IAMF-LPCM.
+<dfn noexport>codec_id</dfn> indicates a ‘four-character code’ (4CC) to identify the codec used to generate the audio substreams. It shall be set to one of four codec_ids described in below for this version of the spcecificaiton.
+- 'Opus' for OPUS: The payload of all substreams of all Audio Elements referring to this codec configuration shall comply to the specification [[!RFC6716]] and the decoder_config() structure shall comply with the constraints given in [[#opus-specific]].
+- 'mp4a' for AAC-LC: The payload of all substreams of all Audio Elements referring to this codec configuration shall comply to the specification [[!AAC]] and the decoder_config() structure shall comply with the constraints given in [[#aac-lc-specific]].
+- 'fLaC' for FLAC: The payload of all substreams of all Audio Elements referring to this codec configuration shall comply to the specification [[!FLAC]] and the decoder_config() structure shall comply with the constraints given in [[#flac-specific]].
+- 'ipcm' for LPCM: The payload of all substreams of all Audio Elements referring to this codec configuration shall be audio samples for linear PCM (LPCM) and the decoder_config() structure shall comply with the constraints given in [[#lpcm-specific]].
 
-<dfn noexport>num_samples_per_frame</dfn> indicates the frame length, in samples, of the raw coded audio provided in by audio_frame_obu(). It shall not be set to zero.
+<dfn noexport>num_samples_per_frame</dfn> indicates the frame length, in samples, of the audio_frame() provided in by audio_frame_obu(). It shall not be set to zero. It shall be same as that may be defined in audio_frame() implicitly or explicitly.
 
-<dfn noexport>roll_distance</dfn> is a signed integer that gives the number of frames that need to be decoded in order for a frame to be decoded correctly. A negative value indicates the number of frames before the frame to be decoded corrently.
-- It shall be set to -1 for IAMF-AAC-LC and -R (R = 4 when the frame size = 960) for IAMF-OPUS. IAMF-FLAC may ignore this field. Where, R is the smallest integer greater than or equal to 3840 divided by the frame size. 
+<dfn noexport>roll_distance</dfn> is a signed integer that gives the number of audio frames that need to be decoded in order for an audio frame to be decoded correctly. A positive value indicates the number of audio frames after the audio frame that is a group member that need to be decoded such that at the last of these recovery is complete, i.e. the last audio frame is correct. A negative value indicates the number of audio frames before the audio frame that is a group member that need to be decoded in order for recovery to be complete at the marked audio frame. It shall be set to
+- It shall be set to -R for OPUS. Where, R is the smallest integer greater than or equal to floor(3840 / [=num_samples_per_frame=]).
+- It shall be set to -1 for AAC-LC.
+- FLAC may ignore this field.
+- LPCM may ingore this field. 
 
-<dfn noexport>decoder_config()</dfn> specifies the set of codec parameters required to decode an audio substream for the given codec_id. It is byte aligned.
-- The codec_id and decoder_config() for IAMF-OPUS shall conform to [=Codec_Specific_Info=] of [[#iamf-opus-specific]]
-- The codec_id and decoder_config() for IAMF-AAC-LC shall conform to [=Codec_Specific_Info=] of [[#iamf-aac-lc-specific]].
-- The codec_id and decoder_config() for IAMF-FLAC shall conform to [=Codec_Specific_Info=] of [[#iamf-flac-specific]]
-- The codec_id and decoder_config() for IAMF-LPCM shall conform to [=Codec_Specific_Info=] of [[#iamf-lpcm-specific]].
+<dfn noexport>decoder_config()</dfn> specifies the set of codec parameters required to decode the payload an substream for the given codec_id. It is byte aligned.
+
 
 ## Audio Element OBU Syntax and Semantics ## {#obu-audioelement}
 
@@ -997,7 +1001,7 @@ ambisonics_mode: Method of coding Ambisonics.
    1    : PROJECTION
 </pre>
 
-If ambisonics_mode is equal to MONO, this indicates that the Ambisonics channels are coded as individual mono substreams. For IAMF-LPCM, [=ambisonics_mode=] shall be equal to MONO. 
+If ambisonics_mode is equal to MONO, this indicates that the Ambisonics channels are coded as individual mono substreams. For LPCM, [=ambisonics_mode=] shall be equal to MONO. 
 
 If ambisonics_mode is equal to PROJECTION, this indicates that the Ambisonics channels are first linearly projected onto another subspace before coding as a mix of coupled stereo and mono substreams.
 
@@ -1526,7 +1530,7 @@ class demixing_info_parameter_data() {
 
 <dfn noexport>recon_gain_info_parameter_data()</dfn> contains recon gain values for demixed channels.
 
-NOTE: [=recon_gain_info_parameter_data()=] is required to compensate the propagated errors by De-mixer and Gain modules specified in [[#processing-scalablechannelaudio-demixer]] and [[#processing-scalablechannelaudio-gain]] due to the error caused by lossy codecs such as IAMF-OPUS and IAMF-AAC-LC. However, it is not required for lossless codecs such as IAMF-FLAC and IAMF-LPCM because the propagated errors are negligible.
+NOTE: [=recon_gain_info_parameter_data()=] is required to compensate the propagated errors by De-mixer and Gain modules specified in [[#processing-scalablechannelaudio-demixer]] and [[#processing-scalablechannelaudio-gain]] due to the error caused by lossy codecs such as OPUS and AAC-LC. However, it is not required for lossless codecs such as FLAC and LPCM because the propagated errors are negligible.
 
 <b>Syntax</b>
 
@@ -1589,9 +1593,9 @@ class audio_frame_obu() {
 
 <dfn noexport>coded_frame_size</dfn> is the size of [=audio_frame()=] in bytes.
 
-<dfn noexport>audio_frame()</dfn> is the raw coded audio data for the frame. It shall be [=opus packet=] of [[!RFC6716]] for IAMF-OPUS, [=raw_data_block()=] of [[!AAC]] for IAMF-AAC-LC and [=FRAME=] of [[!FLAC]] for IAMF-FLAC.
+<dfn noexport>audio_frame()</dfn> is the raw coded audio data for the frame. It shall be [=opus packet=] of [[!RFC6716]] for OPUS, [=raw_data_block()=] of [[!AAC]] for AAC-LC and [=FRAME=] of [[!FLAC]] for FLAC.
 
-For IAMF-LPCM, [=audio_frame()=] shall be LPCM samples. When more than one byte is used to represent a LPCM sample, the byte order is indicated in [=sample_format_flags=]. 
+For LPCM, [=audio_frame()=] shall be LPCM samples. When more than one byte is used to represent a LPCM sample, the byte order is indicated in [=sample_format_flags=]. 
 
 ## Temporal Delimiter OBU Syntax and Semantics ## {#obu-temporaldelimiter}
 
@@ -1610,33 +1614,33 @@ NOTE: The Temporal Delimiter OBU has an empty payload.
 
 This section defines codec specific information for Codec_Specific_Info and Substream.
 
-- <dfn noexport>Codec_Specific_Info</dfn> is composed of [=Codec_ID=] and [=Decoder_Config()=]. Codec_ID indicates the codec which has been used to generate a given substream within IA sequence and Decoder_Config() indicates the decoding parameters which are applied to the substream within IA sequence.
+- <dfn noexport>Codec_Specific_Info</dfn> is composed of [=codec_id=] and [=decoder_config()=]. 
 
-For legacy codecs, Decoder_Config() shall be exactly the same information as the conventional file parser feeds to the codec decoders for decoding of the substream. For future codecs, Decoder_Config() shall include all of decoding parameters which are required to decode Substreams.
+For legacy codecs, [=decoder_config()=] shall be exactly the same information as the conventional file parser feeds to the codec decoders for decoding of the Substream. For future codecs, [=decoder_config()=] shall include all of decoding parameters which are required to decode the Substream.
 
-- Substream is a raw coded stream for one or more channels. Substream format is exactly the same as the sample format (before packing OBU and except parameter blocks) for the audio file which consists of only one single coded stream by the Codec_ID.
+- The payload of Substream is an coded stream for one or more channels. The payload format of Substream is exactly the same as the sample format (before packing OBU) for the audio file which consists of only one single coded stream by the [=codec_id=].
 
 
-### IAMF-OPUS Specific ### {#iamf-opus-specific}
+### OPUS Specific ### {#opus-specific}
 
-[=Codec_ID=] shall be 'Opus'.
+[=codec_id=] shall be 'Opus'.
 
-[=Decoder_Config()=] for IAMF-OPUS conforms to [=ID Header=] with [=ChannelMappingFamily=] = 0 of [[!RFC7845]] with following constraints:
+[=decoder_config()=] for OPUS conforms to [=ID Header=] with [=ChannelMappingFamily=] = 0 of [[!RFC7845]] with following constraints:
 - [=Magic Signature=] shall not be present.
 - [=Output Channel Count=] must be set to 2. [=Output Channel Count=] can be ignored because the real value can be determined from the Audio Element OBU and from the opus packet header.
 - [=Pre-skip=] shall be same as the number of audio samples to be trimmed at the start of substreams.
 - [=Output Gain=] shall not be used. In other words, it shall be set to 0dB.
 - The byte order of each field in [=ID Header=] is converted to big endian.
 
-Substream format is [=opus packet=] of [[!RFC6716]] which contains only one single frame of mono or stereo channels and which has non-delimiting frame structure.
+The payload format of Substream is [=opus packet=] of [[!RFC6716]] which contains only one single frame of mono or stereo channels and which has non-delimiting frame structure.
 
 The sample rate used for computing offsets shall be 48 kHz.
 
-### IAMF-AAC-LC Specific ### {#iamf-aac-lc-specific}
+### AAC-LC Specific ### {#aac-lc-specific}
 
-[=Codec_ID=] shall be 'mp4a'.
+[=codec_id=] shall be 'mp4a'.
 
-[=Decoder_Config()=] for IAMF-AAC-LC is [=DecoderConfigDescriptor()=] of [[!MP4-Systems]], which is a subset of [=ESDBox=] for [[!MP4-Audio]], with following constraints:
+[=decoder_config()=] for AAC-LC is [=DecoderConfigDescriptor()=] of [[!MP4-Systems]], which is a subset of [=ESDBox=] for [[!MP4-Audio]], with following constraints:
 - [=objectTypeIndication=] = 0x40
 - [=streamType=] = 0x05 (Audio Stream)
 - [=upstream=] = 0
@@ -1648,25 +1652,25 @@ The sample rate used for computing offsets shall be 48 kHz.
 		- [=dependsOnCoreCoder=] = 0
 		- [=extensionFlag=] = 0
 
-Substream format is one single [=raw_data_block()=] of [[!AAC]] which contains only one single frame of mono or stereo channels.
+The payload format of Substream is one single [=raw_data_block()=] of [[!AAC]] which contains only one single frame of mono or stereo channels.
 
 The sample rate used for computing offsets shall be the rate indicated by the [=samplingFrequencyIndex=] in [=GASpecificConfig()=]
 
-### IAMF-FLAC Specific ### {#iamf-flac-specific}
+### FLAC Specific ### {#flac-specific}
 
-[=Codec_ID=] shall be 'fLaC', the FLAC stream marker in ASCII, meaning byte 0 of the stream is 0x66, followed by 0x4C 0x61 0x43.
+[=codec_id=] shall be 'fLaC', the FLAC stream marker in ASCII, meaning byte 0 of the stream is 0x66, followed by 0x4C 0x61 0x43.
 
-[=Decoder_Config()=] for IAMF-FLAC is [=METADATA_BLOCK=] of [[!FLAC]].
+[=decoder_config()=] for FLAC is [=METADATA_BLOCK=] of [[!FLAC]].
 
-Substream format is [=FRAME=] of [[!FLAC]], which is composed of [=FRAME_HEADER=], followed by [=SUBFRAME=](s) (one [=SUBFRAME=] per channel) and followed by [=FRAME_FOOTER=].
+The payload format of Substream is [=FRAME=] of [[!FLAC]], which is composed of [=FRAME_HEADER=], followed by [=SUBFRAME=](s) (one [=SUBFRAME=] per channel) and followed by [=FRAME_FOOTER=].
 
 The sample rate used for computing offsets shall be the sampling rate indicated in the [=METADATA_BLOCK=].
 
-### IAMF-LPCM Specific ### {#iamf-lpcm-specific}
+### LPCM Specific ### {#lpcm-specific}
 
-[=Codec_ID=] shall be 'ipcm'.
+[=codec_id=] shall be 'ipcm'.
 
-[=Decoder_Config()=] for IAMF-LPCM is as follows:
+[=decoder_config()=] for LPCM is as follows:
 
 ```
 class decoder_config(ipcm) {
@@ -1681,7 +1685,7 @@ class decoder_config(ipcm) {
 
 <dfn noexport>sample_rate</dfn> indicates the sample rate of the input audio in Hz. It shall take a value from the set 44.1k, 16k, 32k, 48k and 96k.
 
-Substream format is one [=audio_frame()=] of Audio_Frame_OBU which contains only one single PCM audio frame of mono or stereo channels.
+The payload format of Substream is one [=audio_frame()=] of Audio_Frame_OBU which contains only one single PCM audio frame of mono or stereo channels.
 	- In case of that [=audio_frame()=] contains one single PCM audio frame of stereo channels, the ith audio sample of the left channel is followed by the ith audio sample of the right channel, and then the (i+1)th audio sample of the left channel is followed by the (i+1)th audio sample of the right channel, where i = 1, 2, ..., [=num_samples_per_frame=].
 
 The sample rate used for computing offsets shall be [=sample_rate=].
@@ -1884,25 +1888,25 @@ NOTE: In typical case, when a track contains a single IA Sequence, trimming can 
 
 ## Codecs Parameter String ## {#codecsparameter}
 DASH and other applications require defined values for the 'Codecs' parameter specified in [[!RFC6381]] for ISO Media tracks. The codecs parameter string for the AOM IA codec shall be:
-- For IAMF-OPUS
+- For OPUS
 
 ```
 	iamf.IAMF-specific-needs.Opus
 ```
 
-- For IAMF-AAC-LC
+- For AAC-LC
 
 ```
 	iamf.IAMF-specific-needs.mp4a.40.2
 ```
 
-- For IAMF-FLAC
+- For FLAC
 
 ```
 	iamf.IAMF-specific-needs.fLaC
 ```
 
-- For IAMF-LPCM
+- For LPCM
 
 ```
 	iamf.IAMF-specific-needs.ipcm
@@ -1912,13 +1916,13 @@ DASH and other applications require defined values for the 'Codecs' parameter sp
 - <dfn noexport>PC</dfn> is three digits within the range 0 to 255 and represents that IA decoder supports the profile of specification.
 
 For example, for this version of the specification
-- The codecs parameter string of IAMF-OPUS for the simple profile:
+- The codecs parameter string of OPUS for the simple profile:
 
 ```
 	iamf.000.Opus
 ```
 
-- The codecs parameter string of IAMF-AAC-LC for the base profile:
+- The codecs parameter string of AAC-LC for the base profile:
 
 ```
 	iamf.001.mp4a.40.2
@@ -1930,7 +1934,7 @@ For example, for this version of the specification
 
 This section provides a guideline for IAMF parser to reconstruct IA sequences from IAMF file.
 
-When IAMF parser feeds the reconstructed IA sequences to IAMF-OBU parser, descriptor OBUs shall be placed at the first and followed by Temporal Units.
+When IAMF parser feeds the reconstructed IA sequences to OBU parser, descriptor OBUs shall be placed at the first and followed by Temporal Units.
 
 During decapsulation process, IAMF file is decapsulated into IA sequences which conform to [[#obu-syntax]] as follows:
 - The ith IA sequence is reconstructed as follows:
@@ -1942,18 +1946,18 @@ During decapsulation process, IAMF file is decapsulated into IA sequences which 
 
 ### Recommended handling of Trimming Information ### {#isobmff-decapsulation-singletrack-trimming}
 
-This section recommends how to handle trimming information of IAMF-ISOBMFF file.
+This section recommends how to handle trimming information of ISOBMFF file.
 
 <center><img src="images/ISOBMFF Trimming Handling.png" style="width:80%; height:auto;"></center>
-<center><figcaption>Recommendation for IAMF-ISOBMFF Trimming Information Handling</figcaption></center>
+<center><figcaption>Recommendation for ISOBMFF Trimming Information Handling</figcaption></center>
 
 As depicted in the above figure, 
-- IAMF-ISOBMFF parser passes descriptor OBUs, PTS1 and Samples (or Temporal Units) to IAMF decoder.
-- IAMF-ISOBMFF parser passes PTS1 and trimming information to IAMF-ISOBMFF player. 
-- IAMF decoder passes PTS and audio samples after decoding to IAMF-ISOBMFF player.
+- ISOBMFF parser passes descriptor OBUs, PTS1 and Samples (or Temporal Units) to IAMF decoder.
+- ISOBMFF parser passes PTS1 and trimming information to ISOBMFF player. 
+- IAMF decoder passes PTS and audio samples after decoding to ISOBMFF player.
 	- If IAMF decoder trims the audio samples to be trimmed based on the trimming information within Audio Frame OBUs, then IAMF decoder passes PTS2 and audio samples after trimming.
 	- If IAMF decoder does not trim, then IAMF decoder passes PTS1 and audio samples before trimming.
-- IAMF-ISOBMFF player playbacks audio samples starting at PTS2 to Loudspeakers.
+- ISOBMFF player playbacks audio samples starting at PTS2 to Loudspeakers.
 
 Where, PTS1 is the presentation time stamp of the first audio sample before trimming and PTS2 is the presentation time stamp of the first audio sample after trimming.
 
@@ -2362,7 +2366,7 @@ Recommended input audio format for IA encoding is as follows:
 - Channel Audio format: It shall conform to [=loudspeaker_layout=] specified in channel_audio_layer_config().
 - Input Sampling Rate: 48000Hz
 - Bitdepth: 16 bits or 24 bits
-	- 16 bits are recommended for IAMF-OPUS.
+	- 16 bits are recommended for OPUS.
 - Input file format: .wav file (Linear PCM, simply called as PCM)
 
 For a given input audio and user inputs, IA encoder shall output [=IA sequence=] which conforms to [[#obu-syntax]].
@@ -2437,7 +2441,7 @@ For Scalable Channel Audio encoding:
 				- [=loudspeaker_layout=] shall be set to the ith list of channel layouts for the ith ChannelGroup.
 				- [=output_gain_is_present_flag=] shall set to 1 for the ith ChannelGroup if attenuation is applied to the mixed channels of the ith ChannelGroup. Otherwise it shall be set to 0 for the ith ChannelGroup.
 				- [=recon_gain_is_present_flag=] shall be set to 1 for the ith ChannelGroup if the preceding ChannelGroups has one or more mixed channels from the down-mixed audio for the ith channel layout. Otherwise, it shall be set to 0 for the ith ChannelGroup. Especially, when [=num_layers=] = 1, this flag shall be set to 0.
-					- This flag shall be set to 0 for lossless codecs including IAMF-LPCM.
+					- This flag shall be set to 0 for lossless codecs including LPCM.
 				- [=substream_count=] shall be set to the number of substreams composing of the ith ChannelGroup.
 				- [=coupled_substream_count=] shall be set to the number of coupled substreams among the substreams composing of the ith ChannelGroup.
 				- [=loudness=] shall be set to the loudness ([=LKFS=]) of the down-mixed audio for the ith channel layout for the ith ChannelGroup.
