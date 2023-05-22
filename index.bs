@@ -1081,17 +1081,20 @@ class mix_presentation_obu() {
 
 <dfn noexport>loudness_layout</dfn> identifies the layout that was used to measure the loudness information provided in this sub-mix.
 
-<dfn noexport>loudness</dfn> provides the loudness information which was measured on [=loudness_layout=] for the mixed audio elements by this sub-mix.
+<dfn noexport>loudness</dfn> provides the loudness information which was measured on [=loudness_layout=] for the mixed audio element by this sub-mix.
 
-The layout specified in [=loudness_layout=] should not be higher than the highest layout among layouts provided by the audio elements. In other words, rendering from an audio element with the highest layout to the [=loudness_layout=] should not require an upmix.
+The layout specified in [=loudness_layout=] should not be higher than the highest layout among layouts provided by the audio elements except zero-order Ambisonics or Mono. In other words, rendering from an audio element with the highest layout (except zero-order Ambisonics or Mono) to the [=loudness_layout=] should not require an upmix.
+- [=loudness_layout=] for zero-order Ambisonics or Mono should not be higher than Stereo. Zero-order Ambisonics or Mono may be rendered to Stereo.
 
 If one sub-mix of Mix Presentation OBU includes only one single scalable channel audio, then it complies with as follows:
 - [=num_layouts=] shall be greater than or equal to [=num_layers=] specified in [=scalable_channel_layout_config()=] of Audio Element OBU for the [=audio_element_id=].
-- The set of [=loudness_layout=]s shall include all of [=loudspeaker_layout=]s specified in the [=channel_audio_layer_config()=]s of Audio Element OBU for the [=audio_element_id=]. 
+- If the Audio Element is not Mono, then the set of [=loudness_layout=]s shall include all of [=loudspeaker_layout=]s specified in the [=channel_audio_layer_config()=]s of Audio Element OBU for the [=audio_element_id=].
 
-The highest [=loudness_layout=] specified in one sub-mix is the layout which was used for authoring the sub-mix.
-
+The highest [=loudness_layout=] specified in one sub-mix except zero-order Ambisonics or Mono is the layout which was used for authoring the sub-mix.
+- The highest [=loudness_layout=] for zero-order Ambisonics or Mono is Stereo.
+ 
 Each sub-mix shall include [=loudness_layout=] to identify [=Loudspeaker configuration for Sound System A (0+2+0)=] (i.e. Stereo). In other words, each sub-mix shall include loudness_info() for Stereo. 
+- If the mixed audio element by each sub-mix is Mono, then its [=loudness=] should be measured on Stereo which is generated from the Mono by the equations, L = 0.707 x Mono and R = 0.707 x Mono. 
 
 ### Mix Presentation Annotations Syntax and Semantics ### {#obu-mixpresentation-annotation}
 
