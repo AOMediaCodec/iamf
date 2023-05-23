@@ -649,6 +649,9 @@ class audio_element_obu() {
 
 ```
 class DemixingParamDefinition() extends ParamDefinition() {
+  default_demixing_info_parameter_data();
+  unsigned int (4) default_w;
+  unsigned int (4) reserved;
 }
 ```
 
@@ -715,6 +718,29 @@ A ChannelGroup is defined in [[#iamfgeneration]]. The order of the substreams in
 <dfn noexport>scalable_channel_layout_config()</dfn> is a class that provides the metadata required for combining the substreams identified here in order to reconstruct a scalable channel layout.
 
 <dfn noexport>ambisonics_config()</dfn> is a class that provides the metadata required for combining the substreams identified here in order to reconstruct an Ambisonics layout.
+
+<dfn noexport>default_demixing_info_parameter_data()</dfn> and <dfn noexport>default_w</dfn> specify the default parameter data for demixing to apply to all audio samples when there are no Parameter Block OBUs (with [=parameter_id=] defined in this DemixingParamDefinition()) provided.
+- [=default_demixing_info_parameter_data()=] conforms to [=demixing_info_parameter_data()=] except that [=w_idx_offset=] shall be ignored.
+- Instead of that, [=default_w=] directly indicates the weight value [=w(k)=] for [=TF2toT2 de-mixer=] specified in [[#processing-scalablechannelaudio-demixer]].
+
+Mapping of default_w to w(k) should be as follows:
+<pre class = "def">
+ default_w :   w(k)
+    0      :    0
+    1      :  0.0179
+    2      :  0.0391
+    3      :  0.0658
+    4      :  0.1038
+    5      :  0.25
+    6      :  0.3962
+    7      :  0.4342
+    8      :  0.4609
+    9      :  0.4821
+    10     :  0.5
+    11     :  reserved
+</pre>
+
+The default parameter data for recon gain is not explicityly provieded in ReconGainParamDefinition() as the default value of recon gain is just 0dB which requires no operation. It may be no Parameter Block OBUs (with [=parameter_id=] defined in this ReconGainParamDefinition()) provided. 
 
 ### Parameter Definition Syntax and Semantics ### {#parameter-definition}
 
