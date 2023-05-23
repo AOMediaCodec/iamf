@@ -197,11 +197,11 @@ url: https://www.iso.org/standard/77752.html#; spec: MP4-PCM; type: property;
 		"publisher": "Wikipedia",
 		"href": "https://en.wikipedia.org/wiki/Q_(number_format)"
 	},
-	"BCP47": {
-		"title": "BCP 47",
-		"status": "Best Practice",
-		"publisher": "IETF",
-		"href": "https://www.rfc-editor.org/info/bcp47"
+	"ISO-639-1": {
+		"title": "ISO 639-1",
+		"status": "Standard",
+		"publisher": "ISO",
+		"href": "https://www.iso.org/standard/22109.html"
 	},
 	"FLAC": {
 		"title": "Free Lossless Audio Codec",
@@ -279,10 +279,8 @@ All of syntax elements conform to [=Syntactic Description Language=] specified i
 
  <b>string</b> indicates the type of a string which is terminated by null of one byte (i.e. 0x00).
  
- <b>syntaxName</b> is a human readable label whose byte representation consists of <b>two-letter primary language subtags</b> and <b>two-letter region subtags</b> which are connected by hyphen("-"), and followed by bytes representation of [=UTF-8_Enc(label)=]. Its length in bytes is limited to 128.
+ <b>syntaxName</b> is a human readable label whose byte representation consists of [=UTF-8_Enc(label)=]. Its length in bytes is limited to 128.
  
- Where, <b>two-letter primary language subtags</b> and <b>two-letter region subtags</b> conform to [[!BCP47]].
-
 ## Arithmetic Operators ## {#convention-arithmetic-operators}
 
 <table class="def">
@@ -968,14 +966,22 @@ A mix presentation may contain one or more sub-mixes. Common use-cases may speci
 ```
 class mix_presentation_obu() {
   leb128() mix_presentation_id;
-  mix_presentation_annotations();
+  leb128() count_label;
+  for (i = 0; i < count_label; i++) {
+    unsigned int (16) language_label;
+  }
+  for (i = 0; i < count_label; i++) {
+    mix_presentation_annotations();
+  }
 
   leb128() num_sub_mixes;
   for (i = 0; i < num_sub_mixes; i++) {	  
     leb128() num_audio_elements;
     for (j = 0; j < num_audio_elements; j++) {
       leb128() audio_element_id;
-      mix_presentation_element_annotations();
+      for (i = 0; i < count_label; i++) {
+        mix_presentation_element_annotations();
+      }
       rendering_config();
       element_mix_config();
     }
@@ -994,6 +1000,11 @@ class mix_presentation_obu() {
 
 <dfn noexport>mix_presentation_id</dfn> defines an identifier for a Mix Presentation. Within an IA Sequence, there shall be exactly one non-redundant Mix Presentation OBU with a given identifier. This identifier may be used by the application to select which Mix Presentation(s) to offer.
 
+<dfn noexport>count_label</dfn> indicates the number of labels in different languages.
+
+<dfn noexport>language_label</dfn> indicates the language which the label is written in. It shall comform to [[!ISO-639-1]]. The same language shall not be duplicated in this loop. 
+- The ith label of both mix_presentation_annotation() and mix_presentation_element_annotation() shall be written in the language indicated by the ith [=language_label=]. Where, i = 0, 1, ..., [=count_label=] -1.
+
 <dfn noexport>mix_presentation_annotations()</dfn> is a class that provides informational metadata that an IA parser should refer to when selecting the mix presentation to use. The metadata may also be used by the playback system to display information to the user, but is not used in the rendering or mixing process to generate the final output audio signal.
 
 <dfn noexport>num_sub_mixes</dfn> specifies the number of sub-mixes.
@@ -1001,6 +1012,8 @@ class mix_presentation_obu() {
 <dfn noexport>num_audio_elements</dfn> specifies the number of audio elements that are used in this mix presentation to generate the final output audio signal for playback.
 
 <dfn value noexport for ="mix_presentation_obu()">audio_element_id</dfn> indicates the identifier for an Audio Element which this Mix Presentation refers to.
+
+<dfn noexport>mix_presentation_element_annotations()</dfn> is a class that provides informational metadata that an IA parser should refer to when selecting the referenced audio element to use. The metadata may also be used by the playback system to display information to the user, but is not used in the rendering or mixing process to generate the final output audio signal.
 
 <dfn noexport>rendering_config()</dfn> is a class that provides the metadata required for rendering the referenced audio element. 
 
