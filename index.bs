@@ -1018,14 +1018,13 @@ The layout specified in [=loudness_layout=] should not be higher than the highes
 - [=loudness_layout=] for zero-order Ambisonics or Mono should not be higher than Stereo. Zero-order Ambisonics or Mono may be rendered to Stereo.
 
 If one sub-mix of Mix Presentation OBU includes only one single scalable channel audio, then it complies with as follows:
-- [=num_layouts=] shall be greater than or equal to [=num_layers=] specified in [=scalable_channel_layout_config()=] of Audio Element OBU for the [=audio_element_id=].
-- If the Audio Element is not Mono, then the set of [=loudness_layout=]s shall include all of [=loudspeaker_layout=]s specified in the [=channel_audio_layer_config()=]s of Audio Element OBU for the [=audio_element_id=].
+- [=num_layouts=] shall be greater than or equal to [=num_layers=] specified in [=scalable_channel_layout_config()=] of Audio Element OBU for the [=audio_element_id=] except the following cases:
 
 The highest [=loudness_layout=] specified in one sub-mix except zero-order Ambisonics or Mono is the layout which was used for authoring the sub-mix.
 - The highest [=loudness_layout=] for zero-order Ambisonics or Mono is Stereo.
  
 Each sub-mix shall include [=loudness_layout=] to identify [=Loudspeaker configuration for Sound System A (0+2+0)=] (i.e. Stereo). In other words, each sub-mix shall include loudness_info() for Stereo. 
-- If the mixed audio element by each sub-mix is Mono, then its [=loudness=] should be measured on Stereo which is generated from the Mono by the equations, L = 0.707 x Mono and R = 0.707 x Mono. 
+- If the mixed audio element by each sub-mix is Mono, then its [=loudness=] for [=loudness_layout=] = Stereo should be measured on the Stereo generated from the Mono by the equations, L = 0.707 x Mono and R = 0.707 x Mono. 
 
 ### Mix Presentation Annotations Syntax and Semantics ### {#obu-mixpresentation-annotation}
 
@@ -1240,7 +1239,8 @@ layout_type : Layout type
  - 9: It indicates [=Loudspeaker configuration for Sound System J (4+7+0)=]
  - 10: It indicates the same loudspeaker configuration as [=loudspeaker_layout=] = 0110 (i.e. 7.1.2ch)
  - 11: It indicates the same loudspeaker configuration as [=loudspeaker_layout=] = 1000 (i.e. 3.1.2ch)
- - 12 ~ 15: Reserved
+ - 12: It indicates Mono
+ - 13 ~ 15: Reserved
 
 ### Loudness Info Syntax and Semantics ### {#obu-mixpresentation-loudness}
 
