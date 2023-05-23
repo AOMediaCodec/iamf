@@ -613,18 +613,17 @@ class codec_config() {
 <dfn noexport>codec_config_id</dfn> defines an identifier for a codec configuration. Within an IA Sequence, there shall be exactly one non-redundant Codec Config OBU with a given identifier. Audio Elements that need a decoder configuration based on this codec configuration refer to this identifier.
 
 <dfn noexport>codec_id</dfn> indicates a ‘four-character code’ (4CC) to identify the codec used to generate the audio substreams. For version 0 of this specification, it shall be set to one of four codec_id values defined below:
-- 'Opus' for OPUS: The payload of all substreams of all Audio Elements referring to this codec configuration shall comply to the specification [[!RFC6716]] and the decoder_config() structure shall comply with the constraints given in [[#opus-specific]].
-- 'mp4a' for AAC-LC: The payload of all substreams of all Audio Elements referring to this codec configuration shall comply to the specification [[!AAC]] and the decoder_config() structure shall comply with the constraints given in [[#aac-lc-specific]].
-- 'fLaC' for FLAC: The payload of all substreams of all Audio Elements referring to this codec configuration shall comply to the specification [[!FLAC]] and the decoder_config() structure shall comply with the constraints given in [[#flac-specific]].
-- 'ipcm' for LPCM: The payload of all substreams of all Audio Elements referring to this codec configuration shall be audio samples for linear PCM (LPCM) and the decoder_config() structure shall comply with the constraints given in [[#lpcm-specific]].
+- 'Opus': The payload of all substreams of all Audio Elements referring to this codec configuration shall comply to the specification [[!RFC6716]] and the decoder_config() structure shall comply with the constraints given in [[#opus-specific]].
+- 'mp4a': The payload of all substreams of all Audio Elements referring to this codec configuration shall comply to the specification [[!AAC]] and the decoder_config() structure shall comply with the constraints given in [[#aac-lc-specific]].
+- 'fLaC': The payload of all substreams of all Audio Elements referring to this codec configuration shall comply to the specification [[!FLAC]] and the decoder_config() structure shall comply with the constraints given in [[#flac-specific]].
+- 'ipcm': The payload of all substreams of all Audio Elements referring to this codec configuration shall be audio samples for linear PCM (LPCM) and the decoder_config() structure shall comply with the constraints given in [[#lpcm-specific]].
 
 <dfn noexport>num_samples_per_frame</dfn> indicates the frame length, in samples, of the audio_frame() provided in by audio_frame_obu(). It shall not be set to zero. If the [=decoder_config()=] structure for a given codec specifies a value for the frame length, the two values shall be equal.
 
 <dfn noexport>roll_distance</dfn>: for some audio codecs, even if an audio frame can be decoded independently, the decoded signal after decoding only that frame may not represent a perfect, decoded audio signal, even ignoring compression artifacts. This can be due to overlap transforms. While potentially acceptable when starting to decode a substream, it may be problematic when automatically switching between similar audio substreams of different quality and/or bitrate. The [=roll_distance=] field indicates how many audio frames prior to the current audio frame need to be decoded (and decoded samples discarded) to set the encoder in a state that will produce the perfect decoded audio signal. It shall be set to
-- It shall be set to -R for OPUS. Where, R is the smallest integer greater than or equal to floor(3840 / [=num_samples_per_frame=]).
-- It shall be set to -1 for AAC-LC.
-- FLAC may ignore this field.
-- LPCM may ingore this field. 
+- It shall be set to -R for 'Opus'. Where, R is the smallest integer greater than or equal to floor(3840 / [=num_samples_per_frame=]).
+- It shall be set to -1 for 'mp4a'.
+- It shall be set to 0 for 'fLaC' or 'ipcm'.
 
 <dfn noexport>decoder_config()</dfn> specifies the set of codec parameters required to decode the payload an substream for the given codec_id. It is byte aligned.
 
