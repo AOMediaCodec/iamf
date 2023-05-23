@@ -618,6 +618,8 @@ class codec_config() {
 - 'fLaC': The payload of all substreams of all Audio Elements referring to this codec configuration shall comply to the specification [[!FLAC]] and the decoder_config() structure shall comply with the constraints given in [[#flac-specific]].
 - 'ipcm': The payload of all substreams of all Audio Elements referring to this codec configuration shall be audio samples for linear PCM (LPCM) and the decoder_config() structure shall comply with the constraints given in [[#lpcm-specific]].
 
+NOTE: 'ipcm' should not be confused with 'lpcm' which is another 4CC to identify codecs in other container formats (e.g. QuickTime).
+
 <dfn noexport>num_samples_per_frame</dfn> indicates the frame length, in samples, of the audio_frame() provided in by audio_frame_obu(). It shall not be set to zero. If the [=decoder_config()=] structure for a given codec specifies a value for the frame length, the two values shall be equal.
 
 <dfn noexport>roll_distance</dfn>: for some audio codecs, even if an audio frame can be decoded independently, the decoded signal after decoding only that frame may not represent a perfect, decoded audio signal, even ignoring compression artifacts. This can be due to overlap transforms. While potentially acceptable when starting to decode a substream, it may be problematic when automatically switching between similar audio substreams of different quality and/or bitrate. The [=roll_distance=] field indicates how many audio frames prior to the current audio frame need to be decoded (and decoded samples discarded) to set the encoder in a state that will produce the perfect decoded audio signal. It shall be set to
