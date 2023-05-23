@@ -1536,9 +1536,9 @@ Any identifier which is not specificed in the preceding Descriptor OBUs, shall n
 
 ```
 class sync_obu() {
-  leb128() global_offset;
-  leb128() num_obu_ids;
-  for (i = 0; i < num_obu_ids; i++) {
+  leb128() reserved;
+  leb128() count;
+  for (i = 0; i < count; i++) {
     leb128() obu_id;
     unsigned int (1) obu_data_type;
     unsigned int (1) reinitialize_decoder;
@@ -1550,13 +1550,11 @@ class sync_obu() {
 
 <b>Semantics</b>
 
-<dfn noexport>global_offset</dfn> specifies the offset that is applied to all substreams and parameters specified in this Sync OBU, in addition to their individual relative offsets.
+<dfn noexport>reserved</dfn> shall be set to 0x00.
 
-For this version of the specification, the value of global_offset shall be set to 0.
+<dfn noexport>count</dfn> specifies the number of substream and parameter IDs that this Sync OBU specifies the relative offset for.
 
-<dfn noexport>num_obu_ids</dfn> specifies the number of substream and parameter IDs that this Sync OBU specifies the offset for.
-
-<dfn noexport>obu_id</dfn> specifies the unique ID associated with the substream or parameter that is being referred to.
+<dfn noexport>id</dfn> specifies the unique ID associated with the substream or parameter that is being referred to. The value of this field is to be interpreted depending on the value of [=obu_data_type=]. If [=obu_data_type=] is 0, the id is interpreted as an [=audio_substream_id=]. If [=obu_data_type=] is 1, the id is interpreted as a [=parameter_id=].
 
 <dfn noexport>obu_data_type</dfn> specifies the type of data that is being referred to.
 
@@ -1576,12 +1574,12 @@ For this version of the specification, the value of reinitialize_decoder shall b
 
 <dfn value noexport for="sync_obu()">reserved</dfn> shall be set to 0. Reserved units are for future use and shall be ignored by an IAMF-OBU parser.
 
-<dfn noexport>relative_offset</dfn> is the offset to position the first audio frame (before trimming) or parameter block with the referenced obu_id that comes after this Sync OBU with respect to the timeline generated before this Sync OBU. If this Sync OBU is the first one, it is the offset from 0. Otherwise, it is the offset from the end of the timeline of Substreams generated from the previous Sync OBU.
+<dfn noexport>relative_offset</dfn> is the offset to position the first audio frame (before trimming) or parameter block with the referenced id that comes after this Sync OBU with respect to the timeline generated before this Sync OBU. If this Sync OBU is the first one, it is the offset from 0. Otherwise, it is the offset from the end of the timeline of Substreams generated from the previous Sync OBU.
 
 The difference, [=relative_offset=](P) - [=relative_offset=](A), shall be the offset to position the first audio sample where the first parameter value of the first parameter block that comes after this Sync OBU is applied to.
 - Where, [=relative_offset=](P) is [=relative_offset=] of [=obu_id=] for the parameter and [=relative_offset=](A) is [=relative_offset=] of [=obu_id=] for the substream which the parameter is applied to. 
 
-The offset shall be indicated in the number of ticks at the sample rate specified in the corresponding substream or Codec Config OBU. For IAMF-OPUS, the sample rate is 48000Hz.
+The offset for [=audio_substream_id=] shall be indicated in the number of ticks at the sample rate of its associated substream and the offset for [=parameter_id=] shall be indicated in the number of ticks at the sample rate of the substream which its associated parameter is applied to. For OPUS, the sample rate is 48000Hz.
 
 IA encoder and decoder operations related to this field are specified in [[#standalone-synchronizing-data-obus]].
 
