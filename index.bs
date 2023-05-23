@@ -1896,11 +1896,11 @@ Even though an IA sequence can theoretically group audio data coded with differe
 
 The result of encapsulating an IA Sequence into an [[!ISOBMFF]] file is as follows:
 
-- If there is audio samples to be trimmed at the start or at the end, then 'edts' and 'elst' boxes shall be present to reflect the trimming status.
+- If there are audio samples to be trimmed at the start or at the end, then 'edts' and 'elst' boxes shall be present to reflect the trimming status.
 - Sample Entry
 	- The first [=IASampleEntry=] shall include the first Descriptor OBUs and followed by Sync OBU of the IA sequence. 
 	
-NOTE: Multiple sample entries may be used in a track, for example when the track is the concatenation of multiple tracks or multiple IA Sequences and some samples have different configOBUs values.
+NOTE: Multiple sample entries may be used in a track, for example when the track is the concatenation of multiple tracks or multiple IA Sequences and some IA samples have different configOBUs values.
 
 - Decoding Time to IA Sample
 	- 'stts' or 'trun' box shall indicate the number of audio samples which [=IA Sample=] includes (i.e. the duration of IA Sample). 
@@ -1951,7 +1951,7 @@ For tracks using the [=IASampleEntry=], an <dfn noexport>IA Sample</dfn> has the
 		- In other words, [=relative_offset=](s) in sync_obu() is (are) applicable to every IA Sample in its associated [=IASampleEntry=].
 - The decode duration of an IA Sample SHALL equal the duration of the underlying temporal unit, i.e. the decode durations of the Audio Frame OBU.
 
-NOTE: Per the restriction of the profiles carried in an IA track, all Audio Frame OBUs in an IA Sample have the same duration and have the same trimming information. If Audio Frame OBUs in the sample contain trimming information, the corresponding audio samples SHALL be removed from presentation using edit list information.
+NOTE: Per the restriction of the profiles carried in an IA track, all Audio Frame OBUs in an IA Sample have the same duration and have the same trimming information. If Audio Frame OBUs in the IA sample contain trimming information, the corresponding audio samples SHALL be removed from presentation using edit list information.
 
 NOTE: In typical case, when a track contains a single IA Sequence, trimming can only happen at the beginning or end of the IA sequence and therefore at the beginning or end of the track and the edit list can describe the start and end trimming with a single edit entry. Track storing consecutive IA Sequences may need multiple edits in the edit list.
 
