@@ -720,6 +720,8 @@ A ChannelGroup is defined in [[#iamfgeneration]]. The order of the substreams in
 
 Parameter definition classes inherits from the abstract <dfn noexport>ParamDefinition()</dfn> class.
 
+For a given parameter, its timeline is fully aligned with that of the Audio Element which the given parameter is applied to. Where, the timeline of the Audio Element is on post coding domain (i.e. before trimming data). So, when we assume the same sample rate between the given Parameter and the Audio Element In other words, the start timestamp and the duration of the given Parameter are same as those of the Audio Elememnt, respectively.
+
 <b>Syntax</b>
 
 ```
@@ -748,6 +750,7 @@ abstract class ParamDefinition() {
 
 <dfn noexport>parameter_rate</dfn> specifies the rate used by this parameter, expressed as ticks per second. Time-related fields associated with this parameter, such as durations, shall be expressed in the number of ticks.
 - In DemixingParamDefinition() or ReconGainParamDefinition(), this field shall be set to the sample rate of the Audio Element which this parameter is applied to.
+- The rate shall be such a value that (the rate x [=num_samples_per_frame=]) / (the sample rate of Audio Element) is still integer.
 
 <dfn noexport>param_definition_mode</dfn> indicates if this parameter definition specifies duration, num_subblocks, constant_subblock_duration and subblock_duration fields for the parameter blocks associated to the [=parameter_id=].
 - When this field is set to 0, all of duration, num_subblocks, constant_subblock_duration and subblock_duration fields shall be specified in this parameter definition mapped to the [=parameter_id=]. In that case, none of parameter blocks associated to this parameter definition shall specify duration, num_subblocks, constant_subblock_duration and subblock_duration fields. 
@@ -757,7 +760,10 @@ abstract class ParamDefinition() {
 	- [=num_subblocks=] shall be set to 1.
 	- [=constant_subblock_duration=] shall be same as [=duration=]
 
-<dfn noexport>duration</dfn> specifies the duration for which all of parameter blocks associated to this parameter definition are valid and applicable. 
+<dfn noexport>duration</dfn> specifies the duration for which all of parameter blocks associated to this parameter definition are valid and applicable.
+- This field shall be set to (([=parameter_rate=] of this parameter) x [=num_samples_per_frame=]) / (the sample rate of Audio Element). 
+- So, if the [=parameter_rate=] = the sample rate of Audio Element, then the [=duration=] shall be same as the [=num_samples_per_frame=].
+
 
 <dfn noexport>num_subblocks</dfn> specifies the number of different sets of parameter values specified in all of parameter blocks associated to this parameter definition, where each set describes a different subblock of the timeline, contiguously.
 
@@ -1353,6 +1359,8 @@ class parameter_block_obu() {
 <dfn noexport>get_param_definition()</dfn> is a run-time function to get the parameter definition type, the parameter definition mode, duration, num_subblocks, constant_subblock_duration and subblock_duration mapped to the parameter_id. 
 
 <dfn value noexport for="parameter_block_obu()">duration</dfn> specifies the duration for which this parameter block is valid and applicable. 
+- This field shall be set to (([=parameter_rate=] of this parameter) x [=num_samples_per_frame=]) / (the sample rate of Audio Element). 
+- So, if the [=parameter_rate=] = the sample rate of Audio Element, then the [=duration=] shall be same as the [=num_samples_per_frame=].
 
 <dfn value noexport for="parameter_block_obu()">num_subblocks</dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different subblock of the timeline, contiguously.
 
