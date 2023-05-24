@@ -2221,9 +2221,9 @@ For example, when CL #1 = 2ch, CL #2 = 3.1.2ch, CL #3 = 5.1.2ch and CL #4 = 7.1.
 	- Sample (k,i) *= Smoothed_Recon_Gain (k,i), where k is the frame index and i is the sample index of the frame.
 	- Smoothed_Recon_Gain (k) = MA_gain (k-1) x e_window + MA_gain (k) x s_window
 	- MA_gain (k) = 2 / (N+1) x Recon_Gain (k) / 255 + (1 – 2/(N+1)) x MA_gain (k-1), where MA_gain (0) = 1.
-	- e_window[:ps – olen] = 1, e_window[ps – olen: ps] = hanning[olen:], e_window[ps:flen] = 0.
-	- s_window[:ps – olen] = 0, s_window[ps – olen: ps] = hanning[:olen], s_window[ps:flen] = 1.
-	- Where, hanning = np.hanning (2*olen), ps is the pre-skip value, flen is the frame size and olen is the overlap size.
+	- e_window[0: olen] = hanning[olen:], e_window[olen:flen] = 0.
+	- s_window[0: olen] = hanning[:olen], s_window[olen:flen] = 1.
+	- Where, hanning = np.hanning (2*olen), flen is the frame size and olen is the overlap size.
 	- Recommend values: N = 7
 
 Below figure shows the smoothing scheme of [=recon_gain=].
@@ -2232,8 +2232,8 @@ Below figure shows the smoothing scheme of [=recon_gain=].
 <center><figcaption>Smoothing Scheme of Recon Gain</figcaption></center>
 
 Recommend values for specific codecs are as follows
-- IAMF-OPUS: olen = 60, the pre-skip (ps) value is indicated in Codec_Specific_Info for IAMF-OPUS.
-- IAMF-AAC-LC: olen = 64, ps = 720.
+- OPUS: olen = 60.
+- AAC-LC: olen = 64.
 
 ## Mix Presentation ## {#processing-mixpresentation}
 
@@ -2667,6 +2667,8 @@ Down-mix paths, which conform to the above rule, shall be only allowed for scala
 This section describes how to generate [=recon_gain=].
 
 Recon_Gain needs to be applied to de-mixed channels. For this, IA encoder needs to deliver it to IA decoders.
+
+When the channel, which this recon_gain needs to be applied to, is coded by a codec, if the kth coded frame has trimming data. The kth frames used to generate recon_gain (k) have the trimming data on the same positions.
 
 Let's define followings:
 - Level Ok is the signal power for the frame #k of a channel of the down-mixed audio for CL #i.
