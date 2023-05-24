@@ -706,8 +706,17 @@ A ChannelGroup is defined in [[#iamfgeneration]]. The order of the substreams in
 
 
 <dfn noexport>num_parameters</dfn> specifies the number of parameters that are used by the algorithms specified in this audio element.
+- When [=audio_element_type=] = 0, this field shall be set to 0, 1 or 2.
+- When [=audio_element_type=] = 1, this field shall be set to 0.
 
 <dfn noexport>param_definition_type</dfn> specifies the type of the parameter definition. All parameter definition types described in this version of the specification are listed in the table below, along with their associated parameter definitions.
+- The type PARAMETER_DEFINITION_MIX_GAIN shall not be present in Audio Element OBU.
+- The type shall not be duplicated in one Audio Element OBU.
+- When [=codec_id=] = 'fLaC' or 'ipcm', the type PARAMETER_DEFINITION_RECON_GAIN shall not be present.
+- When [=num_layers=] > 1, the type PARAMETER_DEFINITION_RECON_GAIN shall be present.
+- When the highest [=loudspeaker_layout=] of (non-)scalable channel audio is less than or equal to 3.1.2ch, the type PARAMETER_DEFINITION_DEMIXING shall not be present.
+- When the highest [=loudspeaker_layout=] of scalable channel audio ([=num_layers=] > 1) is greater than 3.1.2ch, the types of both PARAMETER_DEFINITION_DEMIXING and both PARAMETER_DEFINITION_RECON_GAIN shall be present.
+- When [=num_layers=] = 1 and [=loudspeaker_layout=] is greater than 3.1.2ch, the type PARAMETER_DEFINITION_DEMIXING may be present.
 
 <table class = "def">
 <tr>
