@@ -915,10 +915,16 @@ Loudspeaker Layout (4 bits) :  Channel Layout  : Loudspeaker Location Ordering
 
 ```
 Where, C: Center, L: Left, R: Right, Ls: Left Surround, Lss: Left Side Surround, 
-Rs: Right Surround, Rss: Right Side Surround, 
+Rs: Right Surround, Rss: Right Side Surround, Lrs: Left Rear Surroud, Rrs: Right Rear Surround
 Ltf: Left Top Front, Rtf: Right Top Front, Ltr: Left Top Rear, Rtr: Right Top Rear, 
 Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
 ```
+
+For a given input audio with [=audio_element_type=] = CHANNEL_BASED, if the input audio has height channels (e.g 7.1.4ch or 5.1.2ch), each of the list of channel layouts for scalable channel audio should have height channels (i.e it should be higher than or equal to 3.1.2ch).
+- Examples for recommended list of channel layouts: 3.1.2ch/5.1.2ch, 3.1.2ch/5.1.2ch/7.1.4ch, 5.1.2ch/7.1.4ch etc..
+- Examples for not-recommended list of channel layouts: 2ch/3.1.2ch/5.1.2ch, 2ch/3.1.2ch/5.1.2ch/7.1.4ch, 2ch/5.1.2ch/7.1.4ch, 2ch/7.1.4ch etc..
+
+NOTE: Contents providers may be satisfied with the down-mixed audio having no height channels even though the down-mix mechanism, specified in [[#iamfgeneration-scalablechannelaudio-downmixmechanism]], drops height channels when it does down-mix from input channel audio with height channels to surround channels for example from 7.14ch to Mono, Stereo, 5.1ch or 7.1ch. In that case, encoder may generate a scalable audio with the down-mixed audio without having height channels from the input channel audio with height channels. In other words, this specification does not disallow for scalable audios to have a down-mixed audio without having height channels from input channel audio having height channels.
 
 <dfn noexport>output_gain_is_present_flag</dfn> indicates if output_gain information fields for the ChannelGroup presents .
 - 0: No output_gain information fields for the ChannelGroup shall be present.
@@ -2358,32 +2364,27 @@ The figures below show static down-mix matrices to 3.1.2ch.
 Where, p1 = 0.707. Implementations may use limiter defined in [[#processing-post-limiter]] to preserve energy of audio signals instead of normalization factors.
 
 
-# IAMF Generation Process # {#iamfgeneration}
+# IAMF Generation Process (Informative) # {#iamfgeneration}
 
-This section provides processes for IA encoding for a given input audio format.
+This section provides a guideline for IA encoding for a given input audio format.
 
 Recommended input audio format for IA encoding is as follows:
-- Ambisonics format: It shall conform to [=ChannelMappingFamily=] = 2 or 3 of [[RFC8486]].
-- Channel Audio format: It shall conform to [=loudspeaker_layout=] specified in channel_audio_layer_config().
+- Ambisonics format: It conforms to [=ChannelMappingFamily=] = 2 or 3 of [[RFC8486]].
+- Channel Audio format: It conforms to [=loudspeaker_layout=] specified in channel_audio_layer_config().
 - Input Sampling Rate: 48000Hz
 - Bitdepth: 16 bits or 24 bits
 	- 16 bits are recommended for OPUS.
 - Input file format: .wav file (Linear PCM, simply called as PCM)
 
-For a given input audio and user inputs, IA encoder shall output [=IA sequence=] which conforms to [[#obu-syntax]].
+For a given input audio and user inputs, IA encoder outputs [=IA sequence=] which conforms to [[#obu-syntax]].
 
-Input audio shall be one of followings:
+Input audio is as follows:
 - Ambisonics format
 - Channel Audio format
 
 User inputs are:
 - Ambisonics mode to indicate if [=ChannelMappingFamily=] = 2 or 3 of [[RFC8486]].
 - List of channel layouts to be supported for scalable channel audio: it conforms to [=loudspeaker_layout=].
-	- For a given input audio with Channel Audio format, if the input audio has height channels (e.g 7.1.4ch), each of the list of channel layouts should have height channels (i.e it should be higher than or equal to 3.1.2ch).
-		- Examples for recommended list of channel layouts: 3.1.2ch/5.1.2ch, 3.1.2ch/5.1.2ch/7.1.4ch, 5.1.2ch/7.1.4ch etc..
-		- Examples for not-recommended list of channel layouts: 2ch/3.1.2ch/5.1.2ch, 2ch/3.1.2ch/5.1.2ch/7.1.4ch, 2ch/5.1.2ch/7.1.4ch, 2ch/7.1.4ch etc..
-		
-NOTE: Contents providers may be satisfied with the down-mixed audio having no height channels even though the down-mix mechanism, specified in [[#iamfgeneration-scalablechannelaudio-downmixmechanism]], drops height channels when it does down-mix from input channel audio with height channels to surround channels for example from 7.14ch to Mono, Stereo, 5.1ch or 7.1ch. In that case, encoder may generate a scalable audio with the down-mixed audio without having height channels from the input channel audio with height channels. In other words, this specification does not disallow for scalable audios to have a down-mixed audio without having height channels from input channel audio having height channels.
 
 IA encoding can be done by using the combination of following generation processing.
 - Encoding of an audio element (Ambisonics encoding or Scalable Channel Audio encoding)
@@ -2412,15 +2413,15 @@ The IA encoder is composed of Pre-processor, Codec encoder and OBU packetizer.
 For Ambisonics encoding:
 - Pre-processor outputs one ChannelGroup and descriptors and it is only composed of Meta Generator.
 	- Meta generator generates descriptors based on Ambisonics mode and the number of channels for Ambisonics.
-		- [=ambisonics_mode=] shall be set to 0 for [=ChannelMappingFamily=] = 2 of [[RFC8486]] or 1 for [=ChannelMappingFamily=] = 3 of [[RFC8486]].
+		- [=ambisonics_mode=] is set to 0 for [=ChannelMappingFamily=] = 2 of [[RFC8486]] or 1 for [=ChannelMappingFamily=] = 3 of [[RFC8486]].
 		- ambisonics_config is set to as follows:
-			- [=output_channel_count=], [=substream_count=] and [=coupled_substream_count=] shall be set to the number of channels for Ambisonics.
+			- [=output_channel_count=], [=substream_count=] and [=coupled_substream_count=] is set to the number of channels for Ambisonics.
 			- [=channel_mapping=] for [=ambisonics_mode=] = 0 is assigned to according to the order of substreams in ChannelGroup.
 			- [=demixing_matrix=] for [=ambisonics_mode=] = 1 is assigned to according to the order of substreams in ChannelGroup.
 - Codec Enc. outputs substreams as many as the number of channels which is indicated in [=substream_count=].
-- Temporal unit shall be composed of audio frame OBUs for substreams.
+- Temporal unit is composed of audio frame OBUs for substreams.
 	- It may have the immediately preceding temporal delimiter OBU.
-	- The order of substreams in ChannelGroup shall be aligned with [=channel_mapping=] for Ambisonics_Mode = 0 or [=demixing_matrix=] for Ambisonics_Mode = 1.
+	- The order of substreams in ChannelGroup is aligned with [=channel_mapping=] for Ambisonics_Mode = 0 or [=demixing_matrix=] for Ambisonics_Mode = 1.
 
 ## Scalable Channel Audio Encoding ## {#iamfgeneration-scalablechannelaudio}
 
@@ -2430,31 +2431,31 @@ For Scalable Channel Audio encoding:
 		- Parameter blocks for recon_gain_info_parameter_data is not be generated. 
 		- Parameter blocks for demixing_info_parameter_data may be generated by implementers who assume it to be recommended for dynamic downmixing in a decoder side.
 		- Down-mixer, ChannelGroup generator and Attenuation modules do not needed.
-	- Down-mix parameter generator shall generate 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k)) by analyzing input channel audio.
-	- Down-mixer shall generate down-mixed audios according to the list of channel layouts and the down-mix parameters.
+	- Down-mix parameter generator generates 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k)) by analyzing input channel audio.
+	- Down-mixer generates down-mixed audios according to the list of channel layouts and the down-mix parameters.
 	- Loudness module should output the loudness level ([=LKFS=]) of each down-mixed audio based on [[ITU1770-4]].
-	- ChannelGroup generator shall transform the input channel audio to ChannelGroups for scalable channel audio with [=num_layers=] > 1 scalability by using the down-mix parameters and the list of channel layouts.
-	- Attenuation module shall apply a gain to the transformed ChannelGroups to prevent clipping.
+	- ChannelGroup generator transforms the input channel audio to ChannelGroups for scalable channel audio with [=num_layers=] > 1 scalability by using the down-mix parameters and the list of channel layouts.
+	- Attenuation module applies a gain to the transformed ChannelGroups to prevent clipping.
 	- Meta generator generates descriptors and parameter block(s) for each frame.
-		- descriptors shall be set to as follows:
-			- [=num_layers=] shall be set to the number of channel layouts.
-			- [=channel_audio_layer_config()=] shall be set to as follows:
-				- [=loudspeaker_layout=] shall be set to the ith list of channel layouts for the ith ChannelGroup.
-				- [=output_gain_is_present_flag=] shall set to 1 for the ith ChannelGroup if attenuation is applied to the mixed channels of the ith ChannelGroup. Otherwise it shall be set to 0 for the ith ChannelGroup.
-				- [=recon_gain_is_present_flag=] shall be set to 1 for the ith ChannelGroup if the preceding ChannelGroups has one or more mixed channels from the down-mixed audio for the ith channel layout. Otherwise, it shall be set to 0 for the ith ChannelGroup. Especially, when [=num_layers=] = 1, this flag shall be set to 0.
-					- This flag shall be set to 0 for lossless codecs including LPCM.
-				- [=substream_count=] shall be set to the number of substreams composing of the ith ChannelGroup.
-				- [=coupled_substream_count=] shall be set to the number of coupled substreams among the substreams composing of the ith ChannelGroup.
-				- [=loudness=] shall be set to the loudness ([=LKFS=]) of the down-mixed audio for the ith channel layout for the ith ChannelGroup.
-				- Each bit of [=output_gain_flags=] shall be set to 1 for the ith ChannelGroup if attenuation is applied to the relevant channel of the ith ChannelGroup. Otherwise it shall be set to 0 for the ith ChannelGroup.
-				- [=output_gain=] shall be set to the inverse number of the gain which is applied to the channels which are indicated by output_gain_flags.
-		- Parameter blocks can be composed of [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=]. When [=recon_gain_is_present_flag=] = 0 for all ChannelGroup, recon_gain_info shall not present in IA sequence.
-			- [=dmixp_mode=] of demixing_info_parameter_data for the kth frame shall be set to indicate (α(k), β(k), γ(k), δ(k)) and w_idx_offset(k). Where w_idx_offset(k) = 1 or -1.
-			- [=recon_gain_flags=] of recon_gain_info_parameter_data shall be set to indicate the de-mixed channels, which need to apply [=recon_gain=] among the output channels after demixing for ith channel layout.
-			- [=recon_gain=] shall be set to the gain value to be applied to the channel which is indicated by recon_gain_flags for the ith ChannelGroup.
-- Temporal unit for kth frame shall be composed of audio frame OBUs for the kth frames of the substreams and followed by OBUs for zero or more parameter block OBUs.
+		- descriptors are set to as follows:
+			- [=num_layers=] is set to the number of channel layouts.
+			- [=channel_audio_layer_config()=] is set to as follows:
+				- [=loudspeaker_layout=] is set to the ith list of channel layouts for the ith ChannelGroup.
+				- [=output_gain_is_present_flag=] is set to 1 for the ith ChannelGroup if attenuation is applied to the mixed channels of the ith ChannelGroup. Otherwise it is set to 0 for the ith ChannelGroup.
+				- [=recon_gain_is_present_flag=] is set to 1 for the ith ChannelGroup if the preceding ChannelGroups has one or more mixed channels from the down-mixed audio for the ith channel layout. Otherwise, it shall be set to 0 for the ith ChannelGroup. Especially, when [=num_layers=] = 1, this flag shall be set to 0.
+					- This flag is set to 0 for lossless codecs including LPCM.
+				- [=substream_count=] is set to the number of substreams composing of the ith ChannelGroup.
+				- [=coupled_substream_count=] is set to the number of coupled substreams among the substreams composing of the ith ChannelGroup.
+				- [=loudness=] is set to the loudness ([=LKFS=]) of the down-mixed audio for the ith channel layout for the ith ChannelGroup.
+				- Each bit of [=output_gain_flags=] is set to 1 for the ith ChannelGroup if attenuation is applied to the relevant channel of the ith ChannelGroup. Otherwise it is set to 0 for the ith ChannelGroup.
+				- [=output_gain=] is set to the inverse number of the gain which is applied to the channels which are indicated by output_gain_flags.
+		- Parameter blocks can be composed of [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=]. When [=recon_gain_is_present_flag=] = 0 for all ChannelGroup, recon_gain_info does not present in IA sequence.
+			- [=dmixp_mode=] of demixing_info_parameter_data for the kth frame is set to indicate (α(k), β(k), γ(k), δ(k)) and w_idx_offset(k). Where w_idx_offset(k) = 1 or -1.
+			- [=recon_gain_flags=] of recon_gain_info_parameter_data is set to indicate the de-mixed channels, which need to apply [=recon_gain=] among the output channels after demixing for ith channel layout.
+			- [=recon_gain=] is set to the gain value to be applied to the channel which is indicated by recon_gain_flags for the ith ChannelGroup.
+- Temporal unit for kth frame is composed of audio frame OBUs for the kth frames of the substreams and followed by OBUs for zero or more parameter block OBUs.
 	- It may have the immediately preceding temporal delimiter OBU,
-	- ChannelGroups in temporal unit shall be placed in order. In other words, ChannelGroup for the first channel layout shall come first, followed by ChannelGroup for the second channel layout, followed by ChannelGroup for the third channel layout and so on.
+	- ChannelGroups in temporal unit is placed in order. In other words, ChannelGroup for the first channel layout comes first, followed by ChannelGroup for the second channel layout, followed by ChannelGroup for the third channel layout and so on.
 
 Below figure shows IA encoding flowchart for Scalable Channel Audio.
 - For a given Channel Audio and a given list of channel layouts for scalability, PCMs for Channel Audio are passed to CG Generation module.
@@ -2476,143 +2477,9 @@ Below figure shows IA encoding flowchart for Scalable Channel Audio.
 <center><img src="images/IA Encoding Flowchart for Channel Audio Format.png" style="width:80%; height:auto;"></center>
 <center><figcaption>IA Encoding Flowchart for Scalable Channel Audio</figcaption></center>
 
-Following sections, [[#iamfgeneration-scalablechannelaudio-downmixparameter]], [[#iamfgeneration-scalablechannelaudio-downmixmechanism]], [[#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule]], [[#iamfgeneration-scalablechannelaudio-recongaingeneration]] and [[#iamfgeneration-scalablechannelaudio-channelgroupgenerationrule]] do not needed for non-scalable channel audio (i.e., when [=num_layers=] specified in [=scalable_channel_layout_config()=] is set to 1).
-
-### Down-mix parameter and Loudness ### {#iamfgeneration-scalablechannelaudio-downmixparameter}
-
-This section describes how to generate down-mix parameters and loudness level for a given channel audio and a given list of channel layouts for scalability.
-
-Below figure shows a block diagram for down-mix parameter and loudness module including down-mixer.
-
-<center><img src="images/Down-mix Parameter and Loudness.png" style="width:100%; height:auto;"></center>
-<center><figcaption>IA Down-mix Parameter and Loudness</figcaption></center>
-
-For a given Channel Audio (e.g. 7.1.4ch) and a given list of channel layouts based on the Channel Audio,
-- Down-mix parameter generator shall generate 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k)) by analyzing input Channel Audio, by referring [[AI-CAD-Mixing]]. Where, k is a frame index.
-	- It is composed of Audio Scene Classification module and Height Energy Quantification module as depicted in Figure 11-2.
-	- Audio Scene Classification module generates 4 parameters (α(k), β(k), γ(k), δ(k)) by classifying audio scenes of input channel audio in three modes.
-		- Default scene: Neither Dialog nor Effect
-		- Dialog scene: Center-channel oriented and clear dialog/voice sounds
-		- Effect scene: Directional and spatially moving sounds.
-	- Height Energy Quantification module generates a surround to height mixing parameter (w(k)) which is decided according to the relative energy difference between the top and surround channels of input channel audio.
-		- If the energy of top channels is bigger than that of surround ones, then w_idx_offset(k) is set to 1. Otherwise, it is set to -1. And, w(k) is calculated based on w_idx_offset(k) and conforms to [[#processing-scalablechannelaudio]].
-- Down-mixer generates down-mixed audios from input Channel Audio according to the list of channel layouts and the down-mix parameters, and outputs down-mixed audio for each channel layout to Loudness module.
-	- It is not depicted in the figure but Down-mixer further generates [=Dmixp_Mode=] and [=Recon_Gains=] for each frame to be passed to OBU packetizer.
-- Loudness module measures the loudness level ([=LKFS=]) of each down-mixed audio based on [[ITU1770-4]], and passes them to OBU packetizer.
-
-### Down-mix Mechanism ### {#iamfgeneration-scalablechannelaudio-downmixmechanism}
-
-This section specifies the down-mixing mechanism to generate <dfn noexport>down-mixed audio</dfn> for scalable channel audio.
-
-For a given Channel Audio which conforms to [=loudspeaker_layout=], the surround and top channels (if any) are separately down-mixed and especially step by step until to get a target channels.
-
-Implementers may use another method to get the down-mixed audio from the given channel audio, but the down-mixed audio shall comply with that by this section.
-
-Therefore, a down-mixer based on the down-mix mechanism is a combination of following surround down-mixer(s) and top down-mixer(s) as depicted in below figure.
-- Surround Down-mixers: S7to5 enc., S5to3 enc., S3to2 enc., S2to1 enc.
-
-```
-	S7to5 enc.: Ls5 = α(k) x Lss7 + β(k) x Lrs7 and Rs5 = α(k) x Rss7 + β(k) x Rrs7.
-	S5to3 enc.: L3 = L5 + δ(k) x Ls5 and R3 = R5 + δ(k) x Rs5
-	S3to2 enc.: L2 = L3 + 0.707 x C and R2 = R3 + 0.707 x C
-	S2to1 enc.: Mono = 0.5 x (L2 + R2)
-```
-
-- Top Down-mixers: T4to2 enc., T2toTF2 enc.
-
-```
-	T4to2 enc.: Ltf2 = Ltf4 + γ(k) x Ltb4  and Rtf2 = Rtf4 + γ(k) x Rtb4.
-	T2toTF2 enc.: Ltf3 = Ltf2 + w(k) x δ(k) x Ls5 and Rtf3 = Rtf2 + w(k) x δ(k) x Rs5.
-```
-
-<center><img src="images/Down-mix Mechanism.png" style="width:100%; height:auto;"></center>
-<center><figcaption>IA Down-mix Mechanism</figcaption></center>
-
-```
-For example, to get down-mixed 3.1.2ch from 7.1.4ch:
-- S3 of 3.1.2ch is generated by using S7to5 and S5to3 encs.
-- TF2 of 3.1.2ch is generated by using T4to2 and T2toTF2 encs.
-```
-
-### Channel Layout Generation Rule ### {#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule}
-
-This section describes the generation rule for channel layouts for scalable channel audio.
-
-For a given channel layout (CL #n) of input Channel Audio, any list of CLs ({CL #i: i = 1, 2, ..., n}) for a scalable channel audio shall conform with following rules:
-- Si ≤ Si+1 and Wi ≤ Wi+1 and Ti ≤ Ti+1 except Si = Si+1 and Wi = Wi+1 and Ti = Ti+1 for i = n-1, n-2, …, 1. Where ith Channel Layout CL #i = Si.Wi.Ti.
-- CL #i is one of [=loudspeaker_layouts=] supported in this specification.
-
-Down-mix paths, which conform to the above rule, shall be only allowed for scalable channel audio with [=num_layers=] > 1 as depicted in below figure.
-
-<center><img src="images/Down-mix Path.png" style="width:90%; height:auto;"></center>
-<center><figcaption>IA Down-mix Path</figcaption></center>
-
-### Recon Gain Generation ### {#iamfgeneration-scalablechannelaudio-recongaingeneration}
-
-This section describes how to generate [=recon_gain=].
-
-Recon_Gain needs to be applied to de-mixed channels. For this, IA encoder needs to deliver it to IA decoders.
-
-When the channel, which this recon_gain needs to be applied to, is coded by a codec, if the kth coded frame has trimming data. The kth frames used to generate recon_gain (k) have the trimming data on the same positions.
-
-Let's define followings:
-- Level Ok is the signal power for the frame #k of a channel of the down-mixed audio for CL #i.
-- Level Mk is the signal power for the frame #k of the relevant mixed channel of the down-mixed audio for CL #i-1.
-- Level Dk is the signal power for the frame #k of the de-mixed channel for CL #i (after demixing).
-
-If 10*log10(level Ok / maxL^2) is less than the first threshold value (e.g. -80dB), Recon_Gain (k, i)  = 0. Where, maxL = 32767 for 16bits.
-
-If 10*log10(level Ok / level Mk ) is less than the second threshold value (e.g. -6dB), Recon_Gain (k, i) is set to the value which makes level Ok = Recon_Gain (k, i)^2 x level Dk. Otherwise, Recon_Gain (k, i) = 1. Actual value to be delivered is floor(255*Recon_Gain).
-
-```
-For example, if we assume CL #i = 7.1.4ch and CL #i-1 = 5.1.2ch, then de-mixed channels are D_Lrs7, D_Rrs7, D_Ltb4 and D_Rtb4.
-- D_Lrs7 and D_Rrs7 are de-mixed from Ls5 and Rs5 in the (i-1)th ChannelGroup by using Lss7 and Rss7 in the ith ChannelGroup and its relevant demixing parameters (i.e., α(k) and β(k)) , respectively.
-- D_Ltb4 and D_Rtb4 are de-mixed from Ltf2 and Rtf2 in the (i-1)th ChannelGroup by using Ltf4 and Rtf4 in the ith ChannelGroup and its relevant demixing parameter (i.e., γ(k)), respectively.
-
-Recon_Gain for D_Lrs7:
-- Level Ok is the signal power for the frame #k of Lrs7 in the ith ChannelGroup.
-- Level Mk is the signal power for the frame #k of Ls5 in the (i-1)th ChannelGroup.
-- Level Dk is the signal power for the frame #k of D_Lrs7.
-Recon_Gain for D_Rrs7:
-- Level Ok is the signal power for the frame #k of Rrs7 in the ith ChannelGroup.
-- Level Mk is the signal power for the frame #k of Rs5 in the (i-1)th ChannelGroup.
-- Level Dk is the signal power for the frame #k of D_Rrs7.
-Recon_Gain for D_Ltb4:
-- Level Ok is the signal power for the frame #k of Ltf4 in the ith ChannelGroup.
-- Level Mk is the signal power for the frame #k of Ltf2 in the (i-1)th ChannelGroup.
-- Level Dk is the signal power for the frame #k of D_Ltb4.
-Recon_Gain for D_Rtb4:
-- Level Ok is the signal power for the frame #k of Rtf4 in the ith ChannelGroup.
-- Level Mk is the signal power for the frame #k of Rtf2 in the (i-1)th ChannelGroup.
-- Level Dk is the signal power for the frame #k of D_Rtb4.
-```
-
-### ChannelGroup Generation Rule ### {#iamfgeneration-scalablechannelaudio-channelgroupgenerationrule}
-
-This section describes the generation rule for ChannelGroup.
-
-For a given Channel Audio and the list of CLs ({CL #i: i = 1, 2, ..., n}), CG Generation module outputs the transformed audio (i.e. ChannelGroups) which shall conform to following rules:
-- It consists of C number of channels and is structured to n number of CGs, where C is the number of channels for the Channel Audio.
-- CG #1 (as called BCG): This CG is the down-mixed audio itself for CL #1 generated from the Channel Audio. It contains C1 number of channels.
-- CG #i (as called DCG, i = 2, 3, …, n): This CG contains (Ci – Ci-1) number of channels. (Ci – Ci-1) channel(s) consists of as follows:
-	- (Si – Si-1) surround channel(s) if Si > Si-1 . When S_set = { x | Si-1 < x ≤ Si and x is an integer},
-		- If 2 is an element of S_set, the L2 channel is contained in this CG #i.
-		- If 3 is an element of S_set, the Center channel is contained in this CG #i.
-		- If 5 is an element of S_set, the L5 and R5 channels are contained in this CG #i.
-		- If 7 is an element of S_set, the Lss7 and Rss7 channels are contained in this CG #i.
-	- The LFE channel if Wi > Wi-1 .
-	- (Ti – Ti-1) top channels if Ti > Ti-1 .
-		- If Ti-1 = 0, the top channels of the down-mixed audio for CL #i are contained in this CG #i.
-		- If Ti-1 = 2, the Ltf and Rtf channels of the down-mixed audio for CL #i are contained in this CG #i.
-
-Below figure shows one example of transformation matrix with 4 CGs (2ch/3.1.2ch/5.1.2ch/7.1.4ch).
-
-<center><img src="images/Example of Transformation Matrix with 4 CGs.png" style="width:100%; height:auto;"></center>
-<center><figcaption>Example of Transformation Matrix with 4 CGs</figcaption></center>
-
 ## Mix Presentation Encoding ## {#iamfgeneration-mixpresentation}
 
-For Mix Presentation OBU for one single channel-based audio element, Mix Presentation OBU shall follow following restrictions:
+For Mix Presentation OBU for one single channel-based audio element, Mix Presentation OBU follows following restrictions:
 - [=num_sub_mixes=]: set to 1
 - [=num_audio_elements=]: set to 1
 - [=element_mix_config()=]: No parameter block for element_mix and default_mix_gain = 0dB
@@ -2622,7 +2489,7 @@ For Mix Presentation OBU for one single channel-based audio element, Mix Present
 - loudness_info() on L(1), loudness_info on L(2), ..., loudness_info on L([=num_layers=]): loudness information of the rendered audio to the measured layout L(i).
 - Where L(i) is the measured layout for the ith layer and i = 1, 2, ..., [=num_layers=]
 
-For Mix Presentation for one single scene-based audio element, Mix Presentation OBU shall follow following restrictions:
+For Mix Presentation for one single scene-based audio element, Mix Presentation OBU follows following restrictions:
 - [=num_sub_mixes=]: set to 1
 - [=num_audio_elements=]: set to 1
 - [=element_mix_config()=]: set to [=mix_gain=]
@@ -2633,7 +2500,7 @@ For Mix Presentation for one single scene-based audio element, Mix Presentation 
 - Where L(i) is the measured layout for the ith loudness information and i = 1, 2, ..., M1.
 - This Mix Presentation is authored by using the highest [=loudness_layout=].
  
-For Mix Presentation for N (>1) audio elements (when num_sub-mixes = 1), Mix Presentation OBU shall follow following restrictions:
+For Mix Presentation for N (>1) audio elements (when num_sub-mixes = 1), Mix Presentation OBU follows following restrictions:
 - [=num_sub_mixes=]: set to 1
 - [=num_audio_elements=]: set to N
 - [=element_mix_config()=] for each audio element: set to [=mix_gain=]
@@ -2644,7 +2511,7 @@ For Mix Presentation for N (>1) audio elements (when num_sub-mixes = 1), Mix Pre
 - Where L(i) is the measured layout for the ith loudness information and i = 1, 2, ..., M2.
 - This Mix Presentation is authored by using the highest [=loudness_layout=].
 
-### Element Mix Config (Informative) ###  {#iamfgeneration-mixpresentation-mix}
+### Element Mix Config ###  {#iamfgeneration-mixpresentation-mix}
 
 This section provide a guideline to generate element_mix_config().
 
@@ -2654,9 +2521,9 @@ An IA multiplexer may merge two or more IA sequences. In this case, it should ad
 
 This section provide a way to generate IA sequence having multiple audio elements from two IA simple or base profiles.
 
-### Multiple Audio Elements with One Codec Config (Informative) ### {#iamfgeneration-multipleaudioelements-onecodec}
+### Multiple Audio Elements with One Codec Config ### {#iamfgeneration-multipleaudioelements-onecodec}
 
-This section provides a way how to generate IA sequence having multiple audio elements from two IA simple profiles with the same codec config OBU. However, the result shall comply with the base profile of IA sequence.
+This section provides a way how to generate IA sequence having multiple audio elements from two IA simple profiles with the same codec config OBU. However, the result complies with the base profile of IA sequence.
 
 Step1: Descriptor OBUs are generated as follows:
 - IA Sequence Header OBU: get the larger [=profile_name=] field and the larger [=profile_compatible=] field, respectively.
@@ -2699,7 +2566,7 @@ ISSUE: TODO. Fill in example workflows.
 
 # Annex
 
-## Annex A: ID Linking Scheme (Informative)
+## Annex A: ID Linking Scheme (Informative) ## {#Annex_A}
 
 The below figure shows the linking scheme among IDs in obu_header or obu payload.
 
@@ -2728,10 +2595,144 @@ In the above figure,
 - Parameter Block OBU with parameter_id = 33 is providing mix_gain_parameter_data() to be applied to the rendered audio element after rendering according to render_config() of the Audio Element with audio_element_id = 12.
 - Parameter Block OBU with parameter_id = 34 is providing mix_gain_parameter_data() to be applied to the mixed audio of the two rendered audios.
 
-## Annex B: Short-lived Audio (Normative)
+## Annex B: Short-lived Audio (Normative) ## (Annex_B)
 
 An IA sequence may contain audio elements which are short-lived, where the audio element may not exist for the entire timeline of the IA sequence. There is a method for signalling this. Consider the example with two audio elements, A and B, present at the start of the IA sequence, where B is a short-lived audio element with a length shorter than A.
 
 1. The method uses a new set of Descriptor OBUs. The first set of Descriptor OBUs includes an Audio Element OBU for each of A and B, and a Mix Presentation OBU that references both A and B. When the audio element B has ended, a second set of Descriptor OBUs is placed in the IA stream, which includes an Audio Element for only A, and a Mix Presentation OBU that references only A.
 
 In the case, relevant parameter blocks must be updated in a way to match the timing of the short-lived audio elements if necessary to ensure that the processed audio output is correct.
+
+## Annex C: Rules for Scalable Channel Audio (Normative) ## (Annex_C)
+
+This Annex specifies normative rules for scalable channel audio with [=mum_layers=] > 1.
+
+### Annex C-1: Down-mix parameter and Loudness ### {#iamfgeneration-scalablechannelaudio-downmixparameter}
+
+This section describes how to generate down-mix parameters and loudness level for a given channel audio and a given list of channel layouts for scalability.
+
+Below figure shows a block diagram for down-mix parameter and loudness module including down-mixer.
+
+<center><img src="images/Down-mix Parameter and Loudness.png" style="width:100%; height:auto;"></center>
+<center><figcaption>IA Down-mix Parameter and Loudness</figcaption></center>
+
+For a given Channel Audio (e.g. 7.1.4ch) and a given list of channel layouts based on the Channel Audio,
+- Down-mix parameter generator shall generate 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k)) by analyzing input Channel Audio, by referring [[AI-CAD-Mixing]]. Where, k is a frame index.
+	- It is composed of Audio Scene Classification module and Height Energy Quantification module as depicted in Figure 11-2.
+	- Audio Scene Classification module generates 4 parameters (α(k), β(k), γ(k), δ(k)) by classifying audio scenes of input channel audio in three modes.
+		- Default scene: Neither Dialog nor Effect
+		- Dialog scene: Center-channel oriented and clear dialog/voice sounds
+		- Effect scene: Directional and spatially moving sounds.
+	- Height Energy Quantification module generates a surround to height mixing parameter (w(k)) which is decided according to the relative energy difference between the top and surround channels of input channel audio.
+		- If the energy of top channels is bigger than that of surround ones, then w_idx_offset(k) is set to 1. Otherwise, it is set to -1. And, w(k) is calculated based on w_idx_offset(k) and conforms to [[#processing-scalablechannelaudio]].
+- Down-mixer generates down-mixed audios from input Channel Audio according to the list of channel layouts and the down-mix parameters, and outputs down-mixed audio for each channel layout to Loudness module.
+	- It is not depicted in the figure but Down-mixer further generates [=Dmixp_Mode=] and [=Recon_Gains=] for each frame to be passed to OBU packetizer.
+- Loudness module measures the loudness level ([=LKFS=]) of each down-mixed audio based on [[ITU1770-4]], and passes them to OBU packetizer.
+
+### Annex C-2: Down-mix Mechanism ### {#iamfgeneration-scalablechannelaudio-downmixmechanism}
+
+This section specifies the down-mixing mechanism to generate <dfn noexport>down-mixed audio</dfn> for scalable channel audio.
+
+For a given Channel Audio which conforms to [=loudspeaker_layout=], the surround and top channels (if any) are separately down-mixed and especially step by step until to get a target channels.
+
+Implementers may use another method to get the down-mixed audio from the given channel audio, but the down-mixed audio shall comply with that by this section.
+
+Therefore, a down-mixer based on the down-mix mechanism is a combination of following surround down-mixer(s) and top down-mixer(s) as depicted in below figure.
+- Surround Down-mixers: S7to5 enc., S5to3 enc., S3to2 enc., S2to1 enc.
+
+```
+	S7to5 enc.: Ls5 = α(k) x Lss7 + β(k) x Lrs7 and Rs5 = α(k) x Rss7 + β(k) x Rrs7.
+	S5to3 enc.: L3 = L5 + δ(k) x Ls5 and R3 = R5 + δ(k) x Rs5
+	S3to2 enc.: L2 = L3 + 0.707 x C and R2 = R3 + 0.707 x C
+	S2to1 enc.: Mono = 0.5 x (L2 + R2)
+```
+
+- Top Down-mixers: T4to2 enc., T2toTF2 enc.
+
+```
+	T4to2 enc.: Ltf2 = Ltf4 + γ(k) x Ltb4  and Rtf2 = Rtf4 + γ(k) x Rtb4.
+	T2toTF2 enc.: Ltf3 = Ltf2 + w(k) x δ(k) x Ls5 and Rtf3 = Rtf2 + w(k) x δ(k) x Rs5.
+```
+
+<center><img src="images/Down-mix Mechanism.png" style="width:100%; height:auto;"></center>
+<center><figcaption>IA Down-mix Mechanism</figcaption></center>
+
+```
+For example, to get down-mixed 3.1.2ch from 7.1.4ch:
+- S3 of 3.1.2ch is generated by using S7to5 and S5to3 encs.
+- TF2 of 3.1.2ch is generated by using T4to2 and T2toTF2 encs.
+```
+
+### Annex C-3: Channel Layout Generation Rule ### {#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule}
+
+This section describes the generation rule for channel layouts for scalable channel audio.
+
+For a given channel layout (CL #n) of input Channel Audio, any list of CLs ({CL #i: i = 1, 2, ..., n}) for a scalable channel audio shall conform with following rules:
+- Si ≤ Si+1 and Wi ≤ Wi+1 and Ti ≤ Ti+1 except Si = Si+1 and Wi = Wi+1 and Ti = Ti+1 for i = n-1, n-2, …, 1. Where ith Channel Layout CL #i = Si.Wi.Ti.
+- CL #i is one of [=loudspeaker_layouts=] supported in this specification.
+
+Down-mix paths, which conform to the above rule, shall be only allowed for scalable channel audio with [=num_layers=] > 1 as depicted in below figure.
+
+<center><img src="images/Down-mix Path.png" style="width:90%; height:auto;"></center>
+<center><figcaption>IA Down-mix Path</figcaption></center>
+
+### Annex C-4: Recon Gain Generation ### {#iamfgeneration-scalablechannelaudio-recongaingeneration}
+
+This section describes how to generate [=recon_gain=].
+
+Recon_Gain needs to be applied to de-mixed channels. For this, IA encoder needs to deliver it to IA decoders.
+
+Let's define followings:
+- Level Ok is the signal power for the frame #k of a channel of the down-mixed audio for CL #i.
+- Level Mk is the signal power for the frame #k of the relevant mixed channel of the down-mixed audio for CL #i-1.
+- Level Dk is the signal power for the frame #k of the de-mixed channel for CL #i (after demixing).
+
+If 10*log10(level Ok / maxL^2) is less than the first threshold value (e.g. -80dB), Recon_Gain (k, i)  = 0. Where, maxL = 32767 for 16bits.
+
+If 10*log10(level Ok / level Mk ) is less than the second threshold value (e.g. -6dB), Recon_Gain (k, i) is set to the value which makes level Ok = Recon_Gain (k, i)^2 x level Dk. Otherwise, Recon_Gain (k, i) = 1. Actual value to be delivered is floor(255*Recon_Gain).
+
+```
+For example, if we assume CL #i = 7.1.4ch and CL #i-1 = 5.1.2ch, then de-mixed channels are D_Lrs7, D_Rrs7, D_Ltb4 and D_Rtb4.
+- D_Lrs7 and D_Rrs7 are de-mixed from Ls5 and Rs5 in the (i-1)th ChannelGroup by using Lss7 and Rss7 in the ith ChannelGroup and its relevant demixing parameters (i.e., α(k) and β(k)) , respectively.
+- D_Ltb4 and D_Rtb4 are de-mixed from Ltf2 and Rtf2 in the (i-1)th ChannelGroup by using Ltf4 and Rtf4 in the ith ChannelGroup and its relevant demixing parameter (i.e., γ(k)), respectively.
+
+Recon_Gain for D_Lrs7:
+- Level Ok is the signal power for the frame #k of Lrs7 in the ith ChannelGroup.
+- Level Mk is the signal power for the frame #k of Ls5 in the (i-1)th ChannelGroup.
+- Level Dk is the signal power for the frame #k of D_Lrs7.
+Recon_Gain for D_Rrs7:
+- Level Ok is the signal power for the frame #k of Rrs7 in the ith ChannelGroup.
+- Level Mk is the signal power for the frame #k of Rs5 in the (i-1)th ChannelGroup.
+- Level Dk is the signal power for the frame #k of D_Rrs7.
+Recon_Gain for D_Ltb4:
+- Level Ok is the signal power for the frame #k of Ltf4 in the ith ChannelGroup.
+- Level Mk is the signal power for the frame #k of Ltf2 in the (i-1)th ChannelGroup.
+- Level Dk is the signal power for the frame #k of D_Ltb4.
+Recon_Gain for D_Rtb4:
+- Level Ok is the signal power for the frame #k of Rtf4 in the ith ChannelGroup.
+- Level Mk is the signal power for the frame #k of Rtf2 in the (i-1)th ChannelGroup.
+- Level Dk is the signal power for the frame #k of D_Rtb4.
+```
+
+### Annex C-5: ChannelGroup Generation Rule ### {#iamfgeneration-scalablechannelaudio-channelgroupgenerationrule}
+
+This section describes the generation rule for ChannelGroup.
+
+For a given Channel Audio and the list of CLs ({CL #i: i = 1, 2, ..., n}), CG Generation module outputs the transformed audio (i.e. ChannelGroups) which shall conform to following rules:
+- It consists of C number of channels and is structured to n number of CGs, where C is the number of channels for the Channel Audio.
+- CG #1 (as called BCG): This CG is the down-mixed audio itself for CL #1 generated from the Channel Audio. It contains C1 number of channels.
+- CG #i (as called DCG, i = 2, 3, …, n): This CG contains (Ci – Ci-1) number of channels. (Ci – Ci-1) channel(s) consists of as follows:
+	- (Si – Si-1) surround channel(s) if Si > Si-1 . When S_set = { x | Si-1 < x ≤ Si and x is an integer},
+		- If 2 is an element of S_set, the L2 channel is contained in this CG #i.
+		- If 3 is an element of S_set, the Center channel is contained in this CG #i.
+		- If 5 is an element of S_set, the L5 and R5 channels are contained in this CG #i.
+		- If 7 is an element of S_set, the Lss7 and Rss7 channels are contained in this CG #i.
+	- The LFE channel if Wi > Wi-1 .
+	- (Ti – Ti-1) top channels if Ti > Ti-1 .
+		- If Ti-1 = 0, the top channels of the down-mixed audio for CL #i are contained in this CG #i.
+		- If Ti-1 = 2, the Ltf and Rtf channels of the down-mixed audio for CL #i are contained in this CG #i.
+
+Below figure shows one example of transformation matrix with 4 CGs (2ch/3.1.2ch/5.1.2ch/7.1.4ch).
+
+<center><img src="images/Example of Transformation Matrix with 4 CGs.png" style="width:100%; height:auto;"></center>
+<center><figcaption>Example of Transformation Matrix with 4 CGs</figcaption></center>
