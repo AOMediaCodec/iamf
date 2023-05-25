@@ -408,7 +408,7 @@ The data OBUs contain the actual time-varying data that is required in the gener
 
 The IA sequence supports the description of multiple audio substreams and algorithms, which may have different metadata update rates to each other. The update rate for the audio substreams and audio elements is governed by the frame rates of the audio codec used. Since a single bitstream may support multiple codecs, this may lead to multiple different frame rates. The algorithms for rendering and mixing may have parameters that update at different rates to each other and to the audio frame rates. Therefore, the IA sequence contains information to facilitate the synchronization of the different audio frames and parameters.
 
-- <dfn noexport>Audio Frame OBU</dfn> provides the raw coded audio frame for an audio substream.
+- <dfn noexport>Audio Frame OBU</dfn> provides the coded audio frame for an audio substream. It is represented by different types of OBUs
 - <dfn noexport>Parameter Block OBU</dfn> provides the time-varying parameter values for an algorithm used in any of the decoding, reconstruction, rendering or mixing steps.
 - <dfn noexport>Sync OBU</dfn> provides relative timestamp offsets to synchronize audio frames and parameter blocks.
 - <dfn noexport>Temporal Delimiter OBU</dfn> identifies the temporal units.
@@ -442,9 +442,9 @@ class ia_open_bitstream_unit() {
   else if (obu_type == OBU_IA_Sync)
     sync_obu();
   else if (obu_type == OBU_IA_Audio_Frame)
-    audio_frame_obu_with_no_id();
+    audio_frame_obu_implicit_id();
   else if (obu_type >= 9 and <= 30)
-    audio_frame_obu(obu_type - 9);
+    audio_frame_obu_explicit_id(obu_type - 9);
   else if (obu_type == 6 or 7)
     reserved_obu();
 
@@ -598,7 +598,7 @@ class codec_config() {
 
 <dfn noexport>codec_id</dfn> indicates a ‘four-character code’ (4CC) to identify the codec used to generate the audio substreams. It shall be 'Opus' for IAMF-OPUS, 'mp4a' for IAMF-AAC-LC, 'fLaC' for IAMF-FLAC and 'ipcm' for IAMF-LPCM.
 
-<dfn noexport>num_samples_per_frame</dfn> indicates the frame length, in samples, of the raw coded audio provided in by audio_frame_obu(). It shall not be set to zero.
+<dfn noexport>num_samples_per_frame</dfn> indicates the frame length, in samples, of the coded audio provided in by audio_frame_obu_explicit_id(). It shall not be set to zero.
 
 <dfn noexport>roll_distance</dfn> is a signed integer that gives the number of frames that need to be decoded in order for a frame to be decoded correctly. A negative value indicates the number of frames before the frame to be decoded corrently.
 - It shall be set to -1 for IAMF-AAC-LC and -R (R = 4 when the frame size = 960) for IAMF-OPUS. IAMF-FLAC may ignore this field. Where, R is the smallest integer greater than or equal to 3840 divided by the frame size. 
@@ -1491,14 +1491,14 @@ The first 22 audio substreams in an IA sequence may use the OBU types OBU_IA_Aud
 <b>Syntax</b>
 
 ```
-class audio_frame_obu_with_no_id() {
+class audio_frame_obu_implicit_id() {
   leb128() audio_substream_id;
-  audio_frame_obu(audio_substream_id);
+  audio_frame_obu_explicit_id(audio_substream_id);
 }
 ```
 
 ```
-class audio_frame_obu() {
+class audio_frame_obu_explicit_id() {
   unsigned int (8*coded_frame_size) audio_frame();
 }
 ```
@@ -1509,7 +1509,7 @@ class audio_frame_obu() {
 
 <dfn noexport>coded_frame_size</dfn> is the size of [=audio_frame()=] in bytes.
 
-<dfn noexport>audio_frame()</dfn> is the raw coded audio data for the frame. It shall be [=opus packet=] of [[!RFC6716]] for IAMF-OPUS, [=raw_data_block()=] of [[!AAC]] for IAMF-AAC-LC and [=FRAME=] of [[!FLAC]] for IAMF-FLAC.
+<dfn noexport>audio_frame()</dfn> is the coded audio data for the frame. It shall be [=opus packet=] of [[!RFC6716]] for IAMF-OPUS, [=raw_data_block()=] of [[!AAC]] for IAMF-AAC-LC and [=FRAME=] of [[!FLAC]] for IAMF-FLAC.
 
 For IAMF-LPCM, [=audio_frame()=] shall be LPCM samples. When more than one byte is used to represent a LPCM sample, the byte order is indicated in [=sample_format_flags=]. 
 
