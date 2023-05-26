@@ -1898,7 +1898,7 @@ The result of encapsulating an IA Sequence into an [[!ISOBMFF]] file is as follo
 
 - If there are audio samples to be trimmed at the start or at the end, then 'edts' and 'elst' boxes shall be present to reflect the trimming status.
 - Sample Entry
-	- The first [=IASampleEntry=] shall include the first Descriptor OBUs and followed by Sync OBU of the IA sequence. 
+	- For an IA Sample, the required Descriptor OBUs and Sync OBUs required for processing the samples shall be in the [=configOBUs=] of the associated sample entry. 
 	
 NOTE: Multiple sample entries may be used in a track, for example when the track is the concatenation of multiple tracks or multiple IA Sequences and some IA samples have different configOBUs values.
 
@@ -1926,7 +1926,7 @@ NOTE: Multiple sample entries may be used in a track, for example when the track
 
 ```
 class IASampleEntry extends AudioSampleEntry('iamf') {
-  configOBUs;
+  unsigned int 8[] configOBUs;
 }
 ```
 
@@ -1947,8 +1947,6 @@ None of AudioSampleEntry's optional boxes shall be present.
 
 For tracks using the [=IASampleEntry=], an <dfn noexport>IA Sample</dfn> has the following constraints:
 - One IA Sample data shall be one Temporal Unit and shall not contain Temporal Delimiter OBU.
-- In every IA Sample, the relative offset of each Substream or each Parameter (if present) is identified by its associated [=relative_offset=] field of the sync_obu().
-		- In other words, [=relative_offset=](s) in sync_obu() is (are) applicable to every IA Sample in its associated [=IASampleEntry=].
 - The decode duration of an IA Sample SHALL equal the duration of the underlying temporal unit, i.e. the decode durations of the Audio Frame OBU.
 
 NOTE: Per the restriction of the profiles carried in an IA track, all Audio Frame OBUs in an IA Sample have the same duration and have the same trimming information. If Audio Frame OBUs in the IA sample contain trimming information, the corresponding audio samples SHALL be removed from presentation using edit list information.
