@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 3383f409d, updated Fri Apr 28 15:49:22 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="ad6a3916d259d085183b0d2b8f8ff2134f6c8b99" name="document-revision">
+  <meta content="fbdf9ec2d0a007884687eae721a8e5f6afd6de89" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -3384,10 +3384,10 @@ class AnimatedParameterData(animation_type) {
    <p>This section specifies the OBU payload of OBU_IA_Sync.</p>
    <p><b>Syntax</b></p>
 <pre>class sync_obu() {
-  leb128() global_offset;
-  leb128() num_obu_ids;
-  for (i = 0; i &lt; num_obu_ids; i++) {
-    leb128() obu_id;
+  leb128() reserved;
+  leb128() count;
+  for (i = 0; i &lt; count; i++) {
+    leb128() id;
     unsigned int (1) obu_data_type;
     unsigned int (1) reinitialize_decoder;
     unsigned int (6) reserved;
@@ -3396,10 +3396,10 @@ class AnimatedParameterData(animation_type) {
 }
 </pre>
    <p><b>Semantics</b></p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="global_offset">global_offset<a class="self-link" href="#global_offset"></a></dfn> specifies the offset that is applied to all substreams and parameters specified in this Sync OBU, in addition to their individual relative offsets.</p>
-   <p>For this version of the specification, the value of global_offset shall be set to 0.</p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="num_obu_ids">num_obu_ids<a class="self-link" href="#num_obu_ids"></a></dfn> specifies the number of substream and parameter IDs that this Sync OBU specifies the offset for.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="obu_id">obu_id</dfn> specifies the unique ID associated with the substream or parameter that is being referred to.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="reserved">reserved<a class="self-link" href="#reserved"></a></dfn> shall be set to 0x00.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="count">count<a class="self-link" href="#count"></a></dfn> specifies the number of substream and parameter IDs that this Sync OBU specifies the relative offset for.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="id">id</dfn> specifies the unique ID associated with the substream or parameter that is being referred to. The value of this field is to be interpreted depending on the value of <a data-link-type="dfn" href="#obu_data_type" id="ref-for-obu_data_type">obu_data_type</a>. If <a data-link-type="dfn" href="#obu_data_type" id="ref-for-obu_data_type①">obu_data_type</a> is 0, the id is interpreted as an <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id③">audio_substream_id</a>. If <a data-link-type="dfn" href="#obu_data_type" id="ref-for-obu_data_type②">obu_data_type</a> is 1, the id is interpreted as a <a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id②">parameter_id</a>.</p>
+   <p>Any identifier which is not specificed in the preceding Descriptor OBUs, shall not be present in this Sync OBU. For every Parameter Block OBU (respectively Audio Frame OBU) in an IA Sequence, the value of its <a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id③">parameter_id</a> (respectively <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id④">audio_substream_id</a>) shall be listed as value of <a data-link-type="dfn" href="#id" id="ref-for-id">id</a> in the preceding Sync OBU.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="obu_data_type">obu_data_type</dfn> specifies the type of data that is being referred to.</p>
 <pre class="def">obu_data_type : Type of OBU data
       0       : SUBSTREAM
@@ -3410,7 +3410,7 @@ class AnimatedParameterData(animation_type) {
    <p>If reinitialize_decoder = 1, the decoder shall be reinitialized before decoding the audio frames after the gap. If a pre-skip is specified in the relevant Codec Config OBU, it is applicable after reinitializing the decoder.</p>
    <p>For this version of the specification, the value of reinitialize_decoder shall be set to 0. If a value of 1 is seen, the IA sequence shall be rejected as invalid.</p>
    <p><dfn class="css" data-dfn-for="sync_obu()" data-dfn-type="value" data-noexport id="valdef-sync_obu-reserved">reserved<a class="self-link" href="#valdef-sync_obu-reserved"></a></dfn> shall be set to 0. Reserved units are for future use and shall be ignored by an IAMF-OBU parser.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="relative_offset">relative_offset</dfn> is the offset to position the first audio frame (before trimming) or parameter block with the referenced obu_id that comes after this Sync OBU with respect to the timeline generated before this Sync OBU. If this Sync OBU is the first one, it is the offset from 0. Otherwise, it is the offset from the end of the timeline of Substreams generated from the previous Sync OBU.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="relative_offset">relative_offset</dfn> is the offset to position the first audio frame (before trimming) or parameter block with the referenced id that comes after this Sync OBU with respect to the timeline generated before this Sync OBU. If this Sync OBU is the first one, it is the offset from 0. Otherwise, it is the offset from the end of the timeline of Substreams generated from the previous Sync OBU.</p>
    <ul>
     <li data-md>
      <p>For this version of the specification, it shall be set to 0 for all ids.</p>
@@ -3418,9 +3418,9 @@ class AnimatedParameterData(animation_type) {
    <p>The difference, <a data-link-type="dfn" href="#relative_offset" id="ref-for-relative_offset">relative_offset</a>(P) - <a data-link-type="dfn" href="#relative_offset" id="ref-for-relative_offset①">relative_offset</a>(A), shall be the offset to position the first audio sample where the first parameter value of the first parameter block that comes after this Sync OBU is applied to.</p>
    <ul>
     <li data-md>
-     <p>Where, <a data-link-type="dfn" href="#relative_offset" id="ref-for-relative_offset②">relative_offset</a>(P) is <a data-link-type="dfn" href="#relative_offset" id="ref-for-relative_offset③">relative_offset</a> of <a data-link-type="dfn" href="#obu_id" id="ref-for-obu_id">obu_id</a> for the parameter and <a data-link-type="dfn" href="#relative_offset" id="ref-for-relative_offset④">relative_offset</a>(A) is <a data-link-type="dfn" href="#relative_offset" id="ref-for-relative_offset⑤">relative_offset</a> of <a data-link-type="dfn" href="#obu_id" id="ref-for-obu_id①">obu_id</a> for the substream which the parameter is applied to.</p>
+     <p>Where, <a data-link-type="dfn" href="#relative_offset" id="ref-for-relative_offset②">relative_offset</a>(P) is <a data-link-type="dfn" href="#relative_offset" id="ref-for-relative_offset③">relative_offset</a> of <a data-link-type="dfn">obu_id</a> for the parameter and <a data-link-type="dfn" href="#relative_offset" id="ref-for-relative_offset④">relative_offset</a>(A) is <a data-link-type="dfn" href="#relative_offset" id="ref-for-relative_offset⑤">relative_offset</a> of <a data-link-type="dfn">obu_id</a> for the substream which the parameter is applied to.</p>
    </ul>
-   <p>The offset shall be indicated in the number of ticks at the sample rate specified in the corresponding substream or Codec Config OBU. For IAMF-OPUS, the sample rate is 48000Hz.</p>
+   <p>The offset for <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id⑤">audio_substream_id</a> shall be indicated in the number of ticks at the sample rate of its associated substream and the offset for <a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id④">parameter_id</a> shall be indicated in the number of ticks at the sample rate of the substream which its associated parameter is applied to. For OPUS, the sample rate is 48000Hz.</p>
    <p>IA encoder and decoder operations related to this field are specified in <a href="#standalone-synchronizing-data-obus">§ 5.2 Synchronizing Data OBUs</a>.</p>
    <h3 class="heading settled" data-level="3.13" id="codec-specific"><span class="secno">3.13. </span><span class="content">Codec Specific</span><a class="self-link" href="#codec-specific"></a></h3>
    <p>This section defines codec specific information for Codec_Specific_Info and Substream.</p>
@@ -3537,9 +3537,9 @@ class AnimatedParameterData(animation_type) {
      <p>There shall be only one Sync OBU placed immediately after each set of Descriptor OBUs, and no additional new Sync OBUs inserted anywhere in the sequence of Data OBUs that follow.</p>
      <ul>
       <li data-md>
-       <p>The <a data-link-type="dfn" href="#relative_offset" id="ref-for-relative_offset⑥">relative_offset</a>s of all <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id③">audio_substream_id</a>s and all <a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id②">parameter_id</a> in the Sync OBU shall be set to 0.</p>
+       <p>The <a data-link-type="dfn" href="#relative_offset" id="ref-for-relative_offset⑥">relative_offset</a>s of all <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id⑥">audio_substream_id</a>s and all <a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id⑤">parameter_id</a> in the Sync OBU shall be set to 0.</p>
       <li data-md>
-       <p>Every <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id④">audio_substream_id</a> which is described in the preceding Descriptor OBUs shall be listed as value of <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-id" id="ref-for-concept-id">id</a> (with <a data-link-type="dfn" href="#obu_data_type" id="ref-for-obu_data_type">obu_data_type</a> = SUBSTREAM) in the Sync OBU.</p>
+       <p>Every <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id⑦">audio_substream_id</a> which is described in the preceding Descriptor OBUs shall be listed as value of <a data-link-type="dfn" href="#id" id="ref-for-id①">id</a> (with <a data-link-type="dfn" href="#obu_data_type" id="ref-for-obu_data_type③">obu_data_type</a> = SUBSTREAM) in the Sync OBU.</p>
      </ul>
     <li data-md>
      <p><a data-link-type="dfn" href="#num_sub_mixes" id="ref-for-num_sub_mixes">num_sub_mixes</a> shall be set to 1 for this profile.</p>
@@ -3655,7 +3655,7 @@ class AnimatedParameterData(animation_type) {
     <li data-md>
      <p>A sequence of Audio Frame OBUs or Parameter Block OBUs shall fully cover the time interval between consecutive Sync OBUs or the final Sync OBU and the end of the bitstream.</p>
     <li data-md>
-     <p>If an Audio Frame OBU or Parameter Block OBU has a <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id⑤">audio_substream_id</a> or <a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id③">parameter_id</a> that is not defined in the most recent Sync OBU, it shall not appear in the bitstream, until a new Sync OBU is provided that specifies it.</p>
+     <p>If an Audio Frame OBU or Parameter Block OBU has a <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id⑧">audio_substream_id</a> or <a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id⑥">parameter_id</a> that is not defined in the most recent Sync OBU, it shall not appear in the bitstream, until a new Sync OBU is provided that specifies it.</p>
     <li data-md>
      <p>A Temporal Delimiter OBU may be inserted at the beginning of a Temporal Unit, defined as a set of all Audio Frame OBUs with the same start timestamp and the same duration from all substreams and all non-redundant Parameter Block OBUs with the start timestamp within the duration. A Temporal Unit may include redundant Parameter Block OBUs.</p>
     <li data-md>
@@ -4902,7 +4902,7 @@ Recon_Gain for D_Rtb4:
       <li data-md>
        <p><a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id③">audio_element_id</a>s are updated to be unique in all of Audio Element OBUs.</p>
       <li data-md>
-       <p><a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id⑥">audio_substream_id</a>s are updated to be unique in all of Audio Element OBUs.</p>
+       <p><a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id⑨">audio_substream_id</a>s are updated to be unique in all of Audio Element OBUs.</p>
       <li data-md>
        <p>parameter_ids in <a data-link-type="dfn" href="#paramdefinition" id="ref-for-paramdefinition①">ParamDefinition()</a>s carried in each Audio Element OBU are updated to refer its associated parameters correctly.</p>
      </ul>
@@ -4921,9 +4921,9 @@ Recon_Gain for D_Rtb4:
      <p>Just take all of temporal units for ith frames from each audio element and keep the order of temporal units as the order of audio element OBUs in descriptor OBUs except following:</p>
      <ul>
       <li data-md>
-       <p><a data-link-type="dfn" href="#obu_type" id="ref-for-obu_type③">obu_type</a>s are updated to be aligned according to <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id⑦">audio_substream_id</a>s specified in Audio Element OBUs.</p>
+       <p><a data-link-type="dfn" href="#obu_type" id="ref-for-obu_type③">obu_type</a>s are updated to be aligned according to <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id①⓪">audio_substream_id</a>s specified in Audio Element OBUs.</p>
       <li data-md>
-       <p><a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id④">parameter_id</a>s in Parameter Block OBUs are updated to uniquely indentify the parameter in IA sequence and based on the parameter_ids in <a data-link-type="dfn" href="#paramdefinition" id="ref-for-paramdefinition③">ParamDefinition()</a>s carried in Descriptor OBUs.</p>
+       <p><a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id⑦">parameter_id</a>s in Parameter Block OBUs are updated to uniquely indentify the parameter in IA sequence and based on the parameter_ids in <a data-link-type="dfn" href="#paramdefinition" id="ref-for-paramdefinition③">ParamDefinition()</a>s carried in Descriptor OBUs.</p>
      </ul>
     <li data-md>
      <p>It may have the immediately preceding temporal delimiter OBU for each temporal unit.</p>
@@ -4931,7 +4931,7 @@ Recon_Gain for D_Rtb4:
    <p>Step3: Update Sync OBU.</p>
    <ul>
     <li data-md>
-     <p>Sync OBU is updated based on Sync OBUs of each IA sequence and updated <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id⑧">audio_substream_id</a>s and <a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id⑤">parameter_id</a>s.</p>
+     <p>Sync OBU is updated based on Sync OBUs of each IA sequence and updated <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id①①">audio_substream_id</a>s and <a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id⑧">parameter_id</a>s.</p>
    </ul>
    <p>Step4: Generate IA sequence which starts descriptor OBUs, followed by Sync OBU and followed by temporal units in order.</p>
    <h3 class="heading settled" data-level="8.5" id="iamfgeneration-postprocessing"><span class="secno">8.5. </span><span class="content">Post Processing</span><a class="self-link" href="#iamfgeneration-postprocessing"></a></h3>
@@ -5224,6 +5224,7 @@ Recon_Gain for D_Rtb4:
     </ul>
    <li><a href="#control_point_relative_time">control_point_relative_time</a><span>, in § 3.9.1</span>
    <li><a href="#control_point_value">control_point_value</a><span>, in § 3.9.1</span>
+   <li><a href="#count">count</a><span>, in § 3.12</span>
    <li><a href="#coupled-stereo-channels">Coupled stereo channels</a><span>, in § 3.7.2</span>
    <li><a href="#coupled_substream_count">coupled_substream_count</a><span>, in § 3.7.2</span>
    <li><a href="#csi">CSI</a><span>, in § 3.7.1</span>
@@ -5248,7 +5249,6 @@ Recon_Gain for D_Rtb4:
    <li><a href="#extension_header_size">extension_header_size</a><span>, in § 3.2</span>
    <li><a href="#gamma">gamma</a><span>, in § 3.9.2</span>
    <li><a href="#get_param_definition">get_param_definition()</a><span>, in § 3.9</span>
-   <li><a href="#global_offset">global_offset</a><span>, in § 3.12</span>
    <li><a href="#ia_code">ia_code</a><span>, in § 3.5</span>
    <li><a href="#iamf">IAMF</a><span>, in § 2</span>
    <li>
@@ -5260,6 +5260,7 @@ Recon_Gain for D_Rtb4:
    <li><a href="#ia-sample">IA Sample</a><span>, in § 6.2.4</span>
    <li><a href="#iasampleentry">IASampleEntry</a><span>, in § 6.2.3</span>
    <li><a href="#ia-sequence">IA sequence</a><span>, in § 2.1</span>
+   <li><a href="#id">id</a><span>, in § 3.12</span>
    <li><a href="#immersive-audio">immersive audio</a><span>, in § 2</span>
    <li><a href="#info_type">info_type</a><span>, in § 3.8.7</span>
    <li><a href="#integrated_loudness">integrated_loudness</a><span>, in § 3.8.7</span>
@@ -5282,7 +5283,6 @@ Recon_Gain for D_Rtb4:
    <li><a href="#num_layers">num_layers</a><span>, in § 3.7.2</span>
    <li><a href="#num_layouts">num_layouts</a><span>, in § 3.8</span>
    <li><a href="#num_loudspeakers">num_loudspeakers</a><span>, in § 3.8.6</span>
-   <li><a href="#num_obu_ids">num_obu_ids</a><span>, in § 3.12</span>
    <li><a href="#num_parameters">num_parameters</a><span>, in § 3.7</span>
    <li><a href="#num_samples_per_frame">num_samples_per_frame</a><span>, in § 3.6</span>
    <li><a href="#num_samples_to_trim_at_end">num_samples_to_trim_at_end</a><span>, in § 3.2</span>
@@ -5297,7 +5297,6 @@ Recon_Gain for D_Rtb4:
    <li><a href="#num_substreams">num_substreams</a><span>, in § 3.7</span>
    <li><a href="#obu_data_type">obu_data_type</a><span>, in § 3.12</span>
    <li><a href="#obu_extension_flag">obu_extension_flag</a><span>, in § 3.2</span>
-   <li><a href="#obu_id">obu_id</a><span>, in § 3.12</span>
    <li><a href="#obu_redundant_copy">obu_redundant_copy</a><span>, in § 3.2</span>
    <li><a href="#obu_size">obu_size</a><span>, in § 3.2</span>
    <li><a href="#obu_trimming_status_flag">obu_trimming_status_flag</a><span>, in § 3.2</span>
@@ -5331,7 +5330,12 @@ Recon_Gain for D_Rtb4:
    <li><a href="#reinitialize_decoder">reinitialize_decoder</a><span>, in § 3.12</span>
    <li><a href="#relative_offset">relative_offset</a><span>, in § 3.12</span>
    <li><a href="#rendering_config">rendering_config()</a><span>, in § 3.8</span>
-   <li><a href="#valdef-sync_obu-reserved">reserved</a><span>, in § 3.12</span>
+   <li>
+    reserved
+    <ul>
+     <li><a href="#reserved">definition of</a><span>, in § 3.12</span>
+     <li><a href="#valdef-sync_obu-reserved">value for sync_obu()</a><span>, in § 3.12</span>
+    </ul>
    <li><a href="#roll_distance">roll_distance</a><span>, in § 3.6</span>
    <li><a href="#s1to2-de-mixer">S1to2 de-mixer</a><span>, in § 7.2.2</span>
    <li><a href="#s2to3-de-mixer">S2to3 de-mixer</a><span>, in § 7.2.2</span>
@@ -5378,11 +5382,6 @@ Recon_Gain for D_Rtb4:
     <ul>
      <li><span class="dfn-paneled" id="67d3cf49">clip3</span>
      <li><span class="dfn-paneled" id="3c6e7576">leb128()</span>
-    </ul>
-   <li>
-    <a data-link-type="biblio">[DOM]</a> defines the following terms:
-    <ul>
-     <li><span class="dfn-paneled" id="6ea37aa1">id</span>
     </ul>
    <li>
     <a data-link-type="biblio">[FLAC]</a> defines the following terms:
@@ -5504,8 +5503,6 @@ Recon_Gain for D_Rtb4:
    <dd><a href="https://www.rfc-editor.org/info/bcp47"><cite>BCP 47</cite></a>. Best Practice. URL: <a href="https://www.rfc-editor.org/info/bcp47">https://www.rfc-editor.org/info/bcp47</a>
    <dt id="biblio-bear">[BEAR]
    <dd><a href="https://www.aes.org/e-lib/browse.cfm?elib=21729"><cite>Developing a Binaural Renderer for Audio Definition Model Content</cite></a>. Paper. URL: <a href="https://www.aes.org/e-lib/browse.cfm?elib=21729">https://www.aes.org/e-lib/browse.cfm?elib=21729</a>
-   <dt id="biblio-dom">[DOM]
-   <dd>Anne van Kesteren. <a href="https://dom.spec.whatwg.org/"><cite>DOM Standard</cite></a>. Living Standard. URL: <a href="https://dom.spec.whatwg.org/">https://dom.spec.whatwg.org/</a>
    <dt id="biblio-flac">[FLAC]
    <dd><a href="https://xiph.org/flac/format.html"><cite>Free Lossless Audio Codec</cite></a>. Best Practice. URL: <a href="https://xiph.org/flac/format.html">https://xiph.org/flac/format.html</a>
    <dt id="biblio-iso14496-14">[ISO14496-14]
@@ -5708,7 +5705,6 @@ window.dfnpanelData = {};
 window.dfnpanelData['fc10b1cf'] = {"dfnID": "fc10b1cf", "url": "https://www.iso.org/standard/43345.html#", "dfnText": "raw_data_block()", "refSections": [{"refs": [{"id": "ref-for-something\u2462\u2466"}], "title": "3.10. Audio Frame OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-something\u2465\u2463"}], "title": "3.13.2. IAMF-AAC-LC Specific"}], "external": true};
 window.dfnpanelData['67d3cf49'] = {"dfnID": "67d3cf49", "url": "https://aomedia.org/av1/specification/conventions/", "dfnText": "clip3", "refSections": [{"refs": [{"id": "ref-for-something\u2460"}, {"id": "ref-for-something\u2461"}, {"id": "ref-for-something\u2462"}, {"id": "ref-for-something\u2463"}], "title": "1.1.1. Data types"}, {"refs": [{"id": "ref-for-something\u2464"}], "title": "1.3.2. Mathematical functions"}], "external": true};
 window.dfnpanelData['3c6e7576'] = {"dfnID": "3c6e7576", "url": "https://aomedia.org/av1/specification/conventions/", "dfnText": "leb128()", "refSections": [{"refs": [{"id": "ref-for-something\u2460"}, {"id": "ref-for-something\u2461"}, {"id": "ref-for-something\u2462"}, {"id": "ref-for-something\u2463"}], "title": "1.1.1. Data types"}, {"refs": [{"id": "ref-for-something\u2464"}], "title": "1.3.2. Mathematical functions"}], "external": true};
-window.dfnpanelData['6ea37aa1'] = {"dfnID": "6ea37aa1", "url": "https://dom.spec.whatwg.org/#concept-id", "dfnText": "id", "refSections": [{"refs": [{"id": "ref-for-concept-id"}], "title": "4. Profiles"}], "external": true};
 window.dfnpanelData['f9f6c3b0'] = {"dfnID": "f9f6c3b0", "url": "https://xiph.org/flac/format.html", "dfnText": "flac", "refSections": [{"refs": [{"id": "ref-for-something\u2467"}], "title": "3.6. Codec Config OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-something\u2462\u2467"}], "title": "3.10. Audio Frame OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-something\u2465\u2464"}, {"id": "ref-for-something\u2465\u2465"}, {"id": "ref-for-something\u2465\u2466"}, {"id": "ref-for-something\u2465\u2467"}, {"id": "ref-for-something\u2465\u2468"}, {"id": "ref-for-something\u2466\u24ea"}, {"id": "ref-for-something\u2466\u2460"}], "title": "3.13.3. IAMF-FLAC Specific"}], "external": true};
 window.dfnpanelData['97a7143f'] = {"dfnID": "97a7143f", "url": "https://xiph.org/flac/format.html", "dfnText": "frame", "refSections": [{"refs": [{"id": "ref-for-something\u2467"}], "title": "3.6. Codec Config OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-something\u2462\u2467"}], "title": "3.10. Audio Frame OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-something\u2465\u2464"}, {"id": "ref-for-something\u2465\u2465"}, {"id": "ref-for-something\u2465\u2466"}, {"id": "ref-for-something\u2465\u2467"}, {"id": "ref-for-something\u2465\u2468"}, {"id": "ref-for-something\u2466\u24ea"}, {"id": "ref-for-something\u2466\u2460"}], "title": "3.13.3. IAMF-FLAC Specific"}], "external": true};
 window.dfnpanelData['0afe50aa'] = {"dfnID": "0afe50aa", "url": "https://xiph.org/flac/format.html", "dfnText": "frame_footer", "refSections": [{"refs": [{"id": "ref-for-something\u2467"}], "title": "3.6. Codec Config OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-something\u2462\u2467"}], "title": "3.10. Audio Frame OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-something\u2465\u2464"}, {"id": "ref-for-something\u2465\u2465"}, {"id": "ref-for-something\u2465\u2466"}, {"id": "ref-for-something\u2465\u2467"}, {"id": "ref-for-something\u2465\u2468"}, {"id": "ref-for-something\u2466\u24ea"}, {"id": "ref-for-something\u2466\u2460"}], "title": "3.13.3. IAMF-FLAC Specific"}], "external": true};
@@ -5825,7 +5821,7 @@ window.dfnpanelData['output_mix_gain'] = {"dfnID": "output_mix_gain", "url": "#o
 window.dfnpanelData['digital_peak'] = {"dfnID": "digital_peak", "url": "#digital_peak", "dfnText": "digital_peak", "refSections": [{"refs": [{"id": "ref-for-digital_peak"}], "title": "7.5.1. Loudness Normalization"}], "external": false};
 window.dfnpanelData['true_peak'] = {"dfnID": "true_peak", "url": "#true_peak", "dfnText": "true_peak", "refSections": [{"refs": [{"id": "ref-for-true_peak"}], "title": "7.5.1. Loudness Normalization"}], "external": false};
 window.dfnpanelData['anchor_element'] = {"dfnID": "anchor_element", "url": "#anchor_element", "dfnText": "anchor_element", "refSections": [{"refs": [{"id": "ref-for-anchor_element"}], "title": "3.8.7. Loudness Info Syntax and Semantics"}], "external": false};
-window.dfnpanelData['parameter_id'] = {"dfnID": "parameter_id", "url": "#parameter_id", "dfnText": "parameter_id", "refSections": [{"refs": [{"id": "ref-for-parameter_id"}, {"id": "ref-for-parameter_id\u2460"}], "title": "3.7.1. Parameter Definition Syntax and Semantics"}, {"refs": [{"id": "ref-for-parameter_id\u2461"}], "title": "4. Profiles"}, {"refs": [{"id": "ref-for-parameter_id\u2462"}], "title": "5.1.2. Data OBUs"}, {"refs": [{"id": "ref-for-parameter_id\u2463"}, {"id": "ref-for-parameter_id\u2464"}], "title": "8.4.1. Multiple Audio Elements with One Codec Config (Informative)"}], "external": false};
+window.dfnpanelData['parameter_id'] = {"dfnID": "parameter_id", "url": "#parameter_id", "dfnText": "parameter_id", "refSections": [{"refs": [{"id": "ref-for-parameter_id"}, {"id": "ref-for-parameter_id\u2460"}], "title": "3.7.1. Parameter Definition Syntax and Semantics"}, {"refs": [{"id": "ref-for-parameter_id\u2461"}, {"id": "ref-for-parameter_id\u2462"}, {"id": "ref-for-parameter_id\u2463"}], "title": "3.12. Sync OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-parameter_id\u2464"}], "title": "4. Profiles"}, {"refs": [{"id": "ref-for-parameter_id\u2465"}], "title": "5.1.2. Data OBUs"}, {"refs": [{"id": "ref-for-parameter_id\u2466"}, {"id": "ref-for-parameter_id\u2467"}], "title": "8.4.1. Multiple Audio Elements with One Codec Config (Informative)"}], "external": false};
 window.dfnpanelData['animation_type'] = {"dfnID": "animation_type", "url": "#animation_type", "dfnText": "animation_type", "refSections": [{"refs": [{"id": "ref-for-animation_type"}], "title": "3.9.1. Mix Gain Parameter Data Syntax and Semantics"}, {"refs": [{"id": "ref-for-animation_type\u2460"}, {"id": "ref-for-animation_type\u2461"}, {"id": "ref-for-animation_type\u2462"}, {"id": "ref-for-animation_type\u2463"}], "title": "7.4. Animated Parameters"}], "external": false};
 window.dfnpanelData['animatedparameterdata'] = {"dfnID": "animatedparameterdata", "url": "#animatedparameterdata", "dfnText": "AnimatedParameterData()", "refSections": [{"refs": [{"id": "ref-for-animatedparameterdata"}], "title": "3.9. Parameter Block OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-animatedparameterdata\u2460"}, {"id": "ref-for-animatedparameterdata\u2461"}], "title": "7.4. Animated Parameters"}], "external": false};
 window.dfnpanelData['start_point_value'] = {"dfnID": "start_point_value", "url": "#start_point_value", "dfnText": "start_point_value", "refSections": [{"refs": [{"id": "ref-for-start_point_value"}, {"id": "ref-for-start_point_value\u2460"}, {"id": "ref-for-start_point_value\u2461"}], "title": "7.4. Animated Parameters"}], "external": false};
@@ -5835,10 +5831,10 @@ window.dfnpanelData['dmixp_mode'] = {"dfnID": "dmixp_mode", "url": "#dmixp_mode"
 window.dfnpanelData['recon_gain_info_parameter_data'] = {"dfnID": "recon_gain_info_parameter_data", "url": "#recon_gain_info_parameter_data", "dfnText": "recon_gain_info_parameter_data()", "refSections": [{"refs": [{"id": "ref-for-recon_gain_info_parameter_data"}], "title": "3.9.3. Recon Gain Info Parameter Data Syntax and Semantics"}, {"refs": [{"id": "ref-for-recon_gain_info_parameter_data\u2460"}], "title": "7.2.3. Recon Gain"}, {"refs": [{"id": "ref-for-recon_gain_info_parameter_data\u2461"}], "title": "8.2. Scalable Channel Audio Encoding"}], "external": false};
 window.dfnpanelData['recon_gain_flags'] = {"dfnID": "recon_gain_flags", "url": "#recon_gain_flags", "dfnText": "recon_gain_flags", "refSections": [{"refs": [{"id": "ref-for-recon_gain_flags"}, {"id": "ref-for-recon_gain_flags\u2460"}], "title": "3.9.3. Recon Gain Info Parameter Data Syntax and Semantics"}, {"refs": [{"id": "ref-for-recon_gain_flags\u2461"}], "title": "8.2. Scalable Channel Audio Encoding"}], "external": false};
 window.dfnpanelData['recon_gain'] = {"dfnID": "recon_gain", "url": "#recon_gain", "dfnText": "recon_gain", "refSections": [{"refs": [{"id": "ref-for-recon_gain"}, {"id": "ref-for-recon_gain\u2460"}, {"id": "ref-for-recon_gain\u2461"}], "title": "3.9.3. Recon Gain Info Parameter Data Syntax and Semantics"}, {"refs": [{"id": "ref-for-recon_gain\u2462"}, {"id": "ref-for-recon_gain\u2463"}], "title": "7.2.3. Recon Gain"}, {"refs": [{"id": "ref-for-recon_gain\u2464"}, {"id": "ref-for-recon_gain\u2465"}], "title": "8.2. Scalable Channel Audio Encoding"}, {"refs": [{"id": "ref-for-recon_gain\u2466"}], "title": "8.2.1. Down-mix parameter and Loudness"}, {"refs": [{"id": "ref-for-recon_gain\u2467"}], "title": "8.2.4. Recon Gain Generation"}], "external": false};
-window.dfnpanelData['audio_substream_id'] = {"dfnID": "audio_substream_id", "url": "#audio_substream_id", "dfnText": "audio_substream_id", "refSections": [{"refs": [{"id": "ref-for-audio_substream_id"}, {"id": "ref-for-audio_substream_id\u2460"}, {"id": "ref-for-audio_substream_id\u2461"}], "title": "3.10. Audio Frame OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-audio_substream_id\u2462"}, {"id": "ref-for-audio_substream_id\u2463"}], "title": "4. Profiles"}, {"refs": [{"id": "ref-for-audio_substream_id\u2464"}], "title": "5.1.2. Data OBUs"}, {"refs": [{"id": "ref-for-audio_substream_id\u2465"}, {"id": "ref-for-audio_substream_id\u2466"}, {"id": "ref-for-audio_substream_id\u2467"}], "title": "8.4.1. Multiple Audio Elements with One Codec Config (Informative)"}], "external": false};
+window.dfnpanelData['audio_substream_id'] = {"dfnID": "audio_substream_id", "url": "#audio_substream_id", "dfnText": "audio_substream_id", "refSections": [{"refs": [{"id": "ref-for-audio_substream_id"}, {"id": "ref-for-audio_substream_id\u2460"}, {"id": "ref-for-audio_substream_id\u2461"}], "title": "3.10. Audio Frame OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-audio_substream_id\u2462"}, {"id": "ref-for-audio_substream_id\u2463"}, {"id": "ref-for-audio_substream_id\u2464"}], "title": "3.12. Sync OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-audio_substream_id\u2465"}, {"id": "ref-for-audio_substream_id\u2466"}], "title": "4. Profiles"}, {"refs": [{"id": "ref-for-audio_substream_id\u2467"}], "title": "5.1.2. Data OBUs"}, {"refs": [{"id": "ref-for-audio_substream_id\u2468"}, {"id": "ref-for-audio_substream_id\u2460\u24ea"}, {"id": "ref-for-audio_substream_id\u2460\u2460"}], "title": "8.4.1. Multiple Audio Elements with One Codec Config (Informative)"}], "external": false};
 window.dfnpanelData['audio_frame'] = {"dfnID": "audio_frame", "url": "#audio_frame", "dfnText": "audio_frame()", "refSections": [{"refs": [{"id": "ref-for-audio_frame"}, {"id": "ref-for-audio_frame\u2460"}], "title": "3.10. Audio Frame OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-audio_frame\u2461"}, {"id": "ref-for-audio_frame\u2462"}], "title": "3.13.4. IAMF-LPCM Specific"}], "external": false};
-window.dfnpanelData['obu_id'] = {"dfnID": "obu_id", "url": "#obu_id", "dfnText": "obu_id", "refSections": [{"refs": [{"id": "ref-for-obu_id"}, {"id": "ref-for-obu_id\u2460"}], "title": "3.12. Sync OBU Syntax and Semantics"}], "external": false};
-window.dfnpanelData['obu_data_type'] = {"dfnID": "obu_data_type", "url": "#obu_data_type", "dfnText": "obu_data_type", "refSections": [{"refs": [{"id": "ref-for-obu_data_type"}], "title": "4. Profiles"}], "external": false};
+window.dfnpanelData['id'] = {"dfnID": "id", "url": "#id", "dfnText": "id", "refSections": [{"refs": [{"id": "ref-for-id"}], "title": "3.12. Sync OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-id\u2460"}], "title": "4. Profiles"}], "external": false};
+window.dfnpanelData['obu_data_type'] = {"dfnID": "obu_data_type", "url": "#obu_data_type", "dfnText": "obu_data_type", "refSections": [{"refs": [{"id": "ref-for-obu_data_type"}, {"id": "ref-for-obu_data_type\u2460"}, {"id": "ref-for-obu_data_type\u2461"}], "title": "3.12. Sync OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-obu_data_type\u2462"}], "title": "4. Profiles"}], "external": false};
 window.dfnpanelData['relative_offset'] = {"dfnID": "relative_offset", "url": "#relative_offset", "dfnText": "relative_offset", "refSections": [{"refs": [{"id": "ref-for-relative_offset"}, {"id": "ref-for-relative_offset\u2460"}, {"id": "ref-for-relative_offset\u2461"}, {"id": "ref-for-relative_offset\u2462"}, {"id": "ref-for-relative_offset\u2463"}, {"id": "ref-for-relative_offset\u2464"}], "title": "3.12. Sync OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-relative_offset\u2465"}], "title": "4. Profiles"}], "external": false};
 window.dfnpanelData['codec_specific_info'] = {"dfnID": "codec_specific_info", "url": "#codec_specific_info", "dfnText": "Codec_Specific_Info", "refSections": [{"refs": [{"id": "ref-for-codec_specific_info"}, {"id": "ref-for-codec_specific_info\u2460"}, {"id": "ref-for-codec_specific_info\u2461"}, {"id": "ref-for-codec_specific_info\u2462"}], "title": "3.6. Codec Config OBU Syntax and Semantics"}], "external": false};
 window.dfnpanelData['sample_format_flags'] = {"dfnID": "sample_format_flags", "url": "#sample_format_flags", "dfnText": "sample_format_flags", "refSections": [{"refs": [{"id": "ref-for-sample_format_flags"}], "title": "3.10. Audio Frame OBU Syntax and Semantics"}], "external": false};
