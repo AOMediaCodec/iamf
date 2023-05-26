@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 3383f409d, updated Fri Apr 28 15:49:22 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="f4f446f153570562f5acda83e4ea690a543e799c" name="document-revision">
+  <meta content="b886782dd943674b0abe5672e8570e11c8463d3a" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2002,7 +2002,6 @@ dfn > a.self-link::before      { content: "#"; }
        <ol class="toc">
         <li><a href="#convention-function-templates"><span class="secno">1.3.1</span> <span class="content">Function templates</span></a>
         <li><a href="#convention-function-mathematical"><span class="secno">1.3.2</span> <span class="content">Mathematical functions</span></a>
-        <li><a href="#convention-function-utf8"><span class="secno">1.3.3</span> <span class="content">Function UTF-8 Encoding</span></a>
        </ol>
      </ol>
     <li>
@@ -2202,9 +2201,8 @@ dfn > a.self-link::before      { content: "#"; }
    <p><b>sleb128()</b> indicates the type of an signed integer. It indicates the following signed integer <b>syntaxName</b> is encoded by <a data-link-type="dfn" href="https://aomedia.org/av1/specification/conventions/" id="ref-for-something③">leb128()</a> specified in <a data-link-type="biblio" href="#biblio-av1-convention" title="Conventions">[AV1-Convention]</a>.</p>
    <p><b>syntaxName</b> is an signed integer which is encoded by <a data-link-type="dfn" href="https://aomedia.org/av1/specification/conventions/" id="ref-for-something④">leb128()</a> specified in <a data-link-type="biblio" href="#biblio-av1-convention" title="Conventions">[AV1-Convention]</a>.</p>
    <p><b>string</b> <b>syntaxName</b></p>
-   <p><b>string</b> indicates the type of a string which is terminated by null of one byte (i.e. 0x00).</p>
-   <p><b>syntaxName</b> is a human readable label whose byte representation consists of <b>two-letter primary language subtags</b> and <b>two-letter region subtags</b> which are connected by hyphen("-"), and followed by bytes representation of <a data-link-type="dfn" href="#utf-8_enc-label" id="ref-for-utf-8_enc-label">UTF-8_Enc(label)</a>. Its length in bytes is limited to 128.</p>
-   <p>Where, <b>two-letter primary language subtags</b> and <b>two-letter region subtags</b> conform to <a data-link-type="biblio" href="#biblio-bcp47" title="BCP 47">[BCP47]</a>.</p>
+   <p><b>string</b> indicates a null-terminated (i.e. ending at the first byte set to 0x00), UTF-8 encoded as defined in <a data-link-type="biblio" href="#biblio-rfc3629" title="UTF-8, a transformation format of ISO 10646">[RFC3629]</a> and whose length shall be limited to 128 bytes.</p>
+   <p><b>syntaxName</b> is a human readable label.</p>
    <h3 class="heading settled" data-level="1.2" id="convention-arithmetic-operators"><span class="secno">1.2. </span><span class="content">Arithmetic Operators</span><a class="self-link" href="#convention-arithmetic-operators"></a></h3>
    <table class="def">
     <tbody>
@@ -2252,9 +2250,8 @@ class Bar {
 </pre>
    <p><b>MOD(Number, Divisor)</b></p>
    <p>The MOD() function returns the remainder after <b>Number</b> is divided by <b>Divisor</b>.</p>
-   <h4 class="heading settled" data-level="1.3.3" id="convention-function-utf8"><span class="secno">1.3.3. </span><span class="content">Function UTF-8 Encoding</span><a class="self-link" href="#convention-function-utf8"></a></h4>
    <p><b>UTF-8_Enc(label)</b></p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="utf-8_enc-label" values>UTF-8_Enc(label)</dfn> byte representation of the encoded <b>label</b>, which is UTF-8 string as defined in <a data-link-type="biblio" href="#biblio-rfc3629" title="UTF-8, a transformation format of ISO 10646">[RFC3629]</a>, null terminated.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="utf-8_enc-label" values>UTF-8_Enc(label)<a class="self-link" href="#utf-8_enc-label"></a></dfn> byte representation of the encoded <b>label</b>, which is UTF-8 string as defined in <a data-link-type="biblio" href="#biblio-rfc3629" title="UTF-8, a transformation format of ISO 10646">[RFC3629]</a>, null terminated.</p>
    <h2 class="heading settled" data-level="2" id="introduction"><span class="secno">2. </span><span class="content">Introduction</span><a class="self-link" href="#introduction"></a></h2>
    <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="immersive-audio">immersive audio</dfn> means the combination of 3D audio signals recreating a sound experience close to that of a natural environment.</p>
    <p>This specification defines a model for representing <a data-link-type="dfn" href="#immersive-audio" id="ref-for-immersive-audio">immersive audio</a> contents based on coded audio substreams contributing to audio elements meant to be rendered and mixed to form one or more immersive presentations as depicted in the figure below.</p>
@@ -2861,14 +2858,22 @@ class ambisonics_projection_config() {
    <p><b>Syntax</b></p>
 <pre>class mix_presentation_obu() {
   leb128() mix_presentation_id;
-  mix_presentation_annotations();
+  leb128() count_label;
+  for (i = 0; i &lt; count_label; i++) {
+    string language_label;
+  }
+  for (i = 0; i &lt; count_label; i++) {
+    mix_presentation_annotations();
+  }
 
   leb128() num_sub_mixes;
   for (i = 0; i &lt; num_sub_mixes; i++) {	  
     leb128() num_audio_elements;
     for (j = 0; j &lt; num_audio_elements; j++) {
       leb128() audio_element_id;
-      mix_presentation_element_annotations();
+      for (i = 0; i &lt; count_label; i++) {
+        mix_presentation_element_annotations();
+      }
       rendering_config();
       element_mix_config();
     }
@@ -2884,10 +2889,17 @@ class ambisonics_projection_config() {
 </pre>
    <p><b>Semantics</b></p>
    <p><dfn data-dfn-type="dfn" data-noexport id="mix_presentation_id">mix_presentation_id<a class="self-link" href="#mix_presentation_id"></a></dfn> defines an identifier for a Mix Presentation. Within an IA Sequence, there shall be exactly one non-redundant Mix Presentation OBU with a given identifier. This identifier may be used by the application to select which Mix Presentation(s) to offer.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="count_label">count_label</dfn> indicates the number of labels in different languages.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="language_label">language_label</dfn> specifies the language which both <a data-link-type="dfn" href="#mix_presentation_friendly_label" id="ref-for-mix_presentation_friendly_label">mix_presentation_friendly_label</a> and <a data-link-type="dfn" href="#audio_element_friendly_label" id="ref-for-audio_element_friendly_label">audio_element_friendly_label</a> are written in. It shall comform to <a data-link-type="biblio" href="#biblio-bcp47" title="BCP 47">[BCP47]</a>. The same language shall not be duplicated in this loop.</p>
+   <ul>
+    <li data-md>
+     <p>The ith label of both mix_presentation_annotation() and mix_presentation_element_annotation() shall be written in the language indicated by the ith <a data-link-type="dfn" href="#language_label" id="ref-for-language_label">language_label</a>. Where, i = 0, 1, ..., <a data-link-type="dfn" href="#count_label" id="ref-for-count_label">count_label</a> -1.</p>
+   </ul>
    <p><dfn data-dfn-type="dfn" data-noexport id="mix_presentation_annotations">mix_presentation_annotations()<a class="self-link" href="#mix_presentation_annotations"></a></dfn> is a class that provides informational metadata that an IA parser should refer to when selecting the mix presentation to use. The metadata may also be used by the playback system to display information to the user, but is not used in the rendering or mixing process to generate the final output audio signal.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_sub_mixes">num_sub_mixes</dfn> specifies the number of sub-mixes.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_audio_elements">num_audio_elements</dfn> specifies the number of audio elements that are used in this mix presentation to generate the final output audio signal for playback.</p>
    <p><dfn class="css" data-dfn-for="mix_presentation_obu()" data-dfn-type="value" data-noexport id="valdef-mix_presentation_obu-audio_element_id">audio_element_id<a class="self-link" href="#valdef-mix_presentation_obu-audio_element_id"></a></dfn> indicates the identifier for an Audio Element which this Mix Presentation refers to.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="mix_presentation_element_annotations">mix_presentation_element_annotations()<a class="self-link" href="#mix_presentation_element_annotations"></a></dfn> is a class that provides informational metadata that an IA parser should refer to when selecting the referenced audio element to use. The metadata may also be used by the playback system to display information to the user, but is not used in the rendering or mixing process to generate the final output audio signal.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="rendering_config">rendering_config()</dfn> is a class that provides the metadata required for rendering the referenced audio element.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="element_mix_config">element_mix_config()</dfn> is a class that provides the metadata required for applying any processing to the referenced and rendered audio element before being summed with other processed audio elements.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="output_mix_config">output_mix_config()</dfn> is a class that provides the metadata required for post-processing the mixed audio signal to generate the audio signal for playback.</p>
@@ -2919,7 +2931,7 @@ class ambisonics_projection_config() {
 }
 </pre>
    <p><b>Semantics</b></p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="audio_element_friendly_label">audio_element_friendly_label<a class="self-link" href="#audio_element_friendly_label"></a></dfn> specifies a human-friendly label to describe the referenced audio element.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_element_friendly_label">audio_element_friendly_label</dfn> specifies a human-friendly label to describe the referenced audio element.</p>
    <h4 class="heading settled" data-level="3.8.3" id="syntax-rendering-config"><span class="secno">3.8.3. </span><span class="content">Rendering Config Syntax and Semantics</span><a class="self-link" href="#syntax-rendering-config"></a></h4>
    <p>During playback, an audio element should be rendered using a pre-defined renderer according to <a href="#processing-mixpresentation-rendering">§ 7.3.2 Rendering an Audio Element</a>. In this version of the specification, no additional metadata is required to configure the renderers, and as such, <code>rendering_config()</code> has an empty payload.</p>
    <p><b>Syntax</b></p>
@@ -4187,7 +4199,7 @@ Ltf = Ltf3 - w(k) x (L2 - 0.707 x C - L5) and Rtf = Rtf3 - w(k) x (R2 - 0.707 x 
    <p>An IA sequence may contain more than one mix presentations. The IA parser should select the appropriate mix presentation in the following order.</p>
    <ol>
     <li data-md>
-     <p>If there are any user-selectable mixes, the IA parser should select the mix, or mixes, that match the user’s preferences. An example might be a mix with a specific language. Mix presentations may use <a data-link-type="dfn" href="#mix_presentation_friendly_label" id="ref-for-mix_presentation_friendly_label">mix_presentation_friendly_label</a> to describe such mixes.</p>
+     <p>If there are any user-selectable mixes, the IA parser should select the mix, or mixes, that match the user’s preferences. An example might be a mix with a specific language. Mix presentations may use <a data-link-type="dfn" href="#mix_presentation_friendly_label" id="ref-for-mix_presentation_friendly_label①">mix_presentation_friendly_label</a> to describe such mixes.</p>
     <li data-md>
      <p>If there are more than one valid mixes remaining, the IA parser should select an appropriate mix for rendering, in the following order.</p>
      <ol>
@@ -5225,6 +5237,7 @@ Recon_Gain for D_Rtb4:
    <li><a href="#control_point_relative_time">control_point_relative_time</a><span>, in § 3.9.1</span>
    <li><a href="#control_point_value">control_point_value</a><span>, in § 3.9.1</span>
    <li><a href="#count">count</a><span>, in § 3.12</span>
+   <li><a href="#count_label">count_label</a><span>, in § 3.8</span>
    <li><a href="#coupled-stereo-channels">Coupled stereo channels</a><span>, in § 3.7.2</span>
    <li><a href="#coupled_substream_count">coupled_substream_count</a><span>, in § 3.7.2</span>
    <li><a href="#csi">CSI</a><span>, in § 3.7.1</span>
@@ -5264,6 +5277,7 @@ Recon_Gain for D_Rtb4:
    <li><a href="#immersive-audio">immersive audio</a><span>, in § 2</span>
    <li><a href="#info_type">info_type</a><span>, in § 3.8.7</span>
    <li><a href="#integrated_loudness">integrated_loudness</a><span>, in § 3.8.7</span>
+   <li><a href="#language_label">language_label</a><span>, in § 3.8</span>
    <li><a href="#layout_type">layout_type</a><span>, in § 3.8.6</span>
    <li><a href="#loudness">loudness</a><span>, in § 3.8</span>
    <li><a href="#loudness_layout">loudness_layout</a><span>, in § 3.8</span>
@@ -5271,6 +5285,7 @@ Recon_Gain for D_Rtb4:
    <li><a href="#magic-code-obu">Magic Code OBU</a><span>, in § 2.2.1</span>
    <li><a href="#mix_gain">mix_gain</a><span>, in § 3.8.4</span>
    <li><a href="#mix_presentation_annotations">mix_presentation_annotations()</a><span>, in § 3.8</span>
+   <li><a href="#mix_presentation_element_annotations">mix_presentation_element_annotations()</a><span>, in § 3.8</span>
    <li><a href="#mix_presentation_friendly_label">mix_presentation_friendly_label</a><span>, in § 3.8.1</span>
    <li><a href="#mix_presentation_id">mix_presentation_id</a><span>, in § 3.8</span>
    <li><a href="#mix-presentation-obu">Mix Presentation OBU</a><span>, in § 2.2.1</span>
@@ -5362,7 +5377,7 @@ Recon_Gain for D_Rtb4:
    <li><a href="#temporal-delimiter-obu">Temporal Delimiter OBU</a><span>, in § 2.2.2</span>
    <li><a href="#tf2tot2-de-mixer">TF2toT2 de-mixer</a><span>, in § 7.2.2</span>
    <li><a href="#true_peak">true_peak</a><span>, in § 3.8.7</span>
-   <li><a href="#utf-8_enc-label">UTF-8_Enc(label)</a><span>, in § 1.3.3</span>
+   <li><a href="#utf-8_enc-label">UTF-8_Enc(label)</a><span>, in § 1.3.2</span>
    <li><a href="#v">V</a><span>, in § 6.3</span>
    <li><a href="#version">version</a><span>, in § 3.5</span>
    <li><a href="#w">w</a><span>, in § 3.9.2</span>
@@ -5759,7 +5774,6 @@ window.dfnpanelData['a710ceb6'] = {"dfnID": "a710ceb6", "url": "https://tools.ie
 window.dfnpanelData['b123b12d'] = {"dfnID": "b123b12d", "url": "https://tools.ietf.org/html/rfc7845#", "dfnText": "output gain", "refSections": [{"refs": [{"id": "ref-for-something\u2463\u24ea"}, {"id": "ref-for-something\u2463\u2461"}, {"id": "ref-for-something\u2463\u2462"}, {"id": "ref-for-something\u2463\u2463"}, {"id": "ref-for-something\u2463\u2464"}, {"id": "ref-for-something\u2463\u2465"}, {"id": "ref-for-something\u2463\u2466"}], "title": "3.13.1. IAMF-OPUS Specific"}], "external": true};
 window.dfnpanelData['617791e4'] = {"dfnID": "617791e4", "url": "https://tools.ietf.org/html/rfc7845#", "dfnText": "pre-skip", "refSections": [{"refs": [{"id": "ref-for-something\u2463\u24ea"}, {"id": "ref-for-something\u2463\u2461"}, {"id": "ref-for-something\u2463\u2462"}, {"id": "ref-for-something\u2463\u2463"}, {"id": "ref-for-something\u2463\u2464"}, {"id": "ref-for-something\u2463\u2465"}, {"id": "ref-for-something\u2463\u2466"}], "title": "3.13.1. IAMF-OPUS Specific"}], "external": true};
 window.dfnpanelData['cbd3e2ac'] = {"dfnID": "cbd3e2ac", "url": "https://tools.ietf.org/html/rfc8486#", "dfnText": "channel count", "refSections": [{"refs": [{"id": "ref-for-something\u2460\u2467"}], "title": "3.7.3. Ambisonics Config Syntax and Semantics"}], "external": true};
-window.dfnpanelData['utf-8_enc-label'] = {"dfnID": "utf-8_enc-label", "url": "#utf-8_enc-label", "dfnText": "UTF-8_Enc(label)", "refSections": [{"refs": [{"id": "ref-for-utf-8_enc-label"}], "title": "1.1.1. Data types"}], "external": false};
 window.dfnpanelData['immersive-audio'] = {"dfnID": "immersive-audio", "url": "#immersive-audio", "dfnText": "immersive audio", "refSections": [{"refs": [{"id": "ref-for-immersive-audio"}, {"id": "ref-for-immersive-audio\u2460"}], "title": "2. Introduction"}, {"refs": [{"id": "ref-for-immersive-audio\u2461"}], "title": "2.1. IA sequence Components"}], "external": false};
 window.dfnpanelData['ia-sequence'] = {"dfnID": "ia-sequence", "url": "#ia-sequence", "dfnText": "IA sequence", "refSections": [{"refs": [{"id": "ref-for-ia-sequence"}], "title": "7. IAMF processing"}, {"refs": [{"id": "ref-for-ia-sequence\u2460"}], "title": "8. IAMF Generation Process"}], "external": false};
 window.dfnpanelData['obu_type'] = {"dfnID": "obu_type", "url": "#obu_type", "dfnText": "obu_type", "refSections": [{"refs": [{"id": "ref-for-obu_type"}], "title": "3.2. OBU Header Syntax and Semantics"}, {"refs": [{"id": "ref-for-obu_type\u2460"}, {"id": "ref-for-obu_type\u2461"}], "title": "3.10. Audio Frame OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-obu_type\u2462"}], "title": "8.4.1. Multiple Audio Elements with One Codec Config (Informative)"}], "external": false};
@@ -5807,6 +5821,8 @@ window.dfnpanelData['ambisonics_mode'] = {"dfnID": "ambisonics_mode", "url": "#a
 window.dfnpanelData['output_channel_count'] = {"dfnID": "output_channel_count", "url": "#output_channel_count", "dfnText": "output_channel_count", "refSections": [{"refs": [{"id": "ref-for-output_channel_count"}], "title": "3.7.3. Ambisonics Config Syntax and Semantics"}, {"refs": [{"id": "ref-for-output_channel_count\u2460"}, {"id": "ref-for-output_channel_count\u2461"}], "title": "7.1. Ambisonics decoding"}, {"refs": [{"id": "ref-for-output_channel_count\u2462"}], "title": "8.1. Ambisonics Encoding"}], "external": false};
 window.dfnpanelData['channel_mapping'] = {"dfnID": "channel_mapping", "url": "#channel_mapping", "dfnText": "channel_mapping", "refSections": [{"refs": [{"id": "ref-for-channel_mapping"}], "title": "7.1. Ambisonics decoding"}, {"refs": [{"id": "ref-for-channel_mapping\u2460"}, {"id": "ref-for-channel_mapping\u2461"}], "title": "8.1. Ambisonics Encoding"}], "external": false};
 window.dfnpanelData['demixing_matrix'] = {"dfnID": "demixing_matrix", "url": "#demixing_matrix", "dfnText": "demixing_matrix", "refSections": [{"refs": [{"id": "ref-for-demixing_matrix"}], "title": "7.1. Ambisonics decoding"}, {"refs": [{"id": "ref-for-demixing_matrix\u2460"}, {"id": "ref-for-demixing_matrix\u2461"}], "title": "8.1. Ambisonics Encoding"}], "external": false};
+window.dfnpanelData['count_label'] = {"dfnID": "count_label", "url": "#count_label", "dfnText": "count_label", "refSections": [{"refs": [{"id": "ref-for-count_label"}], "title": "3.8. Mix Presentation OBU Syntax and Semantics"}], "external": false};
+window.dfnpanelData['language_label'] = {"dfnID": "language_label", "url": "#language_label", "dfnText": "language_label", "refSections": [{"refs": [{"id": "ref-for-language_label"}], "title": "3.8. Mix Presentation OBU Syntax and Semantics"}], "external": false};
 window.dfnpanelData['num_sub_mixes'] = {"dfnID": "num_sub_mixes", "url": "#num_sub_mixes", "dfnText": "num_sub_mixes", "refSections": [{"refs": [{"id": "ref-for-num_sub_mixes"}], "title": "4. Profiles"}, {"refs": [{"id": "ref-for-num_sub_mixes\u2460"}, {"id": "ref-for-num_sub_mixes\u2461"}, {"id": "ref-for-num_sub_mixes\u2462"}], "title": "8.3. Mix Presentation Encoding"}], "external": false};
 window.dfnpanelData['num_audio_elements'] = {"dfnID": "num_audio_elements", "url": "#num_audio_elements", "dfnText": "num_audio_elements", "refSections": [{"refs": [{"id": "ref-for-num_audio_elements"}, {"id": "ref-for-num_audio_elements\u2460"}, {"id": "ref-for-num_audio_elements\u2461"}], "title": "8.3. Mix Presentation Encoding"}], "external": false};
 window.dfnpanelData['rendering_config'] = {"dfnID": "rendering_config", "url": "#rendering_config", "dfnText": "rendering_config()", "refSections": [{"refs": [{"id": "ref-for-rendering_config"}], "title": "8.5.1. Loudness Information"}], "external": false};
@@ -5815,7 +5831,8 @@ window.dfnpanelData['output_mix_config'] = {"dfnID": "output_mix_config", "url":
 window.dfnpanelData['num_layouts'] = {"dfnID": "num_layouts", "url": "#num_layouts", "dfnText": "num_layouts", "refSections": [{"refs": [{"id": "ref-for-num_layouts"}], "title": "3.8. Mix Presentation OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-num_layouts\u2460"}, {"id": "ref-for-num_layouts\u2461"}, {"id": "ref-for-num_layouts\u2462"}], "title": "8.3. Mix Presentation Encoding"}], "external": false};
 window.dfnpanelData['loudness_layout'] = {"dfnID": "loudness_layout", "url": "#loudness_layout", "dfnText": "loudness_layout", "refSections": [{"refs": [{"id": "ref-for-loudness_layout"}, {"id": "ref-for-loudness_layout\u2460"}, {"id": "ref-for-loudness_layout\u2461"}, {"id": "ref-for-loudness_layout\u2462"}, {"id": "ref-for-loudness_layout\u2463"}, {"id": "ref-for-loudness_layout\u2464"}], "title": "3.8. Mix Presentation OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-loudness_layout\u2465"}, {"id": "ref-for-loudness_layout\u2466"}, {"id": "ref-for-loudness_layout\u2467"}], "title": "7.3.1. Selecting a Mix Presentation"}, {"refs": [{"id": "ref-for-loudness_layout\u2468"}, {"id": "ref-for-loudness_layout\u2460\u24ea"}], "title": "7.3.2.1. Rendering a channel-based audio element to loudspeakers"}, {"refs": [{"id": "ref-for-loudness_layout\u2460\u2460"}], "title": "7.3.3. Mixing Audio Elements"}, {"refs": [{"id": "ref-for-loudness_layout\u2460\u2461"}, {"id": "ref-for-loudness_layout\u2460\u2462"}, {"id": "ref-for-loudness_layout\u2460\u2463"}], "title": "7.5.1. Loudness Normalization"}, {"refs": [{"id": "ref-for-loudness_layout\u2460\u2464"}, {"id": "ref-for-loudness_layout\u2460\u2465"}, {"id": "ref-for-loudness_layout\u2460\u2466"}, {"id": "ref-for-loudness_layout\u2460\u2467"}, {"id": "ref-for-loudness_layout\u2460\u2468"}], "title": "8.3. Mix Presentation Encoding"}, {"refs": [{"id": "ref-for-loudness_layout\u2461\u24ea"}, {"id": "ref-for-loudness_layout\u2461\u2460"}], "title": "8.5.1. Loudness Information"}], "external": false};
 window.dfnpanelData['loudness'] = {"dfnID": "loudness", "url": "#loudness", "dfnText": "loudness", "refSections": [{"refs": [{"id": "ref-for-loudness"}], "title": "8.2. Scalable Channel Audio Encoding"}], "external": false};
-window.dfnpanelData['mix_presentation_friendly_label'] = {"dfnID": "mix_presentation_friendly_label", "url": "#mix_presentation_friendly_label", "dfnText": "mix_presentation_friendly_label", "refSections": [{"refs": [{"id": "ref-for-mix_presentation_friendly_label"}], "title": "7.3.1. Selecting a Mix Presentation"}], "external": false};
+window.dfnpanelData['mix_presentation_friendly_label'] = {"dfnID": "mix_presentation_friendly_label", "url": "#mix_presentation_friendly_label", "dfnText": "mix_presentation_friendly_label", "refSections": [{"refs": [{"id": "ref-for-mix_presentation_friendly_label"}], "title": "3.8. Mix Presentation OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-mix_presentation_friendly_label\u2460"}], "title": "7.3.1. Selecting a Mix Presentation"}], "external": false};
+window.dfnpanelData['audio_element_friendly_label'] = {"dfnID": "audio_element_friendly_label", "url": "#audio_element_friendly_label", "dfnText": "audio_element_friendly_label", "refSections": [{"refs": [{"id": "ref-for-audio_element_friendly_label"}], "title": "3.8. Mix Presentation OBU Syntax and Semantics"}], "external": false};
 window.dfnpanelData['mix_gain'] = {"dfnID": "mix_gain", "url": "#mix_gain", "dfnText": "mix_gain", "refSections": [{"refs": [{"id": "ref-for-mix_gain"}, {"id": "ref-for-mix_gain\u2460"}], "title": "8.3. Mix Presentation Encoding"}, {"refs": [{"id": "ref-for-mix_gain\u2461"}, {"id": "ref-for-mix_gain\u2462"}], "title": "8.5.1. Loudness Information"}], "external": false};
 window.dfnpanelData['output_mix_gain'] = {"dfnID": "output_mix_gain", "url": "#output_mix_gain", "dfnText": "output_mix_gain", "refSections": [{"refs": [{"id": "ref-for-output_mix_gain"}, {"id": "ref-for-output_mix_gain\u2460"}], "title": "8.3. Mix Presentation Encoding"}], "external": false};
 window.dfnpanelData['digital_peak'] = {"dfnID": "digital_peak", "url": "#digital_peak", "dfnText": "digital_peak", "refSections": [{"refs": [{"id": "ref-for-digital_peak"}], "title": "7.5.1. Loudness Normalization"}], "external": false};
