@@ -197,11 +197,11 @@ url: https://www.iso.org/standard/77752.html#; spec: MP4-PCM; type: property;
 		"publisher": "Wikipedia",
 		"href": "https://en.wikipedia.org/wiki/Q_(number_format)"
 	},
-	"ISO-639-1": {
-		"title": "ISO 639-1",
-		"status": "Standard",
-		"publisher": "ISO",
-		"href": "https://www.iso.org/standard/22109.html"
+	"BCP47": {
+		"title": "BCP 47",
+		"status": "Best Practice",
+		"publisher": "IETF",
+		"href": "https://www.rfc-editor.org/info/bcp47"
 	},
 	"FLAC": {
 		"title": "Free Lossless Audio Codec",
@@ -968,7 +968,7 @@ class mix_presentation_obu() {
   leb128() mix_presentation_id;
   leb128() count_label;
   for (i = 0; i < count_label; i++) {
-    unsigned int (16) language_label;
+    string language_label;
   }
   for (i = 0; i < count_label; i++) {
     mix_presentation_annotations();
@@ -1002,7 +1002,7 @@ class mix_presentation_obu() {
 
 <dfn noexport>count_label</dfn> indicates the number of labels in different languages.
 
-<dfn noexport>language_label</dfn> is two-character code (2CC) to indicate the language which the label is written in. It shall comform to [[!ISO-639-1]]. The same language shall not be duplicated in this loop. 
+<dfn noexport>language_label</dfn> specifies the language which both [=mix_presentation_friendly_label=] and [=audio_element_friendly_label=] are written in. It shall comform to [[!BCP47]]. The same language shall not be duplicated in this loop. 
 - The ith label of both mix_presentation_annotation() and mix_presentation_element_annotation() shall be written in the language indicated by the ith [=language_label=]. Where, i = 0, 1, ..., [=count_label=] -1.
 
 <dfn noexport>mix_presentation_annotations()</dfn> is a class that provides informational metadata that an IA parser should refer to when selecting the mix presentation to use. The metadata may also be used by the playback system to display information to the user, but is not used in the rendering or mixing process to generate the final output audio signal.
