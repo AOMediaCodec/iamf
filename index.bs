@@ -551,7 +551,13 @@ The reserved OBU allows the extension of this specification with additional OBU 
 
 ## Magic Code OBU Syntax and Semantics ## {#obu-magiccode}
 
-This section specifies obu payload of OBU_IA_Magic_Code.
+This section specifies obu payload of OBU_IA_Magic_Code. 
+
+This OBU is used to indicate the start of IA Sequence. So, the first OBU of IA Sequence shall be OBU_IA_Magic_Code.
+
+NOTE: When an IA Sequence is stored in a file, the Magic Code OBU can be used to detect that the file contains an IA Sequence.
+
+This OBU may be placed frequently within one single IA Sequence for an application such as broadcasting or multicasting scenario. In that case, the other Magic Code OBUs except the first one shall be marked as redundant (i.e. [=obu_redundant_copy=] = 1).
 
 <b>Syntax</b>
 
@@ -565,7 +571,9 @@ class magic_code_obu() {
 
 <b>Semantics</b>
 
-<dfn noexport>ia_code</dfn> indicates a ‘four-character code’ (4CC) to identify the start of the IA sequence. It shall be ‘iamf’.
+<dfn noexport>ia_code</dfn> indicates a ‘four-character code’ (4CC), ‘iamf’. 
+	
+NOTE: When IA OBUs are delivered over a protocol that does not provide explicit IA Sequence boundaries, a parser may locate the IA Sequence start by searching for the code 'iamf' preceded by specific OBU header values, e.g. assuming [=obu_extension_flag=] is set to 0 and because [=obu_trimming_status_flag=] is set to 0 for a Magic Code OBU, the OBU header can be 0xF806 or 0xFC06
 
 <dfn noexport>version</dfn> indicates the version of an IA sequence. It shall be set to 0 for this version of the specification. Implementations should treat IA sequences where the MSB four bits of the version number match that of a recognized specification as backwards compatible with that specification. That is, the version number can be split into "major" and "minor" version sub-fields, with changes to the minor sub-field (in the LSB four bits) signaling compatible changes. For example, an implementation of this specification should accept any stream with a version number of ’15’ or less, and should assume any stream with a version number ’16’ or
 greater is incompatible.
@@ -720,6 +728,8 @@ A ChannelGroup is defined in [[#iamfgeneration]]. The order of the substreams in
 
 Parameter definition classes inherits from the abstract <dfn noexport>ParamDefinition()</dfn> class.
 
+For a given parameter, its timeline is fully aligned with that of the Audio Element which the given parameter is applied to. Where, the timeline of the Audio Element is on post coding domain (i.e. before trimming data). So, when we assume the same sample rate between the given Parameter and the Audio Element In other words, the start timestamp and the duration of the given Parameter are same as those of the Audio Elememnt, respectively.
+
 <b>Syntax</b>
 
 ```
@@ -747,12 +757,21 @@ abstract class ParamDefinition() {
 <dfn value noexport for="ParamDefinition()">parameter_id</dfn> indicates the identifier for the Parameter which this parameter definition refers to.
 
 <dfn noexport>parameter_rate</dfn> specifies the rate used by this parameter, expressed as ticks per second. Time-related fields associated with this parameter, such as durations, shall be expressed in the number of ticks.
+- In DemixingParamDefinition() or ReconGainParamDefinition(), this field shall be set to the sample rate of the Audio Element which this parameter is applied to.
+- The rate shall be such a value that (the rate x [=num_samples_per_frame=]) / (the sample rate of Audio Element) is still integer.
 
 <dfn noexport>param_definition_mode</dfn> indicates if this parameter definition specifies duration, num_subblocks, constant_subblock_duration and subblock_duration fields for the parameter blocks associated to the [=parameter_id=].
 - When this field is set to 0, all of duration, num_subblocks, constant_subblock_duration and subblock_duration fields shall be specified in this parameter definition mapped to the [=parameter_id=]. In that case, none of parameter blocks associated to this parameter definition shall specify duration, num_subblocks, constant_subblock_duration and subblock_duration fields. 
 - When this field is set to 1, none of duration, num_subblocks, constant_subblock_duration and subblock_duration fields shall be specificed in this parameter definition. In that case, each of parameter blocks associated to this parameter definition shall specify its own duration, num_subblocks, constant_subblock_duration and subblock_duration fields.
+- This field shall be set to 0 for DemixingParamDefinition() or ReconGainParamDefinition().
+	- [=duration=] shall be same as [=num_samples_per_frame=] of the Audio Element which this parameter is applied to.
+	- [=num_subblocks=] shall be set to 1.
+	- [=constant_subblock_duration=] shall be same as [=duration=]
 
-<dfn noexport>duration</dfn> specifies the duration for which all of parameter blocks associated to this parameter definition are valid and applicable. 
+<dfn noexport>duration</dfn> specifies the duration for which all of parameter blocks associated to this parameter definition are valid and applicable.
+- This field shall be set to (([=parameter_rate=] of this parameter) x [=num_samples_per_frame=]) / (the sample rate of Audio Element). 
+- So, if the [=parameter_rate=] = the sample rate of Audio Element, then the [=duration=] shall be same as the [=num_samples_per_frame=].
+
 
 <dfn noexport>num_subblocks</dfn> specifies the number of different sets of parameter values specified in all of parameter blocks associated to this parameter definition, where each set describes a different subblock of the timeline, contiguously.
 
@@ -1348,6 +1367,8 @@ class parameter_block_obu() {
 <dfn noexport>get_param_definition()</dfn> is a run-time function to get the parameter definition type, the parameter definition mode, duration, num_subblocks, constant_subblock_duration and subblock_duration mapped to the parameter_id. 
 
 <dfn value noexport for="parameter_block_obu()">duration</dfn> specifies the duration for which this parameter block is valid and applicable. 
+- This field shall be set to (([=parameter_rate=] of this parameter) x [=num_samples_per_frame=]) / (the sample rate of Audio Element). 
+- So, if the [=parameter_rate=] = the sample rate of Audio Element, then the [=duration=] shall be same as the [=num_samples_per_frame=].
 
 <dfn value noexport for="parameter_block_obu()">num_subblocks</dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different subblock of the timeline, contiguously.
 
@@ -1575,6 +1596,7 @@ For this version of the specification, the value of reinitialize_decoder shall b
 <dfn value noexport for="sync_obu()">reserved</dfn> shall be set to 0. Reserved units are for future use and shall be ignored by an IAMF-OBU parser.
 
 <dfn noexport>relative_offset</dfn> is the offset to position the first audio frame (before trimming) or parameter block with the referenced id that comes after this Sync OBU with respect to the timeline generated before this Sync OBU. If this Sync OBU is the first one, it is the offset from 0. Otherwise, it is the offset from the end of the timeline of Substreams generated from the previous Sync OBU.
+
 - For this version of the specification, it shall be set to 0 for all ids.
 
 The difference, [=relative_offset=](P) - [=relative_offset=](A), shall be the offset to position the first audio sample where the first parameter value of the first parameter block that comes after this Sync OBU is applied to.
@@ -1664,42 +1686,48 @@ The IA Profiles define a set of capabilities that are required to parse, decode 
 
 NOTE: In this section and subsections, the meaning of an unique OBU is that it is still unique if it only varies by reduntant flag.
 
+Common restrictions on the IA sequence for all profiles specified in this version of specification:
+- There shall be only one unique set of Descriptor OBUs. So, if the Descriptor OBUs present in the middle of the IA sequence, all OBUs of the Decriptor OBUs shall be marked as redundant (i.e. [=obu_redundant_copy=] = 1) 
+	- The set of Descriptor OBUs shall not be placed in the middle of a Temporal Unit. In other words, the set of Descriptor OBUs shall be present after the last OBU of a Temporal Unit and before the first OBU of the next Temporal Unit.
+	- [=version=] shall be set to 0 for this version of specification.
+- There shall be only one unique Codec Config OBU.
+- Every Substream in the IA sequence shall have the same timeline and has the same trimming information.
+- Every Parameter in ths IA sequence shall have the same timeline with that of Substream.
+	- Every Parameter Block OBU has the same duration as that of Audio Frame OBU under the same sample rate.
+		- For example, when Audio Frame OBU has 960 audio samples at 48000Hz, the duration of every Parameter Block OBU shall be 960 units at 48000Hz or 480 units at 24000Hz.
+- In every Temporal Unit, the start timestamp of every Audio Frame OBU shall be same as that of every Parameter Block OBU if present.
+	- There shall be no redundant Parameter Block OBU.
+- There shall be only one Sync OBU placed immediately after each set of Descriptor OBUs, and no additional new Sync OBUs inserted anywhere in the sequence of Data OBUs that follow.
+	- The [=relative_offset=]s of all [=audio_substream_id=]s and all [=parameter_id=] in the Sync OBU shall be set to 0.
+	- Every [=audio_substream_id=] which is described in the preceding Descriptor OBUs shall be listed as value of [=id=] (with [=obu_data_type=] = SUBSTREAM) in the Sync OBU.
+- [=num_sub_mixes=] shall be set to 1 for this profile.
+- When [=num_layers=] = 1, DemixingParameDefinion() for demixng may be present in the Audio Element OBU and IA decoders may use the (default) parameter data for demixing for (dynamic) down-mixing.
+- All parameter definitons except DemixingParamDefinition() and ReconGainParamDefinition() shall have the same [=param_definition_mode=].
+	- When [=param_definition_mode=] = 0, duration, num_subblocks, constant_subblock_duration and subblock_duration shall be same in all parameter definitions, respectively.
+
+
 ## IA Simple Profile ## {#profiles-simple}
 
 This section specifies the conformance points of the simple profile.
 
 Restrictions on the IA sequence:
 
-- There shall be only one unique Codec Config OBU.
 - There shall be only one unique Audio Element OBU.
-	- All of substreams shall have the same trimming information.
-- There shall be only one unique set of Descriptor OBUs.
-- There shall be only one Sync OBU placed immediately after each set of Descriptor OBUs, and no additional new Sync OBUs inserted anywhere in the sequence of data OBUs that follow.
 - There shall not be any Temporal Delimiter OBUs present.
-- [=version=] shall be set to 0 for this version of specification.
 - [=profile_version=] shall be set to 0 for this version of specification.
-	- [=num_sub_mixes=] shall be set to 1 for this profile.
-- [=num_layers=] shall be set to 1 or up to 6 for Channel-based audio element (i.e. scalable channel audio).
-    - In this case, [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=] may be present in the IA sequence.
-    - In case of simple scalable channel audio (e.g. mono for layer 1 & stereo for layer 2), demixing_info() and recon_gain_info() shall not be present in the bitstream.
-    - When num_layers = 1, OBU_IA_Parameter_Block including demixing_info() may be present in the IA sequence and IA decoders may use the demixing_info() for dynamic down-mixing.
-- All audio frames shall have aligned frame boundaries.
-- All parameter definitons shall have the same [=param_definition_mode=].
-	- When [=param_definition_mode=] = 0, duration, num_subblocks, constant_subblock_duration and subblock_duration shall be same in all parameter definitions, respectively.
 
 
 Capabilities of the IA parser, decoder and processor:
 - They shall be able to parse an IA sequence with the MSB four bits of [=profile_version=] = 0 and the MSB four bits of [=version=] = 0 (i.e., profile_version = 0 to 15 and version = 0 to 15).
 - They shall be able to decode and process up to 16 channels.	
 - They shall be able to reconstruct one audio element.
-- They may use demixing_info_parameter_data() to do down-mixing.
+- They may use (default_)demixing_info_parameter_data() to do down-mixing.
 
 ## IA Base Profile ## {#profiles-base}
 
 This section specifies the conformance points of the base profile.
 
 Restrictions on IA sequence:
-- There shall be only one unique Codec Config OBU.
 - There shall be at most two unique Audio Element OBUs at any one time.
 	- There shall be at most one Channel-based Audio Element having [=num_layers=] > 1 at any one time.
 	- There shall be at most one Scene-based Audio Element at any one time.
@@ -1708,21 +1736,8 @@ Restrictions on IA sequence:
 		- Channel-based Audio Element having [=num_layers=] = 1 + Channel-based Audio Element having [=num_layers=] > 1.
 		- Scene-based Audio Element + Channel-based Audio Element having [=num_layers=] = 1.
 		- Scene-based Audio Element + Channel-based Audio Element having [=num_layers=] > 1.
-	- All of substreams shall have the same trimming information.
-- There may be more than one unique set of Descriptor OBUs.
-- There shall be only one Sync OBU placed immediately after each set of Descriptor OBUs, and no additional new Sync OBUs inserted anywhere in the sequence of data OBUs that follow.
 - There may be Temporal Delimiter OBUs present.
-- [=version=] shall be set to 0 for this version of specification.
 - [=profile_version=] shall be set to 16 for this version of specification.
-	- [=num_sub_mixes=] shall be set to 1 for this profile.
-	- For a given Mix Presentation OBU, it shall include at most one scene-based audio element and it shall include at most one channel-based audio element with [=num_layers=] > 1 for this profile.
-- [=num_layers=] shall be set to 1 or up to 6 for Channel-based audio element (i.e. scalable channel audio)
-    - In this case, [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=] may be present in the IA sequence.
-    - In case of simple scalable channel audio (e.g. mono for layer 1 & stereo for layer 2), [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=] shall not be present in the bitstream.
-    - When num_layers = 1, OBU_IA_Parameter_Block including [=demixing_info_parameter_data()=] may be present in the IA sequence and IA decoders may use the [=demixing_info_parameter_data()=] for dynamic down-mixing.
-- All audio frames shall have aligned frame boundaries.
-- All parameter definitons shall have the same [=param_definition_mode=].
-	- When [=param_definition_mode=] = 0, duration, num_subblocks, constant_subblock_duration and subblock_duration shall be same in all parameter definitions, respectively.
 
 
 Capabilities of the IA parser, decoder and processor:
@@ -1733,7 +1748,6 @@ Capabilities of the IA parser, decoder and processor:
 	- One specific example of 18 channels is 3rd-order Ambisonics (16 channels) + non-diegetic stereo (2 channels).
 - They shall be able to reconstruct two audio elements.
 - They shall be able to mix two audio elements.
-- They shall be able to process short-lived audio elements.
 
 
 # Standalone IAMF Representation # {#standalone}
@@ -1742,7 +1756,16 @@ This section details the order in which the OBUs are sequenced in a standalone I
 
 ## OBU Sequence Order ## {#standalone-obu-sequence-order}
 
-An IA sequence is composed of a series of OBUs in the sequence of a set of descriptor OBUs followed by their associated data OBUs, and where this pattern is repeated as many times as needed.
+An IA sequence is composed of a series of OBUs in the sequence of a set of Descriptor OBUs followed by their associated Data OBUs. 
+
+NOTE: In typically case, the first Descriptor OBUs of the IA sequence are all non-redundant (i.e. [=obu_redundant_copy=] = 0).
+
+The descriptor OBUs may additionally be repeated redundantly and as frequently as necessary. In this case, the "obu_redundant_copy" field in the OBU header of each of the descriptor OBUs shall be set to 1.
+
+The below figure shows an example of IA sequence.
+
+<center><img src="images/IA sequence.png" style="width:100%; height:auto;"></center>
+<center><figcaption>Example of Immersive Audio Sequence</figcaption></center>
 
 ### Descriptor OBUs ### {#standalone-descriptor-obus}
 A set of Descriptor OBUs shall be placed in the following order regardless of where they appear in the bitstream:
@@ -1757,12 +1780,12 @@ A set of Descriptor OBUs shall be placed in the following order regardless of wh
 
 One Sync OBU shall be placed immediately after the Descriptor OBUs. This shall be followed by a sequence of Audio Frame OBUs, Parameter Block OBUs and Temporal Delimiter OBUs (if present), according to the rules below:
 
-- Audio Frame OBUs and Parameter Block OBUs must be ordered by their implied timestamp in the timeline, and may be interleaved.
-- If there are multiple Audio Frame OBUs that have the same implied start timestamp, they must be grouped by audio elements.
-- Between two Sync OBUs, a sequence of audio frames or parameter blocks must be gapless.
-- If an Audio Frame OBU or Parameter Block OBU has a substream or parameter ID that is not defined in the most recent Sync OBU, it must not appear in the bitstream, until a new Sync OBU is provided that specifies them.
-- A Temporal Delimiter OBU may be inserted at the beginning of a temporal unit, defined as a set of all audio frames with the same start timestamp and the same duration from all substreams and all non-redundant parameter blocks with the start timestamp within the duration. A temporal unit may include redundant parameter blocks.
-- If Temporal Delimiter OBUs are present, they shall be inserted at the beginning of every temporal unit.
+- Audio Frame OBUs and Parameter Block OBUs shall be ordered by their implied timestamp in the timeline, and may be interleaved.
+- If there are multiple Audio Frame OBUs that have the same implied start timestamp, they shall be grouped by audio elements.
+- A sequence of Audio Frame OBUs or Parameter Block OBUs shall fully cover the time interval between consecutive Sync OBUs or the final Sync OBU and the end of the bitstream.
+- If an Audio Frame OBU or Parameter Block OBU has a [=audio_substream_id=] or [=parameter_id=] that is not defined in the most recent Sync OBU, it shall not appear in the bitstream, until a new Sync OBU is provided that specifies it.
+- A Temporal Delimiter OBU may be inserted at the beginning of a Temporal Unit, defined as a set of all Audio Frame OBUs with the same start timestamp and the same duration from all substreams and all non-redundant Parameter Block OBUs with the start timestamp within the duration. A Temporal Unit may include redundant Parameter Block OBUs.
+- If Temporal Delimiter OBUs are present, they shall be inserted at the beginning of every Temporal Unit.
 
 Additionally, the following constraints apply to the Audio Frame and Parameter Block OBUs:
 
@@ -1773,11 +1796,10 @@ Additionally, the following constraints apply to the Audio Frame and Parameter B
 
 ### Refreshing Descriptor OBUs ### {#standalone-obu-sequence-refreshes}
 
-The above describes the full sequence of OBUs for a given set of descriptor OBUs and their associated data OBUs. If the IAMF configuration changes, a new set of descriptor OBUs is required. In that case, a new sequence of the complete set of descriptor OBUs, a Sync OBU and their corresponding data OBUs shall follow, in the same order as described above.
+The above describes the full sequence of OBUs for a given set of Descriptor OBUs and their associated Data OBUs. 
 
-The descriptor OBUs may additionally be repeated redundantly and as frequently as necessary. In this case, the "obu_redundant_copy" field in the OBU header of each of the descriptor OBUs shall be set to 1.
-
-If there is set of descriptor OBUs placed mid-stream, there may be parameter blocks that came before them which are still valid and applicable for the duration after the descriptor OBUs. In this case, these parameter blocks must be redundantly copied and placed after the first Sync OBU that follows the descriptor OBUs. This ensures that any receiver joining mid-stream and encountering a set of descriptor OBU is guaranteed to be able to receive the complete set of metadata that is applicable to all audio frames that come after.
+If the IAMF configuration changes, a new set of Descriptor OBUs is required. In that case, a new IA sequence of the complete set of Descriptor OBUs, a Sync OBU and their corresponding Data OBUs shall follow, in the same order as described above.
+- Each of the Descriptor OBUs of the new IA sequence shall be marked as non-redundant (i.e. [=obu_redundant_copy=] = 0).
 
 ## Synchronizing Data OBUs ## {#standalone-synchronizing-data-obus}
 
