@@ -404,10 +404,9 @@ The data OBUs contain the actual time-varying data that is required in the gener
 
 The IA sequence supports the description of multiple audio substreams and algorithms, which may have different metadata update rates to each other. The update rate for the audio substreams and audio elements is governed by the frame rates of the audio codec used. Since a single bitstream may support multiple codecs, this may lead to multiple different frame rates. The algorithms for rendering and mixing may have parameters that update at different rates to each other and to the audio frame rates. Therefore, the IA sequence contains information to facilitate the synchronization of the different audio frames and parameters.
 
-- <dfn noexport>Audio Frame OBU</dfn> provides the raw coded audio frame for an audio substream.
+- <dfn noexport>Audio Frame OBU</dfn> provides the coded audio frame for an audio substream.
 - <dfn noexport>Parameter Block OBU</dfn> provides the time-varying parameter values for an algorithm used in any of the decoding, reconstruction, rendering or mixing steps.
-- <dfn noexport>Sync OBU</dfn> provides relative timestamp offsets to synchronize audio frames and parameter blocks.
-- <dfn noexport>Temporal Delimiter OBU</dfn> identifies the temporal units.
+- <dfn noexport>Temporal Delimiter OBU</dfn> identifies the temporal units. Where, <dfn noexport>Temporal Unit</dfn> is defined as a set of all Audio Frame OBUs with the same start timestamp and the same duration from all substreams and all non-redundant Parameter Block OBUs with the start timestamp within the duration.
 
 # Open Bitstream Unit (OBU) Syntax and Semantics # {#obu-syntax}
 
@@ -435,8 +434,6 @@ class ia_open_bitstream_unit() {
     parameter_block_obu();
   else if (obu_type == OBU_IA_Temporal_Delimiter)
     temporal_delimiter_obu();
-  else if (obu_type == OBU_IA_Sync)
-    sync_obu();
   else if (obu_type == OBU_IA_Audio_Frame)
     audio_frame_obu_with_no_id();
   else if (obu_type >= 9 and <= 30)
@@ -487,8 +484,7 @@ obu_type: Name of obu_type
    2    : OBU_IA_Mix_Presentation
    3    : OBU_IA_Parameter_Block
    4    : OBU_IA_Temporal_Delimiter
-   5    : OBU_IA_Sync
-  6~7   : Reserved
+  5~7   : Reserved
    8    : OBU_IA_Audio_Frame
   9~30  : OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21
    31   : OBU_IA_Magic_Code
@@ -499,7 +495,6 @@ obu_type: Name of obu_type
 It shall always be set to 0 for the following obu_type values:
 
 - OBU_IA_Temporal_Delimiter
-- OBU_IA_Sync
 - OBU_IA_Audio_Frame
 - OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21
 
@@ -825,11 +820,11 @@ When an audio element is composed of G(r) number of substreams, scalable channel
 - The order of ChannelGroups in each temporal unit shall be same as the order of channel_audio_layer_config()s in scalable_channel_layout_config().
 - <dfn noexport>ChannelGroup</dfn> is a set of substreams which is able to provide a spatial resolution of audio contents by itself or which is able to provide an enhanced spatial resolution of audio contents by combining with the preceding ChannelGroups within the audio frames.
 - ChannelGroup #q consists of G(q)-G(q-1) number of substreams. Where, q = 1, 2, ..., r and G(0) = 0.
-- IA frame is a set of audio_frame_obus with the same sync offsets of the single audio element for scalable channel audio. Each of them comes from each substream.
+- IA frame is a set of audio_frame_obus with the same start timestamp of the single audio element for scalable channel audio. Each of them comes from each substream.
 - Every IA frame shall have the same number of audio_frame_obus.
 - When r > 1, parameter_block_obu() may present with IA frame. 
 
-<center><img src="images/Immersive Audio Bitstream with scalable channel audio (before OBU packing).png" style="width:100%; height:auto;"></center>
+<center><img src="images/Immersive Audio Sequence with scalable channel audio (before OBU packing).png" style="width:100%; height:auto;"></center>
 <center><figcaption>Immersive Audio Sequence with scalable channel audio (before OBU packing)</figcaption></center>
 
 The IA decoder shall select one of one or more channel audios provided by scalable channel audio. The IA decoder should select the appropriate channel audio according to the following rules, in order:
@@ -1567,66 +1562,6 @@ class temporal_delimiter_obu() {
 
 NOTE: The Temporal Delimiter OBU has an empty payload.
 
-## Sync OBU Syntax and Semantics ## {#obu-sync}
-
-This section specifies the OBU payload of OBU_IA_Sync.
-
-<b>Syntax</b>
-
-```
-class sync_obu() {
-  leb128() reserved;
-  leb128() count;
-  for (i = 0; i < count; i++) {
-    leb128() id;
-    unsigned int (1) obu_data_type;
-    unsigned int (1) reinitialize_decoder;
-    unsigned int (6) reserved;
-    sleb128() relative_offset;
-  }
-}
-```
-
-<b>Semantics</b>
-
-<dfn noexport>reserved</dfn> shall be set to 0x00.
-
-<dfn noexport>count</dfn> specifies the number of substream and parameter IDs that this Sync OBU specifies the relative offset for.
-
-<dfn noexport>id</dfn> specifies the unique ID associated with the substream or parameter that is being referred to. The value of this field is to be interpreted depending on the value of [=obu_data_type=]. If [=obu_data_type=] is 0, the id is interpreted as an [=audio_substream_id=]. If [=obu_data_type=] is 1, the id is interpreted as a [=parameter_id=].
-
-Any identifier which is not specificed in the preceding Descriptor OBUs, shall not be present in this Sync OBU. For every Parameter Block OBU (respectively Audio Frame OBU) in an IA Sequence, the value of its [=parameter_id=] (respectively [=audio_substream_id=]) shall be listed as value of [=id=] in the preceding Sync OBU. 
-
-<dfn noexport>obu_data_type</dfn> specifies the type of data that is being referred to.
-
-<pre class = "def">
-obu_data_type : Type of OBU data
-      0       : SUBSTREAM
-      1       : PARAMETER
-</pre>
-
-<dfn noexport>reinitialize_decoder</dfn> is used to specify the behaviour of a decoder when encountering gaps in the audio substream, where the gap is identified as described in [[#standalone-synchronizing-data-obus]]. If obu_data_type does not equal SUBSTREAM, an IAMF-OBU parser shall ignore this field.
-
-If reinitialize_decoder = 0, the decoder shall not be reinitialized before decoding the audio frames after the gap. This may be used in the case where it is preferable for the decoder to fill the gap with silence instead.
-
-If reinitialize_decoder = 1, the decoder shall be reinitialized before decoding the audio frames after the gap. If a pre-skip is specified in the relevant Codec Config OBU, it is applicable after reinitializing the decoder.
-
-For this version of the specification, the value of reinitialize_decoder shall be set to 0. If a value of 1 is seen, the IA sequence shall be rejected as invalid.
-
-<dfn value noexport for="sync_obu()">reserved</dfn> shall be set to 0. Reserved units are for future use and shall be ignored by an IAMF-OBU parser.
-
-<dfn noexport>relative_offset</dfn> is the offset to position the first audio frame (before trimming) or parameter block with the referenced id that comes after this Sync OBU with respect to the timeline generated before this Sync OBU. If this Sync OBU is the first one, it is the offset from 0. Otherwise, it is the offset from the end of the timeline of Substreams generated from the previous Sync OBU.
-
-- For this version of the specification, it shall be set to 0 for all ids.
-
-The difference, [=relative_offset=](P) - [=relative_offset=](A), shall be the offset to position the first audio sample where the first parameter value of the first parameter block that comes after this Sync OBU is applied to.
-- Where, [=relative_offset=](P) is [=relative_offset=] of [=obu_id=] for the parameter and [=relative_offset=](A) is [=relative_offset=] of [=obu_id=] for the substream which the parameter is applied to. 
-
-The offset for [=audio_substream_id=] shall be indicated in the number of ticks at the sample rate of its associated substream and the offset for [=parameter_id=] shall be indicated in the number of ticks at the sample rate of the substream which its associated parameter is applied to. For OPUS, the sample rate is 48000Hz.
-
-IA encoder and decoder operations related to this field are specified in [[#standalone-synchronizing-data-obus]].
-
-
 ## Codec Specific ## {#codec-specific}
 
 This section defines codec specific information for Codec_Specific_Info and Substream.
@@ -1717,9 +1652,6 @@ Common restrictions on the IA sequence for all profiles specified in this versio
 		- For example, when Audio Frame OBU has 960 audio samples at 48000Hz, the duration of every Parameter Block OBU shall be 960 units at 48000Hz or 480 units at 24000Hz.
 - In every Temporal Unit, the start timestamp of every Audio Frame OBU shall be same as that of every Parameter Block OBU if present.
 	- There shall be no redundant Parameter Block OBU.
-- There shall be only one Sync OBU placed immediately after each set of Descriptor OBUs, and no additional new Sync OBUs inserted anywhere in the sequence of Data OBUs that follow.
-	- The [=relative_offset=]s of all [=audio_substream_id=]s and all [=parameter_id=] in the Sync OBU shall be set to 0.
-	- Every [=audio_substream_id=] which is described in the preceding Descriptor OBUs shall be listed as value of [=id=] (with [=obu_data_type=] = SUBSTREAM) in the Sync OBU.
 - [=num_sub_mixes=] shall be set to 1 for this profile.
 - When [=num_layers=] = 1, DemixingParameDefinion() for demixng may be present in the Audio Element OBU and IA decoders may use the (default) parameter data for demixing for (dynamic) down-mixing.
 - All parameter definitons except DemixingParamDefinition() and ReconGainParamDefinition() shall have the same [=param_definition_mode=].
@@ -1772,7 +1704,7 @@ Capabilities of the IA parser, decoder and processor:
 
 # Standalone IAMF Representation # {#standalone}
 
-This section details the order in which the OBUs are sequenced in a standalone IAMF representation. It further specifies how the Data OBUs are synchronized, with the aid of the Sync OBUs.
+This section details the order in which the OBUs are sequenced in a standalone IAMF representation. 
 
 ## OBU Sequence Order ## {#standalone-obu-sequence-order}
 
@@ -1798,117 +1730,24 @@ A set of Descriptor OBUs shall be placed in the following order regardless of wh
 
 ### Data OBUs ### {#standalone-data-obus}
 
-One Sync OBU shall be placed immediately after the Descriptor OBUs. This shall be followed by a sequence of Audio Frame OBUs, Parameter Block OBUs and Temporal Delimiter OBUs (if present), according to the rules below:
+Data OBUs consists a sequence of Audio Frame OBUs, Parameter Block OBUs and Temporal Delimiter OBUs (if present), according to the rules below:
 
 - Audio Frame OBUs and Parameter Block OBUs shall be ordered by their implied timestamp in the timeline, and may be interleaved.
 - If there are multiple Audio Frame OBUs that have the same implied start timestamp, they shall be grouped by audio elements.
-- A sequence of Audio Frame OBUs or Parameter Block OBUs shall fully cover the time interval between consecutive Sync OBUs or the final Sync OBU and the end of the bitstream.
-- If an Audio Frame OBU or Parameter Block OBU has a [=audio_substream_id=] or [=parameter_id=] that is not defined in the most recent Sync OBU, it shall not appear in the bitstream, until a new Sync OBU is provided that specifies it.
-- A Temporal Delimiter OBU may be inserted at the beginning of a Temporal Unit, defined as a set of all Audio Frame OBUs with the same start timestamp and the same duration from all substreams and all non-redundant Parameter Block OBUs with the start timestamp within the duration. A Temporal Unit may include redundant Parameter Block OBUs.
+- A Temporal Delimiter OBU may be inserted at the beginning of a Temporal Unit.
 - If Temporal Delimiter OBUs are present, they shall be inserted at the beginning of every Temporal Unit.
 
 Additionally, the following constraints apply to the Audio Frame and Parameter Block OBUs:
 
 - Audio Frame OBUs shall be provided non-redundantly, such that for each substream, there shall not be two audio frames that are overlapping in time.
-- Parameter Block OBUs may be provided redundantly, such that they contain the same data as a previously provided Parameter Block OBU for the same time region. In this case, the "obu_redundant_copy" field in the OBU header shall be set to 1.
-- Redundant Parameter Block OBUs do not need to be ordered by their implied timestamp in the timeline. The implied timestamp should be inferred from the initial non-redundant version.
 - Non-redundant Parameter Block OBUs must not provide data for overlapping time regions.
 
 ### Refreshing Descriptor OBUs ### {#standalone-obu-sequence-refreshes}
 
 The above describes the full sequence of OBUs for a given set of Descriptor OBUs and their associated Data OBUs. 
 
-If the IAMF configuration changes, a new set of Descriptor OBUs is required. In that case, a new IA sequence of the complete set of Descriptor OBUs, a Sync OBU and their corresponding Data OBUs shall follow, in the same order as described above.
+If the IAMF configuration changes, a new set of Descriptor OBUs is required. In that case, a new IA sequence of the complete set of Descriptor OBUs and their corresponding Data OBUs shall follow, in the same order as described above.
 - Each of the Descriptor OBUs of the new IA sequence shall be marked as non-redundant (i.e. [=obu_redundant_copy=] = 0).
-
-## Synchronizing Data OBUs ## {#standalone-synchronizing-data-obus}
-
-The audio frames and parameter data provided in the Data OBUs may be asynchronous; different audio substreams may have different audio frame sizes, parameter blocks may have different durations from the audio frames, or there may be gaps in a parameter's timeline. This section details how these Data OBUs may be synchronized, based on their duration and the information provided in the Sync OBUs.
-
-The Sync OBU contains two pieces of information that apply to all substream and parameters that follow it: 
-
-1) a relative offset for each of the substreams and parameters, and
-
-2) a global offset.
-
-The relative offsets describe how the substreams and parameters are positioned with respect to the timeline of Substreams generated from the previous Sync OBU. For example, from the previous Sync OBU, Substream 1 has a end timestamp 960 units, Substream 2 has a end timestamp 1024 units, Parameter 1 has a end timestamp 900 units and Parameter 2 has a end timestamp 1100 units. The relative offsets are calculated with respect to the maximum timeline of Substreams (i.e. 1024 units). So, Substream 1 has a relative offset that is 64 units before Substream 2, Substream 2 has  a relative offset that is 0 unit, Parameter 1 has a relative offset that is 124 units before Substream 2 and Parameter 2 has a relative offset that is 76 after Substream 2.
-
-<table class="def">
-<tr>
-  <th>ID (name)</th><th>end timestamp</th><th>Relative offset</th>
-</tr>
-<tr>
-  <td>N/A (Global offset)</td><td>0</td><td>0</td>
-</td>
-</tr>
-  <td>1 (Substream 1)</td><td>960</td><td>-64</td>
-</td>
-</tr>
-  <td>2 (Substream 2)</td><td>1024</td><td>+0</td>
-</td>
-</tr>
-  <td>3 (Parameter 1)</td><td>900</td><td>-124</td>
-</td>
-</tr>
-  <td>4 (Parameter 2)</td><td>1100</td><td>+76</td>
-</tr>
-</table>
-
-The global offset defines an additional offset that is applied to all substreams and parameters, and can be used to express intentional gaps between the local frames associated with two Sync OBUs.
-
-The local frame of reference can be positioned in a global frame of reference by using the concatenation rule provided below. This rule specify how two timelines associated with different Sync OBUs are aligned.
-
-<dfn noexport>Concatenation Rule</dfn>
-
-Ignoring the global offset, the new timeline after a Sync OBU is extended based on the timeline generated from the previous Sync OBU and relative offsets in the current Sync OBU. Then, the global offset is applied to additionally shift the new timeline.
-
-
-The algorithm below may be used to implement the concatenation rule. But, the result shall comply with this.
-
-```
-For a given ID, end_timestamp\[ID]\[0] = 0 (i.e. initial value = 0)
-
-Encoder operation for the Nth Sync OBU 
-// Encoders know the position of an OBU on global timeline. 
-// So, they know start_timestamp\[ID]\[N] and global_offset\[N].
-
-For each ID in the Nth Sync OBU.
-
-relative_offset\[ID]\[N] = start_timestamp\[ID]\[N] - global_offset\[N]
-                           - max(end_timestamp\[ID]\[N-1] for each audio frame ID);
-// i.e. relative_offset\[ID]\[1] = start_timestamp\[ID]\[1] 
-//                                 - global_offset\[1] for the first Sync OBU.
-
-// end_timestamp\[ID]\[N] for each ID is calculated as follows:
-
-end_timestamp\[ID]\[N] = start_timestamp\[ID]\[N];
-
-for (i = 0: i < M(N); i++) {
-  end_timestamp\[ID]\[N] += frame size of ith audio frame
-                            (or duration of ith parameter block) having the ID;
-}
-// M(N) is the number of audio frame OBUs(or parameter block OBUs) having the given ID
-// between the Nth Sync OBU and the (N+1)th Sync OBU.
-
-Decoder operation for the Nth Sync OBU 
-// Decoders need to extend the timeline generated from the previous Sync OBU.
-// For the first Sync OBU which decoders get after join mid-stream, N is set to 1.
-
-For each ID in the Nth Sync OBU.
-
-start_timestamp\[ID]\[N] = max(end_timestamp\[ID]\[N-1] for each audio frame ID)
-                           + relative_offset\[ID]\[N] + global_offset\[N];
-
-end_timestamp\[ID]\[N] = start_timestamp\[ID]\[N];
-
-for (i = 0: i < M(N); i++) {
-  end_timestamp\[ID]\[N] += frame size of ith audio frame
-                            (or duration of ith parameter block) having the ID;
-}
-// M(N) is the number of audio frame OBUs
-// (or parameter block OBUs) having the given ID
-// between the Nth Sync OBU and the (N+1)th Sync OBU.
-```
 
 
 # ISOBMFF IAMF Encapsulation # {#isobmff}
@@ -1939,7 +1778,7 @@ The result of encapsulating an IA Sequence into an [[!ISOBMFF]] file is as follo
 
 - If there are audio samples to be trimmed at the start or at the end, then 'edts' and 'elst' boxes shall be present to reflect the trimming status.
 - Sample Entry
-	- For an IA Sample, the required Descriptor OBUs and Sync OBUs required for processing the samples shall be in the [=configOBUs=] of the associated sample entry. 
+	- For an IA Sample, the required Descriptor OBUs required for processing the samples shall be in the [=configOBUs=] of the associated sample entry. 
 	
 NOTE: Multiple sample entries may be used in a track, for example when the track is the concatenation of multiple tracks or multiple IA Sequences and some IA samples have different configOBUs values.
 
@@ -1949,9 +1788,6 @@ NOTE: Multiple sample entries may be used in a track, for example when the track
 - Sample Group
 	- In an IA Track, every sample shall be associated with a sample group of type 'roll'. The roll_distance value SHALL equal to the value of the [=roll_distance=] field in the Codec Config OBU stored in the configOBUs array in the sample entry.
 		
-<center><img src="images/IAMF Encapsulation Guideline.png" style="width:100%; height:auto;"></center>
-<center><figcaption>IAMF Encapsulation Scheme</figcaption></center>
-
 ### IA Sample Entry ### {#iasampleentry-section}
 
 <pre class="def">
@@ -1982,7 +1818,6 @@ None of AudioSampleEntry's optional boxes shall be present.
 - Codec Config OBU
 - One or more Audio Element OBUs
 - One or more Mix Presentation OBUs
-- Sync OBU
 
 ### IA Sample Format ### {#iasampleformat}
 
@@ -2051,10 +1886,10 @@ When IAMF parser feeds the reconstructed IA sequences to IAMF-OBU parser, descri
 
 During decapsulation process, IAMF file is decapsulated into IA sequences which conform to [[#obu-syntax]] as follows:
 - The ith IA sequence is reconstructed as follows:
-	- Step1: Take the ith descriptor OBUs and Sync OBU from the ith IASampleEntry.
+	- Step1: Take the ith descriptor OBUs from its associated IASampleEntry.
 	- Step2: Take jth sample as it is and add Temporal Delimiter OBU in front of the jth sample.
 		- Every Temporal Unit shall have Temporal Delimiter OBU or no Temporal Unit shall have Temporal Delimiter OBU.
-	- Step3: Place the ith descriptor OBUs, followed by Sync OBU, and followed by Temporal Units in order (j = i1, i2, …, im) without gap, to reconstruct the ith IA sequence.
+	- Step3: Place the ith descriptor OBUs, and followed by Temporal Units in order (j = i1, i2, …, im) without gap, to reconstruct the ith IA sequence.
 - Place IA sequences in order (i = 1, 2, 3, ...) to reconstruct the IA sequences.
 
 ### Recommended handling of Trimming Information ### {#isobmff-decapsulation-singletrack-trimming}
@@ -2513,7 +2348,7 @@ The IA encoder is composed of Pre-processor, Codec encoder and OBU packetizer.
 		- For channel-based audio element with [=num_layers=] > 1, it outputs parameter blocks for demixing_info_parameter_data and recon_gain_info_parameter_data.
 		- It may further output parameter blocks for mixing gain.
 - Codec encoder generates one or more substreams from each ChannelGroup based on Codec Config.
-- OBU packetizer packetize descriptors, sync information, parameter blocks and audio frames by OBU, and outputs IA sequence.
+- OBU packetizer packetize descriptors, parameter blocks and audio frames by OBU, and outputs IA sequence.
 	- Temporal unit generator generates temporal unit for each frame from audio frame OBUs and parameter block OBUs (if present).
 
 <center><img src="images/IA Encoder Configuration.png" style="width:100%; height:auto;"></center>
@@ -2583,7 +2418,7 @@ Below figure shows IA encoding flowchart for Scalable Channel Audio.
 - OBU packetizer generates temporal unit for each frame.
 	- Temporal unit consists of audio frame OBUs and followed by zero or more parameter block OBUs.
 		- It may have the immediately preceding temporal delimiter OBU, 
-- OBU Packetizer outputs IA sequence which is composed of OBUs for descriptor OBUs, followed by sync OBU and followed by OBUs for temporal units.
+- OBU Packetizer outputs IA sequence which is composed of OBUs for descriptor OBUs and followed by OBUs for temporal units.
 
 <center><img src="images/IA Encoding Flowchart for Channel Audio Format.png" style="width:80%; height:auto;"></center>
 <center><figcaption>IA Encoding Flowchart for Scalable Channel Audio</figcaption></center>
@@ -2787,10 +2622,7 @@ Step2: ith temporal unit is generated as follows:
 	- [=parameter_id=]s in Parameter Block OBUs are updated to uniquely indentify the parameter in IA sequence and based on the parameter_ids in [=ParamDefinition()=]s carried in Descriptor OBUs.
 - It may have the immediately preceding temporal delimiter OBU for each temporal unit.
 
-Step3: Update Sync OBU.
-	- Sync OBU is updated based on Sync OBUs of each IA sequence and updated [=audio_substream_id=]s and [=parameter_id=]s.
-
-Step4: Generate IA sequence which starts descriptor OBUs, followed by Sync OBU and followed by temporal units in order.
+Step3: Generate IA sequence which starts descriptor OBUs and followed by temporal units in order.
 
 ## Post Processing ## {#iamfgeneration-postprocessing}
 
