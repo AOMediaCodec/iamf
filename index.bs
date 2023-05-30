@@ -393,7 +393,7 @@ The IA sequence includes one or more audio elements, each of which consists of o
 
 The descriptor OBUs contains all the information that is required to setup and configure the decoders, reconstruction algorithms, renderers and mixers.
 
-- <dfn noexport>Magic Code OBU</dfn> indicates the start of a full IA sequence description, profile and compatible profile.
+- <dfn noexport>IA Sequence Header OBU</dfn> indicates the start of a full IA sequence description, profile and compatible profile.
 - <dfn noexport>Codec Config OBU</dfn> describes information to set up a decoder for an audio substream.
 - <dfn noexport>Audio Element OBU</dfn> describes information to combine one or more audio substreams to reconstruct an audio element.
 - <dfn noexport>Mix Presentation OBU</dfn> describes information to render and mix one or more audio elements to generate the final audio output.
@@ -423,8 +423,8 @@ This section specifies the OBU syntax elements and their semantics.
 class ia_open_bitstream_unit() {
   obu_header();
 
-  if (obu_type == OBU_IA_Magic_Code)
-    magic_code_obu();
+  if (obu_type == OBU_IA_Sequence_Header)
+    ia_sequence_header_obu();
   else if (obu_type == OBU_IA_Codec_Config)
     codec_config_obu();
   else if (obu_type == OBU_IA_Audio_Element)
@@ -450,7 +450,7 @@ class ia_open_bitstream_unit() {
 
 <b>Semantics</b>
 
-If the syntax element obu_type is equal to OBU_IA_Magic_Code, an ordered series of OBUs is presented to the decoding process as a string of bytes.
+If the syntax element obu_type is equal to OBU_IA_Sequence_Header, an ordered series of OBUs is presented to the decoding process as a string of bytes.
 
 
 ## OBU Header Syntax and Semantics ## {#obu-header}
@@ -491,7 +491,7 @@ obu_type: Name of obu_type
   6~7   : Reserved
    8    : OBU_IA_Audio_Frame
   9~30  : OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21
-   31   : OBU_IA_Magic_Code
+   31   : OBU_IA_Sequence_Header
 </pre>
 
 <dfn noexport>obu_redundant_copy</dfn> indicates whether this OBU is a redundant copy of the previous OBU in the IA sequence with the same obu_type. A value of 1 indicates that it is a redundant copy, while a value of 0 indicates that it is not.
@@ -554,20 +554,20 @@ class byte_alignment() {
 The reserved OBU allows the extension of this specification with additional OBU types in a way that allows IAMF-OBU parsers compliant to this version of specification to ignore them.
 
 
-## Magic Code OBU Syntax and Semantics ## {#obu-magiccode}
+## IA Sequence Header OBU Syntax and Semantics ## {#obu-iasequenceheader}
 
-This section specifies obu payload of OBU_IA_Magic_Code. 
+This section specifies obu payload of OBU_IA_Sequence_Header. 
 
-This OBU is used to indicate the start of IA Sequence. So, the first OBU of IA Sequence shall be OBU_IA_Magic_Code.
+This OBU is used to indicate the start of IA Sequence. So, the first OBU of IA Sequence shall be OBU_IA_Sequence_Header.
 
-NOTE: When an IA Sequence is stored in a file, the Magic Code OBU can be used to detect that the file contains an IA Sequence.
+NOTE: When an IA Sequence is stored in a file, the IA Sequence Header OBU can be used to detect that the file contains an IA Sequence.
 
-This OBU may be placed frequently within one single IA Sequence for an application such as broadcasting or multicasting scenario. In that case, the other Magic Code OBUs except the first one shall be marked as redundant (i.e. [=obu_redundant_copy=] = 1).
+This OBU may be placed frequently within one single IA Sequence for an application such as broadcasting or multicasting scenario. In that case, the other IA Sequence Header OBUs except the first one shall be marked as redundant (i.e. [=obu_redundant_copy=] = 1).
 
 <b>Syntax</b>
 
 ```
-class magic_code_obu() {
+class ia_sequence_header_obu() {
   unsigned int (32) ia_code;
   unsigned int (8) profile_name;
   unsigned int (8) profile_compatible;
@@ -578,7 +578,7 @@ class magic_code_obu() {
 
 <dfn noexport>ia_code</dfn> indicates a ‘four-character code’ (4CC), ‘iamf’. 
 	
-NOTE: When IA OBUs are delivered over a protocol that does not provide explicit IA Sequence boundaries, a parser may locate the IA Sequence start by searching for the code 'iamf' preceded by specific OBU header values, e.g. assuming [=obu_extension_flag=] is set to 0 and because [=obu_trimming_status_flag=] is set to 0 for a Magic Code OBU, the OBU header can be 0xF806 or 0xFC06
+NOTE: When IA OBUs are delivered over a protocol that does not provide explicit IA Sequence boundaries, a parser may locate the IA Sequence start by searching for the code 'iamf' preceded by specific OBU header values, e.g. assuming [=obu_extension_flag=] is set to 0 and because [=obu_trimming_status_flag=] is set to 0 for a IA Sequence Header OBU, the OBU header can be 0xF806 or 0xFC06
 
 <dfn noexport>profile_name</dfn> indicates that this IA sequence is able to be processed by IA decoder to support the profile indicated in this field.
 - 0: Simple Profile
@@ -1798,7 +1798,7 @@ The below figure shows an example of IA sequence.
 ### Descriptor OBUs ### {#standalone-descriptor-obus}
 A set of Descriptor OBUs shall be placed in the following order regardless of where they appear in the bitstream:
 
-1. One Magic Code OBU
+1. One IA Sequence Header OBU
 2. All Codec Config OBUs
 3. All Audio Element OBUs
 4. All Mix Presentation OBUs
@@ -1986,7 +1986,7 @@ None of AudioSampleEntry's optional boxes shall be present.
 <b>Semantics</b>
 
 <dfn noexport>configOBUs</dfn> shall contain the following OBUs in order.
-- Magic Code OBU
+- IA Sequence Header OBU
 - Codec Config OBU
 - One or more Audio Element OBUs
 - One or more Mix Presentation OBUs
@@ -2510,7 +2510,7 @@ The IA encoder is composed of Pre-processor, Codec encoder and OBU packetizer.
 - Pre-processor outputs one or more ChannelGroups, descriptors and optional parameter blocks based on the input audios and user inputs.
 	- It outputs one single ChannelGroup for scene-based audio element.
 	- It outputs one or more ChannelGroups for channel-based audio element.
-	- It outputs descriptors which are composed of one Magic Code, one Codec Config, one Audio Element config, one or more Mix Presentation config. 
+	- It outputs descriptors which are composed of one IA Sequence Header, one Codec Config, one Audio Element config, one or more Mix Presentation config. 
 	- It may output parameter blocks
 		- For channel-based audio element with [=num_layers=] = 1, it may output parameter blocks for demixing info.
 		- For channel-based audio element with [=num_layers=] > 1, it outputs parameter blocks for demixing_info_parameter_data and recon_gain_info_parameter_data.
@@ -2579,7 +2579,7 @@ Below figure shows IA encoding flowchart for Scalable Channel Audio.
 - The Attenuation module reduces all sample values of the mixed channels in the same CG at a uniform rate (Output_Gain).
 	- A range of 0dB to -6dB is recommended for the attenuation. (i.e. a range of 0dB to 6dB for Output_Gain)
 - Codec Enc. generates the coded substreams from PCMs and passes substreams and one single decoder_config to OBU Packetizer.
-- OBU packetizer generates descriptor OBUs which consists of one Magic Code OBU, one Codec Config OBU, one Audio Element OBU and zero or more Mix Presentation OBU.
+- OBU packetizer generates descriptor OBUs which consists of one IA Sequence Header OBU, one Codec Config OBU, one Audio Element OBU and zero or more Mix Presentation OBU.
 		- Codec Config OBU is generated based on [=decoder_config()=].
 - OBU packetizer generates zero or more parameter block OBUs for each frame which contains demixing_info_parameter_data and recon_gain_info_parameter_data.
 - OBU packetizer generates audio frame OBUs for each frame of the substreams.
@@ -2772,7 +2772,7 @@ This section provide a way to generate IA sequence having multiple audio element
 This section provides a way how to generate IA sequence having multiple audio elements from two IA simple profiles with the same codec config OBU. However, the result shall comply with the base profile of IA sequence.
 
 Step1: Descriptor OBUs are generated as follows:
-- Magic Code OBU: get the larger [=profile_name=] field and the larger [=profile_compatible=] field, respectively.
+- IA Sequence Header OBU: get the larger [=profile_name=] field and the larger [=profile_compatible=] field, respectively.
 - Codec Config OBU
 	- take just one codec_id and codec_config()
 - Audio Element OBUs: just take all of them except followings:
