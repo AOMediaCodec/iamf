@@ -393,7 +393,7 @@ The IA sequence includes one or more audio elements, each of which consists of o
 
 The descriptor OBUs contains all the information that is required to setup and configure the decoders, reconstruction algorithms, renderers and mixers.
 
-- <dfn noexport>Magic Code OBU</dfn> indicates the start of a full IA sequence description, version and profile version.
+- <dfn noexport>Magic Code OBU</dfn> indicates the start of a full IA sequence description, profile and compatible profile.
 - <dfn noexport>Codec Config OBU</dfn> describes information to set up a decoder for an audio substream.
 - <dfn noexport>Audio Element OBU</dfn> describes information to combine one or more audio substreams to reconstruct an audio element.
 - <dfn noexport>Mix Presentation OBU</dfn> describes information to render and mix one or more audio elements to generate the final audio output.
@@ -520,7 +520,7 @@ NOTE: This means that if one of the value is set to the the number of samples (i
 
 <dfn noexport>obu_extension_flag</dfn> indicates whether the [=extension_header_size=] field presents or not. If it set to 0, the [=extension_header_size=] field shall not be present. Otherwise, the [=extension_header_size=] field shall be present.
 
-This flag shall be set to 0 for the current version of the specification (i.e. [=version=] = 0). An IAMF-OBU parser which is conformant with the current version of the specification shall be able to parse this flag and [=extension_header_size=].
+This flag shall be set to 0 for this version of the specification. An IAMF-OBU parser which is conformant with this version of the specification shall be able to parse this flag and [=extension_header_size=].
 
 NOTE: A future version of specification may use this flag to specify an extension header field by setting [=obu_extension_flag=] = 1 and setting the size of extended header to [=extension_header_size=].
 
@@ -569,8 +569,8 @@ This OBU may be placed frequently within one single IA Sequence for an applicati
 ```
 class magic_code_obu() {
   unsigned int (32) ia_code;
-  unsigned int (8) version;
-  unsigned int (8) profile_version
+  unsigned int (8) profile_name;
+  unsigned int (8) profile_compatible;
 }
 ```
 
@@ -580,10 +580,17 @@ class magic_code_obu() {
 	
 NOTE: When IA OBUs are delivered over a protocol that does not provide explicit IA Sequence boundaries, a parser may locate the IA Sequence start by searching for the code 'iamf' preceded by specific OBU header values, e.g. assuming [=obu_extension_flag=] is set to 0 and because [=obu_trimming_status_flag=] is set to 0 for a Magic Code OBU, the OBU header can be 0xF806 or 0xFC06
 
-<dfn noexport>version</dfn> indicates the version of an IA sequence. It shall be set to 0 for this version of the specification. Implementations should treat IA sequences where the MSB four bits of the version number match that of a recognized specification as backwards compatible with that specification. That is, the version number can be split into "major" and "minor" version sub-fields, with changes to the minor sub-field (in the LSB four bits) signaling compatible changes. For example, an implementation of this specification should accept any stream with a version number of ’15’ or less, and should assume any stream with a version number ’16’ or
-greater is incompatible.
+<dfn noexport>profile_name</dfn> indicates that this IA sequence is able to be processed by IA decoder to support the profile indicated in this field.
+- 0: Simple Profile
+- 1: Base Profile
+- 2~255: Reserved
 
-<dfn noexport>profile_version</dfn> indicates the profile of an IA sequence. The MSB four bits indicates the profile of an IA sequence. Implementations should treat IA sequences where the MSB four bits of the version number match that of a recognized profile as backwards compatible with that specification. That is, the version number can be split into "profile major" and "profile minor" version sub-fields, with changes to the minor sub-field (in the LSB four bits) signaling compatible changes with the profile major version. The semantic of this field is only valid when the MSB four bits of [=version=] = 0.
+<dfn noexport>profile_compatible</dfn> indicates the profile of specification which this IA sequence complies to.
+- 0: Simple Profile
+- 1: Base Profile
+- 2~255: Reserved
+
+NOTE: For example, an IA sequence with [=profile_name=] = 0 and [=profile_compatible=] = 1 means that the IA sequence complies to Base profile of specification and IA decoder to support Simple profile can playback the IA sequence. When a future profile is defined with [=profile_compatible=] = 2 as called Enhanced profile, an IA sequence with [=profile_name=] = 1 and [=profile_compatible=] = 2 will mean that the IA sequence will comply with Enhanced profile and IA decoder to support Base profile of specification will be able to playback it by ignoring unknown OBUs and/or unknown syntaxes if present.
 
 ## Codec Config OBU Syntax and Semantics ## {#obu-codecconfig}
 
@@ -1709,7 +1716,6 @@ NOTE: In this section and subsections, the meaning of an unique OBU is that it i
 Common restrictions on the IA sequence for all profiles specified in this version of specification:
 - There shall be only one unique set of Descriptor OBUs. So, if the Descriptor OBUs present in the middle of the IA sequence, all OBUs of the Decriptor OBUs shall be marked as redundant (i.e. [=obu_redundant_copy=] = 1) 
 	- The set of Descriptor OBUs shall not be placed in the middle of a Temporal Unit. In other words, the set of Descriptor OBUs shall be present after the last OBU of a Temporal Unit and before the first OBU of the next Temporal Unit.
-	- [=version=] shall be set to 0 for this version of specification.
 - There shall be only one unique Codec Config OBU.
 - Every Substream in the IA sequence shall have the same timeline and has the same trimming information.
 - Every Parameter in ths IA sequence shall have the same timeline with that of Substream.
@@ -1734,11 +1740,12 @@ Restrictions on the IA sequence:
 
 - There shall be only one unique Audio Element OBU.
 - There shall not be any Temporal Delimiter OBUs present.
-- [=profile_version=] shall be set to 0 for this version of specification.
+- [=profile_compatible=] shall be set to 0 to indicate that the IA sequence complies to this profile.
+- [=profile_name=] shall be set to 0.
 
 
 Capabilities of the IA parser, decoder and processor:
-- They shall be able to parse an IA sequence with the MSB four bits of [=profile_version=] = 0 and the MSB four bits of [=version=] = 0 (i.e., profile_version = 0 to 15 and version = 0 to 15).
+- They shall be able to parse an IA sequence with [=profile_name=] = 0.
 - They shall be able to decode and process up to 16 channels.	
 - They shall be able to reconstruct one audio element.
 - They may use (default_)demixing_info_parameter_data() to do down-mixing.
@@ -1757,11 +1764,12 @@ Restrictions on IA sequence:
 		- Scene-based Audio Element + Channel-based Audio Element having [=num_layers=] = 1.
 		- Scene-based Audio Element + Channel-based Audio Element having [=num_layers=] > 1.
 - There may be Temporal Delimiter OBUs present.
-- [=profile_version=] shall be set to 16 for this version of specification.
+- [=profile_compatible=] shall be set to 1 to indicate that the IA sequence complies to this profile.
+- [=profile_name=] may be set to 0 or 1.
 
 
 Capabilities of the IA parser, decoder and processor:
-- They shall be able to parse an IA sequence with the MSB four bits of [=profile_version=] = 0 or 1 and the MSB four bits of [=version=] = 0 (i.e., profile_version = 0 to 31 and version = 0 to 15).
+- They shall be able to parse an IA sequence with [=profile_name=] = 0 or 1.
 - They shall be able to support the capabilities of the Simple Profile.
 - They shall be able to decode and process up to 18 channels.
 	- Where, 18 channels means not the number of channels after mixing of two Audio Elements but the total sum of channels before mixing of two Audio Elements .
@@ -2020,25 +2028,20 @@ DASH and other applications require defined values for the 'Codecs' parameter sp
 	iamf.IAMF-specific-needs.ipcm
 ```
 
-<b>IAMF-specific-needs</b> shall be <b>V.PV</b> as follows:
-- <dfn noexport>V</dfn> is four digits and represents the [=version=] of IA sequence.
-	- The first two digits represents the major version within the range 0 to 15.
-	- The second two digits represents the minor version within the range 0 to 15.
-- <dfn noexport>PV</dfn> is four digits and represents the [=profile_version=] of IA sequence.
-	- The first <b>P</b> is two digits and represents the profile major version within the range 0 to 15.
-	- The second <b>V</b> is two digits and represents the profile minor version within the range 0 to 15.
+<b>IAMF-specific-needs</b> shall be <b>PC</b> as follows:
+- <dfn noexport>PC</dfn> is three digits within the range 0 to 255 and represents that IA decoder supports the profile of specification.
 
 For example, for this version of the specification
 - The codecs parameter string of IAMF-OPUS for the simple profile:
 
 ```
-	iamf.0000.0000.Opus
+	iamf.000.Opus
 ```
 
 - The codecs parameter string of IAMF-AAC-LC for the base profile:
 
 ```
-	iamf.0000.0100.mp4a.40.2
+	iamf.001.mp4a.40.2
 ```
 
 ## ISOBMFF IAMF Decapsulation (Informative) ## {#isobmff-decapsulation}
@@ -2769,7 +2772,7 @@ This section provide a way to generate IA sequence having multiple audio element
 This section provides a way how to generate IA sequence having multiple audio elements from two IA simple profiles with the same codec config OBU. However, the result shall comply with the base profile of IA sequence.
 
 Step1: Descriptor OBUs are generated as follows:
-- Magic Code OBU: get the larger version field and the larger profile version field, respectively.
+- Magic Code OBU: get the larger [=profile_name=] field and the larger [=profile_compatible=] field, respectively.
 - Codec Config OBU
 	- take just one codec_id and codec_config()
 - Audio Element OBUs: just take all of them except followings:
