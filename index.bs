@@ -729,8 +729,16 @@ A ChannelGroup is defined in [[#iamfgeneration]]. The order of the substreams in
 </table>
 
 <dfn noexport>demixing_info</dfn> provides the parameter definition for the demixing information to reconstruct channel audios according to [=loudspeaker_layout=] from scalable channel audio. The parameter definition is provided by DemixingParamDefinition() and the corresponding parameter data to be provided in parameter blocks is specified in demixing_info_parameter_data().
+- In this parameter definition, [=parameter_rate=] shall be set to the sample rate of this Audio Element and [=param_definition_mode=] shall be set to 0.
+	- [=duration=] shall be same as [=num_samples_per_frame=] of this Audio Element.
+	- [=num_subblocks=] shall be set to 1.
+	- [=constant_subblock_duration=] shall be same as [=duration=]
 
 <dfn noexport>recon_gain_info</dfn> provides the parameter definition for the gain value to reconstruct channel audios according to [=loudspeaker_layout=] from scalable channel audio. The parameter definition is provided by ReconGainParamDefinition() and the corresponding parameter data to be provided in parameter blocks is specified in recon_gain_info_parameter_data().
+- In this parameter definition, [=parameter_rate=] shall be set to the sample rate of this Audio Element and [=param_definition_mode=] shall be set to 0.
+	- [=duration=] shall be same as [=num_samples_per_frame=] of this Audio Element.
+	- [=num_subblocks=] shall be set to 1.
+	- [=constant_subblock_duration=] shall be same as [=duration=]
 
 <dfn noexport>scalable_channel_layout_config()</dfn> is a class that provides the metadata required for combining the substreams identified here in order to reconstruct a scalable channel layout.
 
@@ -792,16 +800,11 @@ abstract class ParamDefinition() {
 <dfn value noexport for="ParamDefinition()">parameter_id</dfn> indicates the identifier for the Parameter which this parameter definition refers to.
 
 <dfn noexport>parameter_rate</dfn> specifies the rate used by this parameter, expressed as ticks per second. Time-related fields associated with this parameter, such as durations, shall be expressed in the number of ticks.
-- In DemixingParamDefinition() or ReconGainParamDefinition(), this field shall be set to the sample rate of the Audio Element which this parameter is applied to.
 - The rate shall be such a value that (the rate x [=num_samples_per_frame=]) / (the sample rate of Audio Element) is still integer.
 
 <dfn noexport>param_definition_mode</dfn> indicates if this parameter definition specifies duration, num_subblocks, constant_subblock_duration and subblock_duration fields for the parameter blocks associated to the [=parameter_id=].
 - When this field is set to 0, all of duration, num_subblocks, constant_subblock_duration and subblock_duration fields shall be specified in this parameter definition mapped to the [=parameter_id=]. In that case, none of parameter blocks associated to this parameter definition shall specify duration, num_subblocks, constant_subblock_duration and subblock_duration fields. 
 - When this field is set to 1, none of duration, num_subblocks, constant_subblock_duration and subblock_duration fields shall be specificed in this parameter definition. In that case, each of parameter blocks associated to this parameter definition shall specify its own duration, num_subblocks, constant_subblock_duration and subblock_duration fields.
-- This field shall be set to 0 for DemixingParamDefinition() or ReconGainParamDefinition().
-	- [=duration=] shall be same as [=num_samples_per_frame=] of the Audio Element which this parameter is applied to.
-	- [=num_subblocks=] shall be set to 1.
-	- [=constant_subblock_duration=] shall be same as [=duration=]
 
 <dfn noexport>duration</dfn> specifies the duration for which all of parameter blocks associated to this parameter definition are valid and applicable.
 - This field shall be set to (([=parameter_rate=] of this parameter) x [=num_samples_per_frame=]) / (the sample rate of Audio Element). 
