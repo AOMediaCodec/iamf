@@ -8,7 +8,7 @@ Repository: AOMediaCodec/iamf
 Shortname: iamf
 URL: https://aomediacodec.github.io/iamf/
 Date: 2023-05-26
-Abstract: This document specifies an immersive audio (IA) architecture and model, a standalone IA sequence format and an [[!ISOBMFF]]-based IA container format.
+Abstract: This document specifies an immersive audio (IA) and model, a standalone IA sequence format and an [[!ISOBMFF]]-based IA container format.
 </pre>
 
 <pre class="anchors">
@@ -255,107 +255,67 @@ url: https://www.iso.org/standard/77752.html#; spec: MP4-PCM; type: property;
 }
 </pre>
 
-# Convention # {#convention}
-
-## Syntax Description ## {#convention-syntaxstructure}
-
-All of syntax elements conform to [=Syntactic Description Language=] specified in [[!MP4-Systems]] unless it is explicitly described in the specification.
-
-### Data types ### {#convention-data-types}
-
- <b>leb128()</b> <b>syntaxName</b>
- 
- <b>leb128()</b> indicates the type of an unsigned integer. It indicates the following unsigned integer <b>syntaxName</b> is encoded by [=leb128()=] specified in [[!AV1-Convention]].
- 
- <b>syntaxName</b> is an unsigned integer which is encoded by [=leb128()=] specified in [[!AV1-Convention]].
- 
- <b>sleb128()</b> <b>syntaxName</b>
-
- <b>sleb128()</b> indicates the type of an signed integer. It indicates the following signed integer <b>syntaxName</b> is encoded by [=leb128()=] specified in [[!AV1-Convention]].
- 
- <b>syntaxName</b> is an signed integer which is encoded by [=leb128()=] specified in [[!AV1-Convention]].
- 
- <b>string</b> <b>syntaxName</b>
-
-<b>string</b> indicates a null-terminated (i.e. ending at the first byte set to 0x00), UTF-8 encoded as defined in [[!RFC3629]] and whose length shall be limited to 128 bytes. 
- 
-<b>syntaxName</b> is a human readable label.
- 
-## Arithmetic Operators ## {#convention-arithmetic-operators}
-
-<table class="def">
-<tr>
-  <td>+</td><td>Addition.</td>
-</tr>
-<tr>
-  <td>-</td><td>Subtraction.</td>
-</tr>
-<tr>
-  <td>*</td><td>Multiplication.</td>
-</tr>
-<tr>
-  <td>÷</td><td>Floating point (arithmetic) division.</td>
-</tr>
-<tr>
-  <td>/</td><td>Integer division with truncation of the result toward zero.</td>
-</tr>
-<tr>
-  <td>floor(x)</td><td>The largest integer that is smaller than or equal to x.</td>
-</tr>
-<tr>
-  <td>sqrt(x)</td><td>The square root of x.</td>
-</tr>
-</table>
-
-## Function ## {#convention-function}
-
-### Function templates ### {#convention-function-templates}
-
-When the <b>template</b> keyword is used to decorate the <b>class</b> declaration, it indicates that the code is a template with a placeholder type that can be reused by other classes. Only classes that use the template present in the bitstream; the template itself does not present in the bitstream. Classes that use a function template pass a data type that is specified in either [[!MP4-Systems]] or [[#convention-data-types]].
-
-<b>Example</b>
-
-```
-template <class T>
-class Foo {
-  T t;
-}
-
-class Bar {
-  Foo<int> f;
-}
-```
-
-### Mathematical functions ### {#convention-function-mathematical}
- 
-<b>Clip3(x, y, z)</b>
- 
-It conforms to [=Clip3=] specified in [[!AV1-Convention]].
-
-<b>round(x)</b>
-
-The round() function returns the integer value closest to <code>x</code> and may be implemented as
-
-```
-round(x) = floor(x + 0.5).
-```
-
-<b>MOD(Number, Divisor)</b>
-
-The MOD() function returns the remainder after <b>Number</b> is divided by <b>Divisor</b>.
- 
- <b>UTF-8_Enc(label)</b>
- 
- <dfn values noexport>UTF-8_Enc(label)</dfn> byte representation of the encoded <b>label</b>, which is UTF-8 string as defined in [[!RFC3629]], null terminated.
-
 # Introduction # {#introduction}
 
-The <dfn noexport>immersive audio</dfn> means the combination of 3D audio signals recreating a sound experience close to that of a natural environment.
+This specification defines an immersive audio model and formats (IAMF) to provide immersive audio experience to end-users.
+- The term <dfn noexport>Immersive Audio</dfn> (IA) means the combination of [=3D audio signal=]s recreating a sound experience close to that of a natural environment.
+- The term <dfn noexport>3D audio signal</dfn> means a respresentation of sound that incorporates additional information beyond traditional stereo or surroud sound formats such as Ambisonics (Scene-based), Object-based audio and Channel-based audio (e.g. 3.1.2ch or 7.1.4ch).
 
-This specification defines a model for representing [=immersive audio=] contents based on coded audio substreams contributing to audio elements meant to be rendered and mixed to form one or more immersive presentations as depicted in the figure below.
+This specification defines a model for representing [=Immersive Audio=] contents based on [=Audio Substream=]s contributing to [=Audio Element=]s meant to be rendered and mixed to form one or more presentations as depicted in the figure below.
 
 <center><img src="images/decoding_flow_cropped.png" style="width:100%; height:auto;"></center>
-<center><figcaption>Processing flow to decode, reconstruct, render and mix the audio signals for immersive audio playback.</figcaption></center>
+<center><figcaption>Processing flow to decode, reconstruct, render and mix the 3D audio signals for immersive audio playback.</figcaption></center>
+
+The model comprises a number of coded [=Audio Substream=]s and the metadata that describes how to decode, render and mix the substreams to generate an audio signal for playback. The model itself is codec-agnostic; any supported audio codec may be used to code the [=Audio Substream=]s.
+
+The model includes one or more [=Audio Element=]s, each of which consists of one or more [=Audio Substream=]s. The model further includes [=Mix Presentation=]s and [=IA Parameter=]s.
+- The term <dfn noexport>Audio Substream</dfn> means an audio stream, which may be encoded with any compatible audio codec.
+- The term <dfn noexport>Audio Element</dfn> means a [=3D audio signal=], and is constructed from one or more [=Audio Substream=]s and the metadata describing them. The [=Audio Substream=]s associated with one [=Audio Element=] use the same audio codec.
+- The term <dfn noexport>IA Parameter</dfn> is a set of parameter values that is associated with the algorithms used for decoding, reconstructing, rendering and mixing. It is applied to its associated [=Audio Element=].
+	- [=IA Parameter=] may change their values over time and may further be animated; for example, any changes in values may be smoothed over some time duration. As such, they may be viewed as a 1D signal that have different metadata specified for different time durations.
+- The term <dfn noexport>Mix Presentation</dfn> means a series of processes to present [=Immersive Audio=] contents to end-users by using [=Audio Element=](s). It contain metadata, that describe how the [=Audio Element=]s are rendered and mixed together for playback through physical loudspeakers or headsets, and loudness information.
+
+IAMF can be used to provide [=Immersive Audio=] contents for presentation on a wide range of devices in both streaming and offline applications. These applications include internet audio streaming, multicasting/broadcasting services, file download, gaming, communication, virtual and augmented reality, and others. In these applications, audio may be played back on a wide range of devices, e.g. headsets, mobile phones, tablets, TVs, sound bars, home theater systems and big screens.
+
+Here are some typical IAMF use cases and examples of how to instantiate the model for the use cases.
+- UC1: One [=Audio Element=] (e.g. 3.1.2ch or First Order Ambisonics (FOA)) is delivered to a big-screen TV (in Home) or a Mobile device through unicast network. It is rendered to a loudspeaker layout (e.g. 3.1.2ch) or Binaural (or Stereo) with loudness normalization and is playbacked on loudspeakers builted in the big-screen TV or headset through the Mobile device, respectively.
+- UC2: Two [=Audio Element=]s (e.g. 5.1.2ch and Stereo) are delivered to a big-screen TV through unicast network. Both are rendered to the same loudspeaker layout builted in the big-screen TV and are mixed. After loudness normalization appropriate to Home environment, the mixed [=Audio Element=] is playbacked on the loudspeakers.
+- UC3: Two [=Audio Element=]s (e.g. FOA and Stereo) are delivered to a Mobile device through unicast network. Both are rendered to the same loudspeaker layout to be mixed. After mixing of them, it is rendered to Binaural (or Stereo) with loudness normalization and  is playbacked on headset through the Mobile device.
+- UC4: Two [=Audio Element=]s (e.g. 5.1.2ch (or FOA) and stereo) are delivered to big-screen TVs and Mobile devices through multicasting or broadcasting network. After the same processing as UC2 or UC3, it is playbacked on the loudspeakers or on headset throught the Mobile device, respectively.
+
+Example 1: [=3D audio signal=] = 3.1.2ch of UC1,
+- Audio Substream: L and R channels are coded as one audio stream, Ltf and Rtf channels as one audio stream, Center as one audio stream and LFE as one audio stream.
+- Audio Element (3.1.2ch): Consists of 4 Audio Substreams.
+- Mix Presentation: Provide rendering algorithm of Audio Element to popular loudspeaker layouts and loudness information of the [=3D audio signal=].
+
+Example 2: Two [=3D audio signal=]s = 5.1.2ch and Stereo of UC2,
+- Audio Substream: L and R channels are coded as one audio steam, Ls and Rs channels as one audio stream, Ltf and Rtf channels as one audio stream, Center as one audio stream and LFE as one audio stream.
+- Audio Element 1 (5.1.2ch): Consists of 5 Audio Substreams.
+- Audio Element 2 (Stereo): Consists of 1 Audio Substream.
+- IA Parameter 1-1: Mixing parameter values applied to Audio Element 1 by considering Home environment
+- IA Parameter 1-2: Mixing parameter values applied to Audio Element 2 by considering Home environment
+- Mix Presentation: Provide rendering algorithm of Audio Element 1 & 2 to popular loudspeaker layouts, mixing based on IA Parameter 1-1 & 1-2 and loudness information of the mixed [=Audio Element=].
+
+Example 3: Two [=3D audio signal=]s = FOA and Stereo of UC3,
+- Audio Substream: L and R channels are coded as one audio steam and each channel of FOA as one audio stream.
+- Audio Element 1 (FOA) : Consists of 4 Audio Substreams.
+- Audio Element 2 (Stereo) : Consists of 1 Audio Substream.
+- IA Parameter 1-1: Mixing parameter values applied to Audio Element 1 by considering Mobile environment
+- IA Parameter 1-2: Mixing parameter values applied to Audio Element 2 by considering Mobile environment
+- Mix Presentation: Provide rendering algorithm of Audio Element 1 & 2 to popular loudspeaker layouts, mixing based on IA Parameter 1-1 & 1-2 and loudness information of the mixed [=Audio Element=].
+
+Example 4: Two [=3D audio signal=]s = 5.1.2 and Stereo of UC4,
+- Audio Substream: L and R channels are coded as one audio steam, Ls and Rs channels as one audio stream, Ltf and Rtf channels as one audio stream, Center as one audio stream and LFE as one audio stream.
+- Audio Element 1 (5.1.2ch) : Consists of 5 Audio Substreams.
+- Audio Element 2 (Stereo) : Consists of 1 Audio Substream.
+- IA Parameter 1-1: Mixing parameter values applied to Audio Element 1 by considering Home environment
+- IA Parameter 1-2: Mixing parameter values applied to Audio Element 2 by considering Home environment
+- IA Parameter 2-1: Mixing parameter values applied to Audio Element 1 by considering Mobile environment
+- IA Parameter 2-2: Mixing parameter values applied to Audio Element 2 by considering Mobile environment
+- Mix Presentation 1: Provide rendering algorithm of Audio Element 1 & 2 to popular loudspeaker layouts, mixing based on IA Parameter 1-1 & 1-2 and loudness information of the mixed [=Audio Element=].
+- Mix Presentation 2: Provide rendering algorithm of Audio Element 1 & 2 to popular loudspeaker layouts, mixing based on IA Parameter 2-1 & 2-2 and loudness information of the mixed [=Audio Element=].
+
+NOTE: Big-screen TVs select Mix Presentation 1 and Mobile devices select Mix Presentation 2.
 
 Based on the model, this specification defines a hypothetical immersive audio model and format (<dfn noexport>IAMF</dfn>) architecture as depicted in the figure below.
 
@@ -363,51 +323,60 @@ Based on the model, this specification defines a hypothetical immersive audio mo
 <center><figcaption>Hypothetical IAMF Architecture</figcaption></center>
 
 For a given input 3D audio,
-- Pre-Processor generates Pre-Processed Audio and Codec Agnostic Metadata for [=immersive audio=] (IA).
-	- Pre-Processed Audio is composed of one or more substreams.
-	- Metadata is determined to drive the rendering and mixing
-- Audio Codec Enc generates Codec-Dependent Bitstream, which consists of the coded substreams.
-- Bitstream Packager generates IA sequence from Codec-Dependent Bitstream and Codec Agnostic Metadata.
-- File Packager generates IAMF File by encapsulating IA sequence into [[!ISOBMFF]] tracks.
-- File Parser reconstructs IA sequence by decapsulating IAMF File.
-- Bitstream Parser outputs Codec-Dependent Bitstream and Codec Agnostic Metadata.
-- Audio Codec Dec outputs a decoded Pre-Processed Audio after decoding of Codec-Dependent Bitstream.
-- Post-Processor outputs Immersive 3D Audio by using the decoded Pre-Processed Audio and Codec Agnostic Metadata.
+- Pre-Processor generates ChannelGroup(s)), [=Descriptors=] and [=IA Parameter=](s).
+	- ChannelGroup(s) is composed of one or more [=Audio Substream=]s.
+- Codec Enc generates coded [=Audio Substream=](s).
+- OBU Packetizer generates IA sequence from [=Audio Substream=](s) and [=Descriptors=] and [=IA Parameter=](s).
+- File Packager (ISOBMFF Encapsulation) generates IAMF File by encapsulating IA sequence into [[!ISOBMFF]] track(s).
+- File Parser (ISOBMFF Parser) reconstructs IA sequence by decapsulating IAMF File.
+- OBU Parser outputs [=Audio Substream=](s) and [=IA Parameter=](s).
+- Codec Dec outputs a decoded ChannelGroup(s) after decoding of [=Audio Substream=](s).
+- Post-Processor outputs [=Immersive Audio=] by using the ChannelGroup(s) and [=Descriptors=] and [=IA Parameter=](s).
 
-## IA sequence Components ## {#iasequence-components}
+Where, 
+- Pre-Processor, ChannelGroup(s), Codec Enc and OBU Packetizer are defined in [[#iamfgeneration]].
+- IA sequence is defined in [[#iasequence]]
+- ISOBMFF Encapsulation, IAMF file (ISOBMFF file) and ISOBMFF Parser are deifned in [[#isobmff]].
+- OBU Parser, Codec Dec and Post-Processor are defined in [[#processing]].
 
-The <dfn noexport>IA sequence</dfn> is a bitstream to represent [=immersive audio=] for presentation on a wide range of devices in both dynamic streaming and offline applications. These applications include internet audio streaming, multicasting/broadcasting services, file download, gaming, communication, virtual and augmented reality, and others. In these applications, audio may be played back on a wide range of devices, e.g. headsets, mobile phones, tablets, TVs, sound bars, home theater systems and big screens.
 
-The bitstream comprises a number of coded audio substreams and the metadata that describes how to decode, render and mix the substreams to generate an audio signal for playback. The bitstream format itself is codec-agnostic; any supported audio codec may be used to code the audio substreams.
+## IA sequence ## {#iasequence}
 
-The IA sequence includes one or more audio elements, each of which consists of one or more audio substreams. The IA sequence further includes mix presentations and parameters.
+An IA sequence is a bitstream to represent [=Immersive Audio=] contents and consists of [=Descriptors=] defined in [[#descriptors]] and [=IA Data=] defined in [[#iadata]].
 
-- <dfn noexport>Audio substream</dfn> is the actual audio signal, which may be encoded with any compatible audio codec.
-- <dfn noexport>Audio element</dfn> is the 3D representation of the audio signals, and are constructed from one or more audio substreams and the metadata describing them. The audio substreams associated with one audio element use the same audio codec.
-- <dfn noexport>Mix presentations</dfn> contain metadata that describe how the audio elements are rendered and mixed together for playback through physical loudspeakers or headphones. Multiple mix presentations can be defined as alternatives to each other within the same IA sequence. Furthermore, the choice of which mix presentation to use at playback is left to the user. For example, multi-language support is implemented by defining different mix presentations, where the first mix describes the use of the audio element with English dialogue, and the second mix describes the use of the audio element with French dialogue.
-- <dfn noexport>Parameters</dfn> are the values that are associated with the algorithms used for decoding, reconstructing, rendering and mixing. Parameters may change their values over time and may further be animated; for example, any changes in values may be smoothed over some time duration. Their rate of change is specific to its respective algorithm, and is independent of other algorithms and the frame rates associated with the audio substreams. As such, they may be viewed as a 1D signal that have different metadata specified for different time durations.
+Each of [=Descriptors=] and each of [=IA Data=] are packetized by Open Bitstream Unit (OBU), respectively. The term Open Bitstream Unit (OBU) is the concrete, physical unit used to represent the components in the model.
 
 ## Use of OBU Syntax ## {#use-of-obu}
 
 ### Descriptors ### {#descriptors}
 
-The descriptor OBUs contains all the information that is required to setup and configure the decoders, reconstruction algorithms, renderers and mixers.
+<dfn noexport>Descriptors</dfn> contain all the information that is required to setup and configure the decoders, reconstruction algorithm, renderers and mixers. [=Descriptors=] do not contain audio signal.
 
-- <dfn noexport>Magic Code OBU</dfn> indicates the start of a full IA sequence description, version and profile version.
-- <dfn noexport>Codec Config OBU</dfn> describes information to set up a decoder for an audio substream.
-- <dfn noexport>Audio Element OBU</dfn> describes information to combine one or more audio substreams to reconstruct an audio element.
-- <dfn noexport>Mix Presentation OBU</dfn> describes information to render and mix one or more audio elements to generate the final audio output.
+- <dfn noexport>IA Sequence Header OBU</dfn> indicates the start of a full IA sequence description and contains information related to profiles.
+- <dfn noexport>Codec Config OBU</dfn> describes information to set up a decoder for an coded [=Audio Substream=].
+- <dfn noexport>Audio Element OBU</dfn> describes information to combine one or more [=Audio Substream=]s to reconstruct an [=Audio Element=].
+- <dfn noexport>Mix Presentation OBU</dfn> describes information to render and mix one or more [=Audio Element=]s to generate the final 3D audio output.
+	- Multiple [=Mix Presentation=]s can be defined as alternatives to each other within the same IA sequence. Furthermore, the choice of which [=Mix Presentation=] to use at playback is left to the user. For example, multi-language support is implemented by defining different [=Mix Presentation=]s, where the first mix describes the use of the [=Audio Element=] with English dialogue, and the second mix describes the use of the [=Audio Element=] with French dialogue.
 
-### Data ### {#data}
+### IA Data ### {#iadata}
 
-The data OBUs contain the actual time-varying data that is required in the generation of the final audio output.
+<dfn noexport>IA Data</dfn> contains the actual time-varying data that is required in the generation of the final 3D audio output.
 
-The IA sequence supports the description of multiple audio substreams and algorithms, which may have different metadata update rates to each other. The update rate for the audio substreams and audio elements is governed by the frame rates of the audio codec used. Since a single bitstream may support multiple codecs, this may lead to multiple different frame rates. The algorithms for rendering and mixing may have parameters that update at different rates to each other and to the audio frame rates. Therefore, the IA sequence contains information to facilitate the synchronization of the different audio frames and parameters.
+- <dfn noexport>Audio Frame OBU</dfn> provides the coded audio frame for an [=Audio Substream=]. It has the start timestamp  and duration. So, a coded [=Audio Substream=] is represented as a sequence of [=Audio Frame OBU=]s with the same identifier, in time order.
+- <dfn noexport>Parameter Block OBU</dfn> provides the parameter values in a block for an time-varying [=IA Parameter=]. It has the start timestampe and duration. So, a time-varying [=IA Parameter=] is represented as a sequence of parameter values in [=Parameter Block OBU=]s with the same identifier, in time order.
+- <dfn noexport>Temporal Delimiter OBU</dfn> identifies the [=Temporal Unit=]s.
 
-- <dfn noexport>Audio Frame OBU</dfn> provides the raw coded audio frame for an audio substream.
-- <dfn noexport>Parameter Block OBU</dfn> provides the time-varying parameter values for an algorithm used in any of the decoding, reconstruction, rendering or mixing steps.
-- <dfn noexport>Sync OBU</dfn> provides relative timestamp offsets to synchronize audio frames and parameter blocks.
-- <dfn noexport>Temporal Delimiter OBU</dfn> identifies the temporal units.
+The term <dfn noexport>Temporal Unit</dfn> means a set of all [=Audio Frame OBU=]s with the same start timestamp and the same duration from all [=Audio Substream=]s and all non-redundant [=Parameter Block OBU=]s with the start timestamp within the duration.
+
+## Timing Model ## {#iadata-timingmodel}
+
+In this specification, the timeline of an [=Audio Substream=] is defined on post-coding domain which may include trimming audio samples. Thus the timeline of an [=IA Parameter=] which is supposed to be applied to the [=Audio Substream=] is same as that of the [=Audio Substream=] as depicted in the figure below.  
+- The [=Audio Substream=] has its own start timestamp and the duration in time based on the sequence of consecutive [=Audio Frame OBU=]s with the same identifier, in time order.
+- The [=IA Parameter=] has the same start timestamp and the same duration in time as those of the [=Audio Substream=], respectively. For the time-varying [=IA Parameter=]s, it means that the timeline is based on the sequence of parameter values provided in each of consecutive [=Parameter Block OBU=]s with the same identifier, in time order.
+
+<center><img src="images/IAMF Timing Model.png" style="width:100%; height:auto;"></center>
+<center><figcaption>Example of IAMF Timing Model</figcaption></center>
+
 
 # Open Bitstream Unit (OBU) Syntax and Semantics # {#obu-syntax}
 
@@ -1776,7 +1745,7 @@ This section details the order in which the OBUs are sequenced in a standalone I
 
 ## OBU Sequence Order ## {#standalone-obu-sequence-order}
 
-An IA sequence is composed of a series of OBUs in the sequence of a set of Descriptor OBUs followed by their associated Data OBUs. 
+An <dfn noexport>IA sequence</dfn> is composed of a series of OBUs in the sequence of a set of Descriptor OBUs followed by their associated Data OBUs. 
 
 NOTE: In typically case, the first Descriptor OBUs of the IA sequence are all non-redundant (i.e. [=obu_redundant_copy=] = 0).
 
@@ -2806,9 +2775,99 @@ For a given Mix Presentation OBU and a given [=loudness_layout=] of a sub-mix of
 - All of the Audio Elements specified in the sub-mix of the given Mix Presentation OBU are summed, and then applies [=mix_gain=] according to [=output_mix_config()=] for the sub-mix.
 - Generate loudness_info() of the mixed audio according to [[#obu-mixpresentation-loudness]].
 
-# Consumption of IAMF bitstream # {#iamfconsumption}
+# Convention # {#convention}
 
-ISSUE: TODO. Fill in example workflows.
+## Syntax Description ## {#convention-syntaxstructure}
+
+All of syntax elements conform to [=Syntactic Description Language=] specified in [[!MP4-Systems]] unless it is explicitly described in the specification.
+
+### Data types ### {#convention-data-types}
+
+ <b>leb128()</b> <b>syntaxName</b>
+ 
+ <b>leb128()</b> indicates the type of an unsigned integer. It indicates the following unsigned integer <b>syntaxName</b> is encoded by [=leb128()=] specified in [[!AV1-Convention]].
+ 
+ <b>syntaxName</b> is an unsigned integer which is encoded by [=leb128()=] specified in [[!AV1-Convention]].
+ 
+ <b>sleb128()</b> <b>syntaxName</b>
+
+ <b>sleb128()</b> indicates the type of an signed integer. It indicates the following signed integer <b>syntaxName</b> is encoded by [=leb128()=] specified in [[!AV1-Convention]].
+ 
+ <b>syntaxName</b> is an signed integer which is encoded by [=leb128()=] specified in [[!AV1-Convention]].
+ 
+ <b>string</b> <b>syntaxName</b>
+
+<b>string</b> indicates a null-terminated (i.e. ending at the first byte set to 0x00), UTF-8 encoded as defined in [[!RFC3629]] and whose length shall be limited to 128 bytes. 
+ 
+<b>syntaxName</b> is a human readable label.
+ 
+## Arithmetic Operators ## {#convention-arithmetic-operators}
+
+<table class="def">
+<tr>
+  <td>+</td><td>Addition.</td>
+</tr>
+<tr>
+  <td>-</td><td>Subtraction.</td>
+</tr>
+<tr>
+  <td>*</td><td>Multiplication.</td>
+</tr>
+<tr>
+  <td>÷</td><td>Floating point (arithmetic) division.</td>
+</tr>
+<tr>
+  <td>/</td><td>Integer division with truncation of the result toward zero.</td>
+</tr>
+<tr>
+  <td>floor(x)</td><td>The largest integer that is smaller than or equal to x.</td>
+</tr>
+<tr>
+  <td>sqrt(x)</td><td>The square root of x.</td>
+</tr>
+</table>
+
+## Function ## {#convention-function}
+
+### Function templates ### {#convention-function-templates}
+
+When the <b>template</b> keyword is used to decorate the <b>class</b> declaration, it indicates that the code is a template with a placeholder type that can be reused by other classes. Only classes that use the template present in the bitstream; the template itself does not present in the bitstream. Classes that use a function template pass a data type that is specified in either [[!MP4-Systems]] or [[#convention-data-types]].
+
+<b>Example</b>
+
+```
+template <class T>
+class Foo {
+  T t;
+}
+
+class Bar {
+  Foo<int> f;
+}
+```
+
+### Mathematical functions ### {#convention-function-mathematical}
+ 
+<b>Clip3(x, y, z)</b>
+ 
+It conforms to [=Clip3=] specified in [[!AV1-Convention]].
+
+<b>round(x)</b>
+
+The round() function returns the integer value closest to <code>x</code> and may be implemented as
+
+```
+round(x) = floor(x + 0.5).
+```
+
+<b>MOD(Number, Divisor)</b>
+
+The MOD() function returns the remainder after <b>Number</b> is divided by <b>Divisor</b>.
+ 
+ <b>UTF-8_Enc(label)</b>
+ 
+ <dfn values noexport>UTF-8_Enc(label)</dfn> byte representation of the encoded <b>label</b>, which is UTF-8 string as defined in [[!RFC3629]], null terminated.
+
 
 # Annex
 
@@ -2841,10 +2900,6 @@ In the above figure,
 - Parameter Block OBU with parameter_id = 33 is providing mix_gain_parameter_data() to be applied to the rendered audio element after rendering according to render_config() of the Audio Element with audio_element_id = 12.
 - Parameter Block OBU with parameter_id = 34 is providing mix_gain_parameter_data() to be applied to the mixed audio of the two rendered audios.
 
-## Annex B: Short-lived Audio (Normative)
+## Consumption of IAMF bitstream (informative) ## {#iamfconsumption}
 
-An IA sequence may contain audio elements which are short-lived, where the audio element may not exist for the entire timeline of the IA sequence. There is a method for signalling this. Consider the example with two audio elements, A and B, present at the start of the IA sequence, where B is a short-lived audio element with a length shorter than A.
-
-1. The method uses a new set of Descriptor OBUs. The first set of Descriptor OBUs includes an Audio Element OBU for each of A and B, and a Mix Presentation OBU that references both A and B. When the audio element B has ended, a second set of Descriptor OBUs is placed in the IA stream, which includes an Audio Element for only A, and a Mix Presentation OBU that references only A.
-
-In the case, relevant parameter blocks must be updated in a way to match the timing of the short-lived audio elements if necessary to ensure that the processed audio output is correct.
+ISSUE: TODO. Fill in example workflows.
