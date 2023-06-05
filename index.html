@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 5fcd28d6d, updated Tue May 30 13:12:11 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="5742a5d5d5d4b7d9a75a06999d0f3a2e06b9085e" name="document-revision">
+  <meta content="ce41cf8d64bb73fc9fa592f673f502b601c81099" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -4247,26 +4247,26 @@ Ltf = Ltf3 - w(k) x (L2 - 0.707 x C - L5) and Rtf = Rtf3 - w(k) x (R2 - 0.707 x 
       <li data-md>
        <p>MA_gain (k) = 2 / (N+1) x Recon_Gain (k) / 255 + (1 – 2/(N+1)) x MA_gain (k-1), where MA_gain (0) = 1.</p>
       <li data-md>
-       <p>e_window[:ps – olen] = 1, e_window[ps – olen: ps] = hanning[olen:], e_window[ps:flen] = 0.</p>
+       <p>e_window[0: olen] = hanning[olen:], e_window[olen:flen] = 0.</p>
       <li data-md>
-       <p>s_window[:ps – olen] = 0, s_window[ps – olen: ps] = hanning[:olen], s_window[ps:flen] = 1.</p>
+       <p>s_window[0: olen] = hanning[:olen], s_window[olen:flen] = 1.</p>
       <li data-md>
-       <p>Where, hanning = np.hanning (2*olen), ps is the pre-skip value, flen is the frame size and olen is the overlap size.</p>
+       <p>Where, hanning = np.hanning (2*olen), flen is the frame size and olen is the overlap size.</p>
       <li data-md>
        <p>Recommend values: N = 7</p>
      </ul>
    </ul>
    <p>Below figure shows the smoothing scheme of <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain④">recon_gain</a>.</p>
-   <center><img height="200" src="images/Smoothing Scheme of Recon Gain.png" style="width:100%; height:auto;" width="800"></center>
+   <center><img height="334" src="images/Smoothing Scheme of Recon Gain.png" style="width:100%; height:auto;" width="1513"></center>
    <center>
     <figcaption>Smoothing Scheme of Recon Gain</figcaption>
    </center>
    <p>Recommend values for specific codecs are as follows</p>
    <ul>
     <li data-md>
-     <p>IAMF-OPUS: olen = 60, the pre-skip (ps) value is indicated in Codec_Specific_Info for IAMF-OPUS.</p>
+     <p>OPUS: olen = 60.</p>
     <li data-md>
-     <p>IAMF-AAC-LC: olen = 64, ps = 720.</p>
+     <p>AAC-LC: olen = 64.</p>
    </ul>
    <h3 class="heading settled" data-level="7.3" id="processing-mixpresentation"><span class="secno">7.3. </span><span class="content">Mix Presentation</span><a class="self-link" href="#processing-mixpresentation"></a></h3>
    <p>An IA sequence may contain more than one mix presentation. <a href="#processing-mixpresentation-selection">§ 7.3.1 Selecting a Mix Presentation</a> details how a mix presentation should be selected from multiple of them.</p>
@@ -4831,6 +4831,7 @@ T2toTF2 enc.: Ltf3 = Ltf2 + w(k) x δ(k) x Ls5 and Rtf3 = Rtf2 + w(k) x δ(k) x 
    <h4 class="heading settled" data-level="8.2.4" id="iamfgeneration-scalablechannelaudio-recongaingeneration"><span class="secno">8.2.4. </span><span class="content">Recon Gain Generation</span><a class="self-link" href="#iamfgeneration-scalablechannelaudio-recongaingeneration"></a></h4>
    <p>This section describes how to generate <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain⑧">recon_gain</a>.</p>
    <p>Recon_Gain needs to be applied to de-mixed channels. For this, IA encoder needs to deliver it to IA decoders.</p>
+   <p>When the channel, which this recon_gain needs to be applied to, is coded by a codec, if the kth coded frame has trimming data. The kth frames used to generate recon_gain (k) have the trimming data on the same positions.</p>
    <p>Let’s define followings:</p>
    <ul>
     <li data-md>
