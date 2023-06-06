@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 5fcd28d6d, updated Tue May 30 13:12:11 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="b658f38ecebeb6fbfdbe93161628406c34f3d6bc" name="document-revision">
+  <meta content="ba0e1690cef55bae6c52e0cef547dba6daa721d7" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2072,7 +2072,7 @@ dfn > a.self-link::before      { content: "#"; }
       <li><a href="#obu-header"><span class="secno">3.2</span> <span class="content">OBU Header Syntax and Semantics</span></a>
       <li><a href="#obu-bytealignment"><span class="secno">3.3</span> <span class="content">Byte Alignment Syntax and Semantics</span></a>
       <li><a href="#obu-reserved"><span class="secno">3.4</span> <span class="content">Reserved OBU Syntax and Semantics</span></a>
-      <li><a href="#obu-magiccode"><span class="secno">3.5</span> <span class="content">Magic Code OBU Syntax and Semantics</span></a>
+      <li><a href="#obu-iasequenceheader"><span class="secno">3.5</span> <span class="content">IA Sequence Header OBU Syntax and Semantics</span></a>
       <li><a href="#obu-codecconfig"><span class="secno">3.6</span> <span class="content">Codec Config OBU Syntax and Semantics</span></a>
       <li>
        <a href="#obu-audioelement"><span class="secno">3.7</span> <span class="content">Audio Element OBU Syntax and Semantics</span></a>
@@ -2356,7 +2356,7 @@ class Bar {
    <p>The descriptor OBUs contains all the information that is required to setup and configure the decoders, reconstruction algorithms, renderers and mixers.</p>
    <ul>
     <li data-md>
-     <p><dfn data-dfn-type="dfn" data-noexport id="magic-code-obu">Magic Code OBU<a class="self-link" href="#magic-code-obu"></a></dfn> indicates the start of a full IA sequence description, version and profile version.</p>
+     <p><dfn data-dfn-type="dfn" data-noexport id="ia-sequence-header-obu">IA Sequence Header OBU<a class="self-link" href="#ia-sequence-header-obu"></a></dfn> indicates the start of a full IA sequence description, profile and compatible profile.</p>
     <li data-md>
      <p><dfn data-dfn-type="dfn" data-noexport id="codec-config-obu">Codec Config OBU<a class="self-link" href="#codec-config-obu"></a></dfn> describes information to set up a decoder for an audio substream.</p>
     <li data-md>
@@ -2383,8 +2383,8 @@ class Bar {
 <pre>class ia_open_bitstream_unit() {
   obu_header();
 
-  if (obu_type == OBU_IA_Magic_Code)
-    magic_code_obu();
+  if (obu_type == OBU_IA_Sequence_Header)
+    ia_sequence_header_obu();
   else if (obu_type == OBU_IA_Codec_Config)
     codec_config_obu();
   else if (obu_type == OBU_IA_Audio_Element)
@@ -2406,7 +2406,7 @@ class Bar {
 }
 </pre>
    <p><b>Semantics</b></p>
-   <p>If the syntax element obu_type is equal to OBU_IA_Magic_Code, an ordered series of OBUs is presented to the decoding process as a string of bytes.</p>
+   <p>If the syntax element obu_type is equal to OBU_IA_Sequence_Header, an ordered series of OBUs is presented to the decoding process as a string of bytes.</p>
    <h3 class="heading settled" data-level="3.2" id="obu-header"><span class="secno">3.2. </span><span class="content">OBU Header Syntax and Semantics</span><a class="self-link" href="#obu-header"></a></h3>
    <p><b>Syntax</b></p>
 <pre>class obu_header() {
@@ -2436,7 +2436,7 @@ class Bar {
   5~7   : Reserved
    8    : OBU_IA_Audio_Frame
   9~30  : OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21
-   31   : OBU_IA_Magic_Code
+   31   : OBU_IA_Sequence_Header
 </pre>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="obu_redundant_copy">obu_redundant_copy</dfn> indicates whether this OBU is a redundant copy of the previous OBU in the IA sequence with the same obu_type. A value of 1 indicates that it is a redundant copy, while a value of 0 indicates that it is not.</p>
    <p>It shall always be set to 0 for the following obu_type values:</p>
@@ -2469,7 +2469,7 @@ class Bar {
      <p>When <a data-link-type="dfn" href="#num_samples_to_trim_at_end" id="ref-for-num_samples_to_trim_at_end②">num_samples_to_trim_at_end</a> is non-zero in an Audio Frame OBU, there shall be no subsequent Audio Frame OBU with the same substream id until a non-redundant Codec OBU defining a substream with the same substream id.</p>
    </ul>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="obu_extension_flag">obu_extension_flag</dfn> indicates whether the <a data-link-type="dfn" href="#extension_header_size" id="ref-for-extension_header_size">extension_header_size</a> field presents or not. If it set to 0, the <a data-link-type="dfn" href="#extension_header_size" id="ref-for-extension_header_size①">extension_header_size</a> field shall not be present. Otherwise, the <a data-link-type="dfn" href="#extension_header_size" id="ref-for-extension_header_size②">extension_header_size</a> field shall be present.</p>
-   <p>This flag shall be set to 0 for the current version of the specification (i.e. <a data-link-type="dfn" href="#version" id="ref-for-version">version</a> = 0). An IAMF-OBU parser which is conformant with the current version of the specification shall be able to parse this flag and <a data-link-type="dfn" href="#extension_header_size" id="ref-for-extension_header_size③">extension_header_size</a>.</p>
+   <p>This flag shall be set to 0 for this version of the specification. An IAMF-OBU parser which is conformant with this version of the specification shall be able to parse this flag and <a data-link-type="dfn" href="#extension_header_size" id="ref-for-extension_header_size③">extension_header_size</a>.</p>
    <p class="note" role="note"><span class="marker">NOTE:</span> A future version of specification may use this flag to specify an extension header field by setting <a data-link-type="dfn" href="#obu_extension_flag" id="ref-for-obu_extension_flag">obu_extension_flag</a> = 1 and setting the size of extended header to <a data-link-type="dfn" href="#extension_header_size" id="ref-for-extension_header_size④">extension_header_size</a>.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="obu_size">obu_size<a class="self-link" href="#obu_size"></a></dfn> indicates the size in bytes of the OBU immediately following the obu_size field of the OBU.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_samples_to_trim_at_start">num_samples_to_trim_at_start</dfn> indicates the number of samples that needs to be trimmed from the start of the samples in this Audio Frame OBU.</p>
@@ -2486,24 +2486,40 @@ class Bar {
    <p><dfn data-dfn-type="dfn" data-noexport id="zero_bit">zero_bit<a class="self-link" href="#zero_bit"></a></dfn> shall be equal to 0 and is inserted into the bitstream to align the bit position to a multiple of 8 bits.</p>
    <h3 class="heading settled" data-level="3.4" id="obu-reserved"><span class="secno">3.4. </span><span class="content">Reserved OBU Syntax and Semantics</span><a class="self-link" href="#obu-reserved"></a></h3>
    <p>The reserved OBU allows the extension of this specification with additional OBU types in a way that allows IAMF-OBU parsers compliant to this version of specification to ignore them.</p>
-   <h3 class="heading settled" data-level="3.5" id="obu-magiccode"><span class="secno">3.5. </span><span class="content">Magic Code OBU Syntax and Semantics</span><a class="self-link" href="#obu-magiccode"></a></h3>
-   <p>This section specifies obu payload of OBU_IA_Magic_Code.</p>
-   <p>This OBU is used to indicate the start of IA Sequence. So, the first OBU of IA Sequence shall be OBU_IA_Magic_Code.</p>
-   <p class="note" role="note"><span class="marker">NOTE:</span> When an IA Sequence is stored in a file, the Magic Code OBU can be used to detect that the file contains an IA Sequence.</p>
-   <p>This OBU may be placed frequently within one single IA Sequence for an application such as broadcasting or multicasting scenario. In that case, the other Magic Code OBUs except the first one shall be marked as redundant (i.e. <a data-link-type="dfn" href="#obu_redundant_copy" id="ref-for-obu_redundant_copy">obu_redundant_copy</a> = 1).</p>
+   <h3 class="heading settled" data-level="3.5" id="obu-iasequenceheader"><span class="secno">3.5. </span><span class="content">IA Sequence Header OBU Syntax and Semantics</span><a class="self-link" href="#obu-iasequenceheader"></a></h3>
+   <p>This section specifies obu payload of OBU_IA_Sequence_Header.</p>
+   <p>This OBU is used to indicate the start of IA Sequence. So, the first OBU of IA Sequence shall be OBU_IA_Sequence_Header.</p>
+   <p class="note" role="note"><span class="marker">NOTE:</span> When an IA Sequence is stored in a file, the IA Sequence Header OBU can be used to detect that the file contains an IA Sequence.</p>
+   <p>This OBU may be placed frequently within one single IA Sequence for an application such as broadcasting or multicasting scenario. In that case, the other IA Sequence Header OBUs except the first one shall be marked as redundant (i.e. <a data-link-type="dfn" href="#obu_redundant_copy" id="ref-for-obu_redundant_copy">obu_redundant_copy</a> = 1).</p>
    <p><b>Syntax</b></p>
-<pre>class magic_code_obu() {
+<pre>class ia_sequence_header_obu() {
   unsigned int (32) ia_code;
-  unsigned int (8) version;
-  unsigned int (8) profile_version
+  unsigned int (8) profile_name;
+  unsigned int (8) profile_compatible;
 }
 </pre>
    <p><b>Semantics</b></p>
    <p><dfn data-dfn-type="dfn" data-noexport id="ia_code">ia_code<a class="self-link" href="#ia_code"></a></dfn> indicates a ‘four-character code’ (4CC), ‘iamf’.</p>
-   <p class="note" role="note"><span class="marker">NOTE:</span> When IA OBUs are delivered over a protocol that does not provide explicit IA Sequence boundaries, a parser may locate the IA Sequence start by searching for the code <a class="property css" data-link-type="property">iamf</a> preceded by specific OBU header values, e.g. assuming <a data-link-type="dfn" href="#obu_extension_flag" id="ref-for-obu_extension_flag①">obu_extension_flag</a> is set to 0 and because <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag">obu_trimming_status_flag</a> is set to 0 for a Magic Code OBU, the OBU header can be 0xF806 or 0xFC06</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="version">version</dfn> indicates the version of an IA sequence. It shall be set to 0 for this version of the specification. Implementations should treat IA sequences where the MSB four bits of the version number match that of a recognized specification as backwards compatible with that specification. That is, the version number can be split into "major" and "minor" version sub-fields, with changes to the minor sub-field (in the LSB four bits) signaling compatible changes. For example, an implementation of this specification should accept any stream with a version number of ’15’ or less, and should assume any stream with a version number ’16’ or
-greater is incompatible.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="profile_version">profile_version</dfn> indicates the profile of an IA sequence. The MSB four bits indicates the profile of an IA sequence. Implementations should treat IA sequences where the MSB four bits of the version number match that of a recognized profile as backwards compatible with that specification. That is, the version number can be split into "profile major" and "profile minor" version sub-fields, with changes to the minor sub-field (in the LSB four bits) signaling compatible changes with the profile major version. The semantic of this field is only valid when the MSB four bits of <a data-link-type="dfn" href="#version" id="ref-for-version①">version</a> = 0.</p>
+   <p class="note" role="note"><span class="marker">NOTE:</span> When IA OBUs are delivered over a protocol that does not provide explicit IA Sequence boundaries, a parser may locate the IA Sequence start by searching for the code <a class="property css" data-link-type="property">iamf</a> preceded by specific OBU header values, e.g. assuming <a data-link-type="dfn" href="#obu_extension_flag" id="ref-for-obu_extension_flag①">obu_extension_flag</a> is set to 0 and because <a data-link-type="dfn" href="#obu_trimming_status_flag" id="ref-for-obu_trimming_status_flag">obu_trimming_status_flag</a> is set to 0 for a IA Sequence Header OBU, the OBU header can be 0xF806 or 0xFC06</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="profile_name">profile_name</dfn> indicates that this IA sequence is able to be processed by IA decoders that support the profile indicated in this field. The IA decoders shall be able to parse all OBUs explicitly listed in that profile and can still encounter reserved OBUs that it should skip and it is acceptable to do so. This allows future versions of the specification to define new profiles that can be backwards compatible to old profiles.</p>
+   <ul>
+    <li data-md>
+     <p>0: Simple Profile</p>
+    <li data-md>
+     <p>1: Base Profile</p>
+    <li data-md>
+     <p>2~255: Reserved</p>
+   </ul>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="profile_compatible">profile_compatible</dfn> indicates an additional profile of this specification to which this IA sequence complies. If a sequence only complies with the <a data-link-type="dfn" href="#profile_name" id="ref-for-profile_name">profile_name</a> profile, this field shall be set to same <a data-link-type="dfn" href="#profile_name" id="ref-for-profile_name①">profile_name</a> value.</p>
+   <ul>
+    <li data-md>
+     <p>0: Simple Profile</p>
+    <li data-md>
+     <p>1: Base Profile</p>
+    <li data-md>
+     <p>2~255: Reserved</p>
+   </ul>
+   <p class="note" role="note"><span class="marker">NOTE:</span> For example, an IA sequence with <a data-link-type="dfn" href="#profile_name" id="ref-for-profile_name②">profile_name</a> = 0 and <a data-link-type="dfn" href="#profile_compatible" id="ref-for-profile_compatible">profile_compatible</a> = 1 means that the IA sequence complies to Base profile of specification and IA decoder to support Simple profile can playback the IA sequence. When a future profile is defined with <a data-link-type="dfn" href="#profile_compatible" id="ref-for-profile_compatible①">profile_compatible</a> = 2 as called Enhanced profile, an IA sequence with <a data-link-type="dfn" href="#profile_name" id="ref-for-profile_name③">profile_name</a> = 1 and <a data-link-type="dfn" href="#profile_compatible" id="ref-for-profile_compatible②">profile_compatible</a> = 2 will mean that the IA sequence will comply with Enhanced profile and IA decoder to support Base profile of specification will be able to playback it by ignoring unknown OBUs and/or unknown syntaxes if present.</p>
    <h3 class="heading settled" data-level="3.6" id="obu-codecconfig"><span class="secno">3.6. </span><span class="content">Codec Config OBU Syntax and Semantics</span><a class="self-link" href="#obu-codecconfig"></a></h3>
    <p>This section specifies the OBU payload of OBU_IA_Codec_Config.</p>
    <p><b>Syntax</b></p>
@@ -3581,8 +3597,6 @@ class AnimatedParameterData(animation_type) {
      <ul>
       <li data-md>
        <p>The set of Descriptor OBUs shall not be placed in the middle of a Temporal Unit. In other words, the set of Descriptor OBUs shall be present after the last OBU of a Temporal Unit and before the first OBU of the next Temporal Unit.</p>
-      <li data-md>
-       <p><a data-link-type="dfn" href="#version" id="ref-for-version②">version</a> shall be set to 0 for this version of specification.</p>
      </ul>
     <li data-md>
      <p>There shall be only one unique Codec Config OBU.</p>
@@ -3626,12 +3640,14 @@ class AnimatedParameterData(animation_type) {
     <li data-md>
      <p>There shall not be any Temporal Delimiter OBUs present.</p>
     <li data-md>
-     <p><a data-link-type="dfn" href="#profile_version" id="ref-for-profile_version">profile_version</a> shall be set to 0 for this version of specification.</p>
+     <p><a data-link-type="dfn" href="#profile_compatible" id="ref-for-profile_compatible③">profile_compatible</a> shall be set to 0 to indicate that the IA sequence complies to this profile.</p>
+    <li data-md>
+     <p><a data-link-type="dfn" href="#profile_name" id="ref-for-profile_name④">profile_name</a> shall be set to 0.</p>
    </ul>
    <p>Capabilities of the IA parser, decoder and processor:</p>
    <ul>
     <li data-md>
-     <p>They shall be able to parse an IA sequence with the MSB four bits of <a data-link-type="dfn" href="#profile_version" id="ref-for-profile_version①">profile_version</a> = 0 and the MSB four bits of <a data-link-type="dfn" href="#version" id="ref-for-version③">version</a> = 0 (i.e., profile_version = 0 to 15 and version = 0 to 15).</p>
+     <p>They shall be able to parse an IA sequence with <a data-link-type="dfn" href="#profile_name" id="ref-for-profile_name⑤">profile_name</a> = 0.</p>
     <li data-md>
      <p>They shall be able to decode and process up to 16 channels.</p>
     <li data-md>
@@ -3666,12 +3682,14 @@ class AnimatedParameterData(animation_type) {
     <li data-md>
      <p>There may be Temporal Delimiter OBUs present.</p>
     <li data-md>
-     <p><a data-link-type="dfn" href="#profile_version" id="ref-for-profile_version②">profile_version</a> shall be set to 16 for this version of specification.</p>
+     <p><a data-link-type="dfn" href="#profile_compatible" id="ref-for-profile_compatible④">profile_compatible</a> shall be set to 1 to indicate that the IA sequence complies to this profile.</p>
+    <li data-md>
+     <p><a data-link-type="dfn" href="#profile_name" id="ref-for-profile_name⑥">profile_name</a> may be set to 0 or 1.</p>
    </ul>
    <p>Capabilities of the IA parser, decoder and processor:</p>
    <ul>
     <li data-md>
-     <p>They shall be able to parse an IA sequence with the MSB four bits of <a data-link-type="dfn" href="#profile_version" id="ref-for-profile_version③">profile_version</a> = 0 or 1 and the MSB four bits of <a data-link-type="dfn" href="#version" id="ref-for-version④">version</a> = 0 (i.e., profile_version = 0 to 31 and version = 0 to 15).</p>
+     <p>They shall be able to parse an IA sequence with <a data-link-type="dfn" href="#profile_name" id="ref-for-profile_name⑦">profile_name</a> = 0 or 1.</p>
     <li data-md>
      <p>They shall be able to support the capabilities of the Simple Profile.</p>
     <li data-md>
@@ -3702,7 +3720,7 @@ class AnimatedParameterData(animation_type) {
     A set of Descriptor OBUs shall be placed in the following order regardless of where they appear in the bitstream: 
    <ol>
     <li data-md>
-     <p>One Magic Code OBU</p>
+     <p>One IA Sequence Header OBU</p>
     <li data-md>
      <p>All Codec Config OBUs</p>
     <li data-md>
@@ -3803,7 +3821,7 @@ Quantity:          One or more.
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="configobus">configOBUs</dfn> shall contain the following OBUs in order.</p>
    <ul>
     <li data-md>
-     <p>Magic Code OBU</p>
+     <p>IA Sequence Header OBU</p>
     <li data-md>
      <p>Codec Config OBU</p>
     <li data-md>
@@ -3847,37 +3865,23 @@ Quantity:          One or more.
    </ul>
 <pre>iamf.IAMF-specific-needs.ipcm
 </pre>
-   <p><b>IAMF-specific-needs</b> shall be <b>V.PV</b> as follows:</p>
+   <p><b>IAMF-specific-needs</b> shall be <b>PC</b> as follows:</p>
    <ul>
     <li data-md>
-     <p><dfn data-dfn-type="dfn" data-noexport id="v">V<a class="self-link" href="#v"></a></dfn> is four digits and represents the <a data-link-type="dfn" href="#version" id="ref-for-version⑤">version</a> of IA sequence.</p>
-     <ul>
-      <li data-md>
-       <p>The first two digits represents the major version within the range 0 to 15.</p>
-      <li data-md>
-       <p>The second two digits represents the minor version within the range 0 to 15.</p>
-     </ul>
-    <li data-md>
-     <p><dfn data-dfn-type="dfn" data-noexport id="pv">PV<a class="self-link" href="#pv"></a></dfn> is four digits and represents the <a data-link-type="dfn" href="#profile_version" id="ref-for-profile_version④">profile_version</a> of IA sequence.</p>
-     <ul>
-      <li data-md>
-       <p>The first <b>P</b> is two digits and represents the profile major version within the range 0 to 15.</p>
-      <li data-md>
-       <p>The second <b>V</b> is two digits and represents the profile minor version within the range 0 to 15.</p>
-     </ul>
+     <p><dfn data-dfn-type="dfn" data-noexport id="pc">PC<a class="self-link" href="#pc"></a></dfn> is three digits within the range 0 to 255 and represents that IA decoder supports the profile of specification.</p>
    </ul>
    <p>For example, for this version of the specification</p>
    <ul>
     <li data-md>
      <p>The codecs parameter string of IAMF-OPUS for the simple profile:</p>
    </ul>
-<pre>iamf.0000.0000.Opus
+<pre>iamf.000.Opus
 </pre>
    <ul>
     <li data-md>
      <p>The codecs parameter string of IAMF-AAC-LC for the base profile:</p>
    </ul>
-<pre>iamf.0000.0100.mp4a.40.2
+<pre>iamf.001.mp4a.40.2
 </pre>
    <h3 class="heading settled" data-level="6.4" id="isobmff-decapsulation"><span class="secno">6.4. </span><span class="content">ISOBMFF IAMF Decapsulation (Informative)</span><a class="self-link" href="#isobmff-decapsulation"></a></h3>
    <h4 class="heading settled" data-level="6.4.1" id="isobmff-decapsulation-singletrack"><span class="secno">6.4.1. </span><span class="content">ISOBMFF IAMF Decapsulation with single track</span><a class="self-link" href="#isobmff-decapsulation-singletrack"></a></h4>
@@ -4440,7 +4444,7 @@ gamma = n0 - n.
       <li data-md>
        <p>It outputs one or more ChannelGroups for channel-based audio element.</p>
       <li data-md>
-       <p>It outputs descriptors which are composed of one Magic Code, one Codec Config, one Audio Element config, one or more Mix Presentation config.</p>
+       <p>It outputs descriptors which are composed of one IA Sequence Header, one Codec Config, one Audio Element config, one or more Mix Presentation config.</p>
       <li data-md>
        <p>It may output parameter blocks</p>
        <ul>
@@ -4600,7 +4604,7 @@ gamma = n0 - n.
     <li data-md>
      <p>Codec Enc. generates the coded substreams from PCMs and passes substreams and one single decoder_config to OBU Packetizer.</p>
     <li data-md>
-     <p>OBU packetizer generates descriptor OBUs which consists of one Magic Code OBU, one Codec Config OBU, one Audio Element OBU and zero or more Mix Presentation OBU.</p>
+     <p>OBU packetizer generates descriptor OBUs which consists of one IA Sequence Header OBU, one Codec Config OBU, one Audio Element OBU and zero or more Mix Presentation OBU.</p>
      <ul>
       <li data-md>
        <p>Codec Config OBU is generated based on <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config⑥">decoder_config()</a>.</p>
@@ -4858,7 +4862,7 @@ Recon_Gain for D_Rtb4:
    <p>Step1: Descriptor OBUs are generated as follows:</p>
    <ul>
     <li data-md>
-     <p>Magic Code OBU: get the larger version field and the larger profile version field, respectively.</p>
+     <p>IA Sequence Header OBU: get the larger <a data-link-type="dfn" href="#profile_name" id="ref-for-profile_name⑧">profile_name</a> field and the larger <a data-link-type="dfn" href="#profile_compatible" id="ref-for-profile_compatible⑤">profile_compatible</a> field, respectively.</p>
     <li data-md>
      <p>Codec Config OBU</p>
      <ul>
@@ -5227,6 +5231,7 @@ Recon_Gain for D_Rtb4:
    <li><a href="#ia-sample">IA Sample</a><span>, in § 6.2.4</span>
    <li><a href="#iasampleentry">IASampleEntry</a><span>, in § 6.2.3</span>
    <li><a href="#ia-sequence">IA sequence</a><span>, in § 2.1</span>
+   <li><a href="#ia-sequence-header-obu">IA Sequence Header OBU</a><span>, in § 2.2.1</span>
    <li><a href="#immersive-audio">immersive audio</a><span>, in § 2</span>
    <li><a href="#info_type">info_type</a><span>, in § 3.8.7</span>
    <li><a href="#integrated_loudness">integrated_loudness</a><span>, in § 3.8.7</span>
@@ -5235,7 +5240,6 @@ Recon_Gain for D_Rtb4:
    <li><a href="#loudness">loudness</a><span>, in § 3.8</span>
    <li><a href="#loudness_layout">loudness_layout</a><span>, in § 3.8</span>
    <li><a href="#loudspeaker_layout">loudspeaker_layout</a><span>, in § 3.7.2</span>
-   <li><a href="#magic-code-obu">Magic Code OBU</a><span>, in § 2.2.1</span>
    <li><a href="#mix_gain">mix_gain</a><span>, in § 3.8.4</span>
    <li><a href="#mix_presentation_annotations">mix_presentation_annotations()</a><span>, in § 3.8</span>
    <li><a href="#mix_presentation_element_annotations">mix_presentation_element_annotations()</a><span>, in § 3.8</span>
@@ -5287,8 +5291,9 @@ Recon_Gain for D_Rtb4:
     </ul>
    <li><a href="#parameter_rate">parameter_rate</a><span>, in § 3.7.1</span>
    <li><a href="#parameters">Parameters</a><span>, in § 2.1</span>
-   <li><a href="#profile_version">profile_version</a><span>, in § 3.5</span>
-   <li><a href="#pv">PV</a><span>, in § 6.3</span>
+   <li><a href="#pc">PC</a><span>, in § 6.3</span>
+   <li><a href="#profile_compatible">profile_compatible</a><span>, in § 3.5</span>
+   <li><a href="#profile_name">profile_name</a><span>, in § 3.5</span>
    <li><a href="#recon_gain">recon_gain</a><span>, in § 3.9.3</span>
    <li><a href="#recon_gain_flags">recon_gain_flags</a><span>, in § 3.9.3</span>
    <li><a href="#recon_gain_info">recon_gain_info</a><span>, in § 3.7</span>
@@ -5322,8 +5327,6 @@ Recon_Gain for D_Rtb4:
    <li><a href="#tf2tot2-de-mixer">TF2toT2 de-mixer</a><span>, in § 7.2.2</span>
    <li><a href="#true_peak">true_peak</a><span>, in § 3.8.7</span>
    <li><a href="#utf-8_enc-label">UTF-8_Enc(label)</a><span>, in § 1.3.2</span>
-   <li><a href="#v">V</a><span>, in § 6.3</span>
-   <li><a href="#version">version</a><span>, in § 3.5</span>
    <li><a href="#w">w</a><span>, in § 3.9.2</span>
    <li><a href="#widx-k">wIdx(k)</a><span>, in § 7.2.2</span>
    <li><a href="#w_idx_offset">w_idx_offset</a><span>, in § 3.9.2</span>
@@ -5874,14 +5877,14 @@ window.dfnpanelData['cbd3e2ac'] = {"dfnID": "cbd3e2ac", "url": "https://tools.ie
 window.dfnpanelData['immersive-audio'] = {"dfnID": "immersive-audio", "url": "#immersive-audio", "dfnText": "immersive audio", "refSections": [{"refs": [{"id": "ref-for-immersive-audio"}, {"id": "ref-for-immersive-audio\u2460"}], "title": "2. Introduction"}, {"refs": [{"id": "ref-for-immersive-audio\u2461"}], "title": "2.1. IA sequence Components"}], "external": false};
 window.dfnpanelData['ia-sequence'] = {"dfnID": "ia-sequence", "url": "#ia-sequence", "dfnText": "IA sequence", "refSections": [{"refs": [{"id": "ref-for-ia-sequence"}], "title": "7. IAMF processing"}, {"refs": [{"id": "ref-for-ia-sequence\u2460"}], "title": "8. IAMF Generation Process"}], "external": false};
 window.dfnpanelData['obu_type'] = {"dfnID": "obu_type", "url": "#obu_type", "dfnText": "obu_type", "refSections": [{"refs": [{"id": "ref-for-obu_type"}], "title": "3.2. OBU Header Syntax and Semantics"}, {"refs": [{"id": "ref-for-obu_type\u2460"}, {"id": "ref-for-obu_type\u2461"}], "title": "3.10. Audio Frame OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-obu_type\u2462"}], "title": "8.4.1. Multiple Audio Elements with One Codec Config (Informative)"}], "external": false};
-window.dfnpanelData['obu_redundant_copy'] = {"dfnID": "obu_redundant_copy", "url": "#obu_redundant_copy", "dfnText": "obu_redundant_copy", "refSections": [{"refs": [{"id": "ref-for-obu_redundant_copy"}], "title": "3.5. Magic Code OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-obu_redundant_copy\u2460"}], "title": "4. Profiles"}, {"refs": [{"id": "ref-for-obu_redundant_copy\u2461"}], "title": "5.1. OBU Sequence Order"}, {"refs": [{"id": "ref-for-obu_redundant_copy\u2462"}], "title": "5.1.3. Refreshing Descriptor OBUs"}], "external": false};
-window.dfnpanelData['obu_trimming_status_flag'] = {"dfnID": "obu_trimming_status_flag", "url": "#obu_trimming_status_flag", "dfnText": "obu_trimming_status_flag", "refSections": [{"refs": [{"id": "ref-for-obu_trimming_status_flag"}], "title": "3.5. Magic Code OBU Syntax and Semantics"}], "external": false};
-window.dfnpanelData['obu_extension_flag'] = {"dfnID": "obu_extension_flag", "url": "#obu_extension_flag", "dfnText": "obu_extension_flag", "refSections": [{"refs": [{"id": "ref-for-obu_extension_flag"}], "title": "3.2. OBU Header Syntax and Semantics"}, {"refs": [{"id": "ref-for-obu_extension_flag\u2460"}], "title": "3.5. Magic Code OBU Syntax and Semantics"}], "external": false};
+window.dfnpanelData['obu_redundant_copy'] = {"dfnID": "obu_redundant_copy", "url": "#obu_redundant_copy", "dfnText": "obu_redundant_copy", "refSections": [{"refs": [{"id": "ref-for-obu_redundant_copy"}], "title": "3.5. IA Sequence Header OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-obu_redundant_copy\u2460"}], "title": "4. Profiles"}, {"refs": [{"id": "ref-for-obu_redundant_copy\u2461"}], "title": "5.1. OBU Sequence Order"}, {"refs": [{"id": "ref-for-obu_redundant_copy\u2462"}], "title": "5.1.3. Refreshing Descriptor OBUs"}], "external": false};
+window.dfnpanelData['obu_trimming_status_flag'] = {"dfnID": "obu_trimming_status_flag", "url": "#obu_trimming_status_flag", "dfnText": "obu_trimming_status_flag", "refSections": [{"refs": [{"id": "ref-for-obu_trimming_status_flag"}], "title": "3.5. IA Sequence Header OBU Syntax and Semantics"}], "external": false};
+window.dfnpanelData['obu_extension_flag'] = {"dfnID": "obu_extension_flag", "url": "#obu_extension_flag", "dfnText": "obu_extension_flag", "refSections": [{"refs": [{"id": "ref-for-obu_extension_flag"}], "title": "3.2. OBU Header Syntax and Semantics"}, {"refs": [{"id": "ref-for-obu_extension_flag\u2460"}], "title": "3.5. IA Sequence Header OBU Syntax and Semantics"}], "external": false};
 window.dfnpanelData['num_samples_to_trim_at_start'] = {"dfnID": "num_samples_to_trim_at_start", "url": "#num_samples_to_trim_at_start", "dfnText": "num_samples_to_trim_at_start", "refSections": [{"refs": [{"id": "ref-for-num_samples_to_trim_at_start"}, {"id": "ref-for-num_samples_to_trim_at_start\u2460"}, {"id": "ref-for-num_samples_to_trim_at_start\u2461"}, {"id": "ref-for-num_samples_to_trim_at_start\u2462"}], "title": "3.2. OBU Header Syntax and Semantics"}], "external": false};
 window.dfnpanelData['num_samples_to_trim_at_end'] = {"dfnID": "num_samples_to_trim_at_end", "url": "#num_samples_to_trim_at_end", "dfnText": "num_samples_to_trim_at_end", "refSections": [{"refs": [{"id": "ref-for-num_samples_to_trim_at_end"}, {"id": "ref-for-num_samples_to_trim_at_end\u2460"}, {"id": "ref-for-num_samples_to_trim_at_end\u2461"}], "title": "3.2. OBU Header Syntax and Semantics"}], "external": false};
 window.dfnpanelData['extension_header_size'] = {"dfnID": "extension_header_size", "url": "#extension_header_size", "dfnText": "extension_header_size", "refSections": [{"refs": [{"id": "ref-for-extension_header_size"}, {"id": "ref-for-extension_header_size\u2460"}, {"id": "ref-for-extension_header_size\u2461"}, {"id": "ref-for-extension_header_size\u2462"}, {"id": "ref-for-extension_header_size\u2463"}], "title": "3.2. OBU Header Syntax and Semantics"}], "external": false};
-window.dfnpanelData['version'] = {"dfnID": "version", "url": "#version", "dfnText": "version", "refSections": [{"refs": [{"id": "ref-for-version"}], "title": "3.2. OBU Header Syntax and Semantics"}, {"refs": [{"id": "ref-for-version\u2460"}], "title": "3.5. Magic Code OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-version\u2461"}], "title": "4. Profiles"}, {"refs": [{"id": "ref-for-version\u2462"}], "title": "4.1. IA Simple Profile"}, {"refs": [{"id": "ref-for-version\u2463"}], "title": "4.2. IA Base Profile"}, {"refs": [{"id": "ref-for-version\u2464"}], "title": "6.3. Codecs Parameter String"}], "external": false};
-window.dfnpanelData['profile_version'] = {"dfnID": "profile_version", "url": "#profile_version", "dfnText": "profile_version", "refSections": [{"refs": [{"id": "ref-for-profile_version"}, {"id": "ref-for-profile_version\u2460"}], "title": "4.1. IA Simple Profile"}, {"refs": [{"id": "ref-for-profile_version\u2461"}, {"id": "ref-for-profile_version\u2462"}], "title": "4.2. IA Base Profile"}, {"refs": [{"id": "ref-for-profile_version\u2463"}], "title": "6.3. Codecs Parameter String"}], "external": false};
+window.dfnpanelData['profile_name'] = {"dfnID": "profile_name", "url": "#profile_name", "dfnText": "profile_name", "refSections": [{"refs": [{"id": "ref-for-profile_name"}, {"id": "ref-for-profile_name\u2460"}, {"id": "ref-for-profile_name\u2461"}, {"id": "ref-for-profile_name\u2462"}], "title": "3.5. IA Sequence Header OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-profile_name\u2463"}, {"id": "ref-for-profile_name\u2464"}], "title": "4.1. IA Simple Profile"}, {"refs": [{"id": "ref-for-profile_name\u2465"}, {"id": "ref-for-profile_name\u2466"}], "title": "4.2. IA Base Profile"}, {"refs": [{"id": "ref-for-profile_name\u2467"}], "title": "8.4.1. Multiple Audio Elements with One Codec Config (Informative)"}], "external": false};
+window.dfnpanelData['profile_compatible'] = {"dfnID": "profile_compatible", "url": "#profile_compatible", "dfnText": "profile_compatible", "refSections": [{"refs": [{"id": "ref-for-profile_compatible"}, {"id": "ref-for-profile_compatible\u2460"}, {"id": "ref-for-profile_compatible\u2461"}], "title": "3.5. IA Sequence Header OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-profile_compatible\u2462"}], "title": "4.1. IA Simple Profile"}, {"refs": [{"id": "ref-for-profile_compatible\u2463"}], "title": "4.2. IA Base Profile"}, {"refs": [{"id": "ref-for-profile_compatible\u2464"}], "title": "8.4.1. Multiple Audio Elements with One Codec Config (Informative)"}], "external": false};
 window.dfnpanelData['codec_config_id'] = {"dfnID": "codec_config_id", "url": "#codec_config_id", "dfnText": "codec_config_id", "refSections": [{"refs": [{"id": "ref-for-codec_config_id"}], "title": "8.4.1. Multiple Audio Elements with One Codec Config (Informative)"}], "external": false};
 window.dfnpanelData['codec_id'] = {"dfnID": "codec_id", "url": "#codec_id", "dfnText": "codec_id", "refSections": [{"refs": [{"id": "ref-for-codec_id"}], "title": "3.7. Audio Element OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-codec_id\u2460"}], "title": "3.12. Codec Specific"}, {"refs": [{"id": "ref-for-codec_id\u2461"}], "title": "3.12.1. IAMF-OPUS Specific"}, {"refs": [{"id": "ref-for-codec_id\u2462"}], "title": "3.12.2. IAMF-AAC-LC Specific"}, {"refs": [{"id": "ref-for-codec_id\u2463"}], "title": "3.12.3. IAMF-FLAC Specific"}, {"refs": [{"id": "ref-for-codec_id\u2464"}], "title": "3.12.4. IAMF-LPCM Specific"}], "external": false};
 window.dfnpanelData['num_samples_per_frame'] = {"dfnID": "num_samples_per_frame", "url": "#num_samples_per_frame", "dfnText": "num_samples_per_frame", "refSections": [{"refs": [{"id": "ref-for-num_samples_per_frame"}, {"id": "ref-for-num_samples_per_frame\u2460"}, {"id": "ref-for-num_samples_per_frame\u2461"}], "title": "3.2. OBU Header Syntax and Semantics"}, {"refs": [{"id": "ref-for-num_samples_per_frame\u2462"}, {"id": "ref-for-num_samples_per_frame\u2463"}], "title": "3.7. Audio Element OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-num_samples_per_frame\u2464"}], "title": "3.7.1. Parameter Definition Syntax and Semantics"}, {"refs": [{"id": "ref-for-num_samples_per_frame\u2465"}], "title": "3.12.4. IAMF-LPCM Specific"}], "external": false};
