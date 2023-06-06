@@ -294,7 +294,7 @@ Example 2: Two [=3D audio signal=]s = 5.1.2ch and Stereo of UC2,
 - Audio Element 2 (Stereo): Consists of 1 Audio Substream which is grouped into one [=ChannelGroup=].
 - Parameter Substream 1-1: Mixing parameter values applied to Audio Element 1 by considering Home environment
 - Parameter Substream 1-2: Mixing parameter values applied to Audio Element 2 by considering Home environment
-- Mix Presentation: Provide rendering algorithm of Audio Element 1 & 2 to popular loudspeaker layouts, mixing based on IA Parameter 1-1 & 1-2 and loudness information of the mixed [=Audio Element=].
+- Mix Presentation: Provide rendering algorithm of Audio Element 1 & 2 to popular loudspeaker layouts, mixing based on Parameter Substream 1-1 & 1-2 and loudness information of the mixed [=Audio Element=].
 
 Example 3: Two [=3D audio signal=]s = FOA and Stereo of UC3,
 - Audio Substream: L and R channels are coded as one audio steam and each channel of FOA as one audio stream.
@@ -302,7 +302,7 @@ Example 3: Two [=3D audio signal=]s = FOA and Stereo of UC3,
 - Audio Element 2 (Stereo) : Consists of 1 Audio Substream  which is grouped into one [=ChannelGroup=].
 - Parameter Substream 1-1: Mixing parameter values applied to Audio Element 1 by considering Mobile environment
 - Parameter Substream 1-2: Mixing parameter values applied to Audio Element 2 by considering Mobile environment
-- Mix Presentation: Provide rendering algorithm of Audio Element 1 & 2 to popular loudspeaker layouts, mixing based on IA Parameter 1-1 & 1-2 and loudness information of the mixed [=Audio Element=].
+- Mix Presentation: Provide rendering algorithm of Audio Element 1 & 2 to popular loudspeaker layouts, mixing based on Parameter Substream 1-1 & 1-2 and loudness information of the mixed [=Audio Element=].
 
 NOTE: Big-screen TVs select Mix Presentation 1 and Mobile devices select Mix Presentation 2.
 
@@ -314,21 +314,21 @@ Based on the model, this specification defines a hypothetical immersive audio mo
 For a given input 3D audio,
 - A Pre-Processor generates [=ChannelGroup=](s), [=Descriptors=] and [=Parameter Substream=](s).
 - A Codec Enc generates coded [=Audio Substream=](s).
-- An OBU Packetizer generates an IA sequence from [=Audio Substream=](s) and [=Descriptors=] and [=Parameter Substream=](s).
-- A File Packager (ISOBMFF Encapsulation) generates an IAMF File by encapsulating the IA sequence into [[!ISOBMFF]] track(s).
-- A File Parser (ISOBMFF Parser) reconstructs the IA sequence by decapsulating the IAMF File.
+- An OBU Packetizer generates an [=IA Sequence=] from [=Audio Substream=](s) and [=Descriptors=] and [=Parameter Substream=](s).
+- A File Packager (ISOBMFF Encapsulation) generates an IAMF File by encapsulating the [=IA Sequence=] into [[!ISOBMFF]] track(s).
+- A File Parser (ISOBMFF Parser) reconstructs the [=IA Sequence=] by decapsulating the IAMF File.
 - An OBU Parser outputs the [=Audio Substream=](s) and the [=Parameter Substream=](s).
 - A Codec Dec outputs decoded [=ChannelGroup=](s) after decoding of the [=Audio Substream=](s).
 - A Post-Processor outputs an [=Immersive Audio=] by using the [=ChannelGroup=](s), the [=Descriptors=] and the [=Parameter Substream=](s).
 - Pre-Processor, [=ChannelGroup=](s), Codec Enc and OBU Packetizer are defined in [[#iamfgeneration]].
-- IA sequence is defined in [[#iasequence]]
+- [=IA Sequence=] is defined in [[#iasequence]]
 - ISOBMFF Encapsulation, IAMF file (ISOBMFF file) and ISOBMFF Parser are deifned in [[#isobmff]].
 - OBU Parser, Codec Dec and Post-Processor are defined in [[#processing]].
 
 
-## IA sequence ## {#iasequence}
+## IA Sequence ## {#iasequence}
 
-An IA sequence is a bitstream to represent [=Immersive Audio=] contents and consists of [=Descriptors=] and [=IA Data=].
+An [=IA Sequence=] is a bitstream to represent [=Immersive Audio=] contents and consists of [=Descriptors=] and [=IA Data=].
 
 Each of [=Descriptors=] and each of [=IA Data=] are packetized by Open Bitstream Unit (OBU), respectively. The term Open Bitstream Unit (OBU) is the concrete, physical unit used to represent the components in the model.
 
@@ -338,21 +338,19 @@ Each of [=Descriptors=] and each of [=IA Data=] are packetized by Open Bitstream
 
 <dfn noexport>Descriptors</dfn> contain all the information that is required to setup and configure the decoders, reconstruction algorithm, renderers and mixers. [=Descriptors=] do not contain audio signal.
 
-- <dfn noexport>IA Sequence Header OBU</dfn> indicates the start of a full IA sequence description and contains information related to profiles.
+- <dfn noexport>IA Sequence Header OBU</dfn> indicates the start of a full [=IA Sequence=] description and contains information related to profiles.
 - <dfn noexport>Codec Config OBU</dfn> describes information to set up a decoder for an coded [=Audio Substream=].
 - <dfn noexport>Audio Element OBU</dfn> describes information to combine one or more [=Audio Substream=]s to reconstruct an [=Audio Element=].
 - <dfn noexport>Mix Presentation OBU</dfn> describes information to render and mix one or more [=Audio Element=]s to generate the final 3D audio output.
-	- Multiple [=Mix Presentation=]s can be defined as alternatives to each other within the same IA sequence. Furthermore, the choice of which [=Mix Presentation=] to use at playback is left to the user. For example, multi-language support is implemented by defining different [=Mix Presentation=]s, where the first mix describes the use of the [=Audio Element=] with English dialogue, and the second mix describes the use of the [=Audio Element=] with French dialogue.
+	- Multiple [=Mix Presentation=]s can be defined as alternatives to each other within the same [=IA Sequence=]. Furthermore, the choice of which [=Mix Presentation=] to use at playback is left to the user. For example, multi-language support is implemented by defining different [=Mix Presentation=]s, where the first mix describes the use of the [=Audio Element=] with English dialogue, and the second mix describes the use of the [=Audio Element=] with French dialogue.
 
 ### IA Data ### {#iadata}
 
 <dfn noexport>IA Data</dfn> contains the actual time-varying data that is required in the generation of the final 3D audio output.
 
 - <dfn noexport>Audio Frame OBU</dfn> provides the coded audio frame for an [=Audio Substream=]. It has the start timestamp  and duration. So, a coded [=Audio Substream=] is represented as a sequence of [=Audio Frame OBU=]s with the same identifier, in time order.
-- <dfn noexport>Parameter Block OBU</dfn> provides the parameter values in a block for an time-varying [=IA Parameter=]. It has the start timestampe and duration. So, a time-varying [=IA Parameter=] is represented as a sequence of parameter values in [=Parameter Block OBU=]s with the same identifier, in time order.
+- <dfn noexport>Parameter Block OBU</dfn> provides the parameter values in a block for an time-varying [=Parameter Substream=]. It has the start timestampe and duration. So, a time-varying [=Parameter Substream=] is represented as a sequence of parameter values in [=Parameter Block OBU=]s with the same identifier, in time order.
 - <dfn noexport>Temporal Delimiter OBU</dfn> identifies the [=Temporal Unit=]s.
-
-The term <dfn noexport>Temporal Unit</dfn> means a set of all [=Audio Frame OBU=]s with the same start timestamp and the same duration from all [=Audio Substream=]s and all non-redundant [=Parameter Block OBU=]s with the start timestamp within the duration.
 
 ## Timing Model ## {#timingmodel}
 
@@ -368,6 +366,8 @@ Within an [=Mix Presentation=], the presentation start time of all [=Audio Eleme
 
 Within an [=IA Sequence=], all [=Mix Presentation=]s have the same duration, defining the duration of the [=IA Sequence=] and have the same presentation start time defining the presentation start time of the [=IA Sequence=].
 
+The term <dfn noexport>Temporal Unit</dfn> means a set of all [=Audio Frame OBU=]s with the same decode start time and the same duration from all [=Audio Substream=]s and all non-redundant [=Parameter Block OBU=]s with the decode start time within the duration.
+
 The below figure shows an example of Timing Model in terms of the decode start times and durations of [=Audio Substream=] and [=Parameter Substream=].
 
 <center><img src="images/IAMF Timing Model.png" style="width:100%; height:auto;"></center>
@@ -375,7 +375,7 @@ The below figure shows an example of Timing Model in terms of the decode start t
 
 # Open Bitstream Unit (OBU) Syntax and Semantics # {#obu-syntax}
 
-The IA sequence uses the OBU syntax.
+The [=IA Sequence=] uses the OBU syntax.
 
 This section specifies the OBU syntax elements and their semantics.
 
@@ -825,7 +825,6 @@ class channel_audio_layer_config(i) {
 
 When an audio element is composed of G(r) number of substreams, scalable channel audio for the audio element is layered into [=num_layers=] = r number of ChannelGroups.
 - The order of ChannelGroups in each temporal unit shall be same as the order of channel_audio_layer_config()s in scalable_channel_layout_config().
-- <dfn noexport>ChannelGroup</dfn> is a set of substreams which is able to provide a spatial resolution of audio contents by itself or which is able to provide an enhanced spatial resolution of audio contents by combining with the preceding ChannelGroups within the audio frames.
 - ChannelGroup #q consists of G(q)-G(q-1) number of substreams. Where, q = 1, 2, ..., r and G(0) = 0.
 - IA frame is a set of audio_frame_obus with the same start timestamp of the single audio element for scalable channel audio. Each of them comes from each substream.
 - Every IA frame shall have the same number of audio_frame_obus.
