@@ -435,9 +435,9 @@ class ia_open_bitstream_unit() {
   else if (obu_type == OBU_IA_Temporal_Delimiter)
     temporal_delimiter_obu();
   else if (obu_type == OBU_IA_Audio_Frame)
-    audio_frame_obu_with_no_id();
+    audio_frame_obu(true);
   else if (obu_type >= 9 and <= 30)
-    audio_frame_obu(obu_type - 9);
+    audio_frame_obu(false);
   else if (obu_type == 5 or 6 or 7)
     reserved_obu();
 
@@ -1561,30 +1561,26 @@ The each bit of [=recon_gain_flags=] indicates the presence of [=recon_gain=] ap
 
 ## Audio Frame OBU Syntax and Semantics ## {#obu-audioframe}
 
-This section specifies OBU payloads of OBU_IA_Audio_Frame and OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21. 
+This section specifies OBU payloads of OBU_IA_Audio_Frame and OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21.
 
-The first 22 audio substreams in an IA sequence may use the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21, which have predefined audio substream identifiers associated with them. This avoids the need to manually specify an [=audio_substream_id=].
-
-[=audio_substream_id=] = 0 to [=audio_substream_id=] = 21 shall be assigned to Audio Frame OBUs with [=obu_type=] = 9 to 30, respectively. 
+<dfn noexport>audio_substream_id</dfn> is the substream ID associated with this audio frame. Within an IA Sequence, there shall be exactly one non-redundant Audio Element OBU with a substream ID.
 
 <b>Syntax</b>
 
 ```
-class audio_frame_obu_with_no_id() {
-  leb128() audio_substream_id;
-  audio_frame_obu(audio_substream_id);
-}
-```
-
-```
-class audio_frame_obu() {
+class audio_frame_obu(audio_substream_id_in_bitstream) {
+  if(audio_substream_id_in_bitstream) {
+     leb128() explicit_audio_substream_id;
+  }
   unsigned int (8*coded_frame_size) audio_frame();
 }
 ```
 
 <b>Semantics</b>
 
-<dfn noexport>audio_substream_id</dfn> defines an identifier for a Substream. In this class (i.e. when [=obu_type=] = 8), the value shall be greater than 21. Within an IA Sequence, there shall be exactly one non-redundant Audio Element OBU with this identifier. Audio Frame OBUs that provide coded data for this Substream use this identifier.
+<dfn noexport>explicit_audio_substream_id</dfn> defines the [=audio_substream_id=] of this frame. The value shall be greater than 21. When this field is not present [=audio_substream_id=] is implicit and is defined as a value from 0 to 21 for OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21 respectively.
+
+NOTE: The first 22 audio substreams in an IA sequence can use the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21, which have predefined audio substream identifiers associated with them. This reduces bitrate by avoiding the extra [=explicit_audio_substream_id=] field in the bitstream.
 
 <dfn noexport>coded_frame_size</dfn> is the size of [=audio_frame()=] in bytes.
 
