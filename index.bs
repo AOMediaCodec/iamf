@@ -285,23 +285,23 @@ Here are some typical IAMF use cases and examples of how to instantiate the mode
 
 Example 1: [=3D audio signal=] = 3.1.2ch of UC1,
 - Audio Substream: L and R channels are coded as one audio stream, Ltf and Rtf channels as one audio stream, Center as one audio stream and LFE as one audio stream.
-- Audio Element (3.1.2ch): Consists of 4 Audio Substreams.
+- Audio Element (3.1.2ch): Consists of 4 Audio Substreams which are grouped into one [=ChannelGroup=].
 - Mix Presentation: Provide rendering algorithm of Audio Element to popular loudspeaker layouts and loudness information of the [=3D audio signal=].
 
 Example 2: Two [=3D audio signal=]s = 5.1.2ch and Stereo of UC2,
 - Audio Substream: L and R channels are coded as one audio steam, Ls and Rs channels as one audio stream, Ltf and Rtf channels as one audio stream, Center as one audio stream and LFE as one audio stream.
-- Audio Element 1 (5.1.2ch): Consists of 5 Audio Substreams.
-- Audio Element 2 (Stereo): Consists of 1 Audio Substream.
-- IA Parameter 1-1: Mixing parameter values applied to Audio Element 1 by considering Home environment
-- IA Parameter 1-2: Mixing parameter values applied to Audio Element 2 by considering Home environment
+- Audio Element 1 (5.1.2ch): Consists of 5 Audio Substreams which are grouped into one [=ChannelGroup=].
+- Audio Element 2 (Stereo): Consists of 1 Audio Substream which is grouped into one [=ChannelGroup=].
+- Parameter Substream 1-1: Mixing parameter values applied to Audio Element 1 by considering Home environment
+- Parameter Substream 1-2: Mixing parameter values applied to Audio Element 2 by considering Home environment
 - Mix Presentation: Provide rendering algorithm of Audio Element 1 & 2 to popular loudspeaker layouts, mixing based on IA Parameter 1-1 & 1-2 and loudness information of the mixed [=Audio Element=].
 
 Example 3: Two [=3D audio signal=]s = FOA and Stereo of UC3,
 - Audio Substream: L and R channels are coded as one audio steam and each channel of FOA as one audio stream.
-- Audio Element 1 (FOA) : Consists of 4 Audio Substreams.
-- Audio Element 2 (Stereo) : Consists of 1 Audio Substream.
-- IA Parameter 1-1: Mixing parameter values applied to Audio Element 1 by considering Mobile environment
-- IA Parameter 1-2: Mixing parameter values applied to Audio Element 2 by considering Mobile environment
+- Audio Element 1 (FOA) : Consists of 4 Audio Substreams which are grouped into one [=ChannelGroup=].
+- Audio Element 2 (Stereo) : Consists of 1 Audio Substream  which is grouped into one [=ChannelGroup=].
+- Parameter Substream 1-1: Mixing parameter values applied to Audio Element 1 by considering Mobile environment
+- Parameter Substream 1-2: Mixing parameter values applied to Audio Element 2 by considering Mobile environment
 - Mix Presentation: Provide rendering algorithm of Audio Element 1 & 2 to popular loudspeaker layouts, mixing based on IA Parameter 1-1 & 1-2 and loudness information of the mixed [=Audio Element=].
 
 NOTE: Big-screen TVs select Mix Presentation 1 and Mobile devices select Mix Presentation 2.
@@ -312,18 +312,15 @@ Based on the model, this specification defines a hypothetical immersive audio mo
 <center><figcaption>Hypothetical IAMF Architecture</figcaption></center>
 
 For a given input 3D audio,
-- Pre-Processor generates ChannelGroup(s)), [=Descriptors=] and [=IA Parameter=](s).
-	- ChannelGroup(s) is composed of one or more [=Audio Substream=]s.
-- Codec Enc generates coded [=Audio Substream=](s).
-- OBU Packetizer generates IA sequence from [=Audio Substream=](s) and [=Descriptors=] and [=IA Parameter=](s).
-- File Packager (ISOBMFF Encapsulation) generates IAMF File by encapsulating IA sequence into [[!ISOBMFF]] track(s).
-- File Parser (ISOBMFF Parser) reconstructs IA sequence by decapsulating IAMF File.
-- OBU Parser outputs [=Audio Substream=](s) and [=IA Parameter=](s).
-- Codec Dec outputs a decoded ChannelGroup(s) after decoding of [=Audio Substream=](s).
-- Post-Processor outputs [=Immersive Audio=] by using the ChannelGroup(s) and [=Descriptors=] and [=IA Parameter=](s).
-
-Where, 
-- Pre-Processor, ChannelGroup(s), Codec Enc and OBU Packetizer are defined in [[#iamfgeneration]].
+- A Pre-Processor generates [=ChannelGroup=](s), [=Descriptors=] and [=Parameter Substream=](s).
+- A Codec Enc generates coded [=Audio Substream=](s).
+- An OBU Packetizer generates an IA sequence from [=Audio Substream=](s) and [=Descriptors=] and [=Parameter Substream=](s).
+- A File Packager (ISOBMFF Encapsulation) generates an IAMF File by encapsulating the IA sequence into [[!ISOBMFF]] track(s).
+- A File Parser (ISOBMFF Parser) reconstructs the IA sequence by decapsulating the IAMF File.
+- An OBU Parser outputs the [=Audio Substream=](s) and the [=Parameter Substream=](s).
+- A Codec Dec outputs decoded [=ChannelGroup=](s) after decoding of the [=Audio Substream=](s).
+- A Post-Processor outputs an [=Immersive Audio=] by using the [=ChannelGroup=](s), the [=Descriptors=] and the [=Parameter Substream=](s).
+- Pre-Processor, [=ChannelGroup=](s), Codec Enc and OBU Packetizer are defined in [[#iamfgeneration]].
 - IA sequence is defined in [[#iasequence]]
 - ISOBMFF Encapsulation, IAMF file (ISOBMFF file) and ISOBMFF Parser are deifned in [[#isobmff]].
 - OBU Parser, Codec Dec and Post-Processor are defined in [[#processing]].
