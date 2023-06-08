@@ -14,24 +14,17 @@ Abstract: This document specifies an immersive audio (IA) architecture and model
 <pre class="anchors">
 url: https://www.iso.org/standard/68960.html#; spec: ISOBMFF; type: dfn;
 	text: AudioSampleEntry
-	text: boxtype
 	text: grouping_type
-	text: SampleGroupDescriptionEntry
 	text: channelcount
 	text: samplerate
-	text: AudioRollRecoveryEntry
-	text: media_time
-	text: edit_duration
+	text: roll_distance
 	
 url: https://www.iso.org/standard/68960.html#; spec: ISOBMFF; type: property;
 	text: iso6
-	text: sgpd
 	text: stsd
-	text: sbgp
 	text: edts
 	text: stts
 	text: roll
-	text: mvhd
 	text: elst
 	text: trun
 
@@ -603,7 +596,7 @@ class codec_config_obu() {
 class codec_config() {
   unsigned int (32) codec_id;
   leb128() num_samples_per_frame;
-  signed int (16) roll_distance;
+  signed int (16) audio_roll_distance;
   decoder_config(codec_id);
 }
 ```
@@ -622,10 +615,8 @@ NOTE: 'ipcm' should not be confused with 'lpcm' which is another 4CC to identify
 
 <dfn noexport>num_samples_per_frame</dfn> indicates the frame length, in samples, of the audio_frame() provided in by audio_frame_obu(). It shall not be set to zero. If the [=decoder_config()=] structure for a given codec specifies a value for the frame length, the two values shall be equal.
 
-<dfn noexport>roll_distance</dfn> indicates how many audio frames prior to the current audio frame need to be decoded (and decoded samples discarded) to set the encoder in a state that will produce the perfect decoded audio signal. It shall be always negative value or zero. For some audio codecs, even if an audio frame can be decoded independently, the decoded signal after decoding only that frame may not represent a perfect, decoded audio signal, even ignoring compression artifacts. This can be due to overlap transforms. While potentially acceptable when starting to decode a substream, it may be problematic when automatically switching between similar audio substreams of different quality and/or bitrate. 
-- It shall be set to -R when [=codec_id=] is set to 'Opus'. Where, R is the smallest integer greater than or equal to floor(3840 / [=num_samples_per_frame=]).
-- It shall be set to -1 when [=codec_id=] is set to 'mp4a'.
-- It shall be set to 0 when [=codec_id=] is set to  'fLaC' or 'ipcm'.
+<dfn noexport>audio_roll_distance</dfn> is a signed integer that gives the number of frames that need to be decoded in order for a frame to be decoded correctly. A negative value indicates the number of frames before the frame to be decoded corrently.
+- It shall be set to -1 for IAMF-AAC-LC and -R (R = 4 when the frame size = 960) for IAMF-OPUS. IAMF-FLAC may ignore this field. Where, R is the smallest integer greater than or equal to 3840 divided by the frame size.
 
 <dfn noexport>decoder_config()</dfn> specifies the set of codec parameters required to decode the payload an substream for the given codec_id. It is byte aligned.
 
@@ -1848,7 +1839,7 @@ NOTE: Multiple sample entries may be used in a track, for example when the track
 	- 'stts' or 'trun' box shall indicate the number of audio samples which [=IA Sample=] includes (i.e. the duration of IA Sample). 
 	- The duration of [=IA Sample=] is duration including audio samples trimmed at the beginning but excluding audio samples trimmed at the end. 
 - Sample Group
-	- In an IA Track, every sample shall be associated with a sample group of type 'roll'. The roll_distance value SHALL equal to the value of the [=roll_distance=] field in the Codec Config OBU stored in the configOBUs array in the sample entry.
+	- When [=codec_id=] is set to 'Opus' or 'mp4a', in an IA Track, every sample shall be associated with a sample group of type 'roll'. The [=roll_distance=] value SHALL equal to the value of the [=audio_roll_distance=] field in the [=Codec Config OBU=] stored in the [=configOBUs=] array in the sample entry.
 		
 ### IA Sample Entry ### {#iasampleentry-section}
 
