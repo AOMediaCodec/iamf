@@ -1490,7 +1490,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 5fcd28d6d, updated Tue May 30 13:12:11 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="19f327285bda817af9fa4e73da3787823c8187d7" name="document-revision">
+  <meta content="0ae132e75771562eee9f03c423eb3710b8c2e2fa" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2398,9 +2398,9 @@ class Bar {
   else if (obu_type == OBU_IA_Temporal_Delimiter)
     temporal_delimiter_obu();
   else if (obu_type == OBU_IA_Audio_Frame)
-    audio_frame_obu_with_no_id();
+    audio_frame_obu(true);
   else if (obu_type >= 9 and &lt;= 30)
-    audio_frame_obu(obu_type - 9);
+    audio_frame_obu(false);
   else if (obu_type == 5 or 6 or 7)
     reserved_obu();
 
@@ -2878,6 +2878,7 @@ Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
      <p>Examples for not-recommended list of channel layouts: 2ch/3.1.2ch/5.1.2ch, 2ch/3.1.2ch/5.1.2ch/7.1.4ch, 2ch/5.1.2ch/7.1.4ch, 2ch/7.1.4ch etc..</p>
    </ul>
    <p class="note" role="note"><span class="marker">NOTE:</span> Contents providers may be satisfied with the down-mixed audio having no height channels even though the down-mix mechanism, specified in <a href="#iamfgeneration-scalablechannelaudio-downmixmechanism">§ 10.3.2 Annex C-2: Down-mix Mechanism</a>, drops height channels when it does down-mix from input channel audio with height channels to surround channels for example from 7.14ch to Mono, Stereo, 5.1ch or 7.1ch. In that case, encoder may generate a scalable audio with the down-mixed audio without having height channels from the input channel audio with height channels. In other words, this specification does not disallow for scalable audios to have a down-mixed audio without having height channels from input channel audio having height channels.</p>
+   <p class="note" role="note"><span class="marker">NOTE:</span> The Ltr and Rtr of 5.1.4ch down-mixed from 7.1.4ch is within the range of Ltb and Rtb of 7.1.4ch.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="output_gain_is_present_flag">output_gain_is_present_flag</dfn> indicates if output_gain information fields for the ChannelGroup presents .</p>
    <ul>
     <li data-md>
@@ -3500,20 +3501,18 @@ class AnimatedParameterData(animation_type) {
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="recon_gain">recon_gain</dfn> indicates the gain value to be applied to the channel, which is indicated by <a data-link-type="dfn" href="#recon_gain_flags" id="ref-for-recon_gain_flags①">recon_gain_flags</a>, after decoding of the associated frames and demixing operation. Where, the channel is indicated by recon_gain_flags. Detailed operation by using this value is specified in <a href="#processing-scalablechannelaudio-recongain">§ 7.2.3 Recon Gain</a>.</p>
    <h3 class="heading settled" data-level="3.10" id="obu-audioframe"><span class="secno">3.10. </span><span class="content">Audio Frame OBU Syntax and Semantics</span><a class="self-link" href="#obu-audioframe"></a></h3>
    <p>This section specifies OBU payloads of OBU_IA_Audio_Frame and OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21.</p>
-   <p>The first 22 audio substreams in an IA sequence may use the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21, which have predefined audio substream identifiers associated with them. This avoids the need to manually specify an <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id">audio_substream_id</a>.</p>
-   <p><a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id①">audio_substream_id</a> = 0 to <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id②">audio_substream_id</a> = 21 shall be assigned to Audio Frame OBUs with <a data-link-type="dfn" href="#obu_type" id="ref-for-obu_type①">obu_type</a> = 9 to 30, respectively.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_substream_id">audio_substream_id</dfn> is an identifier for the substream associated with this audio frame. Within an IA Sequence, there shall be exactly one non-redundant Audio Element OBU with a <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id">audio_substream_id</a>.</p>
    <p><b>Syntax</b></p>
-<pre>class audio_frame_obu_with_no_id() {
-  leb128() audio_substream_id;
-  audio_frame_obu(audio_substream_id);
-}
-</pre>
-<pre>class audio_frame_obu() {
+<pre>class audio_frame_obu(audio_substream_id_in_bitstream) {
+  if(audio_substream_id_in_bitstream) {
+     leb128() explicit_audio_substream_id;
+  }
   unsigned int (8*coded_frame_size) audio_frame();
 }
 </pre>
    <p><b>Semantics</b></p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_substream_id">audio_substream_id</dfn> defines an identifier for a Substream. In this class (i.e. when <a data-link-type="dfn" href="#obu_type" id="ref-for-obu_type②">obu_type</a> = 8), the value shall be greater than 21. Within an IA Sequence, there shall be exactly one non-redundant Audio Element OBU with this identifier. Audio Frame OBUs that provide coded data for this Substream use this identifier.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="explicit_audio_substream_id">explicit_audio_substream_id</dfn> defines the <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id①">audio_substream_id</a> of this frame. The value shall be greater than 21. When this field is not present <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id②">audio_substream_id</a> is implicit and is defined as a value from 0 to 21 for OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21 respectively.</p>
+   <p class="note" role="note"><span class="marker">NOTE:</span> The first 22 audio substreams in an IA sequence can use the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21, which have predefined audio substream identifiers associated with them. This reduces bitrate by avoiding the extra <a data-link-type="dfn" href="#explicit_audio_substream_id" id="ref-for-explicit_audio_substream_id">explicit_audio_substream_id</a> field in the bitstream.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="coded_frame_size">coded_frame_size<a class="self-link" href="#coded_frame_size"></a></dfn> is the size of <a data-link-type="dfn" href="#audio_frame" id="ref-for-audio_frame">audio_frame()</a> in bytes.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_frame">audio_frame()</dfn> is the raw coded audio data for the frame. It shall be <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6716#" id="ref-for-something④③">opus packet</a> of <a data-link-type="biblio" href="#biblio-rfc6716" title="Definition of the Opus Audio Codec">[RFC6716]</a> for OPUS, <a data-link-type="dfn" href="https://www.iso.org/standard/43345.html#" id="ref-for-something④④">raw_data_block()</a> of <a data-link-type="biblio" href="#biblio-aac" title="Information technology — Generic coding of moving pictures and associated audio information — Part 7: Advanced Audio Coding (AAC)">[AAC]</a> for AAC-LC and <a data-link-type="dfn" href="https://xiph.org/flac/format.html" id="ref-for-something④⑤">FRAME</a> of <a data-link-type="biblio" href="#biblio-flac" title="Free Lossless Audio Codec">[FLAC]</a> for FLAC.</p>
    <p>For LPCM, <a data-link-type="dfn" href="#audio_frame" id="ref-for-audio_frame①">audio_frame()</a> shall be LPCM samples. When more than one byte is used to represent a LPCM sample, the byte order is indicated in <a data-link-type="dfn" href="#sample_format_flags" id="ref-for-sample_format_flags">sample_format_flags</a>.</p>
@@ -4008,14 +4007,14 @@ Quantity:          One or more.
     <li data-md>
      <p>Ambisonics to Channel Format module may convert the output channels to channel audio according to the target loudspeaker layout.</p>
    </ul>
-   <center><img height="504" src="images/Ambisonics Decoding Flowchart.png" style="width:80%; height:auto;" width="466"></center>
+   <center><img height="702" src="images/Ambisonics Decoding Flowchart.png" style="width:80%; height:auto;" width="509"></center>
    <center>
     <figcaption>Ambisonics Decoding Flowchart</figcaption>
    </center>
    <h3 class="heading settled" data-level="7.2" id="processing-scalablechannelaudio"><span class="secno">7.2. </span><span class="content">Scalable Channel Audio decoding</span><a class="self-link" href="#processing-scalablechannelaudio"></a></h3>
    <p>This section describes the decoding of Scalable Channel Audio.</p>
    <p>Below figure shows the decoding flowchart of the decoding for Scalable Channel Audio.</p>
-   <center><img height="785" src="images/Channel Audio Decoding Flowchart.png" style="width:80%; height:auto;" width="541"></center>
+   <center><img height="695" src="images/Channel Audio Decoding Flowchart.png" style="width:80%; height:auto;" width="541"></center>
    <center>
     <figcaption>Scalable Channel Audio Decoding Flowchart</figcaption>
    </center>
@@ -4744,7 +4743,7 @@ gamma = n0 - n.
      <p>Just take all of temporal units for ith frames from each audio element and keep the order of temporal units as the order of audio element OBUs in descriptor OBUs except following:</p>
      <ul>
       <li data-md>
-       <p><a data-link-type="dfn" href="#obu_type" id="ref-for-obu_type③">obu_type</a>s are updated to be aligned according to <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id④">audio_substream_id</a>s specified in Audio Element OBUs.</p>
+       <p><a data-link-type="dfn" href="#obu_type" id="ref-for-obu_type①">obu_type</a>s are updated to be aligned according to <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id④">audio_substream_id</a>s specified in Audio Element OBUs.</p>
       <li data-md>
        <p><a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id④">parameter_id</a>s in Parameter Block OBUs are updated to uniquely indentify the parameter in IA sequence and based on the parameter_ids in <a data-link-type="dfn" href="#paramdefinition" id="ref-for-paramdefinition③">ParamDefinition()</a>s carried in Descriptor OBUs.</p>
      </ul>
@@ -4990,7 +4989,7 @@ Recon_Gain for D_Rtb4:
      </ul>
    </ul>
    <p>Below figure shows one example of transformation matrix with 4 CGs (2ch/3.1.2ch/5.1.2ch/7.1.4ch).</p>
-   <center><img height="261" src="images/Example of Transformation Matrix with 4 CGs.png" style="width:100%; height:auto;" width="800"></center>
+   <center><img height="598" src="images/Example of Transformation Matrix with 4 CGs.png" style="width:100%; height:auto;" width="1765"></center>
    <center>
     <figcaption>Example of Transformation Matrix with 4 CGs</figcaption>
    </center>
@@ -5225,6 +5224,7 @@ Recon_Gain for D_Rtb4:
     </ul>
    <li><a href="#element_mix_config">element_mix_config()</a><span>, in § 3.8</span>
    <li><a href="#end_point_value">end_point_value</a><span>, in § 3.9.1</span>
+   <li><a href="#explicit_audio_substream_id">explicit_audio_substream_id</a><span>, in § 3.10</span>
    <li><a href="#extension_header_size">extension_header_size</a><span>, in § 3.2</span>
    <li><a href="#gamma">gamma</a><span>, in § 3.9.2</span>
    <li><a href="#get_param_definition">get_param_definition()</a><span>, in § 3.9</span>
@@ -5886,7 +5886,7 @@ window.dfnpanelData['617791e4'] = {"dfnID": "617791e4", "url": "https://tools.ie
 window.dfnpanelData['cbd3e2ac'] = {"dfnID": "cbd3e2ac", "url": "https://tools.ietf.org/html/rfc8486#", "dfnText": "channel count", "refSections": [{"refs": [{"id": "ref-for-something\u2461\u2464"}], "title": "3.7.3. Ambisonics Config Syntax and Semantics"}], "external": true};
 window.dfnpanelData['immersive-audio'] = {"dfnID": "immersive-audio", "url": "#immersive-audio", "dfnText": "immersive audio", "refSections": [{"refs": [{"id": "ref-for-immersive-audio"}, {"id": "ref-for-immersive-audio\u2460"}], "title": "2. Introduction"}, {"refs": [{"id": "ref-for-immersive-audio\u2461"}], "title": "2.1. IA sequence Components"}], "external": false};
 window.dfnpanelData['ia-sequence'] = {"dfnID": "ia-sequence", "url": "#ia-sequence", "dfnText": "IA sequence", "refSections": [{"refs": [{"id": "ref-for-ia-sequence"}], "title": "7. IAMF processing"}, {"refs": [{"id": "ref-for-ia-sequence\u2460"}], "title": "8. IAMF Generation Process (Informative)"}], "external": false};
-window.dfnpanelData['obu_type'] = {"dfnID": "obu_type", "url": "#obu_type", "dfnText": "obu_type", "refSections": [{"refs": [{"id": "ref-for-obu_type"}], "title": "3.2. OBU Header Syntax and Semantics"}, {"refs": [{"id": "ref-for-obu_type\u2460"}, {"id": "ref-for-obu_type\u2461"}], "title": "3.10. Audio Frame OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-obu_type\u2462"}], "title": "8.4.1. Multiple Audio Elements with One Codec Config"}], "external": false};
+window.dfnpanelData['obu_type'] = {"dfnID": "obu_type", "url": "#obu_type", "dfnText": "obu_type", "refSections": [{"refs": [{"id": "ref-for-obu_type"}], "title": "3.2. OBU Header Syntax and Semantics"}, {"refs": [{"id": "ref-for-obu_type\u2460"}], "title": "8.4.1. Multiple Audio Elements with One Codec Config"}], "external": false};
 window.dfnpanelData['obu_redundant_copy'] = {"dfnID": "obu_redundant_copy", "url": "#obu_redundant_copy", "dfnText": "obu_redundant_copy", "refSections": [{"refs": [{"id": "ref-for-obu_redundant_copy"}], "title": "3.5. IA Sequence Header OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-obu_redundant_copy\u2460"}], "title": "4. Profiles"}, {"refs": [{"id": "ref-for-obu_redundant_copy\u2461"}], "title": "5.1. OBU Sequence Order"}, {"refs": [{"id": "ref-for-obu_redundant_copy\u2462"}], "title": "5.1.3. Refreshing Descriptor OBUs"}], "external": false};
 window.dfnpanelData['obu_trimming_status_flag'] = {"dfnID": "obu_trimming_status_flag", "url": "#obu_trimming_status_flag", "dfnText": "obu_trimming_status_flag", "refSections": [{"refs": [{"id": "ref-for-obu_trimming_status_flag"}], "title": "3.5. IA Sequence Header OBU Syntax and Semantics"}], "external": false};
 window.dfnpanelData['obu_extension_flag'] = {"dfnID": "obu_extension_flag", "url": "#obu_extension_flag", "dfnText": "obu_extension_flag", "refSections": [{"refs": [{"id": "ref-for-obu_extension_flag"}], "title": "3.2. OBU Header Syntax and Semantics"}, {"refs": [{"id": "ref-for-obu_extension_flag\u2460"}], "title": "3.5. IA Sequence Header OBU Syntax and Semantics"}], "external": false};
@@ -5963,6 +5963,7 @@ window.dfnpanelData['recon_gain_info_parameter_data'] = {"dfnID": "recon_gain_in
 window.dfnpanelData['recon_gain_flags'] = {"dfnID": "recon_gain_flags", "url": "#recon_gain_flags", "dfnText": "recon_gain_flags", "refSections": [{"refs": [{"id": "ref-for-recon_gain_flags"}, {"id": "ref-for-recon_gain_flags\u2460"}], "title": "3.9.3. Recon Gain Info Parameter Data Syntax and Semantics"}, {"refs": [{"id": "ref-for-recon_gain_flags\u2461"}], "title": "8.2. Scalable Channel Audio Encoding"}], "external": false};
 window.dfnpanelData['recon_gain'] = {"dfnID": "recon_gain", "url": "#recon_gain", "dfnText": "recon_gain", "refSections": [{"refs": [{"id": "ref-for-recon_gain"}, {"id": "ref-for-recon_gain\u2460"}, {"id": "ref-for-recon_gain\u2461"}], "title": "3.9.3. Recon Gain Info Parameter Data Syntax and Semantics"}, {"refs": [{"id": "ref-for-recon_gain\u2462"}, {"id": "ref-for-recon_gain\u2463"}], "title": "7.2.3. Recon Gain"}, {"refs": [{"id": "ref-for-recon_gain\u2464"}, {"id": "ref-for-recon_gain\u2465"}], "title": "8.2. Scalable Channel Audio Encoding"}, {"refs": [{"id": "ref-for-recon_gain\u2466"}], "title": "10.3.1. Annex C-1: Down-mix parameter and Loudness"}, {"refs": [{"id": "ref-for-recon_gain\u2467"}], "title": "10.3.4. Annex C-4: Recon Gain Generation"}], "external": false};
 window.dfnpanelData['audio_substream_id'] = {"dfnID": "audio_substream_id", "url": "#audio_substream_id", "dfnText": "audio_substream_id", "refSections": [{"refs": [{"id": "ref-for-audio_substream_id"}, {"id": "ref-for-audio_substream_id\u2460"}, {"id": "ref-for-audio_substream_id\u2461"}], "title": "3.10. Audio Frame OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-audio_substream_id\u2462"}, {"id": "ref-for-audio_substream_id\u2463"}], "title": "8.4.1. Multiple Audio Elements with One Codec Config"}], "external": false};
+window.dfnpanelData['explicit_audio_substream_id'] = {"dfnID": "explicit_audio_substream_id", "url": "#explicit_audio_substream_id", "dfnText": "explicit_audio_substream_id", "refSections": [{"refs": [{"id": "ref-for-explicit_audio_substream_id"}], "title": "3.10. Audio Frame OBU Syntax and Semantics"}], "external": false};
 window.dfnpanelData['audio_frame'] = {"dfnID": "audio_frame", "url": "#audio_frame", "dfnText": "audio_frame()", "refSections": [{"refs": [{"id": "ref-for-audio_frame"}, {"id": "ref-for-audio_frame\u2460"}], "title": "3.10. Audio Frame OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-audio_frame\u2461"}, {"id": "ref-for-audio_frame\u2462"}], "title": "3.12.4. LPCM Specific"}], "external": false};
 window.dfnpanelData['sample_format_flags'] = {"dfnID": "sample_format_flags", "url": "#sample_format_flags", "dfnText": "sample_format_flags", "refSections": [{"refs": [{"id": "ref-for-sample_format_flags"}], "title": "3.10. Audio Frame OBU Syntax and Semantics"}], "external": false};
 window.dfnpanelData['sample_rate'] = {"dfnID": "sample_rate", "url": "#sample_rate", "dfnText": "sample_rate", "refSections": [{"refs": [{"id": "ref-for-sample_rate"}], "title": "3.12.4. LPCM Specific"}], "external": false};
