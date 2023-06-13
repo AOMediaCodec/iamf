@@ -14,24 +14,17 @@ Abstract: This document specifies an immersive audio (IA) model, a standalone IA
 <pre class="anchors">
 url: https://www.iso.org/standard/68960.html#; spec: ISOBMFF; type: dfn;
 	text: AudioSampleEntry
-	text: boxtype
 	text: grouping_type
-	text: SampleGroupDescriptionEntry
 	text: channelcount
 	text: samplerate
-	text: AudioRollRecoveryEntry
-	text: media_time
-	text: edit_duration
+	text: roll_distance
 	
 url: https://www.iso.org/standard/68960.html#; spec: ISOBMFF; type: property;
 	text: iso6
-	text: sgpd
 	text: stsd
-	text: sbgp
 	text: edts
 	text: stts
 	text: roll
-	text: mvhd
 	text: elst
 	text: trun
 
@@ -73,6 +66,7 @@ url: https://www.iso.org/standard/76383.html#; spec: MP4-Audio; type: dfn;
 	text: frameLengthFlag
 	text: dependsOnCoreCoder
 	text: extensionFlag
+	text: samplingFrequencyIndex
 
 url: https://www.iso.org/standard/79110.html#; spec: MP4; type: dfn;
 	text: ESDBox
@@ -400,9 +394,9 @@ class ia_open_bitstream_unit() {
   else if (obu_type == OBU_IA_Temporal_Delimiter)
     temporal_delimiter_obu();
   else if (obu_type == OBU_IA_Audio_Frame)
-    audio_frame_obu_with_no_id();
+    audio_frame_obu(true);
   else if (obu_type >= 9 and <= 30)
-    audio_frame_obu(obu_type - 9);
+    audio_frame_obu(false);
   else if (obu_type == 5 or 6 or 7)
     reserved_obu();
 
@@ -480,7 +474,7 @@ NOTE: This means that if one of the value is set to the the number of samples (i
 
 <dfn noexport>obu_extension_flag</dfn> indicates whether the [=extension_header_size=] field presents or not. If it set to 0, the [=extension_header_size=] field shall not be present. Otherwise, the [=extension_header_size=] field shall be present.
 
-This flag shall be set to 0 for this version of the specification. An IAMF-OBU parser which is conformant with this version of the specification shall be able to parse this flag and [=extension_header_size=].
+This flag shall be set to 0 for this version of the specification (i.e. [=version=] = 0). An OBU parser which is conformant with the current version of the specification shall be able to parse this flag and [=extension_header_size=].
 
 NOTE: A future version of specification may use this flag to specify an extension header field by setting [=obu_extension_flag=] = 1 and setting the size of extended header to [=extension_header_size=].
 
@@ -511,7 +505,7 @@ class byte_alignment() {
 
 ## Reserved OBU Syntax and Semantics ## {#obu-reserved}
 
-The reserved OBU allows the extension of this specification with additional OBU types in a way that allows IAMF-OBU parsers compliant to this version of specification to ignore them.
+Reserved OBUs shall be ignored by parsers compliant to this version of the specification. Future versions of the specification may define semantics for these reserved OBUs that would only be supported by parsers compliant to these future versions.
 
 
 ## IA Sequence Header OBU Syntax and Semantics ## {#obu-iasequenceheader}
@@ -567,7 +561,7 @@ class codec_config_obu() {
 class codec_config() {
   unsigned int (32) codec_id;
   leb128() num_samples_per_frame;
-  signed int (16) roll_distance;
+  signed int (16) audio_roll_distance;
   decoder_config(codec_id);
 }
 ```
@@ -576,18 +570,21 @@ class codec_config() {
 
 <dfn noexport>codec_config_id</dfn> defines an identifier for a codec configuration. Within an IA Sequence, there shall be exactly one non-redundant Codec Config OBU with a given identifier. Audio Elements that need a decoder configuration based on this codec configuration refer to this identifier.
 
-<dfn noexport>codec_id</dfn> indicates a ‘four-character code’ (4CC) to identify the codec used to generate the audio substreams. It shall be 'Opus' for IAMF-OPUS, 'mp4a' for IAMF-AAC-LC, 'fLaC' for IAMF-FLAC and 'ipcm' for IAMF-LPCM.
+<dfn noexport>codec_id</dfn> indicates a ‘four-character code’ (4CC) to identify the codec used to generate the audio substreams. For version 0 of this specification, it shall be set to one of four codec_id values defined below:
+- 'Opus': The payload of all substreams of all Audio Elements referring to this codec configuration shall comply to the specification [[!RFC6716]] and the decoder_config() structure shall comply with the constraints given in [[#opus-specific]].
+- 'mp4a': The payload of all substreams of all Audio Elements referring to this codec configuration shall comply to the specification [[!AAC]] and the decoder_config() structure shall comply with the constraints given in [[#aac-lc-specific]].
+- 'fLaC': The payload of all substreams of all Audio Elements referring to this codec configuration shall comply to the specification [[!FLAC]] and the decoder_config() structure shall comply with the constraints given in [[#flac-specific]].
+- 'ipcm': The payload of all substreams of all Audio Elements referring to this codec configuration shall be audio samples for linear PCM (LPCM) and the decoder_config() structure shall comply with the constraints given in [[#lpcm-specific]].
 
-<dfn noexport>num_samples_per_frame</dfn> indicates the frame length, in samples, of the raw coded audio provided in by audio_frame_obu(). It shall not be set to zero.
+NOTE: 'ipcm' should not be confused with 'lpcm' which is another 4CC to identify codecs in other container formats (e.g. QuickTime).
 
-<dfn noexport>roll_distance</dfn> is a signed integer that gives the number of frames that need to be decoded in order for a frame to be decoded correctly. A negative value indicates the number of frames before the frame to be decoded corrently.
-- It shall be set to -1 for IAMF-AAC-LC and -R (R = 4 when the frame size = 960) for IAMF-OPUS. IAMF-FLAC may ignore this field. Where, R is the smallest integer greater than or equal to 3840 divided by the frame size. 
+<dfn noexport>num_samples_per_frame</dfn> indicates the frame length, in samples, of the audio_frame() provided in by audio_frame_obu(). It shall not be set to zero. If the [=decoder_config()=] structure for a given codec specifies a value for the frame length, the two values shall be equal.
 
-<dfn noexport>decoder_config()</dfn> specifies the set of codec parameters required to decode an audio substream for the given codec_id. It is byte aligned.
-- The codec_id and decoder_config() for IAMF-OPUS shall conform to [=Codec_Specific_Info=] of [[#iamf-opus-specific]]
-- The codec_id and decoder_config() for IAMF-AAC-LC shall conform to [=Codec_Specific_Info=] of [[#iamf-aac-lc-specific]].
-- The codec_id and decoder_config() for IAMF-FLAC shall conform to [=Codec_Specific_Info=] of [[#iamf-flac-specific]]
-- The codec_id and decoder_config() for IAMF-LPCM shall conform to [=Codec_Specific_Info=] of [[#iamf-lpcm-specific]].
+<dfn noexport>audio_roll_distance</dfn> is a signed integer that gives the number of frames that need to be decoded in order for a frame to be decoded correctly. A negative value indicates the number of frames before the frame to be decoded correctly.
+- It shall be set to -1 for IAMF-AAC-LC and -R (R = 4 when the frame size = 960) for IAMF-OPUS. IAMF-FLAC may ignore this field. Where, R is the smallest integer greater than or equal to 3840 divided by the frame size.
+
+<dfn noexport>decoder_config()</dfn> specifies the set of codec parameters required to decode the payload an substream for the given codec_id. It is byte aligned.
+
 
 ## Audio Element OBU Syntax and Semantics ## {#obu-audioelement}
 
@@ -772,7 +769,7 @@ abstract class ParamDefinition() {
 <dfn value noexport for="ParamDefinition()">parameter_id</dfn> indicates the identifier for the Parameter which this parameter definition refers to.
 
 <dfn noexport>parameter_rate</dfn> specifies the rate used by this parameter, expressed as ticks per second. Time-related fields associated with this parameter, such as durations, shall be expressed in the number of ticks.
-- The rate shall be such a value that (the rate x [=num_samples_per_frame=]) / (the sample rate of Audio Element) is still integer.
+- The rate shall be such a value that (the rate x [=num_samples_per_frame=]) / (the sample rate of Audio Element) is a non-zero integer.
 
 <dfn noexport>param_definition_mode</dfn> indicates if this parameter definition specifies duration, num_subblocks, constant_subblock_duration and subblock_duration fields for the parameter blocks associated to the [=parameter_id=].
 - When this field is set to 0, all of duration, num_subblocks, constant_subblock_duration and subblock_duration fields shall be specified in this parameter definition mapped to the [=parameter_id=]. In that case, none of parameter blocks associated to this parameter definition shall specify duration, num_subblocks, constant_subblock_duration and subblock_duration fields. 
@@ -873,10 +870,18 @@ Loudspeaker Layout (4 bits) :  Channel Layout  : Loudspeaker Location Ordering
 
 ```
 Where, C: Center, L: Left, R: Right, Ls: Left Surround, Lss: Left Side Surround, 
-Rs: Right Surround, Rss: Right Side Surround, 
+Rs: Right Surround, Rss: Right Side Surround, Lrs: Left Rear Surroud, Rrs: Right Rear Surround
 Ltf: Left Top Front, Rtf: Right Top Front, Ltr: Left Top Rear, Rtr: Right Top Rear, 
 Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
 ```
+
+For a given input audio with [=audio_element_type=] = CHANNEL_BASED, if the input audio has height channels (e.g 7.1.4ch or 5.1.2ch), each of the list of channel layouts for scalable channel audio is recommended to have height channels (i.e it is recommended to be higher than or equal to 3.1.2ch).
+- Examples for recommended list of channel layouts: 3.1.2ch/5.1.2ch, 3.1.2ch/5.1.2ch/7.1.4ch, 5.1.2ch/7.1.4ch etc..
+- Examples for not-recommended list of channel layouts: 2ch/3.1.2ch/5.1.2ch, 2ch/3.1.2ch/5.1.2ch/7.1.4ch, 2ch/5.1.2ch/7.1.4ch, 2ch/7.1.4ch etc..
+
+NOTE: Contents providers may be satisfied with the down-mixed audio having no height channels even though the down-mix mechanism, specified in [[#iamfgeneration-scalablechannelaudio-downmixmechanism]], drops height channels when it does down-mix from input channel audio with height channels to surround channels for example from 7.14ch to Mono, Stereo, 5.1ch or 7.1ch. In that case, encoder may generate a scalable audio with the down-mixed audio without having height channels from the input channel audio with height channels. In other words, this specification does not disallow for scalable audios to have a down-mixed audio without having height channels from input channel audio having height channels.
+
+NOTE: The Ltr and Rtr of 5.1.4ch down-mixed from 7.1.4ch is within the range of Ltb and Rtb of 7.1.4ch.
 
 <dfn noexport>output_gain_is_present_flag</dfn> indicates if output_gain information fields for the ChannelGroup presents .
 - 0: No output_gain information fields for the ChannelGroup shall be present.
@@ -960,7 +965,7 @@ ambisonics_mode: Method of coding Ambisonics.
    1    : PROJECTION
 </pre>
 
-If ambisonics_mode is equal to MONO, this indicates that the Ambisonics channels are coded as individual mono substreams. For IAMF-LPCM, [=ambisonics_mode=] shall be equal to MONO. 
+If ambisonics_mode is equal to MONO, this indicates that the Ambisonics channels are coded as individual mono substreams. For LPCM, [=ambisonics_mode=] shall be equal to MONO. 
 
 If ambisonics_mode is equal to PROJECTION, this indicates that the Ambisonics channels are first linearly projected onto another subspace before coding as a mix of coupled stereo and mono substreams.
 
@@ -1489,7 +1494,7 @@ class demixing_info_parameter_data() {
 
 <dfn noexport>recon_gain_info_parameter_data()</dfn> contains recon gain values for demixed channels.
 
-NOTE: [=recon_gain_info_parameter_data()=] is required to compensate the propagated errors by De-mixer and Gain modules specified in [[#processing-scalablechannelaudio-demixer]] and [[#processing-scalablechannelaudio-gain]] due to the error caused by lossy codecs such as IAMF-OPUS and IAMF-AAC-LC. However, it is not required for lossless codecs such as IAMF-FLAC and IAMF-LPCM because the propagated errors are negligible.
+NOTE: [=recon_gain_info_parameter_data()=] is required to compensate the propagated errors by De-mixer and Gain modules specified in [[#processing-scalablechannelaudio-demixer]] and [[#processing-scalablechannelaudio-gain]] due to the error caused by lossy codecs such as OPUS and AAC-LC. However, it is not required for lossless codecs such as FLAC and LPCM because the propagated errors are negligible.
 
 <b>Syntax</b>
 
@@ -1525,36 +1530,32 @@ The each bit of [=recon_gain_flags=] indicates the presence of [=recon_gain=] ap
 
 ## Audio Frame OBU Syntax and Semantics ## {#obu-audioframe}
 
-This section specifies OBU payloads of OBU_IA_Audio_Frame and OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21. 
+This section specifies OBU payloads of OBU_IA_Audio_Frame and OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21.
 
-The first 22 audio substreams in an IA sequence may use the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21, which have predefined audio substream identifiers associated with them. This avoids the need to manually specify an [=audio_substream_id=].
-
-[=audio_substream_id=] = 0 to [=audio_substream_id=] = 21 shall be assigned to Audio Frame OBUs with [=obu_type=] = 9 to 30, respectively. 
+<dfn noexport>audio_substream_id</dfn> is an identifier for the substream associated with this audio frame. Within an IA Sequence, there shall be exactly one non-redundant Audio Element OBU with a [=audio_substream_id=].
 
 <b>Syntax</b>
 
 ```
-class audio_frame_obu_with_no_id() {
-  leb128() audio_substream_id;
-  audio_frame_obu(audio_substream_id);
-}
-```
-
-```
-class audio_frame_obu() {
+class audio_frame_obu(audio_substream_id_in_bitstream) {
+  if(audio_substream_id_in_bitstream) {
+     leb128() explicit_audio_substream_id;
+  }
   unsigned int (8*coded_frame_size) audio_frame();
 }
 ```
 
 <b>Semantics</b>
 
-<dfn noexport>audio_substream_id</dfn> defines an identifier for a Substream. In this class (i.e. when [=obu_type=] = 8), the value shall be greater than 21. Within an IA Sequence, there shall be exactly one non-redundant Audio Element OBU with this identifier. Audio Frame OBUs that provide coded data for this Substream use this identifier.
+<dfn noexport>explicit_audio_substream_id</dfn> defines the [=audio_substream_id=] of this frame. The value shall be greater than 21. When this field is not present [=audio_substream_id=] is implicit and is defined as a value from 0 to 21 for OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21 respectively.
+
+NOTE: The first 22 audio substreams in an IA sequence can use the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21, which have predefined audio substream identifiers associated with them. This reduces bitrate by avoiding the extra [=explicit_audio_substream_id=] field in the bitstream.
 
 <dfn noexport>coded_frame_size</dfn> is the size of [=audio_frame()=] in bytes.
 
-<dfn noexport>audio_frame()</dfn> is the raw coded audio data for the frame. It shall be [=opus packet=] of [[!RFC6716]] for IAMF-OPUS, [=raw_data_block()=] of [[!AAC]] for IAMF-AAC-LC and [=FRAME=] of [[!FLAC]] for IAMF-FLAC.
+<dfn noexport>audio_frame()</dfn> is the raw coded audio data for the frame. It shall be [=opus packet=] of [[!RFC6716]] for OPUS, [=raw_data_block()=] of [[!AAC]] for AAC-LC and [=FRAME=] of [[!FLAC]] for FLAC.
 
-For IAMF-LPCM, [=audio_frame()=] shall be LPCM samples. When more than one byte is used to represent a LPCM sample, the byte order is indicated in [=sample_format_flags=]. 
+For LPCM, [=audio_frame()=] shall be LPCM samples. When more than one byte is used to represent a LPCM sample, the byte order is indicated in [=sample_format_flags=]. 
 
 ## Temporal Delimiter OBU Syntax and Semantics ## {#obu-temporaldelimiter}
 
@@ -1573,32 +1574,33 @@ NOTE: The Temporal Delimiter OBU has an empty payload.
 
 This section defines codec specific information for Codec_Specific_Info and Substream.
 
-- <dfn noexport>Codec_Specific_Info</dfn> is composed of [=Codec_ID=] and [=Decoder_Config()=]. Codec_ID indicates the codec which has been used to generate a given substream within IA sequence and Decoder_Config() indicates the decoding parameters which are applied to the substream within IA sequence.
+- <dfn noexport>Codec_Specific_Info</dfn> is composed of [=codec_id=] and [=decoder_config()=]. 
 
-For legacy codecs, Decoder_Config() shall be exactly the same information as the conventional file parser feeds to the codec decoders for decoding of the substream. For future codecs, Decoder_Config() shall include all of decoding parameters which are required to decode Substreams.
+For legacy codecs, [=decoder_config()=] shall be exactly the same information as the conventional file parser feeds to the codec decoders for decoding of the Substream. For future codecs, [=decoder_config()=] shall include all of decoding parameters which are required to decode the Substream.
 
-- Substream is a raw coded stream for one or more channels. Substream format is exactly the same as the sample format (before packing OBU and except parameter blocks) for the audio file which consists of only one single coded stream by the Codec_ID.
+- The payload of Substream is an coded stream for one or more channels. The payload format of Substream is exactly the same as the sample format (before packing OBU) for the audio file which consists of only one single coded stream by the [=codec_id=].
 
 
-### IAMF-OPUS Specific ### {#iamf-opus-specific}
+### OPUS Specific ### {#opus-specific}
 
-[=Codec_ID=] shall be 'Opus'.
+[=codec_id=] shall be 'Opus'.
 
-[=Decoder_Config()=] for IAMF-OPUS conforms to [=ID Header=] with [=ChannelMappingFamily=] = 0 of [[!RFC7845]] with following constraints:
+[=decoder_config()=] for OPUS conforms to [=ID Header=] with [=ChannelMappingFamily=] = 0 of [[!RFC7845]] with following constraints:
 - [=Magic Signature=] shall not be present.
 - [=Output Channel Count=] must be set to 2. [=Output Channel Count=] can be ignored because the real value can be determined from the Audio Element OBU and from the opus packet header.
 - [=Pre-skip=] shall be same as the number of audio samples to be trimmed at the start of substreams.
 - [=Output Gain=] shall not be used. In other words, it shall be set to 0dB.
 - The byte order of each field in [=ID Header=] is converted to big endian.
 
-Substream format is [=opus packet=] of [[!RFC6716]] which contains only one single frame of mono or stereo channels and which has non-delimiting frame structure.
+The payload format of Substream is [=opus packet=] of [[!RFC6716]] which contains only one single frame of mono or stereo channels and which has non-delimiting frame structure.
 
+The sample rate used for computing offsets shall be 48 kHz.
 
-### IAMF-AAC-LC Specific ### {#iamf-aac-lc-specific}
+### AAC-LC Specific ### {#aac-lc-specific}
 
-[=Codec_ID=] shall be 'mp4a'.
+[=codec_id=] shall be 'mp4a'.
 
-[=Decoder_Config()=] for IAMF-AAC-LC is [=DecoderConfigDescriptor()=] of [[!MP4-Systems]], which is a subset of [=ESDBox=] for [[!MP4-Audio]], with following constraints:
+[=decoder_config()=] for AAC-LC is [=DecoderConfigDescriptor()=] of [[!MP4-Systems]], which is a subset of [=ESDBox=] for [[!MP4-Audio]], with following constraints:
 - [=objectTypeIndication=] = 0x40
 - [=streamType=] = 0x05 (Audio Stream)
 - [=upstream=] = 0
@@ -1610,21 +1612,25 @@ Substream format is [=opus packet=] of [[!RFC6716]] which contains only one sing
 		- [=dependsOnCoreCoder=] = 0
 		- [=extensionFlag=] = 0
 
-Substream format is one single [=raw_data_block()=] of [[!AAC]] which contains only one single frame of mono or stereo channels.
+The payload format of Substream is one single [=raw_data_block()=] of [[!AAC]] which contains only one single frame of mono or stereo channels.
 
-### IAMF-FLAC Specific ### {#iamf-flac-specific}
+The sample rate used for computing offsets shall be the rate indicated by the [=samplingFrequencyIndex=] in [=GASpecificConfig()=]
 
-[=Codec_ID=] shall be 'fLaC', the FLAC stream marker in ASCII, meaning byte 0 of the stream is 0x66, followed by 0x4C 0x61 0x43.
+### FLAC Specific ### {#flac-specific}
 
-[=Decoder_Config()=] for IAMF-FLAC is [=METADATA_BLOCK=] of [[!FLAC]].
+[=codec_id=] shall be 'fLaC', the FLAC stream marker in ASCII, meaning byte 0 of the stream is 0x66, followed by 0x4C 0x61 0x43.
 
-Substream format is [=FRAME=] of [[!FLAC]], which is composed of [=FRAME_HEADER=], followed by [=SUBFRAME=](s) (one [=SUBFRAME=] per channel) and followed by [=FRAME_FOOTER=].
+[=decoder_config()=] for FLAC is [=METADATA_BLOCK=] of [[!FLAC]].
 
-### IAMF-LPCM Specific ### {#iamf-lpcm-specific}
+The payload format of Substream is [=FRAME=] of [[!FLAC]], which is composed of [=FRAME_HEADER=], followed by [=SUBFRAME=](s) (one [=SUBFRAME=] per channel) and followed by [=FRAME_FOOTER=].
 
-[=Codec_ID=] shall be 'ipcm'.
+The sample rate used for computing offsets shall be the sampling rate indicated in the [=METADATA_BLOCK=].
 
-[=Decoder_Config()=] for IAMF-LPCM is as follows:
+### LPCM Specific ### {#lpcm-specific}
+
+[=codec_id=] shall be 'ipcm'.
+
+[=decoder_config()=] for LPCM is as follows:
 
 ```
 class decoder_config(ipcm) {
@@ -1639,8 +1645,10 @@ class decoder_config(ipcm) {
 
 <dfn noexport>sample_rate</dfn> indicates the sample rate of the input audio in Hz. It shall take a value from the set 44.1k, 16k, 32k, 48k and 96k.
 
-Substream format is one [=audio_frame()=] of Audio_Frame_OBU which contains only one single PCM audio frame of mono or stereo channels.
+The payload format of Substream is one [=audio_frame()=] of Audio_Frame_OBU which contains only one single PCM audio frame of mono or stereo channels.
 	- In case of that [=audio_frame()=] contains one single PCM audio frame of stereo channels, the ith audio sample of the left channel is followed by the ith audio sample of the right channel, and then the (i+1)th audio sample of the left channel is followed by the (i+1)th audio sample of the right channel, where i = 1, 2, ..., [=num_samples_per_frame=].
+
+The sample rate used for computing offsets shall be [=sample_rate=].
 
 # Profiles # {#profiles}
 
@@ -1795,7 +1803,7 @@ NOTE: Multiple sample entries may be used in a track, for example when the track
 	- 'stts' or 'trun' box shall indicate the number of audio samples which [=IA Sample=] includes (i.e. the duration of IA Sample). 
 	- The duration of [=IA Sample=] is duration including audio samples trimmed at the beginning but excluding audio samples trimmed at the end. 
 - Sample Group
-	- In an IA Track, every sample shall be associated with a sample group of type 'roll'. The roll_distance value SHALL equal to the value of the [=roll_distance=] field in the Codec Config OBU stored in the configOBUs array in the sample entry.
+	- When [=codec_id=] is set to 'Opus' or 'mp4a', in an IA Track, every sample shall be associated with a sample group of type 'roll'. The [=roll_distance=] value SHALL equal to the value of the [=audio_roll_distance=] field in the [=Codec Config OBU=] stored in the [=configOBUs=] array in the sample entry.
 		
 ### IA Sample Entry ### {#iasampleentry-section}
 
@@ -1840,25 +1848,25 @@ NOTE: In typical case, when a track contains a single IA Sequence, trimming can 
 
 ## Codecs Parameter String ## {#codecsparameter}
 DASH and other applications require defined values for the 'Codecs' parameter specified in [[!RFC6381]] for ISO Media tracks. The codecs parameter string for the AOM IA codec shall be:
-- For IAMF-OPUS
+- For OPUS
 
 ```
 	iamf.IAMF-specific-needs.Opus
 ```
 
-- For IAMF-AAC-LC
+- For AAC-LC
 
 ```
 	iamf.IAMF-specific-needs.mp4a.40.2
 ```
 
-- For IAMF-FLAC
+- For FLAC
 
 ```
 	iamf.IAMF-specific-needs.fLaC
 ```
 
-- For IAMF-LPCM
+- For LPCM
 
 ```
 	iamf.IAMF-specific-needs.ipcm
@@ -1868,13 +1876,13 @@ DASH and other applications require defined values for the 'Codecs' parameter sp
 - <dfn noexport>PC</dfn> is three digits within the range 0 to 255 and represents that IA decoder supports the profile of specification.
 
 For example, for this version of the specification
-- The codecs parameter string of IAMF-OPUS for the simple profile:
+- The codecs parameter string of OPUS for the simple profile:
 
 ```
 	iamf.000.Opus
 ```
 
-- The codecs parameter string of IAMF-AAC-LC for the base profile:
+- The codecs parameter string of AAC-LC for the base profile:
 
 ```
 	iamf.001.mp4a.40.2
@@ -1886,7 +1894,7 @@ For example, for this version of the specification
 
 This section provides a guideline for IAMF parser to reconstruct IA sequences from IAMF file.
 
-When IAMF parser feeds the reconstructed IA sequences to IAMF-OBU parser, descriptor OBUs shall be placed at the first and followed by Temporal Units.
+When IAMF parser feeds the reconstructed IA sequences to OBU parser, descriptor OBUs shall be placed at the first and followed by Temporal Units.
 
 During decapsulation process, IAMF file is decapsulated into IA sequences which conform to [[#obu-syntax]] as follows:
 - The ith IA sequence is reconstructed as follows:
@@ -1898,18 +1906,18 @@ During decapsulation process, IAMF file is decapsulated into IA sequences which 
 
 ### Recommended handling of Trimming Information ### {#isobmff-decapsulation-singletrack-trimming}
 
-This section recommends how to handle trimming information of IAMF-ISOBMFF file.
+This section recommends how to handle trimming information of ISOBMFF file.
 
 <center><img src="images/ISOBMFF Trimming Handling.png" style="width:80%; height:auto;"></center>
-<center><figcaption>Recommendation for IAMF-ISOBMFF Trimming Information Handling</figcaption></center>
+<center><figcaption>Recommendation for ISOBMFF Trimming Information Handling</figcaption></center>
 
 As depicted in the above figure, 
-- IAMF-ISOBMFF parser passes descriptor OBUs, PTS1 and Samples (or Temporal Units) to IAMF decoder.
-- IAMF-ISOBMFF parser passes PTS1 and trimming information to IAMF-ISOBMFF player. 
-- IAMF decoder passes PTS and audio samples after decoding to IAMF-ISOBMFF player.
+- ISOBMFF parser passes descriptor OBUs, PTS1 and Samples (or Temporal Units) to IAMF decoder.
+- ISOBMFF parser passes PTS1 and trimming information to ISOBMFF player. 
+- IAMF decoder passes PTS and audio samples after decoding to ISOBMFF player.
 	- If IAMF decoder trims the audio samples to be trimmed based on the trimming information within Audio Frame OBUs, then IAMF decoder passes PTS2 and audio samples after trimming.
 	- If IAMF decoder does not trim, then IAMF decoder passes PTS1 and audio samples before trimming.
-- IAMF-ISOBMFF player playbacks audio samples starting at PTS2 to Loudspeakers.
+- ISOBMFF player playbacks audio samples starting at PTS2 to Loudspeakers.
 
 Where, PTS1 is the presentation time stamp of the first audio sample before trimming and PTS2 is the presentation time stamp of the first audio sample after trimming.
 
@@ -2309,32 +2317,27 @@ The figures below show static down-mix matrices to 3.1.2ch.
 Where, p1 = 0.707. Implementations may use limiter defined in [[#processing-post-limiter]] to preserve energy of audio signals instead of normalization factors.
 
 
-# IAMF Generation Process # {#iamfgeneration}
+# IAMF Generation Process (Informative) # {#iamfgeneration}
 
-This section provides processes for IA encoding for a given input audio format.
+This section provides a guideline for IA encoding for a given input audio format.
 
 Recommended input audio format for IA encoding is as follows:
-- Ambisonics format: It shall conform to [=ChannelMappingFamily=] = 2 or 3 of [[RFC8486]].
-- Channel Audio format: It shall conform to [=loudspeaker_layout=] specified in channel_audio_layer_config().
+- Ambisonics format: It conforms to [=ChannelMappingFamily=] = 2 or 3 of [[RFC8486]].
+- Channel Audio format: It conforms to [=loudspeaker_layout=] specified in channel_audio_layer_config().
 - Input Sampling Rate: 48000Hz
 - Bitdepth: 16 bits or 24 bits
-	- 16 bits are recommended for IAMF-OPUS.
+	- 16 bits are recommended for OPUS.
 - Input file format: .wav file (Linear PCM, simply called as PCM)
 
-For a given input audio and user inputs, IA encoder shall output [=IA sequence=] which conforms to [[#obu-syntax]].
+For a given input audio and user inputs, IA encoder outputs [=IA sequence=] which conforms to [[#obu-syntax]].
 
-Input audio shall be one of followings:
+Input audio is as follows:
 - Ambisonics format
 - Channel Audio format
 
 User inputs are:
 - Ambisonics mode to indicate if [=ChannelMappingFamily=] = 2 or 3 of [[RFC8486]].
 - List of channel layouts to be supported for scalable channel audio: it conforms to [=loudspeaker_layout=].
-	- For a given input audio with Channel Audio format, if the input audio has height channels (e.g 7.1.4ch), each of the list of channel layouts should have height channels (i.e it should be higher than or equal to 3.1.2ch).
-		- Examples for recommended list of channel layouts: 3.1.2ch/5.1.2ch, 3.1.2ch/5.1.2ch/7.1.4ch, 5.1.2ch/7.1.4ch etc..
-		- Examples for not-recommended list of channel layouts: 2ch/3.1.2ch/5.1.2ch, 2ch/3.1.2ch/5.1.2ch/7.1.4ch, 2ch/5.1.2ch/7.1.4ch, 2ch/7.1.4ch etc..
-		
-NOTE: Contents providers may be satisfied with the down-mixed audio having no height channels even though the down-mix mechanism, specified in [[#iamfgeneration-scalablechannelaudio-downmixmechanism]], drops height channels when it does down-mix from input channel audio with height channels to surround channels for example from 7.14ch to Mono, Stereo, 5.1ch or 7.1ch. In that case, encoder may generate a scalable audio with the down-mixed audio without having height channels from the input channel audio with height channels. In other words, this specification does not disallow for scalable audios to have a down-mixed audio without having height channels from input channel audio having height channels.
 
 IA encoding can be done by using the combination of following generation processing.
 - Encoding of an audio element (Ambisonics encoding or Scalable Channel Audio encoding)
@@ -2363,15 +2366,15 @@ The IA encoder is composed of Pre-processor, Codec encoder and OBU packetizer.
 For Ambisonics encoding:
 - Pre-processor outputs one ChannelGroup and descriptors and it is only composed of Meta Generator.
 	- Meta generator generates descriptors based on Ambisonics mode and the number of channels for Ambisonics.
-		- [=ambisonics_mode=] shall be set to 0 for [=ChannelMappingFamily=] = 2 of [[RFC8486]] or 1 for [=ChannelMappingFamily=] = 3 of [[RFC8486]].
+		- [=ambisonics_mode=] is set to 0 for [=ChannelMappingFamily=] = 2 of [[RFC8486]] or 1 for [=ChannelMappingFamily=] = 3 of [[RFC8486]].
 		- ambisonics_config is set to as follows:
-			- [=output_channel_count=], [=substream_count=] and [=coupled_substream_count=] shall be set to the number of channels for Ambisonics.
+			- [=output_channel_count=] is set to the number of channels for Ambisonics. For example 1, 4, 9 or 16.
 			- [=channel_mapping=] for [=ambisonics_mode=] = 0 is assigned to according to the order of substreams in ChannelGroup.
 			- [=demixing_matrix=] for [=ambisonics_mode=] = 1 is assigned to according to the order of substreams in ChannelGroup.
 - Codec Enc. outputs substreams as many as the number of channels which is indicated in [=substream_count=].
-- Temporal unit shall be composed of audio frame OBUs for substreams.
+- Temporal unit is composed of audio frame OBUs for substreams.
 	- It may have the immediately preceding temporal delimiter OBU.
-	- The order of substreams in ChannelGroup shall be aligned with [=channel_mapping=] for Ambisonics_Mode = 0 or [=demixing_matrix=] for Ambisonics_Mode = 1.
+	- The order of substreams in ChannelGroup is aligned with [=channel_mapping=] for Ambisonics_Mode = 0 or [=demixing_matrix=] for Ambisonics_Mode = 1.
 
 ## Scalable Channel Audio Encoding ## {#iamfgeneration-scalablechannelaudio}
 
@@ -2381,31 +2384,31 @@ For Scalable Channel Audio encoding:
 		- Parameter blocks for recon_gain_info_parameter_data is not be generated. 
 		- Parameter blocks for demixing_info_parameter_data may be generated by implementers who assume it to be recommended for dynamic downmixing in a decoder side.
 		- Down-mixer, ChannelGroup generator and Attenuation modules do not needed.
-	- Down-mix parameter generator shall generate 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k)) by analyzing input channel audio.
-	- Down-mixer shall generate down-mixed audios according to the list of channel layouts and the down-mix parameters.
+	- Down-mix parameter generator generates 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k)) by analyzing input channel audio.
+	- Down-mixer generates down-mixed audios according to the list of channel layouts and the down-mix parameters.
 	- Loudness module should output the loudness level ([=LKFS=]) of each down-mixed audio based on [[ITU1770-4]].
-	- ChannelGroup generator shall transform the input channel audio to ChannelGroups for scalable channel audio with [=num_layers=] > 1 scalability by using the down-mix parameters and the list of channel layouts.
-	- Attenuation module shall apply a gain to the transformed ChannelGroups to prevent clipping.
+	- ChannelGroup generator transforms the input channel audio to ChannelGroups for scalable channel audio with [=num_layers=] > 1 scalability by using the down-mix parameters and the list of channel layouts.
+	- Attenuation module applies a gain to the transformed ChannelGroups to prevent clipping.
 	- Meta generator generates descriptors and parameter block(s) for each frame.
-		- descriptors shall be set to as follows:
-			- [=num_layers=] shall be set to the number of channel layouts.
-			- [=channel_audio_layer_config()=] shall be set to as follows:
-				- [=loudspeaker_layout=] shall be set to the ith list of channel layouts for the ith ChannelGroup.
-				- [=output_gain_is_present_flag=] shall set to 1 for the ith ChannelGroup if attenuation is applied to the mixed channels of the ith ChannelGroup. Otherwise it shall be set to 0 for the ith ChannelGroup.
-				- [=recon_gain_is_present_flag=] shall be set to 1 for the ith ChannelGroup if the preceding ChannelGroups has one or more mixed channels from the down-mixed audio for the ith channel layout. Otherwise, it shall be set to 0 for the ith ChannelGroup. Especially, when [=num_layers=] = 1, this flag shall be set to 0.
-					- This flag shall be set to 0 for lossless codecs including IAMF-LPCM.
-				- [=substream_count=] shall be set to the number of substreams composing of the ith ChannelGroup.
-				- [=coupled_substream_count=] shall be set to the number of coupled substreams among the substreams composing of the ith ChannelGroup.
-				- [=loudness=] shall be set to the loudness ([=LKFS=]) of the down-mixed audio for the ith channel layout for the ith ChannelGroup.
-				- Each bit of [=output_gain_flags=] shall be set to 1 for the ith ChannelGroup if attenuation is applied to the relevant channel of the ith ChannelGroup. Otherwise it shall be set to 0 for the ith ChannelGroup.
-				- [=output_gain=] shall be set to the inverse number of the gain which is applied to the channels which are indicated by output_gain_flags.
-		- Parameter blocks can be composed of [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=]. When [=recon_gain_is_present_flag=] = 0 for all ChannelGroup, recon_gain_info shall not present in IA sequence.
-			- [=dmixp_mode=] of demixing_info_parameter_data for the kth frame shall be set to indicate (α(k), β(k), γ(k), δ(k)) and w_idx_offset(k). Where w_idx_offset(k) = 1 or -1.
-			- [=recon_gain_flags=] of recon_gain_info_parameter_data shall be set to indicate the de-mixed channels, which need to apply [=recon_gain=] among the output channels after demixing for ith channel layout.
-			- [=recon_gain=] shall be set to the gain value to be applied to the channel which is indicated by recon_gain_flags for the ith ChannelGroup.
-- Temporal unit for kth frame shall be composed of audio frame OBUs for the kth frames of the substreams and followed by OBUs for zero or more parameter block OBUs.
+		- descriptors are set to as follows:
+			- [=num_layers=] is set to the number of channel layouts.
+			- [=channel_audio_layer_config()=] is set to as follows:
+				- [=loudspeaker_layout=] is set to the ith list of channel layouts for the ith ChannelGroup.
+				- [=output_gain_is_present_flag=] is set to 1 for the ith ChannelGroup if attenuation is applied to the mixed channels of the ith ChannelGroup. Otherwise it is set to 0 for the ith ChannelGroup.
+				- [=recon_gain_is_present_flag=] is set to 1 for the ith ChannelGroup if the preceding ChannelGroups has one or more mixed channels from the down-mixed audio for the ith channel layout. Otherwise, it shall be set to 0 for the ith ChannelGroup. Especially, when [=num_layers=] = 1, this flag shall be set to 0.
+					- This flag is set to 0 for lossless codecs including LPCM.
+				- [=substream_count=] is set to the number of substreams composing of the ith ChannelGroup.
+				- [=coupled_substream_count=] is set to the number of coupled substreams among the substreams composing of the ith ChannelGroup.
+				- [=loudness=] is set to the loudness ([=LKFS=]) of the down-mixed audio for the ith channel layout for the ith ChannelGroup.
+				- Each bit of [=output_gain_flags=] is set to 1 for the ith ChannelGroup if attenuation is applied to the relevant channel of the ith ChannelGroup. Otherwise it is set to 0 for the ith ChannelGroup.
+				- [=output_gain=] is set to the inverse number of the gain which is applied to the channels which are indicated by output_gain_flags.
+		- Parameter blocks can be composed of [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=]. When [=recon_gain_is_present_flag=] = 0 for all ChannelGroup, recon_gain_info does not present in IA sequence.
+			- [=dmixp_mode=] of demixing_info_parameter_data for the kth frame is set to indicate (α(k), β(k), γ(k), δ(k)) and w_idx_offset(k). Where w_idx_offset(k) = 1 or -1.
+			- [=recon_gain_flags=] of recon_gain_info_parameter_data is set to indicate the de-mixed channels, which need to apply [=recon_gain=] among the output channels after demixing for ith channel layout.
+			- [=recon_gain=] is set to the gain value to be applied to the channel which is indicated by recon_gain_flags for the ith ChannelGroup.
+- Temporal unit for kth frame is composed of audio frame OBUs for the kth frames of the substreams and followed by OBUs for zero or more parameter block OBUs.
 	- It may have the immediately preceding temporal delimiter OBU,
-	- ChannelGroups in temporal unit shall be placed in order. In other words, ChannelGroup for the first channel layout shall come first, followed by ChannelGroup for the second channel layout, followed by ChannelGroup for the third channel layout and so on.
+	- ChannelGroups in temporal unit is placed in order. In other words, ChannelGroup for the first channel layout comes first, followed by ChannelGroup for the second channel layout, followed by ChannelGroup for the third channel layout and so on.
 
 Below figure shows IA encoding flowchart for Scalable Channel Audio.
 - For a given Channel Audio and a given list of channel layouts for scalability, PCMs for Channel Audio are passed to CG Generation module.
@@ -2427,143 +2430,9 @@ Below figure shows IA encoding flowchart for Scalable Channel Audio.
 <center><img src="images/IA Encoding Flowchart for Channel Audio Format.png" style="width:80%; height:auto;"></center>
 <center><figcaption>IA Encoding Flowchart for Scalable Channel Audio</figcaption></center>
 
-Following sections, [[#iamfgeneration-scalablechannelaudio-downmixparameter]], [[#iamfgeneration-scalablechannelaudio-downmixmechanism]], [[#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule]], [[#iamfgeneration-scalablechannelaudio-recongaingeneration]] and [[#iamfgeneration-scalablechannelaudio-channelgroupgenerationrule]] do not needed for non-scalable channel audio (i.e., when [=num_layers=] specified in [=scalable_channel_layout_config()=] is set to 1).
-
-### Down-mix parameter and Loudness ### {#iamfgeneration-scalablechannelaudio-downmixparameter}
-
-This section describes how to generate down-mix parameters and loudness level for a given channel audio and a given list of channel layouts for scalability.
-
-Below figure shows a block diagram for down-mix parameter and loudness module including down-mixer.
-
-<center><img src="images/Down-mix Parameter and Loudness.png" style="width:100%; height:auto;"></center>
-<center><figcaption>IA Down-mix Parameter and Loudness</figcaption></center>
-
-For a given Channel Audio (e.g. 7.1.4ch) and a given list of channel layouts based on the Channel Audio,
-- Down-mix parameter generator shall generate 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k)) by analyzing input Channel Audio, by referring [[AI-CAD-Mixing]]. Where, k is a frame index.
-	- It is composed of Audio Scene Classification module and Height Energy Quantification module as depicted in Figure 11-2.
-	- Audio Scene Classification module generates 4 parameters (α(k), β(k), γ(k), δ(k)) by classifying audio scenes of input channel audio in three modes.
-		- Default scene: Neither Dialog nor Effect
-		- Dialog scene: Center-channel oriented and clear dialog/voice sounds
-		- Effect scene: Directional and spatially moving sounds.
-	- Height Energy Quantification module generates a surround to height mixing parameter (w(k)) which is decided according to the relative energy difference between the top and surround channels of input channel audio.
-		- If the energy of top channels is bigger than that of surround ones, then w_idx_offset(k) is set to 1. Otherwise, it is set to -1. And, w(k) is calculated based on w_idx_offset(k) and conforms to [[#processing-scalablechannelaudio]].
-- Down-mixer generates down-mixed audios from input Channel Audio according to the list of channel layouts and the down-mix parameters, and outputs down-mixed audio for each channel layout to Loudness module.
-	- It is not depicted in the figure but Down-mixer further generates [=Dmixp_Mode=] and [=Recon_Gains=] for each frame to be passed to OBU packetizer.
-- Loudness module measures the loudness level ([=LKFS=]) of each down-mixed audio based on [[ITU1770-4]], and passes them to OBU packetizer.
-
-### Down-mix Mechanism ### {#iamfgeneration-scalablechannelaudio-downmixmechanism}
-
-This section specifies the down-mixing mechanism to generate <dfn noexport>down-mixed audio</dfn> for scalable channel audio.
-
-For a given Channel Audio which conforms to [=loudspeaker_layout=], the surround and top channels (if any) are separately down-mixed and especially step by step until to get a target channels.
-
-Implementers may use another method to get the down-mixed audio from the given channel audio, but the down-mixed audio shall comply with that by this section.
-
-Therefore, a down-mixer based on the down-mix mechanism is a combination of following surround down-mixer(s) and top down-mixer(s) as depicted in below figure.
-- Surround Down-mixers: S7to5 enc., S5to3 enc., S3to2 enc., S2to1 enc.
-
-```
-	S7to5 enc.: Ls5 = α(k) x Lss7 + β(k) x Lrs7 and Rs5 = α(k) x Rss7 + β(k) x Rrs7.
-	S5to3 enc.: L3 = L5 + δ(k) x Ls5 and R3 = R5 + δ(k) x Rs5
-	S3to2 enc.: L2 = L3 + 0.707 x C and R2 = R3 + 0.707 x C
-	S2to1 enc.: Mono = 0.5 x (L2 + R2)
-```
-
-- Top Down-mixers: T4to2 enc., T2toTF2 enc.
-
-```
-	T4to2 enc.: Ltf2 = Ltf4 + γ(k) x Ltb4  and Rtf2 = Rtf4 + γ(k) x Rtb4.
-	T2toTF2 enc.: Ltf3 = Ltf2 + w(k) x δ(k) x Ls5 and Rtf3 = Rtf2 + w(k) x δ(k) x Rs5.
-```
-
-<center><img src="images/Down-mix Mechanism.png" style="width:100%; height:auto;"></center>
-<center><figcaption>IA Down-mix Mechanism</figcaption></center>
-
-```
-For example, to get down-mixed 3.1.2ch from 7.1.4ch:
-- S3 of 3.1.2ch is generated by using S7to5 and S5to3 encs.
-- TF2 of 3.1.2ch is generated by using T4to2 and T2toTF2 encs.
-```
-
-### Channel Layout Generation Rule ### {#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule}
-
-This section describes the generation rule for channel layouts for scalable channel audio.
-
-For a given channel layout (CL #n) of input Channel Audio, any list of CLs ({CL #i: i = 1, 2, ..., n}) for a scalable channel audio shall conform with following rules:
-- Si ≤ Si+1 and Wi ≤ Wi+1 and Ti ≤ Ti+1 except Si = Si+1 and Wi = Wi+1 and Ti = Ti+1 for i = n-1, n-2, …, 1. Where ith Channel Layout CL #i = Si.Wi.Ti.
-- CL #i is one of [=loudspeaker_layouts=] supported in this specification.
-
-Down-mix paths, which conform to the above rule, shall be only allowed for scalable channel audio with [=num_layers=] > 1 as depicted in below figure.
-
-<center><img src="images/Down-mix Path.png" style="width:90%; height:auto;"></center>
-<center><figcaption>IA Down-mix Path</figcaption></center>
-
-### Recon Gain Generation ### {#iamfgeneration-scalablechannelaudio-recongaingeneration}
-
-This section describes how to generate [=recon_gain=].
-
-Recon_Gain needs to be applied to de-mixed channels. For this, IA encoder needs to deliver it to IA decoders.
-
-When the channel, which this recon_gain needs to be applied to, is coded by a codec, if the kth coded frame has trimming data. The kth frames used to generate recon_gain (k) have the trimming data on the same positions.
-
-Let's define followings:
-- Level Ok is the signal power for the frame #k of a channel of the down-mixed audio for CL #i.
-- Level Mk is the signal power for the frame #k of the relevant mixed channel of the down-mixed audio for CL #i-1.
-- Level Dk is the signal power for the frame #k of the de-mixed channel for CL #i (after demixing).
-
-If 10*log10(level Ok / maxL^2) is less than the first threshold value (e.g. -80dB), Recon_Gain (k, i)  = 0. Where, maxL = 32767 for 16bits.
-
-If 10*log10(level Ok / level Mk ) is less than the second threshold value (e.g. -6dB), Recon_Gain (k, i) is set to the value which makes level Ok = Recon_Gain (k, i)^2 x level Dk. Otherwise, Recon_Gain (k, i) = 1. Actual value to be delivered is floor(255*Recon_Gain).
-
-```
-For example, if we assume CL #i = 7.1.4ch and CL #i-1 = 5.1.2ch, then de-mixed channels are D_Lrs7, D_Rrs7, D_Ltb4 and D_Rtb4.
-- D_Lrs7 and D_Rrs7 are de-mixed from Ls5 and Rs5 in the (i-1)th ChannelGroup by using Lss7 and Rss7 in the ith ChannelGroup and its relevant demixing parameters (i.e., α(k) and β(k)) , respectively.
-- D_Ltb4 and D_Rtb4 are de-mixed from Ltf2 and Rtf2 in the (i-1)th ChannelGroup by using Ltf4 and Rtf4 in the ith ChannelGroup and its relevant demixing parameter (i.e., γ(k)), respectively.
-
-Recon_Gain for D_Lrs7:
-- Level Ok is the signal power for the frame #k of Lrs7 in the ith ChannelGroup.
-- Level Mk is the signal power for the frame #k of Ls5 in the (i-1)th ChannelGroup.
-- Level Dk is the signal power for the frame #k of D_Lrs7.
-Recon_Gain for D_Rrs7:
-- Level Ok is the signal power for the frame #k of Rrs7 in the ith ChannelGroup.
-- Level Mk is the signal power for the frame #k of Rs5 in the (i-1)th ChannelGroup.
-- Level Dk is the signal power for the frame #k of D_Rrs7.
-Recon_Gain for D_Ltb4:
-- Level Ok is the signal power for the frame #k of Ltf4 in the ith ChannelGroup.
-- Level Mk is the signal power for the frame #k of Ltf2 in the (i-1)th ChannelGroup.
-- Level Dk is the signal power for the frame #k of D_Ltb4.
-Recon_Gain for D_Rtb4:
-- Level Ok is the signal power for the frame #k of Rtf4 in the ith ChannelGroup.
-- Level Mk is the signal power for the frame #k of Rtf2 in the (i-1)th ChannelGroup.
-- Level Dk is the signal power for the frame #k of D_Rtb4.
-```
-
-### ChannelGroup Generation Rule ### {#iamfgeneration-scalablechannelaudio-channelgroupgenerationrule}
-
-This section describes the generation rule for ChannelGroup.
-
-For a given Channel Audio and the list of CLs ({CL #i: i = 1, 2, ..., n}), CG Generation module outputs the transformed audio (i.e. ChannelGroups) which shall conform to following rules:
-- It consists of C number of channels and is structured to n number of CGs, where C is the number of channels for the Channel Audio.
-- CG #1 (as called BCG): This CG is the down-mixed audio itself for CL #1 generated from the Channel Audio. It contains C1 number of channels.
-- CG #i (as called DCG, i = 2, 3, …, n): This CG contains (Ci – Ci-1) number of channels. (Ci – Ci-1) channel(s) consists of as follows:
-	- (Si – Si-1) surround channel(s) if Si > Si-1 . When S_set = { x | Si-1 < x ≤ Si and x is an integer},
-		- If 2 is an element of S_set, the L2 channel is contained in this CG #i.
-		- If 3 is an element of S_set, the Center channel is contained in this CG #i.
-		- If 5 is an element of S_set, the L5 and R5 channels are contained in this CG #i.
-		- If 7 is an element of S_set, the Lss7 and Rss7 channels are contained in this CG #i.
-	- The LFE channel if Wi > Wi-1 .
-	- (Ti – Ti-1) top channels if Ti > Ti-1 .
-		- If Ti-1 = 0, the top channels of the down-mixed audio for CL #i are contained in this CG #i.
-		- If Ti-1 = 2, the Ltf and Rtf channels of the down-mixed audio for CL #i are contained in this CG #i.
-
-Below figure shows one example of transformation matrix with 4 CGs (2ch/3.1.2ch/5.1.2ch/7.1.4ch).
-
-<center><img src="images/Example of Transformation Matrix with 4 CGs.png" style="width:100%; height:auto;"></center>
-<center><figcaption>Example of Transformation Matrix with 4 CGs</figcaption></center>
-
 ## Mix Presentation Encoding ## {#iamfgeneration-mixpresentation}
 
-For Mix Presentation OBU for one single channel-based audio element, Mix Presentation OBU shall follow following restrictions:
+For Mix Presentation OBU for one single channel-based audio element, Mix Presentation OBU follows following restrictions:
 - [=num_sub_mixes=]: set to 1
 - [=num_audio_elements=]: set to 1
 - [=element_mix_config()=]: No parameter block for element_mix and default_mix_gain = 0dB
@@ -2573,7 +2442,7 @@ For Mix Presentation OBU for one single channel-based audio element, Mix Present
 - loudness_info() on L(1), loudness_info on L(2), ..., loudness_info on L([=num_layers=]): loudness information of the rendered audio to the measured layout L(i).
 - Where L(i) is the measured layout for the ith layer and i = 1, 2, ..., [=num_layers=]
 
-For Mix Presentation for one single scene-based audio element, Mix Presentation OBU shall follow following restrictions:
+For Mix Presentation for one single scene-based audio element, Mix Presentation OBU follows following restrictions:
 - [=num_sub_mixes=]: set to 1
 - [=num_audio_elements=]: set to 1
 - [=element_mix_config()=]: set to [=mix_gain=]
@@ -2584,7 +2453,7 @@ For Mix Presentation for one single scene-based audio element, Mix Presentation 
 - Where L(i) is the measured layout for the ith loudness information and i = 1, 2, ..., M1.
 - This Mix Presentation is authored by using the highest [=loudness_layout=].
  
-For Mix Presentation for N (>1) audio elements (when num_sub-mixes = 1), Mix Presentation OBU shall follow following restrictions:
+For Mix Presentation for N (>1) audio elements (when num_sub-mixes = 1), Mix Presentation OBU follows following restrictions:
 - [=num_sub_mixes=]: set to 1
 - [=num_audio_elements=]: set to N
 - [=element_mix_config()=] for each audio element: set to [=mix_gain=]
@@ -2595,7 +2464,7 @@ For Mix Presentation for N (>1) audio elements (when num_sub-mixes = 1), Mix Pre
 - Where L(i) is the measured layout for the ith loudness information and i = 1, 2, ..., M2.
 - This Mix Presentation is authored by using the highest [=loudness_layout=].
 
-### Element Mix Config (Informative) ###  {#iamfgeneration-mixpresentation-mix}
+### Element Mix Config ###  {#iamfgeneration-mixpresentation-mix}
 
 This section provide a guideline to generate element_mix_config().
 
@@ -2605,9 +2474,9 @@ An IA multiplexer may merge two or more IA sequences. In this case, it should ad
 
 This section provide a way to generate IA sequence having multiple audio elements from two IA simple or base profiles.
 
-### Multiple Audio Elements with One Codec Config (Informative) ### {#iamfgeneration-multipleaudioelements-onecodec}
+### Multiple Audio Elements with One Codec Config ### {#iamfgeneration-multipleaudioelements-onecodec}
 
-This section provides a way how to generate IA sequence having multiple audio elements from two IA simple profiles with the same codec config OBU. However, the result shall comply with the base profile of IA sequence.
+This section provides a way how to generate IA sequence having multiple audio elements from two IA simple profiles with the same codec config OBU. However, the result complies with the base profile of IA sequence.
 
 Step1: Descriptor OBUs are generated as follows:
 - IA Sequence Header OBU: get the larger [=profile_name=] field and the larger [=profile_compatible=] field, respectively.
@@ -2643,6 +2512,7 @@ For a given Mix Presentation OBU and a given [=loudness_layout=] of a sub-mix of
 - Each of the Audio Elements specified in the sub-mix of the given Mix Presentation OBU applies [=mix_gain=] according to [=element_mix_config()=] for the Audio Element.
 - All of the Audio Elements specified in the sub-mix of the given Mix Presentation OBU are summed, and then applies [=mix_gain=] according to [=output_mix_config()=] for the sub-mix.
 - Generate loudness_info() of the mixed audio according to [[#obu-mixpresentation-loudness]].
+
 
 # Convention # {#convention}
 
@@ -2732,11 +2602,11 @@ round(x) = floor(x + 0.5).
 <b>MOD(Number, Divisor)</b>
 
 The MOD() function returns the remainder after <b>Number</b> is divided by <b>Divisor</b>.
- 
+
 
 # Annex
 
-## Annex A: ID Linking Scheme (Informative)
+## Annex A: ID Linking Scheme (Informative) ## {#Annex_A}
 
 The below figure shows the linking scheme among IDs in obu_header or obu payload.
 
@@ -2765,6 +2635,140 @@ In the above figure,
 - Parameter Block OBU with parameter_id = 33 is providing mix_gain_parameter_data() to be applied to the rendered audio element after rendering according to render_config() of the Audio Element with audio_element_id = 12.
 - Parameter Block OBU with parameter_id = 34 is providing mix_gain_parameter_data() to be applied to the mixed audio of the two rendered audios.
 
-## Consumption of IAMF bitstream (informative) ## {#iamfconsumption}
+## Annex B: Rules for Scalable Channel Audio (Normative) ## {#Annex_B}
+
+This Annex specifies normative rules for scalable channel audio with [=mum_layers=] > 1.
+
+### Annex B-1: Down-mix parameter and Loudness ### {#iamfgeneration-scalablechannelaudio-downmixparameter}
+
+This section describes how to generate down-mix parameters and loudness level for a given channel audio and a given list of channel layouts for scalability.
+
+Below figure shows a block diagram for down-mix parameter and loudness module including down-mixer.
+
+<center><img src="images/Down-mix Parameter and Loudness.png" style="width:100%; height:auto;"></center>
+<center><figcaption>IA Down-mix Parameter and Loudness</figcaption></center>
+
+For a given Channel Audio (e.g. 7.1.4ch) and a given list of channel layouts based on the Channel Audio,
+- Down-mix parameter generator shall generate 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k)) by analyzing input Channel Audio, by referring [[AI-CAD-Mixing]]. Where, k is a frame index.
+	- It is composed of Audio Scene Classification module and Height Energy Quantification module as depicted in Figure 11-2.
+	- Audio Scene Classification module generates 4 parameters (α(k), β(k), γ(k), δ(k)) by classifying audio scenes of input channel audio in three modes.
+		- Default scene: Neither Dialog nor Effect
+		- Dialog scene: Center-channel oriented and clear dialog/voice sounds
+		- Effect scene: Directional and spatially moving sounds.
+	- Height Energy Quantification module generates a surround to height mixing parameter (w(k)) which is decided according to the relative energy difference between the top and surround channels of input channel audio.
+		- If the energy of top channels is bigger than that of surround ones, then w_idx_offset(k) is set to 1. Otherwise, it is set to -1. And, w(k) is calculated based on w_idx_offset(k) and conforms to [[#processing-scalablechannelaudio]].
+- Down-mixer generates down-mixed audios from input Channel Audio according to the list of channel layouts and the down-mix parameters, and outputs down-mixed audio for each channel layout to Loudness module.
+	- It is not depicted in the figure but Down-mixer further generates [=Dmixp_Mode=] and [=Recon_Gains=] for each frame to be passed to OBU packetizer.
+- Loudness module measures the loudness level ([=LKFS=]) of each down-mixed audio based on [[ITU1770-4]], and passes them to OBU packetizer.
+
+### Annex B-2: Down-mix Mechanism ### {#iamfgeneration-scalablechannelaudio-downmixmechanism}
+
+This section specifies the down-mixing mechanism to generate <dfn noexport>down-mixed audio</dfn> for scalable channel audio.
+
+For a given Channel Audio which conforms to [=loudspeaker_layout=], the surround and top channels (if any) are separately down-mixed and especially step by step until to get a target channels.
+
+Implementers may use another method to get the down-mixed audio from the given channel audio, but the down-mixed audio shall comply with that by this section.
+
+Therefore, a down-mixer based on the down-mix mechanism is a combination of following surround down-mixer(s) and top down-mixer(s) as depicted in below figure.
+- Surround Down-mixers: S7to5 enc., S5to3 enc., S3to2 enc., S2to1 enc.
+
+```
+	S7to5 enc.: Ls5 = α(k) x Lss7 + β(k) x Lrs7 and Rs5 = α(k) x Rss7 + β(k) x Rrs7.
+	S5to3 enc.: L3 = L5 + δ(k) x Ls5 and R3 = R5 + δ(k) x Rs5
+	S3to2 enc.: L2 = L3 + 0.707 x C and R2 = R3 + 0.707 x C
+	S2to1 enc.: Mono = 0.5 x (L2 + R2)
+```
+
+- Top Down-mixers: T4to2 enc., T2toTF2 enc.
+
+```
+	T4to2 enc.: Ltf2 = Ltf4 + γ(k) x Ltb4  and Rtf2 = Rtf4 + γ(k) x Rtb4.
+	T2toTF2 enc.: Ltf3 = Ltf2 + w(k) x δ(k) x Ls5 and Rtf3 = Rtf2 + w(k) x δ(k) x Rs5.
+```
+
+<center><img src="images/Down-mix Mechanism.png" style="width:100%; height:auto;"></center>
+<center><figcaption>IA Down-mix Mechanism</figcaption></center>
+
+```
+For example, to get down-mixed 3.1.2ch from 7.1.4ch:
+- S3 of 3.1.2ch is generated by using S7to5 and S5to3 encs.
+- TF2 of 3.1.2ch is generated by using T4to2 and T2toTF2 encs.
+```
+
+### Annex B-3: Channel Layout Generation Rule ### {#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule}
+
+This section describes the generation rule for channel layouts for scalable channel audio.
+
+For a given channel layout (CL #n) of input Channel Audio, any list of CLs ({CL #i: i = 1, 2, ..., n}) for a scalable channel audio shall conform with following rules:
+- Si ≤ Si+1 and Wi ≤ Wi+1 and Ti ≤ Ti+1 except Si = Si+1 and Wi = Wi+1 and Ti = Ti+1 for i = n-1, n-2, …, 1. Where ith Channel Layout CL #i = Si.Wi.Ti.
+- CL #i is one of [=loudspeaker_layouts=] supported in this specification.
+
+Down-mix paths, which conform to the above rule, shall be only allowed for scalable channel audio with [=num_layers=] > 1 as depicted in below figure.
+
+<center><img src="images/Down-mix Path.png" style="width:90%; height:auto;"></center>
+<center><figcaption>IA Down-mix Path</figcaption></center>
+
+### Annex B-4: Recon Gain Generation ### {#iamfgeneration-scalablechannelaudio-recongaingeneration}
+
+This section describes how to generate [=recon_gain=].
+
+Recon_Gain needs to be applied to de-mixed channels. For this, IA encoder needs to deliver it to IA decoders.
+
+Let's define followings:
+- Level Ok is the signal power for the frame #k of a channel of the down-mixed audio for CL #i.
+- Level Mk is the signal power for the frame #k of the relevant mixed channel of the down-mixed audio for CL #i-1.
+- Level Dk is the signal power for the frame #k of the de-mixed channel for CL #i (after demixing).
+
+If 10*log10(level Ok / maxL^2) is less than the first threshold value (e.g. -80dB), Recon_Gain (k, i)  = 0. Where, maxL = 32767 for 16bits.
+
+If 10*log10(level Ok / level Mk ) is less than the second threshold value (e.g. -6dB), Recon_Gain (k, i) is set to the value which makes level Ok = Recon_Gain (k, i)^2 x level Dk. Otherwise, Recon_Gain (k, i) = 1. Actual value to be delivered is floor(255*Recon_Gain).
+
+```
+For example, if we assume CL #i = 7.1.4ch and CL #i-1 = 5.1.2ch, then de-mixed channels are D_Lrs7, D_Rrs7, D_Ltb4 and D_Rtb4.
+- D_Lrs7 and D_Rrs7 are de-mixed from Ls5 and Rs5 in the (i-1)th ChannelGroup by using Lss7 and Rss7 in the ith ChannelGroup and its relevant demixing parameters (i.e., α(k) and β(k)) , respectively.
+- D_Ltb4 and D_Rtb4 are de-mixed from Ltf2 and Rtf2 in the (i-1)th ChannelGroup by using Ltf4 and Rtf4 in the ith ChannelGroup and its relevant demixing parameter (i.e., γ(k)), respectively.
+
+Recon_Gain for D_Lrs7:
+- Level Ok is the signal power for the frame #k of Lrs7 in the ith ChannelGroup.
+- Level Mk is the signal power for the frame #k of Ls5 in the (i-1)th ChannelGroup.
+- Level Dk is the signal power for the frame #k of D_Lrs7.
+Recon_Gain for D_Rrs7:
+- Level Ok is the signal power for the frame #k of Rrs7 in the ith ChannelGroup.
+- Level Mk is the signal power for the frame #k of Rs5 in the (i-1)th ChannelGroup.
+- Level Dk is the signal power for the frame #k of D_Rrs7.
+Recon_Gain for D_Ltb4:
+- Level Ok is the signal power for the frame #k of Ltf4 in the ith ChannelGroup.
+- Level Mk is the signal power for the frame #k of Ltf2 in the (i-1)th ChannelGroup.
+- Level Dk is the signal power for the frame #k of D_Ltb4.
+Recon_Gain for D_Rtb4:
+- Level Ok is the signal power for the frame #k of Rtf4 in the ith ChannelGroup.
+- Level Mk is the signal power for the frame #k of Rtf2 in the (i-1)th ChannelGroup.
+- Level Dk is the signal power for the frame #k of D_Rtb4.
+```
+
+### Annex B-5: ChannelGroup Generation Rule ### {#iamfgeneration-scalablechannelaudio-channelgroupgenerationrule}
+
+This section describes the generation rule for ChannelGroup.
+
+For a given Channel Audio and the list of CLs ({CL #i: i = 1, 2, ..., n}), CG Generation module outputs the transformed audio (i.e. ChannelGroups) which shall conform to following rules:
+- It consists of C number of channels and is structured to n number of CGs, where C is the number of channels for the Channel Audio.
+- CG #1 (as called BCG): This CG is the down-mixed audio itself for CL #1 generated from the Channel Audio. It contains C1 number of channels.
+- CG #i (as called DCG, i = 2, 3, …, n): This CG contains (Ci – Ci-1) number of channels. (Ci – Ci-1) channel(s) consists of as follows:
+	- (Si – Si-1) surround channel(s) if Si > Si-1 . When S_set = { x | Si-1 < x ≤ Si and x is an integer},
+		- If 2 is an element of S_set, the L2 channel is contained in this CG #i.
+		- If 3 is an element of S_set, the Center channel is contained in this CG #i.
+		- If 5 is an element of S_set, the L5 and R5 channels are contained in this CG #i.
+		- If 7 is an element of S_set, the Lss7 and Rss7 channels are contained in this CG #i.
+	- The LFE channel if Wi > Wi-1 .
+	- (Ti – Ti-1) top channels if Ti > Ti-1 .
+		- If Ti-1 = 0, the top channels of the down-mixed audio for CL #i are contained in this CG #i.
+		- If Ti-1 = 2, the Ltf and Rtf channels of the down-mixed audio for CL #i are contained in this CG #i.
+
+Below figure shows one example of transformation matrix with 4 CGs (2ch/3.1.2ch/5.1.2ch/7.1.4ch).
+
+<center><img src="images/Example of Transformation Matrix with 4 CGs.png" style="width:100%; height:auto;"></center>
+<center><figcaption>Example of Transformation Matrix with 4 CGs</figcaption></center>
+  
+## Annex C: Consumption of IAMF bitstream (informative) ## {#iamfconsumption}
 
 ISSUE: TODO. Fill in example workflows.
