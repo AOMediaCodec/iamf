@@ -451,7 +451,7 @@ obu_type: Name of obu_type
 
 <dfn noexport>obu_redundant_copy</dfn> indicates whether this OBU is a redundant copy of the previous OBU in the IA sequence with the same obu_type. A value of 1 indicates that it is a redundant copy, while a value of 0 indicates that it is not.
 
-It shall always be set to 0 for the following obu_type values:
+It SHALL always be set to 0 for the following obu_type values:
 
 - OBU_IA_Temporal_Delimiter
 - OBU_IA_Audio_Frame
@@ -459,30 +459,30 @@ It shall always be set to 0 for the following obu_type values:
 
 <dfn noexport>obu_trimming_status_flag</dfn> indicates whether this OBU has audio samples to be trimmed or not. It SHALL be set only when [=obu_type=] is set to OBU_IA_Audio_Frame or OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21.
 
-For a given substream, 
-- If an Audio Frame OBU has its [=num_samples_to_trim_at_start=] field set to a non-zero value N, the decoder SHALL discard the first N audio samples.
-- If an Audio Frame OBU has its [=num_samples_to_trim_at_end=] field set to a non-zero value N, the decoder SHALL discard the last N audio samples.
+For a given coded [=Audio Substream=], 
+- If an [=Audio Frame OBU=] has its [=num_samples_to_trim_at_start=] field set to a non-zero value N, the decoder SHALL discard the first N audio samples.
+- If an [=Audio Frame OBU=] has its [=num_samples_to_trim_at_end=] field set to a non-zero value N, the decoder SHALL discard the last N audio samples.
 
 NOTE: Because of coding dependency, discarding a sample can sometimes mean decoding the entire audio frame.
 
-- For a given Audio Frame OBU, the sum of [=num_samples_to_trim_at_start=] and [=num_samples_to_trim_at_end=] shall be less or equal to the number of samples (i.e. [=num_samples_per_frame=]) in the Audio Frame OBU. 
+- For a given [=Audio Frame OBU=], the sum of [=num_samples_to_trim_at_start=] and [=num_samples_to_trim_at_end=] SHALL be less or equal to the number of samples (i.e. [=num_samples_per_frame=]) in the [=Audio Frame OBU=]. 
 
-NOTE: This means that if one of the value is set to the the number of samples (i.e. [=num_samples_per_frame=]) in the Audio Frame OBU, the other value is set to 0.
+NOTE: This means that if one of the value is set to the the number of samples (i.e. [=num_samples_per_frame=]) in the [=Audio Frame OBU=], the other value is set to 0.
 
-- When [=num_samples_to_trim_at_start=] is non-zero, all Audio Frame OBUs with the same substream id, and preceding this OBU back until the Codec OBU defining this substream, SHALL have their [=num_samples_to_trim_at_start=] field equal to the number of samples (i.e. [=num_samples_per_frame=]) in the corresponding Audio Frame OBU.
-- When [=num_samples_to_trim_at_end=] is non-zero in an Audio Frame OBU, there shall be no subsequent Audio Frame OBU with the same substream id until a non-redundant Codec OBU defining a substream with the same substream id.
+- When [=num_samples_to_trim_at_start=] is non-zero, all [=Audio Frame OBU=]s with the same [=audio_substream_id=], and preceding this OBU back until the [=Codec Config OBU=] defining this [=Audio Substream=], SHALL have their [=num_samples_to_trim_at_start=] field equal to the number of samples (i.e. [=num_samples_per_frame=]) in the corresponding Audio Frame OBU.
+- When [=num_samples_to_trim_at_end=] is non-zero in an [=Audio Frame OBU=], there SHALL be no subsequent [=Audio Frame OBU=] with the same [=audio_substream_id=] until a non-redundant [=Codec Config OBU=] defining an [=Audio Substream=] with the same [=audio_substream_id=].
 
-<dfn noexport>obu_extension_flag</dfn> indicates whether the [=extension_header_size=] field presents or not. If it set to 0, the [=extension_header_size=] field shall not be present. Otherwise, the [=extension_header_size=] field shall be present.
+<dfn noexport>obu_extension_flag</dfn> indicates whether the [=extension_header_size=] field presents or not. If it set to 0, the [=extension_header_size=] field SHALL NOT be present. Otherwise, the [=extension_header_size=] field SHALL be present.
 
-This flag shall be set to 0 for this version of the specification (i.e. [=version=] = 0). An OBU parser which is conformant with the current version of the specification shall be able to parse this flag and [=extension_header_size=].
+This flag SHALL be set to 0 for this version of the specification (i.e. [=version=] = 0). An OBU parser which is conformant with the current version of the specification SHALL be able to parse this flag and [=extension_header_size=].
 
 NOTE: A future version of specification may use this flag to specify an extension header field by setting [=obu_extension_flag=] = 1 and setting the size of extended header to [=extension_header_size=].
 
 <dfn noexport>obu_size</dfn> indicates the size in bytes of the OBU immediately following the obu_size field of the OBU.
 	
-<dfn noexport>num_samples_to_trim_at_start</dfn> indicates the number of samples that needs to be trimmed from the start of the samples in this Audio Frame OBU. 
+<dfn noexport>num_samples_to_trim_at_start</dfn> indicates the number of samples that needs to be trimmed from the start of the samples in this [=Audio Frame OBU=]. 
 
-<dfn noexport>num_samples_to_trim_at_end</dfn> indicates the number of samples that needs to be trimmed from the end of the samples in this Audio Frame OBU.
+<dfn noexport>num_samples_to_trim_at_end</dfn> indicates the number of samples that needs to be trimmed from the end of the samples in this [=Audio Frame OBU=].
 
 <dfn noexport>extension_header_size</dfn> indicates the size in bytes of the extension header including this field.
 
@@ -500,23 +500,23 @@ class byte_alignment() {
 
 <b>Semantics</b>
 
-<dfn noexport>zero_bit</dfn> shall be equal to 0 and is inserted into the bitstream to align the bit position to a multiple of 8 bits.
+<dfn noexport>zero_bit</dfn> SHALL be equal to 0 and is inserted into the bitstream to align the bit position to a multiple of 8 bits.
 
 
 ## Reserved OBU Syntax and Semantics ## {#obu-reserved}
 
-Reserved OBUs shall be ignored by parsers compliant to this version of the specification. Future versions of the specification may define semantics for these reserved OBUs that would only be supported by parsers compliant to these future versions.
+Reserved OBUs SHALL be ignored by parsers compliant to this version of the specification. Future versions of the specification MAY define semantics for these reserved OBUs that would only be supported by parsers compliant to these future versions.
 
 
 ## IA Sequence Header OBU Syntax and Semantics ## {#obu-iasequenceheader}
 
 This section specifies obu payload of OBU_IA_Sequence_Header. 
 
-This OBU is used to indicate the start of IA Sequence. So, the first OBU of IA Sequence shall be OBU_IA_Sequence_Header.
+This OBU is used to indicate the start of IA Sequence. So, the first OBU of IA Sequence SHALL be OBU_IA_Sequence_Header.
 
-NOTE: When an IA Sequence is stored in a file, the IA Sequence Header OBU can be used to detect that the file contains an IA Sequence.
+NOTE: When an IA Sequence is stored in a file, the [=IA Sequence Header OBU=] can be used to detect that the file contains an IA Sequence.
 
-This OBU may be placed frequently within one single IA Sequence for an application such as broadcasting or multicasting scenario. In that case, the other IA Sequence Header OBUs except the first one shall be marked as redundant (i.e. [=obu_redundant_copy=] = 1).
+This OBU MAY be placed frequently within one single IA Sequence for an application such as broadcasting or multicasting scenario. In that case, the other [=IA Sequence Header OBU=]s except the first one SHALL be marked as redundant (i.e. [=obu_redundant_copy=] = 1).
 
 <b>Syntax</b>
 
@@ -532,14 +532,14 @@ class ia_sequence_header_obu() {
 
 <dfn noexport>ia_code</dfn> indicates a ‘four-character code’ (4CC), ‘iamf’. 
 	
-NOTE: When IA OBUs are delivered over a protocol that does not provide explicit IA Sequence boundaries, a parser may locate the IA Sequence start by searching for the code 'iamf' preceded by specific OBU header values, e.g. assuming [=obu_extension_flag=] is set to 0 and because [=obu_trimming_status_flag=] is set to 0 for a IA Sequence Header OBU, the OBU header can be 0xF806 or 0xFC06
+NOTE: When IA OBUs are delivered over a protocol that does not provide explicit IA Sequence boundaries, a parser may locate the IA Sequence start by searching for the code 'iamf' preceded by specific OBU header values, e.g. assuming [=obu_extension_flag=] is set to 0 and because [=obu_trimming_status_flag=] is set to 0 for an [=IA Sequence Header OBU=], the OBU header can be 0xF806 or 0xFC06
 
-<dfn noexport>profile_name</dfn> indicates that this IA sequence is able to be processed by IA decoders that support the profile indicated in this field. The IA decoders shall be able to parse all OBUs explicitly listed in that profile and can still encounter reserved OBUs that it should skip and it is acceptable to do so. This allows future versions of the specification to define new profiles that can be backwards compatible to old profiles.
+<dfn noexport>profile_name</dfn> indicates that this IA sequence is able to be processed by IA decoders that support the profile indicated in this field. The IA decoders SHALL be able to parse all OBUs explicitly listed in that profile and can still encounter reserved OBUs that it SHOULD skip and it is acceptable to do so. This allows future versions of the specification to define new profiles that can be backwards compatible to old profiles.
 - 0: Simple Profile
 - 1: Base Profile
 - 2~255: Reserved
 
-<dfn noexport>profile_compatible</dfn> indicates an additional profile of this specification to which this IA sequence complies. If a sequence only complies with the [=profile_name=] profile, this field shall be set to same [=profile_name=] value.  
+<dfn noexport>profile_compatible</dfn> indicates an additional profile of this specification to which this IA sequence complies. If a sequence only complies with the [=profile_name=] profile, this field SHALL be set to same [=profile_name=] value.  
 - 0: Simple Profile
 - 1: Base Profile
 - 2~255: Reserved
@@ -568,22 +568,22 @@ class codec_config() {
 
 <b>Semantics</b>
 
-<dfn noexport>codec_config_id</dfn> defines an identifier for a codec configuration. Within an IA Sequence, there shall be exactly one non-redundant Codec Config OBU with a given identifier. Audio Elements that need a decoder configuration based on this codec configuration refer to this identifier.
+<dfn noexport>codec_config_id</dfn> defines an identifier for a codec configuration. Within an IA Sequence, there SHALL be exactly one non-redundant [=Codec Config OBU=] with a given identifier. [=Audio Element=]s that need a decoder configuration based on this codec configuration refer to this identifier.
 
-<dfn noexport>codec_id</dfn> indicates a ‘four-character code’ (4CC) to identify the codec used to generate the audio substreams. For version 0 of this specification, it shall be set to one of four codec_id values defined below:
-- 'Opus': The payload of all substreams of all Audio Elements referring to this codec configuration shall comply to the specification [[!RFC6716]] and the decoder_config() structure shall comply with the constraints given in [[#opus-specific]].
-- 'mp4a': The payload of all substreams of all Audio Elements referring to this codec configuration shall comply to the specification [[!AAC]] and the decoder_config() structure shall comply with the constraints given in [[#aac-lc-specific]].
-- 'fLaC': The payload of all substreams of all Audio Elements referring to this codec configuration shall comply to the specification [[!FLAC]] and the decoder_config() structure shall comply with the constraints given in [[#flac-specific]].
-- 'ipcm': The payload of all substreams of all Audio Elements referring to this codec configuration shall be audio samples for linear PCM (LPCM) and the decoder_config() structure shall comply with the constraints given in [[#lpcm-specific]].
+<dfn noexport>codec_id</dfn> indicates a ‘four-character code’ (4CC) to identify the codec used to generate the coded [=Audio Substream=]s. For this version of the specification, it SHALL be set to one of four [=codec_id=] values defined below:
+- 'Opus': All coded [=Audio Substream=]s of all [=Audio Element=]s referring to this codec configuration SHALL comply to the specification [[!RFC6716]] and the [=decoder_config()=] structure SHALL comply with the constraints given in [[#opus-specific]].
+- 'mp4a': All coded [=Audio Substream=]s of all [=Audio Element=]s referring to this codec configuration SHALL comply to the specification [[!AAC]] and the [=decoder_config()=] structure SHALL comply with the constraints given in [[#aac-lc-specific]].
+- 'fLaC': All coded [=Audio Substream=]s of all [=Audio Element=]s referring to this codec configuration SHALL comply to the specification [[!FLAC]] and the [=decoder_config()=] structure SHALL comply with the constraints given in [[#flac-specific]].
+- 'ipcm': All coded [=Audio Substream=]s of all [=Audio Element=]s referring to this codec configuration SHALL be audio samples for linear PCM (LPCM) and the [=decoder_config()=] structure SHALL comply with the constraints given in [[#lpcm-specific]].
 
 NOTE: 'ipcm' should not be confused with 'lpcm' which is another 4CC to identify codecs in other container formats (e.g. QuickTime).
 
-<dfn noexport>num_samples_per_frame</dfn> indicates the frame length, in samples, of the audio_frame() provided in by audio_frame_obu(). It shall not be set to zero. If the [=decoder_config()=] structure for a given codec specifies a value for the frame length, the two values shall be equal.
+<dfn noexport>num_samples_per_frame</dfn> indicates the frame length, in samples, of the audio_frame() provided in by audio_frame_obu(). It SHALL NOT be set to zero. If the [=decoder_config()=] structure for a given codec specifies a value for the frame length, the two values SHALL be equal.
 
 <dfn noexport>audio_roll_distance</dfn> is a signed integer that gives the number of frames that need to be decoded in order for a frame to be decoded correctly. A negative value indicates the number of frames before the frame to be decoded correctly.
-- It shall be set to -1 for IAMF-AAC-LC and -R (R = 4 when the frame size = 960) for IAMF-OPUS. IAMF-FLAC may ignore this field. Where, R is the smallest integer greater than or equal to 3840 divided by the frame size.
+- It SHALL be set to -1 for IAMF-AAC-LC and -R (R = 4 when the frame size = 960) for IAMF-OPUS. IAMF-FLAC MAY ignore this field. Where, R is the smallest integer greater than or equal to 3840 divided by the frame size.
 
-<dfn noexport>decoder_config()</dfn> specifies the set of codec parameters required to decode the payload an substream for the given codec_id. It is byte aligned.
+<dfn noexport>decoder_config()</dfn> specifies the set of codec parameters required to decode a coded [=Audio Substream=] by the [=codec_id=]. It is byte aligned.
 
 
 ## Audio Element OBU Syntax and Semantics ## {#obu-audioelement}
@@ -640,9 +640,9 @@ class ReconGainParamDefinition() extends ParamDefinition() {
 
 <b>Semantics</b>
 
-<dfn noexport>audio_element_id</dfn> defines an identifier for an Audio Element. Within an IA Sequence, there shall be exactly one non-redundant Audio Element OBU with a given identifier. Mix Presentations that use an Audio Element refer to this identifier.
+<dfn noexport>audio_element_id</dfn> defines an identifier for an [=Audio Element=]. Within an IA Sequence, there SHALL be exactly one non-redundant [=Audio Element OBU=] with a given identifier. [=Mix Presentation=]s that use an [=Audio Element=] refer to this identifier.
 
-<dfn noexport>audio_element_type</dfn> specifies the audio representation of this audio element which is constructed from one or more audio substreams.
+<dfn noexport>audio_element_type</dfn> specifies the audio representation of this [=Audio Element=] which is constructed from one or more [=Audio Substream=]s.
 
 <pre class = "def">
 audio_element_type: The type of audio representation.
@@ -651,36 +651,36 @@ audio_element_type: The type of audio representation.
   2~7   : Reserved
 </pre>
 
-<dfn value noexport for="audio_element_obu()">codec_config_id</dfn> indicates the identifier for the codec configuration which this Audio Element refers to.
+<dfn value noexport for="audio_element_obu()">codec_config_id</dfn> indicates the identifier for the codec configuration which this [=Audio Element=] refers to.
 
-<dfn noexport>num_substreams</dfn> specifies the number of audio substreams that are used to reconstruct this audio element.
+<dfn noexport>num_substreams</dfn> specifies the number of [=Audio Substream=]s that are used to reconstruct this [=Audio Element=].
 
-<dfn value noexport for="audio_element_obu()">audio_substream_id</dfn> indicates the identifier for a Substream which this Audio Element refers to.
+<dfn value noexport for="audio_element_obu()">audio_substream_id</dfn> indicates the identifier for an [=Audio Substream=] which this [=Audio Element=] refers to.
 
-Let a particular ChannelGroup's substream be indexed as [<dfn noexport>c</dfn>, <dfn noexport>n_c</dfn>], where
-- [=c=] = [1, ..., C] is the ChannelGroup index and C is the number of ChannelGroups.
-- [=n_c=] = [1, ..., N_c] is the substream index in the c-th ChannelGroup and N_c is the number of substreams in the c-th ChannelGroup.
-- The i-th audio_substream_id maps to a ChannelGroup's substream as follows, where i is the index of the array:
+Let a particular [=ChannelGroup=]'s [=Aduio Substream]s be indexed as [<dfn noexport>c</dfn>, <dfn noexport>n_c</dfn>], where
+- [=c=] = [1, ..., C] is the [=ChannelGroup=] index and C is the number of [=ChannelGroup=]s.
+- [=n_c=] = [1, ..., N_c] is the [=Audio Substream=] index in the c-th [=ChannelGroup=] and N_c is the number of [=Audio Substream=]s in the c-th [=ChannelGroup=].
+- The i-th audio_substream_id maps to a [=ChannelGroup=]'s [=Audio Substream=]s as follows, where i is the index of the array:
 
 ```
 [[1, 1], [1, 2], ..., [1, N_1], [2, 1], [2, 2], ..., [2, N_2], ..., [C, 1], [C, 2], ..., [C, N_c]]
 ```
 
-A ChannelGroup is defined in [[#iamfgeneration]]. The order of the substreams in each ChannelGroup., i.e. the semantics of n_c, is specified in [[#syntax-scalable-channel-layout-config]].
+A [=ChannelGroup=] is defined in [[#iamfgeneration]]. The order of the [=Audio Substream=]s in each [=ChannelGroup=]., i.e. the semantics of n_c, is specified in [[#syntax-scalable-channel-layout-config]].
 
 
-<dfn noexport>num_parameters</dfn> specifies the number of parameters that are used by the algorithms specified in this audio element.
-- When [=audio_element_type=] = 0, this field shall be set to 0, 1 or 2.
-- When [=audio_element_type=] = 1, this field shall be set to 0.
+<dfn noexport>num_parameters</dfn> specifies the number of [=Parameter Substream=]s that are used by the algorithms specified in this [=Audio Element=].
+- When [=audio_element_type=] = 0, this field SHALL be set to 0, 1 or 2.
+- When [=audio_element_type=] = 1, this field SHALL be set to 0.
 
 <dfn noexport>param_definition_type</dfn> specifies the type of the parameter definition. All parameter definition types described in this version of the specification are listed in the table below, along with their associated parameter definitions.
-- The type PARAMETER_DEFINITION_MIX_GAIN shall not be present in Audio Element OBU.
-- The type shall not be duplicated in one Audio Element OBU.
-- When [=codec_id=] = 'fLaC' or 'ipcm', the type PARAMETER_DEFINITION_RECON_GAIN shall not be present.
-- When [=num_layers=] > 1, the type PARAMETER_DEFINITION_RECON_GAIN shall be present.
-- When the highest [=loudspeaker_layout=] of (non-)scalable channel audio is less than or equal to 3.1.2ch, the type PARAMETER_DEFINITION_DEMIXING shall not be present.
-- When the highest [=loudspeaker_layout=] of scalable channel audio ([=num_layers=] > 1) is greater than 3.1.2ch, the types of both PARAMETER_DEFINITION_DEMIXING and both PARAMETER_DEFINITION_RECON_GAIN shall be present.
-- When [=num_layers=] = 1 and [=loudspeaker_layout=] is greater than 3.1.2ch, the type PARAMETER_DEFINITION_DEMIXING may be present.
+- The type PARAMETER_DEFINITION_MIX_GAIN SHALL NOT be present in [=Audio Element OBU=].
+- The type SHALL NOT be duplicated in one [=Audio Element OBU=].
+- When [=codec_id=] = 'fLaC' or 'ipcm', the type PARAMETER_DEFINITION_RECON_GAIN SHALL NOT be present.
+- When [=num_layers=] > 1, the type PARAMETER_DEFINITION_RECON_GAIN SHALL be present.
+- When the highest [=loudspeaker_layout=] of (non-)scalable channel audio is less than or equal to 3.1.2ch, the type PARAMETER_DEFINITION_DEMIXING SHALL NOT be present.
+- When the highest [=loudspeaker_layout=] of scalable channel audio ([=num_layers=] > 1) is greater than 3.1.2ch, the types of both PARAMETER_DEFINITION_DEMIXING and both PARAMETER_DEFINITION_RECON_GAIN SHALL be present.
+- When [=num_layers=] = 1 and [=loudspeaker_layout=] is greater than 3.1.2ch, the type PARAMETER_DEFINITION_DEMIXING MAY be present.
 
 <table class = "def">
 <tr>
@@ -698,26 +698,26 @@ A ChannelGroup is defined in [[#iamfgeneration]]. The order of the substreams in
 </table>
 
 <dfn noexport>demixing_info</dfn> provides the parameter definition for the demixing information to reconstruct channel audios according to [=loudspeaker_layout=] from scalable channel audio. The parameter definition is provided by DemixingParamDefinition() and the corresponding parameter data to be provided in parameter blocks is specified in demixing_info_parameter_data().
-- In this parameter definition, [=parameter_rate=] shall be set to the sample rate of this Audio Element and [=param_definition_mode=] shall be set to 0.
-	- [=duration=] shall be same as [=num_samples_per_frame=] of this Audio Element.
-	- [=num_subblocks=] shall be set to 1.
-	- [=constant_subblock_duration=] shall be same as [=duration=]
+- In this parameter definition, [=parameter_rate=] SHALL be set to the sample rate of this [=Audio Element=] and [=param_definition_mode=] SHALL be set to 0.
+	- [=duration=] SHALL be same as [=num_samples_per_frame=] of this [=Audio Element=].
+	- [=num_subblocks=] SHALL be set to 1.
+	- [=constant_subblock_duration=] SHALL be same as [=duration=]
 
 <dfn noexport>recon_gain_info</dfn> provides the parameter definition for the gain value to reconstruct channel audios according to [=loudspeaker_layout=] from scalable channel audio. The parameter definition is provided by ReconGainParamDefinition() and the corresponding parameter data to be provided in parameter blocks is specified in recon_gain_info_parameter_data().
-- In this parameter definition, [=parameter_rate=] shall be set to the sample rate of this Audio Element and [=param_definition_mode=] shall be set to 0.
-	- [=duration=] shall be same as [=num_samples_per_frame=] of this Audio Element.
-	- [=num_subblocks=] shall be set to 1.
-	- [=constant_subblock_duration=] shall be same as [=duration=]
+- In this parameter definition, [=parameter_rate=] SHALL be set to the sample rate of this [=Audio Element=] and [=param_definition_mode=] SHALL be set to 0.
+	- [=duration=] SHALL be same as [=num_samples_per_frame=] of this [=Audio Element=].
+	- [=num_subblocks=] SHALL be set to 1.
+	- [=constant_subblock_duration=] SHALL be same as [=duration=]
 
-<dfn noexport>scalable_channel_layout_config()</dfn> is a class that provides the metadata required for combining the substreams identified here in order to reconstruct a scalable channel layout.
+<dfn noexport>scalable_channel_layout_config()</dfn> is a class that provides the metadata required for combining the [=Audio Substream=]s identified here in order to reconstruct a scalable channel layout.
 
-<dfn noexport>ambisonics_config()</dfn> is a class that provides the metadata required for combining the substreams identified here in order to reconstruct an Ambisonics layout.
+<dfn noexport>ambisonics_config()</dfn> is a class that provides the metadata required for combining the [=Audio Substream=]s identified here in order to reconstruct an Ambisonics layout.
 
-<dfn noexport>default_demixing_info_parameter_data()</dfn> and <dfn noexport>default_w</dfn> specify the default parameter data for demixing to apply to all audio samples when there are no Parameter Block OBUs (with [=parameter_id=] defined in this DemixingParamDefinition()) provided.
-- [=default_demixing_info_parameter_data()=] conforms to [=demixing_info_parameter_data()=] except that [=w_idx_offset=] shall be ignored.
+<dfn noexport>default_demixing_info_parameter_data()</dfn> and <dfn noexport>default_w</dfn> specify the default parameter data for demixing to apply to all audio samples when there are no [=Parameter Block OBU=]s (with [=parameter_id=] defined in this DemixingParamDefinition()) provided.
+- [=default_demixing_info_parameter_data()=] conforms to [=demixing_info_parameter_data()=] except that [=w_idx_offset=] SHALL be ignored.
 - Instead of that, [=default_w=] directly indicates the weight value [=w(k)=] for [=TF2toT2 de-mixer=] specified in [[#processing-scalablechannelaudio-demixer]].
 
-Mapping of default_w to w(k) should be as follows:
+Mapping of default_w to w(k) SHOULD be as follows:
 <pre class = "def">
  default_w :   w(k)
     0      :    0
@@ -734,13 +734,13 @@ Mapping of default_w to w(k) should be as follows:
     11     :  reserved
 </pre>
 
-A default recon gain value of 0db is implied when there are no Parameter Block OBUs (with [=parameter_id=] defined in this ReconGainParamDefinition()) provided. 
+A default recon gain value of 0db is implied when there are no [=Parameter Block OBU=]s (with [=parameter_id=] defined in this ReconGainParamDefinition()) provided. 
 
 ### Parameter Definition Syntax and Semantics ### {#parameter-definition}
 
 Parameter definition classes inherits from the abstract <dfn noexport>ParamDefinition()</dfn> class.
 
-For a given parameter, its timeline is fully aligned with that of the Audio Element which the given parameter is applied to. Where, the timeline of the Audio Element is on post coding domain (i.e. before trimming data). So, when we assume the same sample rate between the given Parameter and the Audio Element In other words, the start timestamp and the duration of the given Parameter are same as those of the Audio Elememnt, respectively.
+For a given [=Parameter Substream=], its timeline is fully aligned with that of the [=Audio Element=] which the given [=Parameter Substream=] is applied to. Where, the timeline of the [=Audio Element=] is on post coding domain (i.e. before trimming data). So, when we assume the same sample rate between the given [=Parameter Substream=] and the [=Audio Element=], the start timestamp and the duration of the given [=Parameter Substream=] are same as those of the [=Audio Element=], respectively.
 
 <b>Syntax</b>
 
@@ -766,29 +766,29 @@ abstract class ParamDefinition() {
 
 <b>Semantics</b>
 
-<dfn value noexport for="ParamDefinition()">parameter_id</dfn> indicates the identifier for the Parameter which this parameter definition refers to.
+<dfn value noexport for="ParamDefinition()">parameter_id</dfn> indicates the identifier for the [=Parameter Substream=] which this parameter definition refers to.
 
-<dfn noexport>parameter_rate</dfn> specifies the rate used by this parameter, expressed as ticks per second. Time-related fields associated with this parameter, such as durations, shall be expressed in the number of ticks.
-- The rate shall be such a value that (the rate x [=num_samples_per_frame=]) / (the sample rate of Audio Element) is a non-zero integer.
+<dfn noexport>parameter_rate</dfn> specifies the rate used by this [=Parameter Substream=], expressed as ticks per second. Time-related fields associated with this [=Parameter Substream=], such as durations, SHALL be expressed in the number of ticks.
+- The rate SHALL be such a value that (the rate x [=num_samples_per_frame=]) / (the sample rate of [=Audio Element=]) is a non-zero integer.
 
 <dfn noexport>param_definition_mode</dfn> indicates if this parameter definition specifies duration, num_subblocks, constant_subblock_duration and subblock_duration fields for the parameter blocks associated to the [=parameter_id=].
-- When this field is set to 0, all of duration, num_subblocks, constant_subblock_duration and subblock_duration fields shall be specified in this parameter definition mapped to the [=parameter_id=]. In that case, none of parameter blocks associated to this parameter definition shall specify duration, num_subblocks, constant_subblock_duration and subblock_duration fields. 
-- When this field is set to 1, none of duration, num_subblocks, constant_subblock_duration and subblock_duration fields shall be specificed in this parameter definition. In that case, each of parameter blocks associated to this parameter definition shall specify its own duration, num_subblocks, constant_subblock_duration and subblock_duration fields.
+- When this field is set to 0, all of duration, num_subblocks, constant_subblock_duration and subblock_duration fields SHALL be specified in this parameter definition mapped to the [=parameter_id=]. In that case, none of parameter blocks associated to this parameter definition SHALL specify duration, num_subblocks, constant_subblock_duration and subblock_duration fields. 
+- When this field is set to 1, none of duration, num_subblocks, constant_subblock_duration and subblock_duration fields SHALL be specificed in this parameter definition. In that case, each of parameter blocks associated to this parameter definition SHALL specify its own duration, num_subblocks, constant_subblock_duration and subblock_duration fields.
 
 <dfn noexport>duration</dfn> specifies the duration for which all of parameter blocks associated to this parameter definition are valid and applicable.
 
 <dfn noexport>num_subblocks</dfn> specifies the number of different sets of parameter values specified in all of parameter blocks associated to this parameter definition, where each set describes a different subblock of the timeline, contiguously.
 
-<dfn noexport>constant_subblock_duration</dfn> specifies the duration of each subblock, in the case where all subblocks except the last subblock have equal durations. If all subblocks except the last subblock do not have equal durations, the value of constant_subblock_duration shall be set to 0. 
+<dfn noexport>constant_subblock_duration</dfn> specifies the duration of each subblock, in the case where all subblocks except the last subblock have equal durations. If all subblocks except the last subblock do not have equal durations, the value of constant_subblock_duration SHALL be set to 0. 
 
 When it defines <dfn noexport>D</dfn> = the value of [=duration=], <dfn noexport>NS</dfn> = the value of [=num_subblocks=], <dfn noexport>CSI</dfn> = the value of [=constant_subblock_duration=] and <dfn noexport>SI</dfn> = the value of [=subblock_duration=].
-- When [=CSI=] != 0, [=NS=] x [=CSI=] shall be equal to or greater than [=D=].
-	- If [=NS=] x [=CSI=] > [=D=], the actual duration of the last subblock shall be [=D=] - ([=NS=] - 1) x [=CSI=].
-- When [=CSI=] = 0, the summation of all [=SI=]s in this parameter block shall be equal to [=D=].
+- When [=CSI=] != 0, [=NS=] x [=CSI=] SHALL be equal to or greater than [=D=].
+	- If [=NS=] x [=CSI=] > [=D=], the actual duration of the last subblock SHALL be [=D=] - ([=NS=] - 1) x [=CSI=].
+- When [=CSI=] = 0, the summation of all [=SI=]s in this parameter block SHALL be equal to [=D=].
 
 <dfn noexport>subblock_duration</dfn> specifies the duration for the given subblock.
 
-Each value of [=duration=], [=constant_subblock_duration=] and [=subblock_duration=] shall be expressed as the number of ticks at the [=parameter_rate=] specified in the corresponding parameter definition.
+Each value of [=duration=], [=constant_subblock_duration=] and [=subblock_duration=] SHALL be expressed as the number of ticks at the [=parameter_rate=] specified in the corresponding parameter definition.
 
 ### Scalable Channel Layout Config Syntax and Semantics ### {#syntax-scalable-channel-layout-config}
 
@@ -820,28 +820,28 @@ class channel_audio_layer_config(i) {
 }
 ```
 
-When an audio element is composed of G(r) number of substreams, scalable channel audio for the audio element is layered into [=num_layers=] = r number of ChannelGroups.
-- The order of ChannelGroups in each temporal unit shall be same as the order of channel_audio_layer_config()s in scalable_channel_layout_config().
-- ChannelGroup #q consists of G(q)-G(q-1) number of substreams. Where, q = 1, 2, ..., r and G(0) = 0.
-- IA frame is a set of audio_frame_obus with the same start timestamp of the single audio element for scalable channel audio. Each of them comes from each substream.
-- Every IA frame shall have the same number of audio_frame_obus.
-- When r > 1, parameter_block_obu() may present with IA frame. 
+When an [=Audio Element=] is composed of G(r) number of [=Audio Substream=]s, scalable channel audio for the [=Audio Element=] is layered into [=num_layers=] = r number of [=ChannelGroup=]s.
+- The order of [=ChannelGroup=]s in each [=Temporal Unit=] SHALL be same as the order of channel_audio_layer_config()s in scalable_channel_layout_config().
+- [=ChannelGroup=] #q consists of G(q)-G(q-1) number of [=Audio Substream=]s. Where, q = 1, 2, ..., r and G(0) = 0.
+- Audio Frames is a set of [=Audio Frame OBU=]s with the same start timestamp of the [=Audio Element=] for scalable channel audio. Each of them comes from each coded [=Audio Substream=].
+- Every Audio Frames SHALL have the same number of [=Audio Frame OBU=]s.
+- [=Parameter Block OBU=] MAY or MAY not present with Audio Frames. 
 
 <center><img src="images/Immersive Audio Sequence with scalable channel audio (before OBU packing).png" style="width:100%; height:auto;"></center>
 <center><figcaption>Immersive Audio Sequence with scalable channel audio (before OBU packing)</figcaption></center>
 
-The IA decoder shall select one of one or more channel audios provided by scalable channel audio. The IA decoder should select the appropriate channel audio according to the following rules, in order:
-- The IA decoder should first attempt to select the channel audio whose loudspeaker layout matches the physical playback layout.
-- If there is no match, the IA decoder should select the channel audio with the closest specified loudspeaker layout to the physical layout and then apply up or down-mixing appropriately, after decoding and reconstruction of the channel audio. [[#iamfgeneration-scalablechannelaudio-downmixmechanism]] and [[#processing-downmixmatrix]] provide examples of dynamic and static down-mixing matrices for some common layouts that may be used.
+The IA decoder SHALL select one of one or more channel audios provided by scalable channel audio. The IA decoder SHOULD select the appropriate channel audio according to the following rules, in order:
+- The IA decoder SHOULD first attempt to select the channel audio whose loudspeaker layout matches the physical playback layout.
+- If there is no match, the IA decoder SHOULD select the channel audio with the closest specified loudspeaker layout to the physical layout and then apply up or down-mixing appropriately, after decoding and reconstruction of the channel audio. [[#iamfgeneration-scalablechannelaudio-downmixmechanism]] and [[#processing-downmixmatrix]] provide examples of dynamic and static down-mixing matrices for some common layouts that MAY be used.
 
 <b>Semantics</b>
 
-<dfn noexport>num_layers</dfn> indicates the number of ChannelGroups for scalable channel audio. It shall not be set to zero and its maximum number shall be limited to 6.
-- For Binaural, this field shall be set to 1.
+<dfn noexport>num_layers</dfn> indicates the number of [=ChannelGroup=]s for scalable channel audio. It SHALL NOT be set to zero and its maximum number SHALL be limited to 6.
+- For Binaural, this field SHALL be set to 1.
 
-<dfn noexport>channel_audio_layer_config()</dfn> is a class that provides the information regarding the configuration of ChannelGroup for scalable channel audio. channel_audio_layer_config(i) provides information regarding the configuration of ChannelGroup #i.
+<dfn noexport>channel_audio_layer_config()</dfn> is a class that provides the information regarding the configuration of [=ChannelGroup=] for scalable channel audio. channel_audio_layer_config(i) provides information regarding the configuration of [=ChannelGroup=] #i.
 
-<dfn noexport>loudspeaker_layout</dfn> indicates the channel layout for the channels to be reconstructed from the precedent ChannelGroups and the current ChannelGroup among ChannelGroups for scalable channel audio.
+<dfn noexport>loudspeaker_layout</dfn> indicates the channel layout for the channels to be reconstructed from the precedent [=ChannelGroup=]s and the current [=ChannelGroup=] among [=ChannelGroup=]s for scalable channel audio.
 
 In the current version of the specification, [=loudspeaker_layout=] indicates one of 10 channel layouts including Mono, Stereo, 5.1ch, 5.1.2ch, 5.1.4ch, 7.1ch, 7.1.2ch, 7.1.4ch, 3.1.2ch and Binaural. Where,
 - <dfn noexport>Stereo</dfn> is the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System A (0+2+0)=] of [[!ITU2051-3]].
@@ -875,40 +875,40 @@ Ltf: Left Top Front, Rtf: Right Top Front, Ltr: Left Top Rear, Rtr: Right Top Re
 Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
 ```
 
-For a given input audio with [=audio_element_type=] = CHANNEL_BASED, if the input audio has height channels (e.g 7.1.4ch or 5.1.2ch), each of the list of channel layouts for scalable channel audio is recommended to have height channels (i.e it is recommended to be higher than or equal to 3.1.2ch).
-- Examples for recommended list of channel layouts: 3.1.2ch/5.1.2ch, 3.1.2ch/5.1.2ch/7.1.4ch, 5.1.2ch/7.1.4ch etc..
-- Examples for not-recommended list of channel layouts: 2ch/3.1.2ch/5.1.2ch, 2ch/3.1.2ch/5.1.2ch/7.1.4ch, 2ch/5.1.2ch/7.1.4ch, 2ch/7.1.4ch etc..
+For a given input audio with [=audio_element_type=] = CHANNEL_BASED, if the input audio has height channels (e.g 7.1.4ch or 5.1.2ch), each of the list of channel layouts for scalable channel audio is RECOMMENDED to have height channels (i.e it is RECOMMENDED to be higher than or equal to 3.1.2ch).
+- Examples for RECOMMENDED list of channel layouts: 3.1.2ch/5.1.2ch, 3.1.2ch/5.1.2ch/7.1.4ch, 5.1.2ch/7.1.4ch etc..
+- Examples for NOT RECOMMENDED list of channel layouts: 2ch/3.1.2ch/5.1.2ch, 2ch/3.1.2ch/5.1.2ch/7.1.4ch, 2ch/5.1.2ch/7.1.4ch, 2ch/7.1.4ch etc..
 
 NOTE: Contents providers may be satisfied with the down-mixed audio having no height channels even though the down-mix mechanism, specified in [[#iamfgeneration-scalablechannelaudio-downmixmechanism]], drops height channels when it does down-mix from input channel audio with height channels to surround channels for example from 7.14ch to Mono, Stereo, 5.1ch or 7.1ch. In that case, encoder may generate a scalable audio with the down-mixed audio without having height channels from the input channel audio with height channels. In other words, this specification does not disallow for scalable audios to have a down-mixed audio without having height channels from input channel audio having height channels.
 
 NOTE: The Ltr and Rtr of 5.1.4ch down-mixed from 7.1.4ch is within the range of Ltb and Rtb of 7.1.4ch.
 
-<dfn noexport>output_gain_is_present_flag</dfn> indicates if output_gain information fields for the ChannelGroup presents .
-- 0: No output_gain information fields for the ChannelGroup shall be present.
-- 1: output_gain information fields for the ChannelGroup present. In this case, output_gain_flags and output_gain fields shall be present.
+<dfn noexport>output_gain_is_present_flag</dfn> indicates if output_gain information fields for the [=ChannelGroup=] presents .
+- 0: No output_gain information fields for the [=ChannelGroup=] SHALL be present.
+- 1: output_gain information fields for the [=ChannelGroup=] present. In this case, output_gain_flags and output_gain fields SHALL be present.
 
-<dfn noexport>recon_gain_is_present_flag</dfn> indicates if recon_gain information fields for the ChannelGroup presents in recon_gain_info_parameter_data().
-- 0: No recon_gain information fields for the ChannelGroup shall be present in recon_gain_info_parameter_data().
-- 1: recon_gain information fields for the ChannelGroup present in recon_gain_info_parameter_data(). In this case, recon_gain_flags and recon_gain fields shall be present.
+<dfn noexport>recon_gain_is_present_flag</dfn> indicates if recon_gain information fields for the [=ChannelGroup=] presents in recon_gain_info_parameter_data().
+- 0: No recon_gain information fields for the [=ChannelGroup=] SHALL be present in recon_gain_info_parameter_data().
+- 1: recon_gain information fields for the [=ChannelGroup=] present in recon_gain_info_parameter_data(). In this case, recon_gain_flags and recon_gain fields SHALL be present.
 
-<dfn noexport>substream_count</dfn> specifies the number of audio substreams. It must be the same as [=num_substreams=] in its corresponding audio_element().
+<dfn noexport>substream_count</dfn> specifies the number of [=Audio Substream=]s. The sum of all [=substream_count]s in this OBU SHALL be the same as [=num_substreams=] in this OBU.
 
-<dfn noexport>coupled_substream_count</dfn> specifies the number of referenced substreams that are coded as coupled stereo channels.
+<dfn noexport>coupled_substream_count</dfn> specifies the number of referenced [=Audio Substream=]s, each of which are coded as coupled stereo channels.
 
-Mono or stereo coding shall be only allowed for the version of this specification.
-- Each pair of coupled stereo channels in the same ChannelGroup shall be coded as stereo mode to generate one single substream and each of non-coupled channels in the same ChannelGroup shall be coded as mono mode to generate one single substream.
+Mono or stereo coding SHALL be only allowed for the version of this specification.
+- Each pair of coupled stereo channels in the same [=ChannelGroup=] SHALL be coded as stereo mode to generate one single coded [=Audio Substream=] and each of non-coupled channels in the same [=ChannelGroup=] SHALL be coded as mono mode to generate one single coded [=Audio Substream=].
 	- <dfn noexport>Coupled stereo channels</dfn>: L/R, Ls/Rs, Lss/Rss, Lrs/Rrs, Ltf/Rtf, Ltb/Rtb
 	- <dnf noexport>Non-coupled channels</dfn>: C, LFE, L
 
-The order of substreams in each ChannelGroup shall be as follows:
-- Coupled Substreams comes first and followed by non-coupled Substreams.
-- Coupled Substreams for surround channels comes first and followed by one(s) for top channels.
-- Coupled Substreams for front channels comes first and followed by one(s) for side, rear and back channels.
-- Coupled Substreams for side channels comes first and followed by one(s) for rear channels.
+The order of [=Audio Substream=]s in each [=ChannelGroup=] SHALL be as follows:
+- Coupled substreams comes first and followed by non-coupled substreams.
+- Coupled substreams for surround channels comes first and followed by one(s) for top channels.
+- Coupled substreams for front channels comes first and followed by one(s) for side, rear and back channels.
+- Coupled substreams for side channels comes first and followed by one(s) for rear channels.
 - Center channel comes first and followed by LFE and followed by the other one.
-- Where, <dfn noexport>non-coupled substream</dfn> is a coded substream from one of non-coupled channels.
+- Where, <dfn noexport>non-coupled substream</dfn> is a coded [=Audio Substream=] from one of non-coupled channels.
 
-<dfn noexport>output_gain_flags</dfn> indicates the channels which output_gain is applied to. If a bit set to 1, output_gain shall be applied to the channel. Otherwise, output_gain shall not be applied to the channel.
+<dfn noexport>output_gain_flags</dfn> indicates the channels which output_gain is applied to. If a bit set to 1, output_gain SHALL be applied to the channel. Otherwise, output_gain SHALL NOT be applied to the channel.
 
 
 <pre class = "def">
@@ -965,34 +965,34 @@ ambisonics_mode: Method of coding Ambisonics.
    1    : PROJECTION
 </pre>
 
-If ambisonics_mode is equal to MONO, this indicates that the Ambisonics channels are coded as individual mono substreams. For LPCM, [=ambisonics_mode=] shall be equal to MONO. 
+If ambisonics_mode is equal to MONO, this indicates that the Ambisonics channels are coded as individual mono substreams. For LPCM, [=ambisonics_mode=] SHALL be equal to MONO. 
 
 If ambisonics_mode is equal to PROJECTION, this indicates that the Ambisonics channels are first linearly projected onto another subspace before coding as a mix of coupled stereo and mono substreams.
 
 <dfn noexport>output_channel_count</dfn> complies with [=channel count=] in [[!RFC8486]] with following restrictions:
 - The allowed numbers of [=output_channel_count=] are (1+n)^2, where n = 0, 1, 2, ..., 14. 
-- In other words, the scene-based audio element shall not include non-diegetic channels.
+- In other words, the scene-based [=Audio Element=] SHALL NOT include non-diegetic channels.
 
-[=substream_count=] specifies the number of audio substreams. It must be the same as [=num_substreams=] in its corresponding audio_element().
+[=substream_count=] specifies the number of [=Audio Substream=]s. It SHALL be the same as [=num_substreams=] in this OBU.
 
 <dfn noexport>channel_mapping</dfn> complies with the one for [=ChannelMappingFamily=] = 2 in [[!RFC8486]].
 
-[=coupled_substream_count=] specifies the number of referenced substreams that are coded as coupled stereo channels, where M <= N.
+[=coupled_substream_count=] specifies the number of referenced [=Audio Substream=]s that are coded as coupled stereo channels, where M <= N.
 
 <dfn noexport>demixing_matrix</dfn> complies with the one for [=ChannelMappingFamily=] = 3 in [[!RFC8486]] except the byte order of each of matrix coefficients is converted to big endian.
 
-The order of substreams in ChannelGroup shall conform to [[RFC8486]].
+The order of [=Audio Substream=]s in [=ChannelGroup=] SHALL conform to [[RFC8486]].
 
 
 ## Mix Presentation OBU Syntax and Semantics ## {#obu-mixpresentation}
 
 This section specifies the OBU payload of OBU_IA_Mix_Presentation.
 
-The metadata in mix_presentation() specifies how to render, process and mix one or more audio elements, with details provided in [[#processing-mixpresentation]].
+The metadata in mix_presentation() specifies how to render, process and mix one or more [=Audio Element=]s, with details provided in [[#processing-mixpresentation]].
 
-An IA sequence may have one or more mix presentations specified. The IA parser shall select the appropriate mix presentation to process according to the rules specified in [[#processing-mixpresentation-selection]].
+An IA sequence MAY have one or more [=Mix Presentation=]s specified. The IA parser SHALL select the appropriate [=Mix Presentation=] to process according to the rules specified in [[#processing-mixpresentation-selection]].
 
-A mix presentation may contain one or more sub-mixes. Common use-cases may specify only one sub-mix, which includes all rendered and processed audio elements used in the mix presentation. The use-case for specifying more than one sub-mix arises if an IA multiplexer is merging two or more IA sequences. In this case, it may choose to capture the loudness information from the original IA sequences in multiple sub-mixes, instead of recomputing the loudness information for the final mix.
+A [=Mix Presentation=] MAY contain one or more sub-mixes. Common use-cases MAY specify only one sub-mix, which includes all rendered and processed [=Audio Element=]s used in the [=Mix Presentation=]. The use-case for specifying more than one sub-mix arises if an IA multiplexer is merging two or more IA sequences. In this case, it MAY choose to capture the loudness information from the original IA sequences in multiple sub-mixes, instead of recomputing the loudness information for the final mix.
 
 <b>Syntax</b>
 ```
@@ -1030,26 +1030,26 @@ class mix_presentation_obu() {
 
 <b>Semantics</b>
 
-<dfn noexport>mix_presentation_id</dfn> defines an identifier for a Mix Presentation. Within an IA Sequence, there shall be exactly one non-redundant Mix Presentation OBU with a given identifier. This identifier may be used by the application to select which Mix Presentation(s) to offer.
+<dfn noexport>mix_presentation_id</dfn> defines an identifier for a [=Mix Presentation=]. Within an IA Sequence, there SHALL be exactly one non-redundant [=Mix Presentation OBU=] with a given identifier. This identifier MAY be used by the application to select which [=Mix Presentation=](s) to offer.
 
 <dfn noexport>count_label</dfn> indicates the number of labels in different languages.
 
-<dfn noexport>language_label</dfn> specifies the language which both [=mix_presentation_friendly_label=] and [=audio_element_friendly_label=] are written in. It shall comform to [[!BCP47]]. The same language shall not be duplicated in this loop. 
-- The ith label of both mix_presentation_annotation() and mix_presentation_element_annotation() shall be written in the language indicated by the ith [=language_label=]. Where, i = 0, 1, ..., [=count_label=] -1.
+<dfn noexport>language_label</dfn> specifies the language which both [=mix_presentation_friendly_label=] and [=audio_element_friendly_label=] are written in. It SHALL comform to [[!BCP47]]. The same language SHALL NOT be duplicated in this loop. 
+- The ith label of both mix_presentation_annotation() and mix_presentation_element_annotation() SHALL be written in the language indicated by the ith [=language_label=]. Where, i = 0, 1, ..., [=count_label=] -1.
 
-<dfn noexport>mix_presentation_annotations()</dfn> is a class that provides informational metadata that an IA parser should refer to when selecting the mix presentation to use. The metadata may also be used by the playback system to display information to the user, but is not used in the rendering or mixing process to generate the final output audio signal.
+<dfn noexport>mix_presentation_annotations()</dfn> is a class that provides informational metadata that an IA parser SHOULD refer to when selecting the [=Mix Presentation=] to use. The metadata MAY also be used by the playback system to display information to the user, but is not used in the rendering or mixing process to generate the final output audio signal.
 
 <dfn noexport>num_sub_mixes</dfn> specifies the number of sub-mixes.
 
-<dfn noexport>num_audio_elements</dfn> specifies the number of audio elements that are used in this mix presentation to generate the final output audio signal for playback.
+<dfn noexport>num_audio_elements</dfn> specifies the number of [=Audio Element=]s that are used in this [=Mix Presentation=] to generate the final output audio signal for playback.
 
-<dfn value noexport for ="mix_presentation_obu()">audio_element_id</dfn> indicates the identifier for an Audio Element which this Mix Presentation refers to.
+<dfn value noexport for ="mix_presentation_obu()">audio_element_id</dfn> indicates the identifier for an [=Audio Element=] which this [=Mix Presentation=] refers to.
 
-<dfn noexport>mix_presentation_element_annotations()</dfn> is a class that provides informational metadata that an IA parser should refer to when selecting the referenced audio element to use. The metadata may also be used by the playback system to display information to the user, but is not used in the rendering or mixing process to generate the final output audio signal.
+<dfn noexport>mix_presentation_element_annotations()</dfn> is a class that provides informational metadata that an IA parser SHOULD refer to when selecting the referenced [=Audio Element=] to use. The metadata MAY also be used by the playback system to display information to the user, but is not used in the rendering or mixing process to generate the final output audio signal.
 
-<dfn noexport>rendering_config()</dfn> is a class that provides the metadata required for rendering the referenced audio element. 
+<dfn noexport>rendering_config()</dfn> is a class that provides the metadata required for rendering the referenced [=Audio Element=]. 
 
-<dfn noexport>element_mix_config()</dfn> is a class that provides the metadata required for applying any processing to the referenced and rendered audio element before being summed with other processed audio elements.
+<dfn noexport>element_mix_config()</dfn> is a class that provides the metadata required for applying any processing to the referenced and rendered [=Audio Element=] before being summed with other processed [=Audio Element=]s.
 
 <dfn noexport>output_mix_config()</dfn> is a class that provides the metadata required for post-processing the mixed audio signal to generate the audio signal for playback.
 
@@ -1057,19 +1057,19 @@ class mix_presentation_obu() {
 
 <dfn noexport>loudness_layout</dfn> identifies the layout that was used to measure the loudness information provided in this sub-mix.
 
-<dfn noexport>loudness</dfn> provides the loudness information which was measured on [=loudness_layout=] for the mixed audio element by this sub-mix.
+<dfn noexport>loudness</dfn> provides the loudness information which was measured on [=loudness_layout=] for the [=Mixed Audio Element=] by this sub-mix.
 
-The layout specified in [=loudness_layout=] should not be higher than the highest layout among layouts provided by the audio elements except zero-order Ambisonics or Mono. In other words, rendering from an audio element with the highest layout (except zero-order Ambisonics or Mono) to the [=loudness_layout=] should not require an upmix.
-- [=loudness_layout=] for zero-order Ambisonics or Mono should not be higher than Stereo. Zero-order Ambisonics or Mono may be rendered to Stereo.
+The layout specified in [=loudness_layout=] SHOULD NOT be higher than the highest layout among layouts provided by the [=Audio Element=]s except zero-order Ambisonics or Mono. In other words, rendering from an [=Audio Element=] with the highest layout (except zero-order Ambisonics or Mono) to the [=loudness_layout=] SHOULD NOT require an upmix.
+- [=loudness_layout=] for zero-order Ambisonics or Mono SHOULD NOT be higher than Stereo. Zero-order Ambisonics or Mono MAY be rendered to Stereo.
 
-If one sub-mix of Mix Presentation OBU includes only one single scalable channel audio, then it complies with as follows:
-- [=num_layouts=] shall be greater than or equal to [=num_layers=] specified in [=scalable_channel_layout_config()=] of Audio Element OBU for the [=audio_element_id=] except the following cases:
+If one sub-mix of [=Mix Presentation OBU=] includes only one single scalable channel audio, then it complies with as follows:
+- [=num_layouts=] SHALL be greater than or equal to [=num_layers=] specified in [=scalable_channel_layout_config()=] of [=Audio Element OBU=] for the [=audio_element_id=] except the following cases:
 
 The highest [=loudness_layout=] specified in one sub-mix except zero-order Ambisonics or Mono is the layout which was used for authoring the sub-mix.
 - The highest [=loudness_layout=] for zero-order Ambisonics or Mono is Stereo.
  
-Each sub-mix shall include [=loudness_layout=] to identify [=Loudspeaker configuration for Sound System A (0+2+0)=] (i.e. Stereo). In other words, each sub-mix shall include loudness_info() for Stereo. 
-- If the mixed audio element by each sub-mix is Mono, then its [=loudness=] for [=loudness_layout=] = Stereo should be measured on the Stereo generated from the Mono by the equations, L = 0.707 x Mono and R = 0.707 x Mono. 
+Each sub-mix SHALL include [=loudness_layout=] to identify [=Loudspeaker configuration for Sound System A (0+2+0)=] (i.e. Stereo). In other words, each sub-mix SHALL include loudness_info() for Stereo. 
+- If the [=Mixed Audio Element=] by each sub-mix is Mono, then its [=loudness=] for [=loudness_layout=] = Stereo SHOULD be measured on the Stereo generated from the Mono by the equations, L = 0.707 x Mono and R = 0.707 x Mono. 
 
 ### Mix Presentation Annotations Syntax and Semantics ### {#obu-mixpresentation-annotation}
 
@@ -1082,7 +1082,7 @@ class mix_presentation_annotations() {
 
 <b>Semantics</b>
 
-<dfn noexport>mix_presentation_friendly_label</dfn> specifies a human-friendly label to describe this mix presentation.
+<dfn noexport>mix_presentation_friendly_label</dfn> specifies a human-friendly label to describe this [=Mix Presentation=].
 
 
 ### Mix Presentation Element Annotations Syntax and Semantics ### {#obu-mixpresentation-elementannotation}
@@ -1096,11 +1096,11 @@ class mix_presentation_element_annotations() {
 
 <b>Semantics</b>
 
-<dfn noexport>audio_element_friendly_label</dfn> specifies a human-friendly label to describe the referenced audio element.
+<dfn noexport>audio_element_friendly_label</dfn> specifies a human-friendly label to describe the referenced [=Audio Element=].
 
 ### Rendering Config Syntax and Semantics ### {#syntax-rendering-config}
 
-During playback, an audio element should be rendered using a pre-defined renderer according to [[#processing-mixpresentation-rendering]]. In this version of the specification, no additional metadata is required to configure the renderers, and as such, <code>rendering_config()</code> has an empty payload.
+During playback, an [=Audio Element=] SHOULD be rendered using a pre-defined renderer according to [[#processing-mixpresentation-rendering]]. In this version of the specification, no additional metadata is required to configure the renderers, and as such, <code>rendering_config()</code> has an empty payload.
 
 <b>Syntax</b>
 
@@ -1113,7 +1113,7 @@ class rendering_config() {
 
 ### Element Mix Config Syntax and Semantics ### {#syntax-element-mix-config}
 
-[=element_mix_config()=] provides a gain value to be applied to the rendered audio element signal.
+[=element_mix_config()=] provides a gain value to be applied to the rendered [=Audio Element=] signal.
 
 <b>Syntax</b>
 
@@ -1131,9 +1131,9 @@ class MixGainParamDefinition() extends ParamDefinition() {
 
 <b>Semantics</b>
 
-<dfn noexport>mix_gain</dfn> provides the parameter definition for the gain value that is applied to all channels of the rendered audio element signal. The parameter definition is provided by MixGainParamDefinition() and the corresponding parameter data to be provided in parameter blocks is specified in mix_gain_parameter_data().
+<dfn noexport>mix_gain</dfn> provides the parameter definition for the gain value that is applied to all channels of the rendered [=Audio Element=] signal. The parameter definition is provided by MixGainParamDefinition() and the corresponding parameter data to be provided in parameter blocks is specified in mix_gain_parameter_data().
 
-<dfn noexport>default_mix_gain</dfn> specifies the default mix gain value to apply when there are no mix gain parameter blocks provided. This value is expressed in dB and shall be applied to all channels in the rendered audio element. It is stored as a 16-bit, signed, two's complement fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]).
+<dfn noexport>default_mix_gain</dfn> specifies the default mix gain value to apply when there are no mix gain parameter blocks provided. This value is expressed in dB and SHALL be applied to all channels in the rendered [=Audio Element=]. It is stored as a 16-bit, signed, two's complement fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]).
 
 
 ### Output Mix Config Syntax and Semantics ### {#obu-mixpresentation-outputmix}
@@ -1317,7 +1317,7 @@ class loudness_info() {
 
 <b>Semantics</b>
 
-<dfn noexport>info_type</dfn> is a bitmask that specifies the type of optional loudness information provided. The bits are set as follows, where the first bit is the LSB:
+<dfn noexport>info_type</dfn> is a bitmask that specifies the type of OPTIONAL loudness information provided. The bits are set as follows, where the first bit is the LSB:
 
 <pre class = "def">
  Bit : Type of information provided
@@ -1341,7 +1341,7 @@ class loudness_info() {
  3~255 : Reserved
 </pre>
 
-There shall be no duplicate values of [=anchor_element=] within one loudness_info().
+There SHALL be no duplicate values of [=anchor_element=] within one loudness_info().
 
 <dfn noexport>anchored_loudness</dfn> specifies the loudness information according to the anchor element, specified in [=LKFS=] as defined in [[!ITU1770-4]].
 
@@ -1391,7 +1391,7 @@ class parameter_block_obu() {
 
 <b>Semantics</b>
 
-<dfn noexport>parameter_id</dfn> defines an identifier for a Parameter. Within an IA Sequence, there shall be exactly one non-redundant Audio Element OBU with this identifier. Parameter Block OBU refer to the Parameter through this identifier.
+<dfn noexport>parameter_id</dfn> defines an identifier for a [=Parameter Substream=]. Within an IA Sequence, there SHALL be exactly one non-redundant [=Audio Element OBU=] with this identifier. [=Parameter Block OBU=] refer to the [=Parameter Substream=] through this identifier.
 
 <dfn noexport>get_param_definition()</dfn> is a run-time function to get the parameter definition type, the parameter definition mode, duration, num_subblocks, constant_subblock_duration and subblock_duration mapped to the parameter_id. 
 
@@ -1399,13 +1399,13 @@ class parameter_block_obu() {
 
 <dfn value noexport for="parameter_block_obu()">num_subblocks</dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different subblock of the timeline, contiguously.
 
-<dfn value noexport for="parameter_block_obu()">constant_subblock_duration</dfn> specifies the duration of each subblock, in the case where all subblocks except the last subblock have equal durations. If all subblocks except the last subblock do not have equal durations, the value of constant_subblock_duration shall be set to 0. 
+<dfn value noexport for="parameter_block_obu()">constant_subblock_duration</dfn> specifies the duration of each subblock, in the case where all subblocks except the last subblock have equal durations. If all subblocks except the last subblock do not have equal durations, the value of constant_subblock_duration SHALL be set to 0. 
 
-Audio Element OBU and/or Mix Presentation OBU is mapping a parameter_id to the parameter definition type. So, IA decoders can know the definition type mapped to the parameter_id.
+[=Audio Element OBU=] and/or [=Mix Presentation OBU=] is mapping a parameter_id to the parameter definition type. So, IA decoders can know the definition type mapped to the parameter_id.
 
 <dfn value noexport for="parameter_block_obu()">subblock_duration</dfn> specifies the duration for the given subblock.
 
-Each value of duration, constant_subblock_duration and subblock_duration shall be expressed as the number of ticks at the [=parameter_rate=] specified in the corresponding parameter definition.
+Each value of duration, constant_subblock_duration and subblock_duration SHALL be expressed as the number of ticks at the [=parameter_rate=] specified in the corresponding parameter definition.
 
 ### Mix Gain Parameter Data Syntax and Semantics ### {#syntax-mix-gain-param}
 
@@ -1422,7 +1422,7 @@ class mix_gain_parameter_data() {
 
 <dfn noexport>animation_type</dfn> specifies the type of animation applied to the parameter values.
 
-<dfn noexport>param_data</dfn> uses the AnimatedParameterData function template. Each of the values defined within this instance (start_point_value, end_point_value and control_point_value) is expressed in dB and shall be applied to all channels in the rendered audio element. They are stored as 16-bit, signed, two's complement fixed-point values with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]).
+<dfn noexport>param_data</dfn> uses the AnimatedParameterData function template. Each of the values defined within this instance (start_point_value, end_point_value and control_point_value) is expressed in dB and SHALL be applied to all channels in the rendered [=Audio Element=]. They are stored as 16-bit, signed, two's complement fixed-point values with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]).
 
 <pre class = "def">
 animation_type : Animation Type
@@ -1523,7 +1523,7 @@ The each bit of [=recon_gain_flags=] indicates the presence of [=recon_gain=] ap
  - 0: It indicates that no [=recon_gain=] presents for the channel.
  - 1: It indicates that [=recon_gain=] presents for the channel.
 
-<dfn noexport>n(i)</dfn> indicates the number of bits for recon_gain_flag(i). It shall be 7 or 12 as depicted in the above figure. Where, i = 0, 1, ..., [=num_layers=] - 1.
+<dfn noexport>n(i)</dfn> indicates the number of bits for recon_gain_flag(i). It SHALL be 7 or 12 as depicted in the above figure. Where, i = 0, 1, ..., [=num_layers=] - 1.
 
 <dfn noexport>recon_gain</dfn> indicates the gain value to be applied to the channel, which is indicated by [=recon_gain_flags=], after decoding of the associated frames and demixing operation. Where, the channel is indicated by recon_gain_flags. Detailed operation by using this value is specified in [[#processing-scalablechannelaudio-recongain]].
 
@@ -1532,7 +1532,7 @@ The each bit of [=recon_gain_flags=] indicates the presence of [=recon_gain=] ap
 
 This section specifies OBU payloads of OBU_IA_Audio_Frame and OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21.
 
-<dfn noexport>audio_substream_id</dfn> is an identifier for the substream associated with this audio frame. Within an IA Sequence, there shall be exactly one non-redundant Audio Element OBU with a [=audio_substream_id=].
+<dfn noexport>audio_substream_id</dfn> is an identifier for the [=Audio Substream=] associated with this audio frame. Within an IA Sequence, there SHALL be exactly one non-redundant [=Audio Element OBU=] with a [=audio_substream_id=].
 
 <b>Syntax</b>
 
@@ -1547,15 +1547,15 @@ class audio_frame_obu(audio_substream_id_in_bitstream) {
 
 <b>Semantics</b>
 
-<dfn noexport>explicit_audio_substream_id</dfn> defines the [=audio_substream_id=] of this frame. The value shall be greater than 21. When this field is not present [=audio_substream_id=] is implicit and is defined as a value from 0 to 21 for OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21 respectively.
+<dfn noexport>explicit_audio_substream_id</dfn> defines the [=audio_substream_id=] of this frame. The value SHALL be greater than 21. When this field is not present [=audio_substream_id=] is implicit and is defined as a value from 0 to 21 for OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21 respectively.
 
-NOTE: The first 22 audio substreams in an IA sequence can use the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21, which have predefined audio substream identifiers associated with them. This reduces bitrate by avoiding the extra [=explicit_audio_substream_id=] field in the bitstream.
+NOTE: The first 22 [=Audio Substream=]s in an IA sequence can use the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21, which have predefined [=audio_substream_id=] associated with them. This reduces bitrate by avoiding the extra [=explicit_audio_substream_id=] field in the bitstream.
 
 <dfn noexport>coded_frame_size</dfn> is the size of [=audio_frame()=] in bytes.
 
-<dfn noexport>audio_frame()</dfn> is the raw coded audio data for the frame. It shall be [=opus packet=] of [[!RFC6716]] for OPUS, [=raw_data_block()=] of [[!AAC]] for AAC-LC and [=FRAME=] of [[!FLAC]] for FLAC.
+<dfn noexport>audio_frame()</dfn> is the raw coded audio data for the frame. It SHALL be [=opus packet=] of [[!RFC6716]] for OPUS, [=raw_data_block()=] of [[!AAC]] for AAC-LC and [=FRAME=] of [[!FLAC]] for FLAC.
 
-For LPCM, [=audio_frame()=] shall be LPCM samples. When more than one byte is used to represent a LPCM sample, the byte order is indicated in [=sample_format_flags=]. 
+For LPCM, [=audio_frame()=] SHALL be LPCM samples. When more than one byte is used to represent a LPCM sample, the byte order is indicated in [=sample_format_flags=]. 
 
 ## Temporal Delimiter OBU Syntax and Semantics ## {#obu-temporaldelimiter}
 
@@ -1568,37 +1568,37 @@ class temporal_delimiter_obu() {
 }
 ```
 
-NOTE: The Temporal Delimiter OBU has an empty payload.
+NOTE: The [=Temporal Delimiter OBU=] has an empty payload.
 
 ## Codec Specific ## {#codec-specific}
 
-This section defines codec specific information for Codec_Specific_Info and Substream.
+This section defines codec specific information for Codec_Specific_Info and its coded [=Audio Substream=].
 
 - <dfn noexport>Codec_Specific_Info</dfn> is composed of [=codec_id=] and [=decoder_config()=]. 
 
-For legacy codecs, [=decoder_config()=] shall be exactly the same information as the conventional file parser feeds to the codec decoders for decoding of the Substream. For future codecs, [=decoder_config()=] shall include all of decoding parameters which are required to decode the Substream.
+For legacy codecs, [=decoder_config()=] SHALL be exactly the same information as the conventional file parser feeds to the codec decoders for decoding of the coded [=Audio Substream=]. For future codecs, [=decoder_config()=] SHALL include all of decoding parameters which are required to decode the coded [=Audio Substream=].
 
-- The payload of Substream is an coded stream for one or more channels. The payload format of Substream is exactly the same as the sample format (before packing OBU) for the audio file which consists of only one single coded stream by the [=codec_id=].
+- A coded [=Audio Substream=] is a coded stream for one or more channels. The format of [=audio_frame()=] is exactly the same as the sample format (before packing OBU) for the audio file which consists of only one single coded stream by the [=codec_id=].
 
 
 ### OPUS Specific ### {#opus-specific}
 
-[=codec_id=] shall be 'Opus'.
+[=codec_id=] SHALL be 'Opus'.
 
 [=decoder_config()=] for OPUS conforms to [=ID Header=] with [=ChannelMappingFamily=] = 0 of [[!RFC7845]] with following constraints:
-- [=Magic Signature=] shall not be present.
-- [=Output Channel Count=] must be set to 2. [=Output Channel Count=] can be ignored because the real value can be determined from the Audio Element OBU and from the opus packet header.
-- [=Pre-skip=] shall be same as the number of audio samples to be trimmed at the start of substreams.
-- [=Output Gain=] shall not be used. In other words, it shall be set to 0dB.
+- [=Magic Signature=] SHALL NOT be present.
+- [=Output Channel Count=] SHALL be set to 2. [=Output Channel Count=] can be ignored because the real value can be determined from the [=Audio Element OBU=] and from the opus packet header.
+- [=Pre-skip=] SHALL be same as the number of audio samples to be trimmed at the start of coded [=Audio Substream=]s.
+- [=Output Gain=] SHALL NOT be used. In other words, it SHALL be set to 0dB.
 - The byte order of each field in [=ID Header=] is converted to big endian.
 
-The payload format of Substream is [=opus packet=] of [[!RFC6716]] which contains only one single frame of mono or stereo channels and which has non-delimiting frame structure.
+The format of [=audio_frame()=] is [=opus packet=] of [[!RFC6716]] which contains only one single frame of mono or stereo channels and which has non-delimiting frame structure.
 
-The sample rate used for computing offsets shall be 48 kHz.
+The sample rate used for computing offsets SHALL be 48 kHz.
 
 ### AAC-LC Specific ### {#aac-lc-specific}
 
-[=codec_id=] shall be 'mp4a'.
+[=codec_id=] SHALL be 'mp4a'.
 
 [=decoder_config()=] for AAC-LC is [=DecoderConfigDescriptor()=] of [[!MP4-Systems]], which is a subset of [=ESDBox=] for [[!MP4-Audio]], with following constraints:
 - [=objectTypeIndication=] = 0x40
@@ -1606,29 +1606,29 @@ The sample rate used for computing offsets shall be 48 kHz.
 - [=upstream=] = 0
 - [=decSpecificInfo()=]: The syntax and values conforms to [=AudioSpecificConfig()=] of [[!MP4-Audio]] with following constraints:
 	- [=audioObjectType=] = 2
-	- [=channelConfiguration=] must be set to 2. The real value can be implied from the Audio Element OBU.
+	- [=channelConfiguration=] SHALL be set to 2. The real value can be implied from the [=Audio Element OBU=].
 	- [=GASpecificConfig()=]: The syntax and values conform to [=GASpecificConfig()=] of [[!MP4-Audio]] with following constraints:
 		- [=frameLengthFlag=] = 0 (1024 lines IMDCT)
 		- [=dependsOnCoreCoder=] = 0
 		- [=extensionFlag=] = 0
 
-The payload format of Substream is one single [=raw_data_block()=] of [[!AAC]] which contains only one single frame of mono or stereo channels.
+The format of [=audio_frame()=] is one single [=raw_data_block()=] of [[!AAC]] which contains only one single frame of mono or stereo channels.
 
-The sample rate used for computing offsets shall be the rate indicated by the [=samplingFrequencyIndex=] in [=GASpecificConfig()=]
+The sample rate used for computing offsets SHALL be the rate indicated by the [=samplingFrequencyIndex=] in [=GASpecificConfig()=]
 
 ### FLAC Specific ### {#flac-specific}
 
-[=codec_id=] shall be 'fLaC', the FLAC stream marker in ASCII, meaning byte 0 of the stream is 0x66, followed by 0x4C 0x61 0x43.
+[=codec_id=] SHALL be 'fLaC', the FLAC stream marker in ASCII, meaning byte 0 of the stream is 0x66, followed by 0x4C 0x61 0x43.
 
 [=decoder_config()=] for FLAC is [=METADATA_BLOCK=] of [[!FLAC]].
 
-The payload format of Substream is [=FRAME=] of [[!FLAC]], which is composed of [=FRAME_HEADER=], followed by [=SUBFRAME=](s) (one [=SUBFRAME=] per channel) and followed by [=FRAME_FOOTER=].
+The format of [=audio_frame()=] is [=FRAME=] of [[!FLAC]], which is composed of [=FRAME_HEADER=], followed by [=SUBFRAME=](s) (one [=SUBFRAME=] per channel) and followed by [=FRAME_FOOTER=].
 
-The sample rate used for computing offsets shall be the sampling rate indicated in the [=METADATA_BLOCK=].
+The sample rate used for computing offsets SHALL be the sampling rate indicated in the [=METADATA_BLOCK=].
 
 ### LPCM Specific ### {#lpcm-specific}
 
-[=codec_id=] shall be 'ipcm'.
+[=codec_id=] SHALL be 'ipcm'.
 
 [=decoder_config()=] for LPCM is as follows:
 
@@ -1641,14 +1641,14 @@ class decoder_config(ipcm) {
 ```
 <dfn noexport>sample_format_flags</dfn> complies with [=format_flags=] specified in [[!MP4-PCM]]. In other words, 0x01 indicates little-endian PCM sample format and 0x00 indicates big-endian PCM sample format.
 
-<dfn noexport>sample_size</dfn> complies with [=PCM_sample_size=] specified in [[!MP4-PCM]]. In other words, it shall take a value from the set 16, 24 and 32. 
+<dfn noexport>sample_size</dfn> complies with [=PCM_sample_size=] specified in [[!MP4-PCM]]. In other words, it SHALL take a value from the set 16, 24 and 32. 
 
-<dfn noexport>sample_rate</dfn> indicates the sample rate of the input audio in Hz. It shall take a value from the set 44.1k, 16k, 32k, 48k and 96k.
+<dfn noexport>sample_rate</dfn> indicates the sample rate of the input audio in Hz. It SHALL take a value from the set 44.1k, 16k, 32k, 48k and 96k.
 
-The payload format of Substream is one [=audio_frame()=] of Audio_Frame_OBU which contains only one single PCM audio frame of mono or stereo channels.
+[=audio_frame()=] of Audio_Frame_OBU is only one single PCM audio frame of mono or stereo channels.
 	- In case of that [=audio_frame()=] contains one single PCM audio frame of stereo channels, the ith audio sample of the left channel is followed by the ith audio sample of the right channel, and then the (i+1)th audio sample of the left channel is followed by the (i+1)th audio sample of the right channel, where i = 1, 2, ..., [=num_samples_per_frame=].
 
-The sample rate used for computing offsets shall be [=sample_rate=].
+The sample rate used for computing offsets SHALL be [=sample_rate=].
 
 # Profiles # {#profiles}
 
