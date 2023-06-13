@@ -474,9 +474,9 @@ NOTE: This means that if one of the value is set to the the number of samples (i
 
 <dfn noexport>obu_extension_flag</dfn> indicates whether the [=extension_header_size=] field presents or not. If it set to 0, the [=extension_header_size=] field SHALL NOT be present. Otherwise, the [=extension_header_size=] field SHALL be present.
 
-This flag SHALL be set to 0 for this version of the specification (i.e. [=version=] = 0). An OBU parser which is conformant with the current version of the specification SHALL be able to parse this flag and [=extension_header_size=].
+This flag SHALL be set to 0 for this version of the specification. An OBU parser which is conformant with this version of the specification SHALL be able to parse this flag and [=extension_header_size=].
 
-NOTE: A future version of specification may use this flag to specify an extension header field by setting [=obu_extension_flag=] = 1 and setting the size of extended header to [=extension_header_size=].
+NOTE: A future version of the specification may use this flag to specify an extension header field by setting [=obu_extension_flag=] = 1 and setting the size of extended header to [=extension_header_size=].
 
 <dfn noexport>obu_size</dfn> indicates the size in bytes of the OBU immediately following the obu_size field of the OBU.
 	
@@ -967,9 +967,9 @@ ambisonics_mode: Method of coding Ambisonics.
    1    : PROJECTION
 </pre>
 
-If ambisonics_mode is equal to MONO, this indicates that the Ambisonics channels are coded as individual mono substreams. For LPCM, [=ambisonics_mode=] SHALL be equal to MONO. 
+If ambisonics_mode is equal to MONO, this indicates that the Ambisonics channels are coded as individual mono [=Audio Substream=]s. For LPCM, [=ambisonics_mode=] SHALL be equal to MONO. 
 
-If ambisonics_mode is equal to PROJECTION, this indicates that the Ambisonics channels are first linearly projected onto another subspace before coding as a mix of coupled stereo and mono substreams.
+If ambisonics_mode is equal to PROJECTION, this indicates that the Ambisonics channels are first linearly projected onto another subspace before coding as a mix of coupled stereo and mono [=Audio Substream=]s.
 
 <dfn noexport>output_channel_count</dfn> complies with [=channel count=] in [[!RFC8486]] with following restrictions:
 - The allowed numbers of [=output_channel_count=] are (1+n)^2, where n = 0, 1, 2, ..., 14. 
@@ -1555,9 +1555,7 @@ NOTE: The first 22 [=Audio Substream=]s in an [=IA Sequence=] can use the OBU ty
 
 <dfn noexport>coded_frame_size</dfn> is the size of [=audio_frame()=] in bytes.
 
-<dfn noexport>audio_frame()</dfn> is the raw coded audio data for the frame. It SHALL be [=opus packet=] of [[!RFC6716]] for OPUS, [=raw_data_block()=] of [[!AAC]] for AAC-LC and [=FRAME=] of [[!FLAC]] for FLAC.
-
-For LPCM, [=audio_frame()=] SHALL be LPCM samples. When more than one byte is used to represent a LPCM sample, the byte order is indicated in [=sample_format_flags=]. 
+<dfn noexport>audio_frame()</dfn> is the coded audio data for the frame. It is codec specific and its format is defined in [[#codec-specific]]. 
 
 ## Temporal Delimiter OBU Syntax and Semantics ## {#obu-temporaldelimiter}
 
@@ -1649,6 +1647,7 @@ class decoder_config(ipcm) {
 
 [=audio_frame()=] of Audio_Frame_OBU is only one single PCM audio frame of mono or stereo channels.
 	- In case of that [=audio_frame()=] contains one single PCM audio frame of stereo channels, the ith audio sample of the left channel is followed by the ith audio sample of the right channel, and then the (i+1)th audio sample of the left channel is followed by the (i+1)th audio sample of the right channel, where i = 1, 2, ..., [=num_samples_per_frame=].
+	- When more than one byte is used to represent a PCM sample, the byte order (i.e. its endianess) is indicated in [=sample_format_flags=].
 
 The sample rate used for computing offsets SHALL be [=sample_rate=].
 
