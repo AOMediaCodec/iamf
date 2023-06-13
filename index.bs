@@ -449,7 +449,7 @@ obu_type: Name of obu_type
    31   : OBU_IA_Sequence_Header
 </pre>
 
-<dfn noexport>obu_redundant_copy</dfn> indicates whether this OBU is a redundant copy of the previous OBU in the IA sequence with the same obu_type. A value of 1 indicates that it is a redundant copy, while a value of 0 indicates that it is not.
+<dfn noexport>obu_redundant_copy</dfn> indicates whether this OBU is a redundant copy of the previous OBU in the [=IA Sequence=] with the same obu_type. A value of 1 indicates that it is a redundant copy, while a value of 0 indicates that it is not.
 
 It SHALL always be set to 0 for the following obu_type values:
 
@@ -512,11 +512,11 @@ Reserved OBUs SHALL be ignored by parsers compliant to this version of the speci
 
 This section specifies obu payload of OBU_IA_Sequence_Header. 
 
-This OBU is used to indicate the start of IA Sequence. So, the first OBU of IA Sequence SHALL be OBU_IA_Sequence_Header.
+This OBU is used to indicate the start of [=IA Sequence=]. So, the first OBU of [=IA Sequence=] SHALL be OBU_IA_Sequence_Header.
 
-NOTE: When an IA Sequence is stored in a file, the [=IA Sequence Header OBU=] can be used to detect that the file contains an IA Sequence.
+NOTE: When an [=IA Sequence=] is stored in a file, the [=IA Sequence Header OBU=] can be used to detect that the file contains an [=IA Sequence=].
 
-This OBU MAY be placed frequently within one single IA Sequence for an application such as broadcasting or multicasting scenario. In that case, the other [=IA Sequence Header OBU=]s except the first one SHALL be marked as redundant (i.e. [=obu_redundant_copy=] = 1).
+This OBU MAY be placed frequently within one single [=IA Sequence=] for an application such as broadcasting or multicasting scenario. In that case, the other [=IA Sequence Header OBU=]s except the first one SHALL be marked as redundant (i.e. [=obu_redundant_copy=] = 1).
 
 <b>Syntax</b>
 
@@ -532,19 +532,19 @@ class ia_sequence_header_obu() {
 
 <dfn noexport>ia_code</dfn> indicates a ‘four-character code’ (4CC), ‘iamf’. 
 	
-NOTE: When IA OBUs are delivered over a protocol that does not provide explicit IA Sequence boundaries, a parser may locate the IA Sequence start by searching for the code 'iamf' preceded by specific OBU header values, e.g. assuming [=obu_extension_flag=] is set to 0 and because [=obu_trimming_status_flag=] is set to 0 for an [=IA Sequence Header OBU=], the OBU header can be 0xF806 or 0xFC06
+NOTE: When IA OBUs are delivered over a protocol that does not provide explicit [=IA Sequence=] boundaries, a parser may locate the [=IA Sequence=] start by searching for the code 'iamf' preceded by specific OBU header values, e.g. assuming [=obu_extension_flag=] is set to 0 and because [=obu_trimming_status_flag=] is set to 0 for an [=IA Sequence Header OBU=], the OBU header can be 0xF806 or 0xFC06
 
-<dfn noexport>profile_name</dfn> indicates that this IA sequence is able to be processed by IA decoders that support the profile indicated in this field. The IA decoders SHALL be able to parse all OBUs explicitly listed in that profile and can still encounter reserved OBUs that it SHOULD skip and it is acceptable to do so. This allows future versions of the specification to define new profiles that can be backwards compatible to old profiles.
+<dfn noexport>profile_name</dfn> indicates that this [=IA Sequence=] is able to be processed by IA decoders that support the profile indicated in this field. The IA decoders SHALL be able to parse all OBUs explicitly listed in that profile and can still encounter reserved OBUs that it SHOULD skip and it is acceptable to do so. This allows future versions of the specification to define new profiles that can be backwards compatible to old profiles.
 - 0: Simple Profile
 - 1: Base Profile
 - 2~255: Reserved
 
-<dfn noexport>profile_compatible</dfn> indicates an additional profile of this specification to which this IA sequence complies. If a sequence only complies with the [=profile_name=] profile, this field SHALL be set to same [=profile_name=] value.  
+<dfn noexport>profile_compatible</dfn> indicates an additional profile of this specification to which this [=IA Sequence=] complies. If a sequence only complies with the [=profile_name=] profile, this field SHALL be set to same [=profile_name=] value.  
 - 0: Simple Profile
 - 1: Base Profile
 - 2~255: Reserved
 
-NOTE: For example, an IA sequence with [=profile_name=] = 0 and [=profile_compatible=] = 1 means that the IA sequence complies to Base profile of specification and IA decoder to support Simple profile can playback the IA sequence. When a future profile is defined with [=profile_compatible=] = 2 as called Enhanced profile, an IA sequence with [=profile_name=] = 1 and [=profile_compatible=] = 2 will mean that the IA sequence will comply with Enhanced profile and IA decoder to support Base profile of specification will be able to playback it by ignoring unknown OBUs and/or unknown syntaxes if present.
+NOTE: For example, an [=IA Sequence=] with [=profile_name=] = 0 and [=profile_compatible=] = 1 means that the [=IA Sequence=] complies to Base profile of specification and IA decoder to support Simple profile can playback the [=IA Sequence=]. When a future profile is defined with [=profile_compatible=] = 2 as called Enhanced profile, an [=IA Sequence=] with [=profile_name=] = 1 and [=profile_compatible=] = 2 will mean that the [=IA Sequence=] will comply with Enhanced profile and IA decoder to support Base profile of specification will be able to playback it by ignoring unknown OBUs and/or unknown syntaxes if present.
 
 ## Codec Config OBU Syntax and Semantics ## {#obu-codecconfig}
 
@@ -568,7 +568,7 @@ class codec_config() {
 
 <b>Semantics</b>
 
-<dfn noexport>codec_config_id</dfn> defines an identifier for a codec configuration. Within an IA Sequence, there SHALL be exactly one non-redundant [=Codec Config OBU=] with a given identifier. [=Audio Element=]s that need a decoder configuration based on this codec configuration refer to this identifier.
+<dfn noexport>codec_config_id</dfn> defines an identifier for a codec configuration. Within an [=IA Sequence=], there SHALL be exactly one non-redundant [=Codec Config OBU=] with a given identifier. [=Audio Element=]s that need a decoder configuration based on this codec configuration refer to this identifier.
 
 <dfn noexport>codec_id</dfn> indicates a ‘four-character code’ (4CC) to identify the codec used to generate the coded [=Audio Substream=]s. For this version of the specification, it SHALL be set to one of four [=codec_id=] values defined below:
 - 'Opus': All coded [=Audio Substream=]s of all [=Audio Element=]s referring to this codec configuration SHALL comply to the specification [[!RFC6716]] and the [=decoder_config()=] structure SHALL comply with the constraints given in [[#opus-specific]].
@@ -580,8 +580,10 @@ NOTE: 'ipcm' should not be confused with 'lpcm' which is another 4CC to identify
 
 <dfn noexport>num_samples_per_frame</dfn> indicates the frame length, in samples, of the audio_frame() provided in by audio_frame_obu(). It SHALL NOT be set to zero. If the [=decoder_config()=] structure for a given codec specifies a value for the frame length, the two values SHALL be equal.
 
-<dfn noexport>audio_roll_distance</dfn> is a signed integer that gives the number of frames that need to be decoded in order for a frame to be decoded correctly. A negative value indicates the number of frames before the frame to be decoded correctly.
-- It SHALL be set to -1 for IAMF-AAC-LC and -R (R = 4 when the frame size = 960) for IAMF-OPUS. IAMF-FLAC MAY ignore this field. Where, R is the smallest integer greater than or equal to 3840 divided by the frame size.
+<dfn noexport>audio_roll_distance</dfn> indicates how many audio frames prior to the current audio frame need to be decoded (and decoded samples discarded) to set the encoder in a state that will produce the perfect decoded audio signal. It SHALL be always negative value or zero. For some audio codecs, even if an audio frame can be decoded independently, the decoded signal after decoding only that frame may not represent a perfect, decoded audio signal, even ignoring compression artifacts. This can be due to overlap transforms. While potentially acceptable when starting to decode an [=Audio Substream=], it may be problematic when automatically switching between similar [=Audio Substream=]s of different quality and/or bitrate. 
+- It SHALL be set to -R when [=codec_id=] is set to 'Opus'. Where, R is the smallest integer greater than or equal to floor(3840 / [=num_samples_per_frame=]).
+- It SHALL be set to -1 when [=codec_id=] is set to 'mp4a'.
+- It SHALL be set to 0 when [=codec_id=] is set to  'fLaC' or 'ipcm'.
 
 <dfn noexport>decoder_config()</dfn> specifies the set of codec parameters required to decode a coded [=Audio Substream=] by the [=codec_id=]. It is byte aligned.
 
@@ -640,7 +642,7 @@ class ReconGainParamDefinition() extends ParamDefinition() {
 
 <b>Semantics</b>
 
-<dfn noexport>audio_element_id</dfn> defines an identifier for an [=Audio Element=]. Within an IA Sequence, there SHALL be exactly one non-redundant [=Audio Element OBU=] with a given identifier. [=Mix Presentation=]s that use an [=Audio Element=] refer to this identifier.
+<dfn noexport>audio_element_id</dfn> defines an identifier for an [=Audio Element=]. Within an [=IA Sequence=], there SHALL be exactly one non-redundant [=Audio Element OBU=] with a given identifier. [=Mix Presentation=]s that use an [=Audio Element=] refer to this identifier.
 
 <dfn noexport>audio_element_type</dfn> specifies the audio representation of this [=Audio Element=] which is constructed from one or more [=Audio Substream=]s.
 
@@ -990,9 +992,9 @@ This section specifies the OBU payload of OBU_IA_Mix_Presentation.
 
 The metadata in mix_presentation() specifies how to render, process and mix one or more [=Audio Element=]s, with details provided in [[#processing-mixpresentation]].
 
-An IA sequence MAY have one or more [=Mix Presentation=]s specified. The IA parser SHALL select the appropriate [=Mix Presentation=] to process according to the rules specified in [[#processing-mixpresentation-selection]].
+An [=IA Sequence=] MAY have one or more [=Mix Presentation=]s specified. The IA parser SHALL select the appropriate [=Mix Presentation=] to process according to the rules specified in [[#processing-mixpresentation-selection]].
 
-A [=Mix Presentation=] MAY contain one or more sub-mixes. Common use-cases MAY specify only one sub-mix, which includes all rendered and processed [=Audio Element=]s used in the [=Mix Presentation=]. The use-case for specifying more than one sub-mix arises if an IA multiplexer is merging two or more IA sequences. In this case, it MAY choose to capture the loudness information from the original IA sequences in multiple sub-mixes, instead of recomputing the loudness information for the final mix.
+A [=Mix Presentation=] MAY contain one or more sub-mixes. Common use-cases MAY specify only one sub-mix, which includes all rendered and processed [=Audio Element=]s used in the [=Mix Presentation=]. The use-case for specifying more than one sub-mix arises if an IA multiplexer is merging two or more [=IA Sequence=]s. In this case, it MAY choose to capture the loudness information from the original [=IA Sequence=]s in multiple sub-mixes, instead of recomputing the loudness information for the final mix.
 
 <b>Syntax</b>
 ```
@@ -1030,7 +1032,7 @@ class mix_presentation_obu() {
 
 <b>Semantics</b>
 
-<dfn noexport>mix_presentation_id</dfn> defines an identifier for a [=Mix Presentation=]. Within an IA Sequence, there SHALL be exactly one non-redundant [=Mix Presentation OBU=] with a given identifier. This identifier MAY be used by the application to select which [=Mix Presentation=](s) to offer.
+<dfn noexport>mix_presentation_id</dfn> defines an identifier for a [=Mix Presentation=]. Within an [=IA Sequence=], there SHALL be exactly one non-redundant [=Mix Presentation OBU=] with a given identifier. This identifier MAY be used by the application to select which [=Mix Presentation=](s) to offer.
 
 <dfn noexport>count_label</dfn> indicates the number of labels in different languages.
 
@@ -1391,7 +1393,7 @@ class parameter_block_obu() {
 
 <b>Semantics</b>
 
-<dfn noexport>parameter_id</dfn> defines an identifier for a [=Parameter Substream=]. Within an IA Sequence, there SHALL be exactly one non-redundant [=Audio Element OBU=] with this identifier. [=Parameter Block OBU=] refer to the [=Parameter Substream=] through this identifier.
+<dfn noexport>parameter_id</dfn> defines an identifier for a [=Parameter Substream=]. Within an [=IA Sequence=], there SHALL be exactly one non-redundant [=Audio Element OBU=] with this identifier. [=Parameter Block OBU=] refer to the [=Parameter Substream=] through this identifier.
 
 <dfn noexport>get_param_definition()</dfn> is a run-time function to get the parameter definition type, the parameter definition mode, duration, num_subblocks, constant_subblock_duration and subblock_duration mapped to the parameter_id. 
 
@@ -1532,7 +1534,7 @@ The each bit of [=recon_gain_flags=] indicates the presence of [=recon_gain=] ap
 
 This section specifies OBU payloads of OBU_IA_Audio_Frame and OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21.
 
-<dfn noexport>audio_substream_id</dfn> is an identifier for the [=Audio Substream=] associated with this audio frame. Within an IA Sequence, there SHALL be exactly one non-redundant [=Audio Element OBU=] with a [=audio_substream_id=].
+<dfn noexport>audio_substream_id</dfn> is an identifier for the [=Audio Substream=] associated with this audio frame. Within an [=IA Sequence=], there SHALL be exactly one non-redundant [=Audio Element OBU=] with a [=audio_substream_id=].
 
 <b>Syntax</b>
 
@@ -1549,7 +1551,7 @@ class audio_frame_obu(audio_substream_id_in_bitstream) {
 
 <dfn noexport>explicit_audio_substream_id</dfn> defines the [=audio_substream_id=] of this frame. The value SHALL be greater than 21. When this field is not present [=audio_substream_id=] is implicit and is defined as a value from 0 to 21 for OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21 respectively.
 
-NOTE: The first 22 [=Audio Substream=]s in an IA sequence can use the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21, which have predefined [=audio_substream_id=] associated with them. This reduces bitrate by avoiding the extra [=explicit_audio_substream_id=] field in the bitstream.
+NOTE: The first 22 [=Audio Substream=]s in an [=IA Sequence=] can use the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21, which have predefined [=audio_substream_id=] associated with them. This reduces bitrate by avoiding the extra [=explicit_audio_substream_id=] field in the bitstream.
 
 <dfn noexport>coded_frame_size</dfn> is the size of [=audio_frame()=] in bytes.
 
