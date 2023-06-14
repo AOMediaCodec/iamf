@@ -406,7 +406,7 @@ class ia_open_bitstream_unit() {
 
 <b>Semantics</b>
 
-If the syntax element obu_type is equal to OBU_IA_Sequence_Header, an ordered series of OBUs is presented to the decoding process as a string of bytes.
+If the syntax element [=obu_type=] is equal to OBU_IA_Sequence_Header, an ordered series of OBUs is presented to the decoding process as a string of bytes.
 
 
 ## OBU Header Syntax and Semantics ## {#obu-header}
@@ -449,9 +449,9 @@ obu_type: Name of obu_type
    31   : OBU_IA_Sequence_Header
 </pre>
 
-<dfn noexport>obu_redundant_copy</dfn> indicates whether this OBU is a redundant copy of the previous OBU in the [=IA Sequence=] with the same obu_type. A value of 1 indicates that it is a redundant copy, while a value of 0 indicates that it is not.
+<dfn noexport>obu_redundant_copy</dfn> indicates whether this OBU is a redundant copy of the previous OBU in the [=IA Sequence=] with the same [=obu_type=]. A value of 1 indicates that it is a redundant copy, while a value of 0 indicates that it is not.
 
-It SHALL always be set to 0 for the following obu_type values:
+It SHALL always be set to 0 for the following [=obu_type=] values:
 
 - OBU_IA_Temporal_Delimiter
 - OBU_IA_Audio_Frame
@@ -699,13 +699,13 @@ A [=ChannelGroup=] is defined in [[#iamfgeneration]]. The order of the [=Audio S
 </tr>
 </table>
 
-<dfn noexport>demixing_info</dfn> provides the parameter definition for the demixing information to reconstruct channel audios according to [=loudspeaker_layout=] from scalable channel audio. The parameter definition is provided by DemixingParamDefinition() and the corresponding parameter data to be provided in parameter blocks is specified in demixing_info_parameter_data().
+<dfn noexport>demixing_info</dfn> provides the parameter definition for the demixing information to reconstruct channel audios according to [=loudspeaker_layout=] from scalable channel audio. The parameter definition is provided by DemixingParamDefinition() and the corresponding parameter data to be provided in parameter blocks is specified in [=demixing_info_parameter_data()=].
 - In this parameter definition, [=parameter_rate=] SHALL be set to the sample rate of this [=Audio Element=] and [=param_definition_mode=] SHALL be set to 0.
 	- [=duration=] SHALL be same as [=num_samples_per_frame=] of this [=Audio Element=].
 	- [=num_subblocks=] SHALL be set to 1.
 	- [=constant_subblock_duration=] SHALL be same as [=duration=]
 
-<dfn noexport>recon_gain_info</dfn> provides the parameter definition for the gain value to reconstruct channel audios according to [=loudspeaker_layout=] from scalable channel audio. The parameter definition is provided by ReconGainParamDefinition() and the corresponding parameter data to be provided in parameter blocks is specified in recon_gain_info_parameter_data().
+<dfn noexport>recon_gain_info</dfn> provides the parameter definition for the gain value to reconstruct channel audios according to [=loudspeaker_layout=] from scalable channel audio. The parameter definition is provided by ReconGainParamDefinition() and the corresponding parameter data to be provided in parameter blocks is specified in [=recon_gain_info_parameter_data()=].
 - In this parameter definition, [=parameter_rate=] SHALL be set to the sample rate of this [=Audio Element=] and [=param_definition_mode=] SHALL be set to 0.
 	- [=duration=] SHALL be same as [=num_samples_per_frame=] of this [=Audio Element=].
 	- [=num_subblocks=] SHALL be set to 1.
@@ -773,9 +773,9 @@ abstract class ParamDefinition() {
 <dfn noexport>parameter_rate</dfn> specifies the rate used by this [=Parameter Substream=], expressed as ticks per second. Time-related fields associated with this [=Parameter Substream=], such as durations, SHALL be expressed in the number of ticks.
 - The rate SHALL be such a value that (the rate x [=num_samples_per_frame=]) / (the sample rate of [=Audio Element=]) is a non-zero integer.
 
-<dfn noexport>param_definition_mode</dfn> indicates if this parameter definition specifies duration, num_subblocks, constant_subblock_duration and subblock_duration fields for the parameter blocks associated to the [=parameter_id=].
-- When this field is set to 0, all of duration, num_subblocks, constant_subblock_duration and subblock_duration fields SHALL be specified in this parameter definition mapped to the [=parameter_id=]. In that case, none of parameter blocks associated to this parameter definition SHALL specify duration, num_subblocks, constant_subblock_duration and subblock_duration fields. 
-- When this field is set to 1, none of duration, num_subblocks, constant_subblock_duration and subblock_duration fields SHALL be specificed in this parameter definition. In that case, each of parameter blocks associated to this parameter definition SHALL specify its own duration, num_subblocks, constant_subblock_duration and subblock_duration fields.
+<dfn noexport>param_definition_mode</dfn> indicates if this parameter definition specifies [=duration=], [=num_subblocks=], [=constant_subblock_duration=] and [=subblock_duration=] fields for the parameter blocks associated to the [=parameter_id=].
+- When this field is set to 0, all of [=duration=], [=num_subblocks=], [=constant_subblock_duration=] and [=subblock_duration=] fields SHALL be specified in this parameter definition mapped to the [=parameter_id=]. In that case, none of parameter blocks associated to this parameter definition SHALL specify [=duration=], [=num_subblocks=], [=constant_subblock_duration=] and [=subblock_duration=] fields. 
+- When this field is set to 1, none of [=duration=], [=num_subblocks=], [=constant_subblock_duration=] and [=subblock_duration=] fields SHALL be specificed in this parameter definition. In that case, each of parameter blocks associated to this parameter definition SHALL specify its own [=duration=], [=num_subblocks=], [=constant_subblock_duration=] and [=subblock_duration=] fields.
 
 <dfn noexport>duration</dfn> specifies the duration for which all of parameter blocks associated to this parameter definition are valid and applicable.
 
@@ -815,7 +815,7 @@ class channel_audio_layer_config(i) {
   unsigned int (8) substream_count(i);
   unsigned int (8) coupled_substream_count(i);
   if (output_gain_is_present_flag(i) == 1) {
-    unsigned int (6) output_gain_flag(i);
+    unsigned int (6) output_gain_flags(i);
     unsigned int (2) reserved;
     signed int (16) output_gain(i);
   }
@@ -886,12 +886,12 @@ NOTE: Contents providers may be satisfied with the down-mixed audio having no he
 NOTE: The Ltr and Rtr of 5.1.4ch down-mixed from 7.1.4ch is within the range of Ltb and Rtb of 7.1.4ch.
 
 <dfn noexport>output_gain_is_present_flag</dfn> indicates if output_gain information fields for the [=ChannelGroup=] presents .
-- 0: No output_gain information fields for the [=ChannelGroup=] SHALL be present.
-- 1: output_gain information fields for the [=ChannelGroup=] present. In this case, output_gain_flags and output_gain fields SHALL be present.
+- 0: No output_gain information fields for the [=ChannelGroup=] present.
+- 1: output_gain information fields for the [=ChannelGroup=] present. In this case, [=output_gain_flags=] and [=output_gain=] fields present.
 
-<dfn noexport>recon_gain_is_present_flag</dfn> indicates if recon_gain information fields for the [=ChannelGroup=] presents in recon_gain_info_parameter_data().
-- 0: No recon_gain information fields for the [=ChannelGroup=] SHALL be present in recon_gain_info_parameter_data().
-- 1: recon_gain information fields for the [=ChannelGroup=] present in recon_gain_info_parameter_data(). In this case, recon_gain_flags and recon_gain fields SHALL be present.
+<dfn noexport>recon_gain_is_present_flag</dfn> indicates if recon_gain information fields for the [=ChannelGroup=] presents in [=recon_gain_info_parameter_data()=].
+- 0: No recon_gain information fields for the [=ChannelGroup=] present in [=recon_gain_info_parameter_data()=].
+- 1: recon_gain information fields for the [=ChannelGroup=] present in [=recon_gain_info_parameter_data()=]. In this case, [=recon_gain_flags=] and [=recon_gain=] fields present.
 
 <dfn noexport>substream_count</dfn> specifies the number of [=Audio Substream=]s. The sum of all [=substream_count]s in this OBU SHALL be the same as [=num_substreams=] in this OBU.
 
@@ -910,7 +910,7 @@ The order of [=Audio Substream=]s in each [=ChannelGroup=] SHALL be as follows:
 - Center channel comes first and followed by LFE and followed by the other one.
 - Where, <dfn noexport>non-coupled substream</dfn> is a coded [=Audio Substream=] from one of non-coupled channels.
 
-<dfn noexport>output_gain_flags</dfn> indicates the channels which output_gain is applied to. If a bit set to 1, output_gain SHALL be applied to the channel. Otherwise, output_gain SHALL NOT be applied to the channel.
+<dfn noexport>output_gain_flags</dfn> indicates the channels which [=output_gain=] is applied to. If a bit set to 1, [=output_gain=] SHALL be applied to the channel. Otherwise, [=output_gain=] SHALL NOT be applied to the channel.
 
 
 <pre class = "def">
@@ -924,7 +924,7 @@ Bit position : Channel Name
 
 </pre>
 
-<dfn noexport>output_gain</dfn> indicates the gain value to be applied to the mixed channels which are indicated by output_gain_flags. It is 20*log10 of the factor by which to scale the mixed channels. It is stored in a 16-bit, signed, two’s complement fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]). Where, each mixed channel is generated by downmixing two or more input channels.
+<dfn noexport>output_gain</dfn> indicates the gain value to be applied to the mixed channels which are indicated by [=output_gain_flags=]. It is 20*log10 of the factor by which to scale the mixed channels. It is stored in a 16-bit, signed, two’s complement fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]). Where, each mixed channel is generated by downmixing two or more input channels.
 
 
 ### Ambisonics Config Syntax and Semantics ### {#syntax-ambisonics-config}
@@ -1133,7 +1133,7 @@ class MixGainParamDefinition() extends ParamDefinition() {
 
 <b>Semantics</b>
 
-<dfn noexport>mix_gain</dfn> provides the parameter definition for the gain value that is applied to all channels of the rendered [=Audio Element=] signal. The parameter definition is provided by MixGainParamDefinition() and the corresponding parameter data to be provided in parameter blocks is specified in mix_gain_parameter_data().
+<dfn noexport>mix_gain</dfn> provides the parameter definition for the gain value that is applied to all channels of the rendered [=Audio Element=] signal. The parameter definition is provided by MixGainParamDefinition() and the corresponding parameter data to be provided in parameter blocks is specified in [=mix_gain_parameter_data()=].
 
 <dfn noexport>default_mix_gain</dfn> specifies the default mix gain value to apply when there are no mix gain parameter blocks provided. This value is expressed in dB and SHALL be applied to all channels in the rendered [=Audio Element=]. It is stored as a 16-bit, signed, two's complement fixed-point value with 8 fractional bits (i.e. Q7.8 in [[!Q-Format]]).
 
@@ -1152,7 +1152,7 @@ class output_mix_config() {
 
 <b>Semantics</b>
 
-<dfn noexport>output_mix_gain</dfn> provides the parameter definition for the gain value that is applied to all channels of the mixed audio signal. The parameter definition is provided by MixGainParamDefinition() and the corresponding parameter data to be provided in parameter blocks is specified in mix_gain_parameter_data().
+<dfn noexport>output_mix_gain</dfn> provides the parameter definition for the gain value that is applied to all channels of the mixed audio signal. The parameter definition is provided by MixGainParamDefinition() and the corresponding parameter data to be provided in parameter blocks is specified in [=mix_gain_parameter_data()=].
 
 
 ### Layout Syntax and Semantics ### {#syntax-layout}
@@ -1411,6 +1411,8 @@ Each value of duration, constant_subblock_duration and subblock_duration SHALL b
 
 ### Mix Gain Parameter Data Syntax and Semantics ### {#syntax-mix-gain-param}
 
+<dfn noexport>mix_gain_parameter_data()</dfn> specifies a parameter data to be used for mixing of an [=Audio Element=].
+
 <b>Syntax</b>
 
 ```
@@ -1506,7 +1508,7 @@ class recon_gain_info_parameter_data() {
     if (recon_gain_is_present_flag(i) == 1) {
       leb128() recon_gain_flags(i);
       for (j=0; j< n(i); j++) {
-        if (recon_gain_flag(i)(j) == 1)
+        if (recon_gain_flags(i)(j) == 1)
           unsigned int (8) recon_gain;
       }
     }
@@ -1516,7 +1518,7 @@ class recon_gain_info_parameter_data() {
 
 <b>Semantics</b>
 
-<dfn noexport>recon_gain_flags</dfn> indicates the channels which recon_gain is applied to.
+<dfn noexport>recon_gain_flags</dfn> indicates the channels which [=recon_gain=] is applied to.
 
 <left><img src="images/Recon_Gain_Flags.png" style="width:100%; height:auto;"></left>
 <center><figcaption>Table for Recon Gain Flags</figcaption></center>
@@ -1525,9 +1527,9 @@ The each bit of [=recon_gain_flags=] indicates the presence of [=recon_gain=] ap
  - 0: It indicates that no [=recon_gain=] presents for the channel.
  - 1: It indicates that [=recon_gain=] presents for the channel.
 
-<dfn noexport>n(i)</dfn> indicates the number of bits for recon_gain_flag(i). It SHALL be 7 or 12 as depicted in the above figure. Where, i = 0, 1, ..., [=num_layers=] - 1.
+<dfn noexport>n(i)</dfn> indicates the number of bits for [=recon_gain_flags=](i). It SHALL be 7 or 12 as depicted in the above figure. Where, i = 0, 1, ..., [=num_layers=] - 1.
 
-<dfn noexport>recon_gain</dfn> indicates the gain value to be applied to the channel, which is indicated by [=recon_gain_flags=], after decoding of the associated frames and demixing operation. Where, the channel is indicated by recon_gain_flags. Detailed operation by using this value is specified in [[#processing-scalablechannelaudio-recongain]].
+<dfn noexport>recon_gain</dfn> indicates the gain value to be applied to the channel, which is indicated by [=recon_gain_flags=], after decoding of the associated frames and demixing operation. Where, the channel is indicated by [=recon_gain_flags=]. Detailed operation by using this value is specified in [[#processing-scalablechannelaudio-recongain]].
 
 
 ## Audio Frame OBU Syntax and Semantics ## {#obu-audioframe}
