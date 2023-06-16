@@ -2615,26 +2615,26 @@ The below figure shows the linking scheme among IDs in obu_header or obu payload
 <center><figcaption>ID Linking Scheme</figcaption></center>
 
 In the above figure, 
-- Codec Config OBU with codec_config_id  = 0 is providing codec_id and its decoder_config().
-- Mix Presentation OBU with mix_presentation_id  = 21 is saying:
-	- There are two Audio Elements(audio_element_id = 11 and 12) which need to be mixed. The audio_element_id = 11 and the audio_element_id = 12 are linked to the Audio Element OBUs with audio_element_id = 11 and audio_element_id = 12, respectively.
-		- There is one or more Parameter Block OBUs with parameter_id = 32 to be used for mixing of the Audio Element with audio_element_id = 11. 
-		- There is one or more Parameter Block OBUs with parameter_id = 33 to be used for mixing of the Audio Element with audio_element_id = 12.
-	- There is one or more Parameter Block OBUs with parameter_id = 34 to be used for mixing of the two Audio Elements.
-- Audio Element OBU with audio_element_id = 11 is saying:
-	- This audio element has been coded using Codec Config OBU with codec_config_id = 0. 
-	- There are two Substreams (audio_substream_id = 0 and 1) in this audio element. The audio_substream_id = 0 and the audio_substream_id = 1 are linked to the Audio Frame OBUs with audio_substream_id = 0 and audio_substream_id = 1(i.e. obu_type = OBU_IA_Audio_Frame_ID0 and obu_type = OBU_IA_Audio_Frame_ID1), respectively.
-	- There is one or more Parameter Block OBUs with parameter_id = 31 to be used for demixing of this audio element.
-- Audio Element OBU with audio_element_id = 12 is saying:
-	- This audio element has been coded by using Codec Config OBU with codec_config_id = 0.
-	- There is one Substream (audio_substream_id = 2) in this audio element. The audio_substream_id = 2 is linked to the Audio Frame OBUs with audio_substream_id = 2 (i.e. obu_type = OBU_IA_Audio_Frame_ID2).
-- Audio Frame OBU with ID = 0 (i.e. obu_type = OBU_IA_Audio_Frame_ID0) is providing the coded data which has been coded by using Codec Config OBU with codec_config_id = 0 of Substream with audio_substream_id = 0.
-- Audio Frame OBU with ID = 1 (i.e. obu_type = OBU_IA_Audio_Frame_ID1) is providing the coded data which has been coded by using Codec Config OBU with codec_config_id = 0 of Substream with audio_substream_id = 1.
-- Audio Frame OBU with ID = 2 (i.e. obu_type = OBU_IA_Audio_Frame_ID2) is providing the coded data which has been coded by using Codec Config OBU with codec_config_id = 0 of Substream with audio_substream_id = 2.
-- Parameter Block OBU with parameter_id = 31 is providing demixing_info_parameter_data() to be applied for demixing of the Audio Element with audio_element_id = 11.
-- Parameter Block OBU with parameter_id = 32 is providing mix_gain_parameter_data() to be applied to the rendered audio element after rendering according to render_config() of the Audio Element with audio_element_id = 11.
-- Parameter Block OBU with parameter_id = 33 is providing mix_gain_parameter_data() to be applied to the rendered audio element after rendering according to render_config() of the Audio Element with audio_element_id = 12.
-- Parameter Block OBU with parameter_id = 34 is providing mix_gain_parameter_data() to be applied to the mixed audio of the two rendered audios.
+- [=Codec Config OBU=] with [=codec_config_id=]  = 0 is providing [=codec_id=] and its [=decoder_config()=].
+- [=Mix Presentation OBU=] with [=mix_presentation_id=]  = 21 is saying:
+	- There are two [=Audio Element=]s([=audio_element_id=] = 11 and 12) which need to be mixed. The [=audio_element_id=] = 11 and the [=audio_element_id=] = 12 are linked to the [=Audio Element OBU=]s with [=audio_element_id=] = 11 and [=audio_element_id=] = 12, respectively.
+		- There are [=Parameter Block OBU=]s with [=parameter_id=] = 32 to be used for mixing of the [=Audio Element=] with [=audio_element_id=] = 11. 
+		- There are [=Parameter Block OBU=]s with [=parameter_id=] = 33 to be used for mixing of the [=Audio Element=] with [=audio_element_id=] = 12.
+	- There are [=Parameter Block OBU=]s with [=parameter_id=] = 34 to be used for mixing of the two [=Audio Element=]s.
+- [=Audio Element OBU=] with [=audio_element_id=] = 11 is saying:
+	- This [=Audio Element=] has been coded using [=Codec Config OBU=] with [=codec_config_id=] = 0. 
+	- There are two [=Audio Substream=]s ([=audio_substream_id=] = 0 and 1) in this [=Audio Element=]. The [=audio_substream_id=] = 0 and the [=audio_substream_id=] = 1 are linked to the [=Audio Frame OBU=]s with [=audio_substream_id=] = 0 and [=audio_substream_id=] = 1(i.e. [=obu_type=] = OBU_IA_Audio_Frame_ID0 and [=obu_type=] = OBU_IA_Audio_Frame_ID1), respectively.
+	- There are [=Parameter Block OBU=]s with [=parameter_id=] = 31 to be used for demixing of this [=Audio Element=].
+- [=Audio Element OBU=] with [=audio_element_id=] = 12 is saying:
+	- This [=Audio Element=] has been coded by using [=Codec Config OBU=] with [=codec_config_id=] = 0.
+	- There is one [=Audio Substream=] ([=audio_substream_id=] = 2) in this [=Audio Element=]. The [=audio_substream_id=] = 2 is linked to the [=Audio Frame OBU=]s with [=audio_substream_id=] = 2 (i.e. [=obu_type=] = OBU_IA_Audio_Frame_ID2).
+- [=Audio Frame OBU=] with [=audio_substream_id=] = 0 (i.e. [=obu_type=] = OBU_IA_Audio_Frame_ID0) is providing the coded data which has been coded by using [=Codec Config OBU=] with [=codec_config_id=] = 0 of [=Audio Substream=] with [=audio_substream_id=] = 0.
+- [=Audio Frame OBU=] with [=audio_substream_id=] = 1 (i.e. [=obu_type=] = OBU_IA_Audio_Frame_ID1) is providing the coded data which has been coded by using [=Codec Config OBU=] with [=codec_config_id=] = 0 of [=Audio Substream=] with [=audio_substream_id=] = 1.
+- [=Audio Frame OBU=] with [=audio_substream_id=] = 2 (i.e. [=obu_type=] = OBU_IA_Audio_Frame_ID2) is providing the coded data which has been coded by using [=Codec Config OBU=] with [=codec_config_id=] = 0 of [=Audio Substream=] with [=audio_substream_id=] = 2.
+- [=Parameter Block OBU=] with [=parameter_id=] = 31 is providing [=demixing_info_parameter_data()=] to be applied for demixing of the [=Audio Element=] with [=audio_element_id=] = 11.
+- [=Parameter Block OBU=] with [=parameter_id=] = 32 is providing mix_gain_parameter_data() to be applied to the rendered [=Audio Element=] after rendering according to render_config() of the [=Audio Element=] with [=audio_element_id=] = 11.
+- [=Parameter Block OBU=] with [=parameter_id=] = 33 is providing mix_gain_parameter_data() to be applied to the rendered [=Audio Element=] after rendering according to render_config() of the [=Audio Element=] with [=audio_element_id=] = 12.
+- [=Parameter Block OBU=] with [=parameter_id=] = 34 is providing mix_gain_parameter_data() to be applied to the [=Mixed Audio Element=] of the two rendered [=Audio Element=]s.
 
 ## Annex B: Rules for Scalable Channel Audio (Normative) ## {#Annex_B}
 
@@ -2642,119 +2642,116 @@ This Annex specifies normative rules for scalable channel audio with [=mum_layer
 
 ### Annex B-1: Down-mix parameter and Loudness ### {#iamfgeneration-scalablechannelaudio-downmixparameter}
 
-This section describes how to generate down-mix parameters and loudness level for a given channel audio and a given list of channel layouts for scalability.
+This section describes how to generate down-mix parameters and loudness level for a given channel audio and a given list of channel layouts for scalability (i.e. [=num_layers=] > 1).
 
 Below figure shows a block diagram for down-mix parameter and loudness module including down-mixer.
 
 <center><img src="images/Down-mix Parameter and Loudness.png" style="width:100%; height:auto;"></center>
 <center><figcaption>IA Down-mix Parameter and Loudness</figcaption></center>
 
-For a given Channel Audio (e.g. 7.1.4ch) and a given list of channel layouts based on the Channel Audio,
-- Down-mix parameter generator shall generate 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k)) by analyzing input Channel Audio, by referring [[AI-CAD-Mixing]]. Where, k is a frame index.
+For a given channel-based input audio (e.g. 7.1.4ch) and a given list of channel layouts based on the input audio,
+- Down-mix parameter generator SHALL generate 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k)) by analyzing the input audio, by referring [[AI-CAD-Mixing]]. Where, k is a frame index.
 	- It is composed of Audio Scene Classification module and Height Energy Quantification module as depicted in Figure 11-2.
-	- Audio Scene Classification module generates 4 parameters (α(k), β(k), γ(k), δ(k)) by classifying audio scenes of input channel audio in three modes.
+	- Audio Scene Classification module generates 4 parameters (α(k), β(k), γ(k), δ(k)) by classifying audio scenes of the input audio in three modes.
 		- Default scene: Neither Dialog nor Effect
 		- Dialog scene: Center-channel oriented and clear dialog/voice sounds
 		- Effect scene: Directional and spatially moving sounds.
-	- Height Energy Quantification module generates a surround to height mixing parameter (w(k)) which is decided according to the relative energy difference between the top and surround channels of input channel audio.
+	- Height Energy Quantification module generates a surround to height mixing parameter (w(k)) which is decided according to the relative energy difference between the top and surround channels of the input audio.
 		- If the energy of top channels is bigger than that of surround ones, then w_idx_offset(k) is set to 1. Otherwise, it is set to -1. And, w(k) is calculated based on w_idx_offset(k) and conforms to [[#processing-scalablechannelaudio]].
-- Down-mixer generates down-mixed audios from input Channel Audio according to the list of channel layouts and the down-mix parameters, and outputs down-mixed audio for each channel layout to Loudness module.
-	- It is not depicted in the figure but Down-mixer further generates [=Dmixp_Mode=] and [=Recon_Gains=] for each frame to be passed to OBU packetizer.
-- Loudness module measures the loudness level ([=LKFS=]) of each down-mixed audio based on [[ITU1770-4]], and passes them to OBU packetizer.
+- Down-mixer generates down-mixed audios from the input audio according to the list of channel layouts and the down-mix parameters, and outputs [=down-mixed audio=] for each channel layout to Loudness module.
+	- It is not depicted in the figure but Down-mixer further generates [=dmixp_mode=] and [=recon_gain=] for each frame to be passed to OBU packetizer.
+- Loudness module measures the loudness level ([=LKFS=]) of each [=down-mixed audio=] based on [[ITU1770-4]], and passes them to OBU packetizer.
 
 ### Annex B-2: Down-mix Mechanism ### {#iamfgeneration-scalablechannelaudio-downmixmechanism}
 
 This section specifies the down-mixing mechanism to generate <dfn noexport>down-mixed audio</dfn> for scalable channel audio.
 
-For a given Channel Audio which conforms to [=loudspeaker_layout=], the surround and top channels (if any) are separately down-mixed and especially step by step until to get a target channels.
+For a given channel-based input audio which conforms to [=loudspeaker_layout=], the surround and top channels (if any) are separately down-mixed and especially step by step until to get a target channels.
 
-Implementers may use another method to get the down-mixed audio from the given channel audio, but the down-mixed audio shall comply with that by this section.
+Implementers MAY use another method to get the [=down-mixed audio=] from the given input audio, but the [=down-mixed audio=] SHALL comply with that by this section.
 
 Therefore, a down-mixer based on the down-mix mechanism is a combination of following surround down-mixer(s) and top down-mixer(s) as depicted in below figure.
-- Surround Down-mixers: S7to5 enc., S5to3 enc., S3to2 enc., S2to1 enc.
+- Surround down-mixers 
+	- <dfn noexport>S7to5 enc.</dfn>: Ls5 = α(k) x Lss7 + β(k) x Lrs7 and Rs5 = α(k) x Rss7 + β(k) x Rrs7.
+	- <dfn noexport>S5to3 enc.</dfn>: L3 = L5 + δ(k) x Ls5 and R3 = R5 + δ(k) x Rs5
+	- <dfn noexport>S3to2 enc.</dfn>: L2 = L3 + 0.707 x C and R2 = R3 + 0.707 x C
+	- <dfn noexport>S2to1 enc.</dfn>: Mono = 0.5 x (L2 + R2)
 
-```
-	S7to5 enc.: Ls5 = α(k) x Lss7 + β(k) x Lrs7 and Rs5 = α(k) x Rss7 + β(k) x Rrs7.
-	S5to3 enc.: L3 = L5 + δ(k) x Ls5 and R3 = R5 + δ(k) x Rs5
-	S3to2 enc.: L2 = L3 + 0.707 x C and R2 = R3 + 0.707 x C
-	S2to1 enc.: Mono = 0.5 x (L2 + R2)
-```
-
-- Top Down-mixers: T4to2 enc., T2toTF2 enc.
-
-```
-	T4to2 enc.: Ltf2 = Ltf4 + γ(k) x Ltb4  and Rtf2 = Rtf4 + γ(k) x Rtb4.
-	T2toTF2 enc.: Ltf3 = Ltf2 + w(k) x δ(k) x Ls5 and Rtf3 = Rtf2 + w(k) x δ(k) x Rs5.
-```
+- Top Down-mixers
+	- <dfn noexport>T4to2 enc.</dfn>: Ltf2 = Ltf4 + γ(k) x Ltb4  and Rtf2 = Rtf4 + γ(k) x Rtb4.
+	- <dfn noexport>T2toTF2 enc.</dfn>: Ltf3 = Ltf2 + w(k) x δ(k) x Ls5 and Rtf3 = Rtf2 + w(k) x δ(k) x Rs5.
 
 <center><img src="images/Down-mix Mechanism.png" style="width:100%; height:auto;"></center>
 <center><figcaption>IA Down-mix Mechanism</figcaption></center>
 
-```
-For example, to get down-mixed 3.1.2ch from 7.1.4ch:
-- S3 of 3.1.2ch is generated by using S7to5 and S5to3 encs.
-- TF2 of 3.1.2ch is generated by using T4to2 and T2toTF2 encs.
-```
+For example, to get [=down-mixed audio=] 3.1.2ch from 7.1.4ch:
+- S3 of 3.1.2ch is generated by using [=S7to5 enc.=] and [=S5to3 enc.=].
+- TF2 of 3.1.2ch is generated by using [=T4to2 enc.=] and [=T2toTF2 enc.=].
+
 
 ### Annex B-3: Channel Layout Generation Rule ### {#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule}
 
 This section describes the generation rule for channel layouts for scalable channel audio.
 
-For a given channel layout (CL #n) of input Channel Audio, any list of CLs ({CL #i: i = 1, 2, ..., n}) for a scalable channel audio shall conform with following rules:
-- Si ≤ Si+1 and Wi ≤ Wi+1 and Ti ≤ Ti+1 except Si = Si+1 and Wi = Wi+1 and Ti = Ti+1 for i = n-1, n-2, …, 1. Where ith Channel Layout CL #i = Si.Wi.Ti.
-- CL #i is one of [=loudspeaker_layouts=] supported in this specification.
+For a given channel layout (CL #n) of an channel-based input audio, any list of CLs ({CL #i: i = 1, 2, ..., n}) for a scalable channel audio SHALL conform with following rules:
+- Si ≤ Si+1 and Wi ≤ Wi+1 and Ti ≤ Ti+1 except Si = Si+1, Wi = Wi+1 and Ti = Ti+1 for i = n-1, n-2, …, 1. Where the ith channel layout CL #i = Si.Wi.Ti.
+- CL #i is one of [=loudspeaker_layout=]s supported in this version of the specification.
 
-Down-mix paths, which conform to the above rule, shall be only allowed for scalable channel audio with [=num_layers=] > 1 as depicted in below figure.
+Down-mix paths, which conform to the above rule, SHALL be only allowed for scalable channel audio with [=num_layers=] > 1 as depicted in below figure.
 
 <center><img src="images/Down-mix Path.png" style="width:90%; height:auto;"></center>
 <center><figcaption>IA Down-mix Path</figcaption></center>
 
 ### Annex B-4: Recon Gain Generation ### {#iamfgeneration-scalablechannelaudio-recongaingeneration}
 
-This section describes how to generate [=recon_gain=].
+This section describes how to generate [=recon_gain=]. 
 
-Recon_Gain needs to be applied to de-mixed channels. For this, IA encoder needs to deliver it to IA decoders.
+NOTE: Recon gain generation is not required when the codec is lossless such as [=codec_id=] is set to 'ipcm' or 'fLaC'.
+
+Recon gain needs to be applied to de-mixed channels. For this, IA encoder needs to deliver it to IA decoders.
 
 Let's define followings:
-- Level Ok is the signal power for the frame #k of a channel of the down-mixed audio for CL #i.
-- Level Mk is the signal power for the frame #k of the relevant mixed channel of the down-mixed audio for CL #i-1.
-- Level Dk is the signal power for the frame #k of the de-mixed channel for CL #i (after demixing).
+- Level Ok is the signal power for the frame #k of a channel of the [=down-mixed audio=] for CL #i.
+- Level Mk is the signal power for the frame #k of the relevant mixed channel of the [=down-mixed audio=] for CL #i-1.
+- Level Dk is the signal power for the frame #k of the de-mixed channel for CL #i (after demixing in decode side).
 
 If 10*log10(level Ok / maxL^2) is less than the first threshold value (e.g. -80dB), Recon_Gain (k, i)  = 0. Where, maxL = 32767 for 16bits.
 
-If 10*log10(level Ok / level Mk ) is less than the second threshold value (e.g. -6dB), Recon_Gain (k, i) is set to the value which makes level Ok = Recon_Gain (k, i)^2 x level Dk. Otherwise, Recon_Gain (k, i) = 1. Actual value to be delivered is floor(255*Recon_Gain).
+If 10*log10(level Ok / level Mk ) is less than the second threshold value (e.g. -6dB), Recon_Gain (k, i) is set to the value which makes level Ok = Recon_Gain (k, i)^2 x level Dk. Otherwise, Recon_Gain (k, i) = 1. Actual value (i.e. [=recon_gain=]) to be delivered is floor(255*Recon_Gain).
 
-```
 For example, if we assume CL #i = 7.1.4ch and CL #i-1 = 5.1.2ch, then de-mixed channels are D_Lrs7, D_Rrs7, D_Ltb4 and D_Rtb4.
-- D_Lrs7 and D_Rrs7 are de-mixed from Ls5 and Rs5 in the (i-1)th ChannelGroup by using Lss7 and Rss7 in the ith ChannelGroup and its relevant demixing parameters (i.e., α(k) and β(k)) , respectively.
-- D_Ltb4 and D_Rtb4 are de-mixed from Ltf2 and Rtf2 in the (i-1)th ChannelGroup by using Ltf4 and Rtf4 in the ith ChannelGroup and its relevant demixing parameter (i.e., γ(k)), respectively.
+- D_Lrs7 and D_Rrs7 are de-mixed from Ls5 and Rs5 in the (i-1)th [=ChannelGroup=] by using Lss7 and Rss7 in the ith [=ChannelGroup=] and its relevant demixing parameters (i.e., α(k) and β(k)) , respectively.
+- D_Ltb4 and D_Rtb4 are de-mixed from Ltf2 and Rtf2 in the (i-1)th [=ChannelGroup=] by using Ltf4 and Rtf4 in the ith [=ChannelGroup=] and its relevant demixing parameter (i.e., γ(k)), respectively.
 
 Recon_Gain for D_Lrs7:
-- Level Ok is the signal power for the frame #k of Lrs7 in the ith ChannelGroup.
-- Level Mk is the signal power for the frame #k of Ls5 in the (i-1)th ChannelGroup.
+- Level Ok is the signal power for the frame #k of Lrs7 in the ith [=ChannelGroup=].
+- Level Mk is the signal power for the frame #k of Ls5 in the (i-1)th [=ChannelGroup=].
 - Level Dk is the signal power for the frame #k of D_Lrs7.
+
 Recon_Gain for D_Rrs7:
-- Level Ok is the signal power for the frame #k of Rrs7 in the ith ChannelGroup.
-- Level Mk is the signal power for the frame #k of Rs5 in the (i-1)th ChannelGroup.
+- Level Ok is the signal power for the frame #k of Rrs7 in the ith [=ChannelGroup=].
+- Level Mk is the signal power for the frame #k of Rs5 in the (i-1)th [=ChannelGroup=].
 - Level Dk is the signal power for the frame #k of D_Rrs7.
+
 Recon_Gain for D_Ltb4:
-- Level Ok is the signal power for the frame #k of Ltf4 in the ith ChannelGroup.
-- Level Mk is the signal power for the frame #k of Ltf2 in the (i-1)th ChannelGroup.
+- Level Ok is the signal power for the frame #k of Ltf4 in the ith [=ChannelGroup=].
+- Level Mk is the signal power for the frame #k of Ltf2 in the (i-1)th [=ChannelGroup=].
 - Level Dk is the signal power for the frame #k of D_Ltb4.
+
 Recon_Gain for D_Rtb4:
-- Level Ok is the signal power for the frame #k of Rtf4 in the ith ChannelGroup.
-- Level Mk is the signal power for the frame #k of Rtf2 in the (i-1)th ChannelGroup.
+- Level Ok is the signal power for the frame #k of Rtf4 in the ith [=ChannelGroup=].
+- Level Mk is the signal power for the frame #k of Rtf2 in the (i-1)th [=ChannelGroup=].
 - Level Dk is the signal power for the frame #k of D_Rtb4.
-```
+
 
 ### Annex B-5: ChannelGroup Generation Rule ### {#iamfgeneration-scalablechannelaudio-channelgroupgenerationrule}
 
-This section describes the generation rule for ChannelGroup.
+This section describes the generation rule for [=ChannelGroup=].
 
-For a given Channel Audio and the list of CLs ({CL #i: i = 1, 2, ..., n}), CG Generation module outputs the transformed audio (i.e. ChannelGroups) which shall conform to following rules:
-- It consists of C number of channels and is structured to n number of CGs, where C is the number of channels for the Channel Audio.
-- CG #1 (as called BCG): This CG is the down-mixed audio itself for CL #1 generated from the Channel Audio. It contains C1 number of channels.
-- CG #i (as called DCG, i = 2, 3, …, n): This CG contains (Ci – Ci-1) number of channels. (Ci – Ci-1) channel(s) consists of as follows:
+For a given channel-based input audio and the list of CLs ({CL #i: i = 1, 2, ..., n}), CG Generation module outputs the transformed audio (i.e. ChannelGroups) which SHALL conform to following rules:
+- It consists of C number of channels and is structured to n number of [=ChannelGroup=]s, where C is the number of channels for the input audio.
+- [=ChannelGroup=] #1 (as called BCG): This [=ChannelGroup=] is the [=down-mixed audio=] itself for CL #1 generated from the input audio. It contains C1 number of channels.
+- [=ChannelGroup=] #i (as called DCG, i = 2, 3, …, n): This [=ChannelGroup=] contains (Ci – Ci-1) number of channels. (Ci – Ci-1) channel(s) consists of as follows:
 	- (Si – Si-1) surround channel(s) if Si > Si-1 . When S_set = { x | Si-1 < x ≤ Si and x is an integer},
 		- If 2 is an element of S_set, the L2 channel is contained in this CG #i.
 		- If 3 is an element of S_set, the Center channel is contained in this CG #i.
@@ -2762,8 +2759,8 @@ For a given Channel Audio and the list of CLs ({CL #i: i = 1, 2, ..., n}), CG Ge
 		- If 7 is an element of S_set, the Lss7 and Rss7 channels are contained in this CG #i.
 	- The LFE channel if Wi > Wi-1 .
 	- (Ti – Ti-1) top channels if Ti > Ti-1 .
-		- If Ti-1 = 0, the top channels of the down-mixed audio for CL #i are contained in this CG #i.
-		- If Ti-1 = 2, the Ltf and Rtf channels of the down-mixed audio for CL #i are contained in this CG #i.
+		- If Ti-1 = 0, the top channels of the [=down-mixed audio=] for CL #i are contained in this [=ChannelGroup=] #i.
+		- If Ti-1 = 2, the Ltf and Rtf channels of the down-mixed audio for CL #i are contained in this [=ChannelGroup=] #i.
 
 Below figure shows one example of transformation matrix with 4 CGs (2ch/3.1.2ch/5.1.2ch/7.1.4ch).
 
