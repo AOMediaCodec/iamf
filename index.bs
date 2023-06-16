@@ -1923,28 +1923,28 @@ Where, PTS1 is the presentation time stamp of the first audio sample before trim
 
 # IAMF processing # {#processing}
 
-This section provides processes for IA decoding for a given [=IA sequence=].
+This section provides processes for IA decoding for a given [=IA Sequence=].
 
 
 IA decoding can be done by using the combination of following decoding processing.
-- Decoding of a scene-based audio element (Ambisonics decoding)
-- Decoding of a channel-based audio element (Scalable Channel Audio decoding)
-- Rendering and mixing of each audio element before mixing of multiple audio elements.
-	- It may include re-sampling of each audio element.
-- Mixing of multiple audio elements with synchronization
+- Decoding of a scene-based [=Audio Element=] (Ambisonics decoding)
+- Decoding of a channel-based [=Audio Element=] (Scalable Channel Audio decoding)
+- Rendering and mixing of each [=Audio Element=] before mixing of multiple [=Audio Element=]s.
+	- It may include re-sampling of each [=Audio Element=].
+- Mixing of multiple [=Audio Element=]s with synchronization
 - Post processing such as Loudness and Limiter.
 
-<b>Ambisonics decoding</b>, it shall conform to [[!RFC8486]] except codec specific processing and shall output Ambisonics channels in ACN (Ambisonics Channel Number) order.
+<b>Ambisonics decoding</b>, it SHALL conform to [[!RFC8486]] except codec specific processing.
 
-<b>Scalable Channel Audio decoding</b>, it shall output the channel audio (e.g. 3.1.2ch or 7.1.4ch) for the target channel layout.
+<b>Scalable Channel Audio decoding</b>, it SHALL output the [=3D audio signal=] (e.g. 3.1.2ch or 7.1.4ch) for the target channel layout.
 
 IA decoder is composed of OBU parser, Codec decoder, Audio Element Renderer and Post-processor as depicted in below figure.
-- OBU parser shall depacketize IA sequence to output one or more substreams with one or more Decoder_Config() but one decoder_config() per audio element, descriptors and parameters.
-- Codec decoder for each substream shall output decoded channels.
-- Audio Element Renderer reconstructs audio channels from decoded channels of Codec decoders according to the type of audio element which is specified audio element OBU, and renders the audio channels to the target loudspeaker layout.
-	- For scene-based audio element, it shall output audio channels for the target loudspeaker layout from the reconstructed ambisonics channels.
-	- For channel-based audio element, it shall output audio channels for the target loudspeaker layout from the reconstructed audio channels.
-- Post-processor outputs audio channels according to the target loudspeaker layout after processing mixing and post processing such as Loudness and Limiter.
+- OBU parser SHALL depacketize [=IA Sequence=] to output one or more [=Audio Substream=]s with one [=decoder_config()=], [=Descriptors=] and [=Parameter Substream=]s.
+- Codec decoder for each [=Audio Substream=] SHALL output decoded channels.
+- Audio Element Renderer reconstructs [=3D audio signal=] from decoded channels of Codec decoders according to the type of [=Audio Element=] which is specified [=Audio Element OBU=], and renders the audio channels to the target loudspeaker layout.
+	- For scene-based audio element, it SHALL output [=3D audio signal=] for the target loudspeaker layout from the reconstructed ambisonics channels.
+	- For channel-based audio element, it SHALL output [=3D audio signal=] for the target loudspeaker layout from the reconstructed audio channels.
+- Post-processor outputs [=Immersive Audio=] according to the target loudspeaker layout after processing mixing and post processing such as Loudness and Limiter.
 	
 <center><img src="images/IA Decoder Configuration.png" style="width:100%; height:auto;"></center>
 <center><figcaption>IA Decoder Configuration</figcaption></center>
@@ -1954,11 +1954,11 @@ IA decoder is composed of OBU parser, Codec decoder, Audio Element Renderer and 
 This section describes the decoding of Ambisonics.
 
 Below figure shows the decoding flowchart of Ambisonics decoding.
-- OBU parser shall output the substreams for the scene-based audio element in IA sequence.
-	- OBU parser shall output [=channel_mapping=] or [=demixing_matrix=] according to [=ambisonics_mode=] to Channel_Mapping/Demixing_Matrix module
-- Codec decoder shall output decoded channels (PCM) in the transmission order as many as[=output_channel_count=] after decoding of each Substream.
-- Channel_Mapping/Demixing_Matrix module shall apply channel_mapping or demixing_matrix according to Ambisonics_Mode to the channels (PCM) and outputs channels as many as [=output_channel_count=] in ACN order.
-- Ambisonics to Channel Format module may convert the output channels to channel audio according to the target loudspeaker layout.
+- OBU parser SHALL output the [=Audio Substream=]s for the scene-based [=Audio Element=] in the [=IA sequence=].
+	- OBU parser SHALL output [=channel_mapping=] or [=demixing_matrix=] according to [=ambisonics_mode=] to Channel_Mapping/Demixing_Matrix module.
+- Codec decoder SHALL output decoded channels (PCM) in the transmission order as many as [=output_channel_count=] after decoding of each [=Audio Substream=].
+- Channel_Mapping/Demixing_Matrix module SHALL apply channel_mapping or demixing_matrix according to [=ambisonics_mode=] to the channels (PCM) and outputs channels as many as [=output_channel_count=] in ACN order.
+- Ambisonics to Channel Format module may render the output channels to [=3D audio signal=] according to the target loudspeaker layout.
 
 <center><img src="images/Ambisonics Decoding Flowchart.png" style="width:80%; height:auto;"></center>
 <center><figcaption>Ambisonics Decoding Flowchart</figcaption></center>
@@ -1972,40 +1972,40 @@ Below figure shows the decoding flowchart of the decoding for Scalable Channel A
 <center><img src="images/Channel Audio Decoding Flowchart.png" style="width:80%; height:auto;"></center>
 <center><figcaption>Scalable Channel Audio Decoding Flowchart</figcaption></center>
 
-For a given loudspeaker layout (i.e. CL #i) among the list of [=loudspeaker_layout=] in scalable channel layout config,
-- OBU Parser shall get substreams for ChannelGroup #1 ~ ChannelGroup #i and pass them to Codec decoder with [=Decoder_Config()=].
-- Codec decoder shall output decoded channels (PCM) in the transmission order.
-	- For non-scalable audio (i.e i = 1), its order shall be converted to the loudspeaker location order for CL #1.
+For a given loudspeaker layout (i.e. CL #i) among the list of [=loudspeaker_layout=] in [=scalable_channel_layout_config()=],
+- OBU Parser SHALL get [=Audio Substream=]s for [=ChannelGroup=] #1 ~ [=ChannelGroup=] #i and pass them to Codec decoder with [=decoder_config()=].
+- Codec decoder SHALL output decoded channels (PCM) in the transmission order.
+	- For non-scalable audio (i.e i = [=num_layers=] = 1), its order SHALL be converted to the loudspeaker location order for CL #1.
 - Following are further processed for scalable audio (i.e. i > 1)
-	- When Output_Gain_Is_Present_Flag(j) for ChannelGroup #j (j = 1, 2, …, i-1) is on, Gain module shall apply Output_Gain(j) to all audio samples of the mixed channels in the ChannelGroup #j indicated by Output_Gain_Flag(j).
-	- De-Mixer shall output de-mixed channels (PCM) for CL #i generated through de-mixing of the mixed channels from Gain module by using non-mixed channels and demixing parameters for each frame.
-	- Recon_Gain module shall output smoothed channels (PCM) by applying Recon_Gain to each frame of the de-mixed channels.
-	- The order for Non-mixed channels and Smoothed channels shall be converted to the loudspeaker location order for CL #i after going through necessary modules such as Gain, De-Mixer, Recon_Gain etc..
+	- When [=output_gain_is_present_flag=](j) for [=ChannelGroup=] #j (j = 1, 2, …, i-1) is on, Gain module SHALL apply [=output_gain=](j) to all audio samples of the mixed channels in the [=ChannelGroup=] #j indicated by [=output_gain_flag=](j).
+	- De-Mixer SHALL output de-mixed channels (PCM) for CL #i generated through de-mixing of the mixed channels from Gain module by using non-mixed channels and demixing parameters for each frame.
+	- Recon_Gain module SHALL output smoothed channels (PCM) by applying [=recon_gain=] to each frame of the de-mixed channels.
+	- The order for Non-mixed channels and Smoothed channels SHALL be converted to the loudspeaker location order for CL #i after going through necessary modules such as Gain, De-Mixer, Recon_Gain etc..
 - Following may be further processed
-	- Loudness normalization module may output loudness normalized channels at -24 LKFS from non-mixed channels and smoothed channels (if present) by using loudness value for CL #i.
+	- Loudness normalization module may output loudness normalized channels at -24 LKFS from non-mixed channels and smoothed channels (if present) by using loudness information for CL #i.
 	- Limiter module may limit the true peak of input channels at -1dB.
 
 Following sections, [[#processing-scalablechannelaudio-gain]], [[#processing-scalablechannelaudio-demixer]] and [[#processing-scalablechannelaudio-recongain]] are only needed for decoding of scalable audio with [=num_layers=] > 1.
 
 ### Gain ### {#processing-scalablechannelaudio-gain}
 
-Gain module is the mirror process of Attenuation module. It recovers the reduced sample values using Output_Gain when its flag for ChannelGroup #j is on. When its flag is off, then this module shall be bypassed for ChannelGroup #j. Output_Gain(j) for ChannelGroup #j shall be applied to all samples of the mixed channels in the ChannelGroup #j. Where, mixed channels means the mixed channels from an input channel audio (i.e. a channel audio for CL #n).
+Gain module is the mirror process of Attenuation module. It recovers the reduced sample values using [=output_gain=](i) when its [=output_gain_is_present_flag=](i) for [=ChannelGroup=] #i is on. When its [=output_gain_is_present_flag=](i) is off, then this module SHALL be bypassed for [=ChannelGroup=] #i. [=output_gain=](i) for [=ChannelGroup=] #i SHALL be applied to all samples of the mixed channels in the [=ChannelGroup=] #i. Where, mixed channels means the mixed channels from an input channel audio (i.e. a channel audio for CL #n).
 
-To apply the gain, an implementation MUST use the following:
+To apply the gain, an implementation SHALL use the following:
 
 ```
-	Sample *= pow(10, Output_Gain(j) / (20.0*256))
+	Sample *= pow(10, [=output_gain=](i) / (20.0*256))
 ```
 
-Where, Output_Gain(j) is the raw 16-bit value for jth layer which is specified in [=channel_audio_layer_config()=].
+Where, n = [=num_layers=] and i = 1, 2, ..., n. [=output_gain=](i) is the raw 16-bit value for the ith layer which is specified in [=channel_audio_layer_config()=].
 
 ### De-mixer ### {#processing-scalablechannelaudio-demixer}
 
 For scalable channel audio with [=num_layers=] > 1, some channels of [=down-mixed audio=] for CL #i are delivered as is but the rest are mixed with other channels for CL #i-1.
 
-De-mixer module reconstructs the rest of the down-mixed audio for CL #i from the mixed channels, which is passed by Gain module, and its relevant non-mixed channels using its relevant demixing parameters.
+De-mixer module reconstructs the rest of the [=down-mixed audio=] for CL #i from the mixed channels, which is passed by Gain module, and its relevant non-mixed channels using its relevant demixing parameters.
 
-De-mixing for down-mixed audio for CL #i shall comply with the result by the combination of following surround and top de-mixers:
+De-mixing for [=down-mixed audio=] for CL #i SHALL comply with the result by the combination of following surround and top de-mixers:
 - Surround de-mixers
 	- <dfn noexport>S1to2 de-mixer</dfn>: R2 = 2 x Mono – L2
 	- <dfn noexport>S2to3 de-mixer</dfn>: L3 = L2 – 0.707 x C and R3 = R2 – 0.707 x C
@@ -2014,12 +2014,12 @@ De-mixing for down-mixed audio for CL #i shall comply with the result by the com
 - Top de-mixers
 	- <dfn noexport>TF2toT2 de-mixer</dfn>: Ltf2 = Ltf3 – w(k) x (L3 – L5) and Rtf2 = Rtf3 – w(k) x (R3 – R5)
 	- <dfn noexport>T2to4 de-mixer</dfn>: Ltb = 1/γ(k) x (Ltf2 – Ltf4) and Rtb = 1/γ(k) x (Rtf2 – Rtf4)
-- Where, Ltf2 / Rtf2 is top channel of x.1.2ch, Ltf3 / Rtf3 is top channel of 3.1.2ch, and Ltf4 / Rtf4 is to channel of x.1.4ch (x = 5 or 7) and w(k) is determined from the value of wIdx(k).
+- Where, Ltf2 / Rtf2 is top channel of x.1.2ch, Ltf3 / Rtf3 is top channel of 3.1.2ch, and Ltf4 / Rtf4 is top channel of x.1.4ch (x = 5 or 7) and [=w(k)=] is determined from the value of wIdx(k).
 
-Initially, wIdx(0) = 0 and the value of wIdx(k) shall be derived as follows:
+Initially, wIdx(0) = 0 and the value of wIdx(k) SHALL be derived as follows:
 - <dfn noexport>wIdx(k)</dfn> = Clip3(0, 10, wIdx(k-1) + w_idx_offset(k))
 
-Mapping of wIdx(k) to w(k) should be as follows:
+Mapping of wIdx(k) to <dfn noexport>w(k)</dfn> SHOULD be as follows:
 <pre class = "def">
  wIdx(k) :   w(k)
     0    :    0
@@ -2036,19 +2036,19 @@ Mapping of wIdx(k) to w(k) should be as follows:
 </pre>
 
 When D_set = { x | S1 < x ≤ Si and x is an integer},
-- If 2 is an element of D_set, the combination shall include [=S1to2 de-mixer=].
-- If 3 is an element of D_set, the combination shall include [=S2to3 de-mixer=].
-- If 5 is an element of D_set, the combination shall include [=S3to5 de-mixer=].
-- If 7 is an element of D_set, the combination shall include [=S5to7 de-mixer=].
+- If 2 is an element of D_set, the combination SHALL include [=S1to2 de-mixer=].
+- If 3 is an element of D_set, the combination SHALL include [=S2to3 de-mixer=].
+- If 5 is an element of D_set, the combination SHALL include [=S3to5 de-mixer=].
+- If 7 is an element of D_set, the combination SHALL include [=S5to7 de-mixer=].
 
 When Ti = 2,
-- If Sj = 3 (j=1,2,…, i-1), the combination shall include [=TF2toT2 de-mixer=].
+- If Sj = 3 (j=1,2,…, i-1), the combination SHALL include [=TF2toT2 de-mixer=].
 
 When Ti = 4,
-- If Sj = 3 (j=1,2,…, i-1), the combination shall include [=TF2toT2 de-mixer=] and [=T2to4 de-mixer=].
-- Elseif Tj = 2 (j=1,2,…, i-1), the combination shall include [=T2to4 de-mixer=].
+- If Sj = 3 (j=1,2,…, i-1), the combination SHALL include [=TF2toT2 de-mixer=] and [=T2to4 de-mixer=].
+- Elseif Tj = 2 (j=1,2,…, i-1), the combination SHALL include [=T2to4 de-mixer=].
 
-For example, when CL #1 = 2ch, CL #2 = 3.1.2ch, CL #3 = 5.1.2ch and CL #4 = 7.1.4ch. To reconstruct the rest (i.e. Ls5/Rs5/Ltf/Rtf) of the down-mixed 5.1.2ch,
+For example, when CL #1 = 2ch, CL #2 = 3.1.2ch, CL #3 = 5.1.2ch and CL #4 = 7.1.4ch. To reconstruct the rest (i.e. Ls5/Rs5/Ltf/Rtf) of the [=down-mixed audio=] 5.1.2ch,
 - The combination includes [=S2to3 de-mixer=], [=S3to5 de-mixer=] and [=TF2toF2 de-mixer].
 - Ls5 and Rs5 are recovered by S2to3 de-mixer and S3to5 de-mixer.
 - Ltf and Rtf are recovered by S2to3 de-mixer and TF2toT2 de-mixer.
@@ -2060,11 +2060,13 @@ For example, when CL #1 = 2ch, CL #2 = 3.1.2ch, CL #3 = 5.1.2ch and CL #4 = 7.1.
 
 ### Recon Gain ### {#processing-scalablechannelaudio-recongain}
 
-[=recon_gain=] shall be only applied to all of audio samples of the de-mixed channels from De-mixer module.
-- [=recon_gain_info_parameter_data()=] indicates each channel of CL #i which Recon_Gain needs to be applied to and provides Recon_Gain value for each frame of the channel.
+Recon gain is REQUIRED only for [=num_layers=] > 1 and when [=codec_id=] is set to 'Opus' or 'mp4a'.
+
+[=recon_gain=] SHALL be only applied to all of audio samples of the de-mixed channels from De-mixer module.
+- [=recon_gain_info_parameter_data()=] indicates each channel of CL #i which recon gain needs to be applied to and provides [=recon_gain=] value for each frame of the channel.
 	- Sample (k,i) *= Smoothed_Recon_Gain (k,i), where k is the frame index and i is the sample index of the frame.
 	- Smoothed_Recon_Gain (k) = MA_gain (k-1) x e_window + MA_gain (k) x s_window
-	- MA_gain (k) = 2 / (N+1) x Recon_Gain (k) / 255 + (1 – 2/(N+1)) x MA_gain (k-1), where MA_gain (0) = 1.
+	- MA_gain (k) = 2 / (N+1) x [=recon_gain=] (k) / 255 + (1 – 2/(N+1)) x MA_gain (k-1), where MA_gain (0) = 1.
 	- e_window[0: olen] = hanning[olen:], e_window[olen:flen] = 0.
 	- s_window[0: olen] = hanning[:olen], s_window[olen:flen] = 1.
 	- Where, hanning = np.hanning (2*olen), flen is the frame size and olen is the overlap size.
@@ -2075,32 +2077,32 @@ Below figure shows the smoothing scheme of [=recon_gain=].
 <center><img src="images/Smoothing Scheme of Recon Gain.png" style="width:100%; height:auto;"></center>
 <center><figcaption>Smoothing Scheme of Recon Gain</figcaption></center>
 
-Recommend values for specific codecs are as follows
-- OPUS: olen = 60.
-- AAC-LC: olen = 64.
+RECOMMENDED values for specific codecs are as follows
+- When [=codec_id=] is set to 'Opus': olen = 60.
+- When [=codec_id=] is set to 'mp4a': olen = 64.
 
 ## Mix Presentation ## {#processing-mixpresentation}
 
-An IA sequence may contain more than one mix presentation. [[#processing-mixpresentation-selection]] details how a mix presentation should be selected from multiple of them.
+An [=IA Sequence=] MAY contain more than one [=Mix Presentation=]. [[#processing-mixpresentation-selection]] details how a [=Mix Presentation=] SHOULD be selected from multiple of them.
 
-A mix presentation specifies how to render, process and mix one or more audio elements. Each audio element should first be individually rendered and processed before mixing. Then, any additional processing specified by [=output_mix_config()=] should be applied to the mixed audio signal in order to generate the final output audio for playback. [[#processing-mixpresentation-rendering]] details how each audio element should be rendered, while [[#processing-mixpresentation-mixing]] details how the audio elements should be processed and mixed.
+A [=Mix Presentation=] specifies how to render, process and mix one or more [=Audio Element=]s. Each [=Audio Element=] SHOULD first be individually rendered and processed before mixing. Then, any additional processing specified by [=output_mix_config()=] SHOULD be applied to the mixed audio signal in order to generate the final output audio for playback. [[#processing-mixpresentation-rendering]] details how each [=Audio Element=] SHOULD be rendered, while [[#processing-mixpresentation-mixing]] details how the [=Audio Element=]s SHOULD be processed and mixed.
 
 ### Selecting a Mix Presentation ### {#processing-mixpresentation-selection}
 
-An IA sequence may contain more than one mix presentations. The IA parser should select the appropriate mix presentation in the following order.
+When an [=IA Sequence=] contain multiple [=Mix Presentation=]s, the IA parser SHOULD select the appropriate [=Mix Presentation=] in the following order.
 
-1. If there are any user-selectable mixes, the IA parser should select the mix, or mixes, that match the user's preferences. An example might be a mix with a specific language. Mix presentations may use [=mix_presentation_friendly_label=] to describe such mixes.
-2. If there are more than one valid mixes remaining, the IA parser should select an appropriate mix for rendering, in the following order.
+1. If there are any user-selectable mixes, the IA parser SHOULD select the mix, or mixes, that match the user's preferences. An example might be a mix with a specific language. [=Mix Presentation=]s may use [=mix_presentation_friendly_label=] to describe such mixes.
+2. If there are more than one valid mixes remaining, the IA parser SHOULD select an appropriate mix for rendering, in the following order.
 	1. If the playback layout is binaural, i.e. headphones:
 		1. Select the mix with [=audio_element_id=] whose [=loudspeaker_layout=] is BINAURAL.
 		2. If there is no such mix, select the mix with the highest available [=loudness_layout=].
 	2. If the playback layout is loudspeakers:
-		1. If there is a mix with an [=loudness_layout=] that matches the playback loudspeaker layout, it should be selected. If there are more than one matching mixes, the first one should be selected.
-		2. If there is no such mix, select the mix presentation with the highest available [=loudness_layout=].
+		1. If there is a mix with an [=loudness_layout=] that matches the playback loudspeaker layout, it SHOULD be selected. If there are more than one matching mixes, the first one SHOULD be selected.
+		2. If there is no such mix, select the [=Mix Presentation=] with the highest available [=loudness_layout=].
 
 ### Rendering an Audio Element ### {#processing-mixpresentation-rendering}
 
-This specification supports the rendering of either a multichannel or ambisonics audio element to either a target loudspeaker layout or a binaural output.
+This specification supports the rendering of either a channel-based or scene-based [=Audio Element=] to either a target loudspeaker layout or a binaural output.
 
 In this section, for a given x.y.z layout, the next highest layout x'.y'.z' means that x', y' and z' are greater than or equal to x, y and z, respectively.
 
@@ -2124,16 +2126,16 @@ In this section, for a given x.y.z layout, the next highest layout x'.y'.z' mean
 
 #### Rendering a channel-based audio element to loudspeakers #### {#processing-mixpresentation-rendering-m2l}
 
-This section defines the renderer to use, given a channel-based audio element and a loudspeaker playback layout.
+This section defines the renderer to use, given a channel-based [=Audio Element=] and a loudspeaker playback layout.
 
 - The input layout of the IA renderer is set as follows:
-	- If [=num_layers=] = 1, use the [=loudspeaker_layout=] of the audio element.
+	- If [=num_layers=] = 1, use the [=loudspeaker_layout=] of the [=Audio Element=].
 	- Else, if there is a [=loudness_layout=] that matches the playback layout, use it.
 	- Else, use the next highest available layout from all available [=loudspeaker_layout=] and [=loudness_layout=].
 - The output layout of the IA renderer is set to the playback layout.
 - The IA renderer used is selected according to the following rules:
-	- If the playback layout matches a [=loudspeaker_layout=] which can be generated from the highest loudspeaker layout of the audio element according to [[#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule]], use demixing_info_parameter_data().
-		- If demixing_info_parameter_data() is not delivered,
+	- If the playback layout matches a [=loudspeaker_layout=] which can be generated from the highest loudspeaker layout of the [=Audio Element=] according to [[#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule]], use [=demixing_info_parameter_data()=] or [=default_demixing_info_parameter_data()=].
+		- If DemixingParamDefinition() is not present,
 			- If the playback layout complies with loudspeaker layouts supported by [[!ITU2051-3]], use EAR Direct Speakers renderer ([[!ITU2127-0]]).
 			- Else if the playback layout is 3.1.2ch, use the static down-mix matrices specified in [[#processing-downmixmatrix-static]].
 			- Else, use implementation-specific renderer
@@ -2141,24 +2143,24 @@ This section defines the renderer to use, given a channel-based audio element an
 	- Else if the playback layout is 3.1.2ch, use the static down-mix matrices specified in [[#processing-downmixmatrix-static]].
 	- Else, use implementation-specific renderer.
 
-If the EAR Direct Speakers renderer is used, the following should be provided for each audio channel of the audio element:
+If the EAR Direct Speakers renderer is used, the following SHOULD be provided for each audio channel of the [=Audio Element=]:
 
-- speaker label: the label of the speaker position, using the same convention as "SP Label" in [[!ITU2051-3]]. This is defined for each audio channel of the audio element based on the information from [=loudspeaker_layouts=].
+- speaker label: the label of the speaker position, using the same convention as "SP Label" in [[!ITU2051-3]]. This is defined for each audio channel of the [=Audio Element=] based on the information from [=loudspeaker_layouts=].
 
-In [[!ITU2051-3]], an LFE audio channel may be identified either by an explicit label or its frequency content. In this specification, the LFE channel is identified based on the explicit label only, given by [=loudspeaker_layout=].
+In [[!ITU2051-3]], an LFE audio channel MAY be identified either by an explicit label or its frequency content. In this specification, the LFE channel is identified based on the explicit label only, given by [=loudspeaker_layout=].
 
 #### Rendering a scene-based audio element to loudspeakers #### {#processing-mixpresentation-rendering-a2l}
 
-This section defines the renderer to use, given a scene-based audio element and a loudspeaker playback layout.
+This section defines the renderer to use, given a scene-based [=Audio Element=] and a loudspeaker playback layout.
 
 - The input layout of the IA renderer is set to Ambisonics.
 - The output layout of the IA renderer is set to the playback layout.
 - The IA renderer used is selected according to the following rules:
 	- If the playback layout complies with loudspeaker layouts supported by [[!ITU2051-3]], use EAR HOA renderer ([[!ITU2127-0]]).
 	- Else, use implementation-specific renderer.
-		- If there is no implementation-specific Ambisonics renderer, use the EAR HOA renderer to render to the next highest [[!ITU2051-3]] layout compared to the playback layout, and then downmix using implementation-specific renderer.
+		- If there is no implementation-specific Ambisonics renderer, use the EAR HOA renderer to render to the next highest [[!ITU2051-3]] layout compared to the playback layout, and then downmix using implementation-specific renderer or use the static down-mix matrices specified in [[#processing-downmixmatrix-static]] if available.
 
-If the EAR HOA renderer is used, the following metadata should be provided to the renderer for each audio channel:
+If the EAR HOA renderer is used, the following metadata SHOULD be provided to the renderer for each audio channel:
 
 1. Ambisonics order
 2. Ambisonics degree
@@ -2173,31 +2175,31 @@ degree  m = k - n * (n + 1).
 
 #### Rendering a channel-based audio element to a binaural output #### {#processing-mixpresentation-rendering-m2b}
 
-Given a channel-based audio element and a binaural playback layout, the Binaural EBU ADM Direct Speaker renderer [[!BEAR]] should be used. The highest layout provided in [=scalable_channel_layout_config()=] should be used as the input to the renderer.
+Given a channel-based [=Audio Element=] and a binaural playback layout, the Binaural EBU ADM Direct Speaker renderer [[!BEAR]] SHOULD be used. The highest layout provided in [=scalable_channel_layout_config()=] SHOULD be used as the input to the renderer.
 
 #### Rendering a scene-based audio element to a binaural output #### {#processing-mixpresentation-rendering-a2b}
 
-Given a scene-based audio element and a binaural playback system, the Resonance Audio renderer [[!Resonance-Audio]] should be used.
+Given a scene-based [=Audio Element=] and a binaural playback system, the Resonance Audio renderer [[!Resonance-Audio]] SHOULD be used.
 
 
 ### Mixing Audio Elements ### {#processing-mixpresentation-mixing}
 
-Each audio element is processed individually before mixing as follows:
+Each [=Audio Element=] SHOULD be processed individually before mixing as follows:
 1. Render to the playback layout.
-2. If all audio elements do not have a common sample rate, re-sample to 48 kHz.
-3. If all audio elements do not have a common bit-depth, convert to a common bit-depth. This specification recommends using 16 bits.
+2. If all [=Audio Element=]s do not have a common sample rate, re-sample to 48 kHz is RECOMMENDED.
+3. If all [=Audio Element=]s do not have a common bit-depth, convert to a common bit-depth. This specification RECOMMENDs using 16 bits.
 4. If [=loudness_layout=] matches with the playback layout, apply any per-element processing according to [=element_mix_config()=].
 
-The rendered and processed audio elements are then summed, and then apply [=output_mix_config()=] to generate one sub-mixed audio signal. If there are more than one sub-mixes, the output of each sub-mix is further summed to generate the final mixed audio signal.
+The rendered and processed [=Audio Element=]s SHOULD be then summed, and then apply [=output_mix_config()=] to generate one sub-mixed audio signal.
 
 
 ## Animated Parameters ## {#processing-animated-params}
 
-This section describes how a set of parameters is animated over a subblock in a parameter block and applied to the corresponding audio samples, using the information provided in [=AnimatedParameterData()=].
+This section describes how a set of parameter values is animated over a subblock in a parameter_block_obu() and applied to the corresponding audio samples, using the information provided in [=AnimatedParameterData()=].
 
-If [=animation_type=] is equal to STEP, the parameter value provided by [=start_point_value=] should be applied to all time steps in the subblock.
+If [=animation_type=] is equal to STEP, the parameter value provided by [=start_point_value=] SHOULD be applied to all time steps in the subblock.
 
-If [=animation_type=] is equal to LINEAR or BEZIER, the information provided in [=AnimatedParameterData()=] describes how the parameter is animated as a Bezier curve. Let <code>T</code> be the subblock duration defined in the parameter_block_obu() and <code>P0</code>, <code>P1</code> and <code>P2</code> be 2D coordinates defined as
+If [=animation_type=] is equal to LINEAR or BEZIER, the information provided in [=AnimatedParameterData()=] describes how the set of parameter value is animated as a Bezier curve. Let <code>T</code> be the [=subblock_duration=] defined in the parameter_block_obu() and <code>P0</code>, <code>P1</code> and <code>P2</code> be 2D coordinates defined as
 
 ```
 P0 = (t0, start_point_value),
@@ -2213,7 +2215,7 @@ t1 = round(D * control_point_relative_time).
 
 The values of <code>t0</code>, <code>t1</code> and <code>t2</code> are expressed as ticks at the [=parameter_rate=] given in the associated parameter definition.
 
-If [=animation_type=] is equal to LINEAR, the parameter value is linearly interpolated between [=start_point_value=] and [=end_point_value=] at a given point in time as:
+If [=animation_type=] is equal to LINEAR, the set of parameter values is linearly interpolated between [=start_point_value=] and [=end_point_value=] at a given point in time as:
 
 ```
 B_linear(a) = (1 - a) * P0 + a * P2,
@@ -2222,7 +2224,7 @@ B_linear(a) = (1 - a) * P0 + a * P2,
 
 where <code>B_linear(a) = (t, y)</code> is a 2D coordinate with the parameter value <code>y</code> at time <code>t</code>.
 
-If [=animation_type=] is equal to BEZIER, the parameter value is interpolated following a quadratic Bezier curve between [=start_point_value=] and [=end_point_value=] at a given point in time as:
+If [=animation_type=] is equal to BEZIER, the set of parameter values is interpolated following a quadratic Bezier curve between [=start_point_value=] and [=end_point_value=] at a given point in time as:
 
 ```
 B_quad(a) = (1 - a)^2 * P0 + 2 * (1 - a) * a * P1 + a^2 * P2,
@@ -2231,7 +2233,7 @@ B_quad(a) = (1 - a)^2 * P0 + 2 * (1 - a) * a * P1 + a^2 * P2,
 
 where <code>B_quad(a) = (t, y)</code> is a 2D coordinate with parameter value <code>y</code> at time <code>t</code>.
 
-To apply the parameter values to the audio samples in the subblock without interpolation, the [=parameter_rate=] is first resampled to the audio sample rate to give:
+To apply the parameter values to the audio samples in the subblock without interpolation, the [=parameter_rate=] SHOULD be first resampled to the audio sample rate to give:
 
 ```
 n0 = t0 * audio_sample_rate / parameter_rate,
@@ -2274,17 +2276,15 @@ gamma = n0 - n.
 
 ### Loudness Normalization ### {#processing-post-loudness}
 
-Loudness normalization should be done by adjusting the loudness level to a target output level using information provided in [[#obu-mixpresentation-loudness]].  A control may be provided to set unique target output levels for each anchored loudness and/or the integrated loudness.  If loudness normalization increases the output level, a peak limiter to prevent saturation and/or clipping may be necessary; [=true_peak=] or [=digital_peak=] may be used to determine if peak limiting is needed.  Alternately, the total amount of normalization may be limited.
+Loudness normalization SHOULD be done by adjusting the loudness level to a target output level using information provided in [[#obu-mixpresentation-loudness]].  A control MAY be provided to set unique target output levels for each anchored loudness and/or the integrated loudness.  If loudness normalization increases the output level, a peak limiter to prevent saturation and/or clipping MAY be necessary; [=true_peak=] or [=digital_peak=] MAY be used to determine if peak limiting is needed.  Alternately, the total amount of normalization MAY be limited.
 
 The rendered layouts that were used to measure the loudness information of a sub-mix are provided by [=loudness_layout=]s. 
 
-If one of them matches the playback layout, the loudness information should be used directly for normalization. If there is a mismatch between [=loudness_layout=] and the playback layout, the implementation may choose to use the provided loudness information of the highest [=loudness_layout=] as-is. 
-
-If there is more than one selected loudness_info() specified in the mix presentation (i.e. in case of multiple sub-mixes), the implementation should normalize the loudness of each sub-mix independently before summing them.
+If one of them matches the playback layout, the loudness information SHOULD be used directly for normalization. If there is a mismatch between [=loudness_layout=] and the playback layout, the implementation MAY choose to use the provided loudness information of the highest [=loudness_layout=] as-is. 
 
 ### Limiter ### {#processing-post-limiter}
 
-The limiter should limit the true peak of audio signal at -1 dBTP, where true peak is defined in [[!ITU1770-4]]. The limiter should apply to multichannel signals in a linked manner and further support auto-release.
+The limiter SHOULD limit the true peak of audio signal at -1 dBTP, where true peak is defined in [[!ITU1770-4]]. The limiter SHOULD apply to multichannel signals in a linked manner and further support auto-release.
 
 
 ## Down-mix Matrix ## {#processing-downmixmatrix}
@@ -2292,13 +2292,13 @@ The limiter should limit the true peak of audio signal at -1 dBTP, where true pe
 
 ### Dynamic Down-mix Matrix ### {#processing-downmixmatrix-dynamic}
 
-This section recommends dynamic down-mixing matrices.
+This section RECOMMENDs dynamic down-mixing matrices.
 
 The dynamic down-mixing matrics complies with the down-mixing mechanism which is specified in [[#iamfgeneration-scalablechannelaudio-downmixmechanism]].
 
 ### Static Down-mix Matrix ### {#processing-downmixmatrix-static}
 
-This section specifies static down-mix matrices to render to 3.1.2ch from each of 5.1.2ch, 5.1.4ch, 7.1.2ch and 7.1.4ch.
+This section RECOMMENDs static down-mix matrices to render to 3.1.2ch from each of 5.1.2ch, 5.1.4ch, 7.1.2ch and 7.1.4ch.
 
 The figures below show static down-mix matrices to 3.1.2ch.
 
@@ -2314,7 +2314,7 @@ The figures below show static down-mix matrices to 3.1.2ch.
 <center><img src="images/3.1.2ch Down-mix Matrix for 7.1.4ch.png" style="width:100%; height:auto;"></center>
 <center><figcaption>3.1.2ch Down-mix matrix for 7.1.4ch</figcaption></center>
 
-Where, p1 = 0.707. Implementations may use limiter defined in [[#processing-post-limiter]] to preserve energy of audio signals instead of normalization factors.
+Where, p1 = 0.707. Implementations MAY use limiter defined in [[#processing-post-limiter]] to preserve energy of audio signals instead of normalization factors.
 
 
 # IAMF Generation Process (Informative) # {#iamfgeneration}
