@@ -465,6 +465,8 @@ It SHALL always be set to 0 for the following [=obu_type=] values:
 - OBU_IA_Audio_Frame
 - OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID17
 
+If a decoder encounters an OBU with [=obu_redundant_copy=] = 1, and it has also received the previous non-redundant OBU, it SHALL ignore the redundant OBU. If the decoder has not received the previous non-redundant OBU, it SHALL treat the redundant copy as a non-redundant OBU and process the OBU accordingly.
+
 <dfn noexport>obu_trimming_status_flag</dfn> indicates whether this OBU has audio samples to be trimmed or not. It SHALL be set only when [=obu_type=] is set to OBU_IA_Audio_Frame or OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID17.
 
 For a given coded [=Audio Substream=], 
@@ -1804,9 +1806,9 @@ This section details the order in which the OBUs are sequenced in a standalone I
 
 An <dfn noexport>IA Sequence</dfn> is composed of a series of OBUs in the sequence of a set of [=Descriptors=] followed by their associated [=IA Data=]s. 
 
-NOTE: In typically case, the first [=Descriptors=] of the [=IA Sequence=] are all non-redundant (i.e. [=obu_redundant_copy=] = 0).
+The first [=Descriptors=] of the [=IA Sequence=] SHALL be marked as non-redundant (i.e. [=obu_redundant_copy=] = 0).
 
-The [=Descriptors=] MAY additionally be repeated redundantly and as frequently as necessary. In this case, the "obu_redundant_copy" field in the OBU header of each of the [=Descriptors=] shall be set to 1.
+The [=Descriptors=] MAY additionally be repeated redundantly and as frequently as necessary. In this case, the [=obu_redundant_copy=] field in their OBU headers SHALL be set to 1.
 
 The below figure shows an example of [=IA Sequence=].
 
