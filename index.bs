@@ -269,13 +269,13 @@ The model includes one or more [=Audio Element=]s, each of which consists of one
 - The term <dfn noexport>Parameter Substream</dfn> means a sequence of parameter values that is associated with the algorithms used for decoding, reconstructing, rendering and mixing. It is applied to its associated [=Audio Element=].
 	- [=Parameter Substream=] may change their values over time and may further be animated; for example, any changes in values may be smoothed over some time duration. As such, they may be viewed as a 1D signal that have different metadata specified for different time durations.
 - The term <dfn noexport>Mix Presentation</dfn> means a series of processes to present [=Immersive Audio=] contents to end-users by using [=Audio Element=](s). It contains metadata, that describe how the [=Audio Element=](s) is(are) rendered and mixed together for playback through physical loudspeakers or headsets, and loudness information.
-- The term <dfn noexport>Mixed Audio Element</dfn> means a [=3D audio signal=] after the [=Audio Element=](s) defined in a [=Mix Presenation=] is(are) rendered and mixed together for playback through physical loudspeaker or headsets.
+- The term <dfn noexport>Rendered Mix Presentation</dfn> means a [=3D audio signal=] after the [=Audio Element=](s) defined in a [=Mix Presenation=] is(are) rendered and mixed together for playback through physical loudspeaker or headsets.
 
 IAMF can be used to provide [=Immersive Audio=] contents for presentation on a wide range of devices in both streaming and offline applications. These applications include internet audio streaming, multicasting/broadcasting services, file download, gaming, communication, virtual and augmented reality, and others. In these applications, audio may be played back on a wide range of devices, e.g. headsets, mobile phones, tablets, TVs, sound bars, home theater systems and big screens.
 
 Here are some typical IAMF use cases and examples of how to instantiate the model for the use cases.
 - UC1: One [=Audio Element=] (e.g. 3.1.2ch or First Order Ambisonics (FOA)) is delivered to a big-screen TV (in Home) or a Mobile device through unicast network. It is rendered to a loudspeaker layout (e.g. 3.1.2ch) or Binaural (or Stereo) with loudness normalization and is played on loudspeakers built in the big-screen TV or headset through the Mobile device, respectively.
-- UC2: Two [=Audio Element=]s (e.g. 5.1.2ch and Stereo) are delivered to a big-screen TV through unicast network. Both are rendered to the same loudspeaker layout builted in the big-screen TV and are mixed. After loudness normalization appropriate to Home environment, the [=Mixed Audio Element=] is playbacked on the loudspeakers.
+- UC2: Two [=Audio Element=]s (e.g. 5.1.2ch and Stereo) are delivered to a big-screen TV through unicast network. Both are rendered to the same loudspeaker layout builted in the big-screen TV and are mixed. After loudness normalization appropriate to Home environment, the [=Rendered Mix Presentation=] is playbacked on the loudspeakers.
 - UC3: Two [=Audio Element=]s (e.g. FOA and Stereo) are delivered to a Mobile device through unicast network. Both are rendered to the same loudspeaker layout to be mixed. After mixing of them, it is rendered to Binaural (or Stereo) with loudness normalization and  is playbacked on headset through the Mobile device.
 
 Example 1: [=3D audio signal=] = 3.1.2ch of UC1,
@@ -289,7 +289,7 @@ Example 2: Two [=3D audio signal=]s = 5.1.2ch and Stereo of UC2,
 - Audio Element 2 (Stereo): Consists of 1 Audio Substream which is grouped into one [=ChannelGroup=].
 - Parameter Substream 1-1: Mixing parameter values applied to Audio Element 1 by considering Home environment
 - Parameter Substream 1-2: Mixing parameter values applied to Audio Element 2 by considering Home environment
-- Mix Presentation: Provide rendering algorithm of Audio Element 1 & 2 to popular loudspeaker layouts, mixing based on Parameter Substream 1-1 & 1-2 and loudness information of the [=Mixed Audio Element=].
+- Mix Presentation: Provide rendering algorithm of Audio Element 1 & 2 to popular loudspeaker layouts, mixing based on Parameter Substream 1-1 & 1-2 and loudness information of the [=Rendered Mix Presentation=].
 
 Example 3: Two [=3D audio signal=]s = FOA and Stereo of UC3,
 - Audio Substream: L and R channels are coded as one audio steam and each channel of FOA as one audio stream.
@@ -297,7 +297,7 @@ Example 3: Two [=3D audio signal=]s = FOA and Stereo of UC3,
 - Audio Element 2 (Stereo) : Consists of 1 Audio Substream  which is grouped into one [=ChannelGroup=].
 - Parameter Substream 1-1: Mixing parameter values applied to Audio Element 1 by considering Mobile environment
 - Parameter Substream 1-2: Mixing parameter values applied to Audio Element 2 by considering Mobile environment
-- Mix Presentation: Provide rendering algorithm of Audio Element 1 & 2 to popular loudspeaker layouts, mixing based on Parameter Substream 1-1 & 1-2 and loudness information of the [=Mixed Audio Element=].
+- Mix Presentation: Provide rendering algorithm of Audio Element 1 & 2 to popular loudspeaker layouts, mixing based on Parameter Substream 1-1 & 1-2 and loudness information of the [=Rendered Mix Presentation=].
 
 NOTE: Big-screen TVs select Mix Presentation 1 and Mobile devices select Mix Presentation 2.
 
@@ -1060,7 +1060,7 @@ class mix_presentation_obu() {
 
 <dfn noexport>loudness_layout</dfn> identifies the layout that was used to measure the loudness information provided in this sub-mix.
 
-<dfn noexport>loudness</dfn> provides the loudness information which was measured on [=loudness_layout=] for the [=Mixed Audio Element=] by this sub-mix.
+<dfn noexport>loudness</dfn> provides the loudness information which was measured on [=loudness_layout=] for the [=Rendered Mix Presentation=] by this sub-mix.
 
 The layout specified in [=loudness_layout=] SHOULD NOT be higher than the highest layout among layouts provided by the [=Audio Element=]s except zero-order Ambisonics or Mono. In other words, rendering from an [=Audio Element=] with the highest layout (except zero-order Ambisonics or Mono) to the [=loudness_layout=] SHOULD NOT require an upmix.
 - [=loudness_layout=] for zero-order Ambisonics or Mono SHOULD NOT be higher than Stereo. Zero-order Ambisonics or Mono MAY be rendered to Stereo.
@@ -1072,7 +1072,7 @@ The highest [=loudness_layout=] specified in one sub-mix except zero-order Ambis
 - The highest [=loudness_layout=] for zero-order Ambisonics or Mono is Stereo.
  
 Each sub-mix SHALL include [=loudness_layout=] to identify [=Loudspeaker configuration for Sound System A (0+2+0)=] (i.e. Stereo). In other words, each sub-mix SHALL include loudness_info() for Stereo. 
-- If the [=Mixed Audio Element=] by each sub-mix is Mono, then its [=loudness=] for [=loudness_layout=] = Stereo SHOULD be measured on the Stereo generated from the Mono by the equations, L = 0.707 x Mono and R = 0.707 x Mono. 
+- If the [=Rendered Mix Presentation=] by each sub-mix is Mono, then its [=loudness=] for [=loudness_layout=] = Stereo SHOULD be measured on the Stereo generated from the Mono by the equations, L = 0.707 x Mono and R = 0.707 x Mono. 
 
 ### Mix Presentation Annotations Syntax and Semantics ### {#obu-mixpresentation-annotation}
 
@@ -2637,7 +2637,7 @@ In the above figure,
 - [=Parameter Block OBU=] with [=parameter_id=] = 31 is providing [=demixing_info_parameter_data()=] to be applied for demixing of the [=Audio Element=] with [=audio_element_id=] = 11.
 - [=Parameter Block OBU=] with [=parameter_id=] = 32 is providing mix_gain_parameter_data() to be applied to the rendered [=Audio Element=] after rendering according to render_config() of the [=Audio Element=] with [=audio_element_id=] = 11.
 - [=Parameter Block OBU=] with [=parameter_id=] = 33 is providing mix_gain_parameter_data() to be applied to the rendered [=Audio Element=] after rendering according to render_config() of the [=Audio Element=] with [=audio_element_id=] = 12.
-- [=Parameter Block OBU=] with [=parameter_id=] = 34 is providing mix_gain_parameter_data() to be applied to the [=Mixed Audio Element=] of the two rendered [=Audio Element=]s.
+- [=Parameter Block OBU=] with [=parameter_id=] = 34 is providing mix_gain_parameter_data() to be applied to the [=Rendered Mix Presentation=] of the two rendered [=Audio Element=]s.
 
 ## Annex B: Rules for Scalable Channel Audio (Normative) ## {#Annex_B}
 
