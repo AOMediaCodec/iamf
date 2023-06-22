@@ -576,6 +576,8 @@ class codec_config() {
 - 'fLaC': All coded [=Audio Substream=]s of all [=Audio Element=]s referring to this codec configuration SHALL comply to the specification [[!FLAC]] and the [=decoder_config()=] structure SHALL comply with the constraints given in [[#flac-specific]].
 - 'ipcm': All coded [=Audio Substream=]s of all [=Audio Element=]s referring to this codec configuration SHALL be audio samples for linear PCM (LPCM) and the [=decoder_config()=] structure SHALL comply with the constraints given in [[#lpcm-specific]].
 
+Parsers compliant to this version of the specification SHALL ignore [=Codec Config OBU=]s with an unknown [=codec_id=].
+
 NOTE: 'ipcm' should not be confused with 'lpcm' which is another 4CC to identify codecs in other container formats (e.g. QuickTime).
 
 <dfn noexport>num_samples_per_frame</dfn> indicates the frame length, in samples, of the audio_frame() provided in by audio_frame_obu(). It SHALL NOT be set to zero. If the [=decoder_config()=] structure for a given codec specifies a value for the frame length, the two values SHALL be equal.
@@ -616,13 +618,16 @@ class audio_element_obu() {
     if (param_definition_type == PARAMETER_DEFINITION_RECON_GAIN) {
         ReconGainParamDefinition recon_gain_info;
     }
+    if (param_definition_type > 2) {
+        leb128() param_definition_size;
+    }
   }
 
   if (audio_element_type == CHANNEL_BASED) {
     scalable_channel_layout_config();
   } else if (audio_element_type == SCENE_BASED) {
     ambisonics_config();
-  }  
+  } 
 }
 ```
 
@@ -644,7 +649,7 @@ class ReconGainParamDefinition() extends ParamDefinition() {
 
 <dfn noexport>audio_element_id</dfn> defines an identifier for an [=Audio Element=]. Within an [=IA Sequence=], there SHALL be exactly one non-redundant [=Audio Element OBU=] with a given identifier. [=Mix Presentation=]s that use an [=Audio Element=] refer to this identifier.
 
-<dfn noexport>audio_element_type</dfn> specifies the audio representation of this [=Audio Element=] which is constructed from one or more [=Audio Substream=]s.
+<dfn noexport>audio_element_type</dfn> specifies the audio representation of this [=Audio Element=] which is constructed from one or more [=Audio Substream=]s. Parsers compliant to this version of the specification SHALL ignore [=Audio Element OBU=]s with a reserved [=audio_element_type=].
 
 <pre class = "def">
 audio_element_type: The type of audio representation.
@@ -653,9 +658,9 @@ audio_element_type: The type of audio representation.
   2~7   : Reserved
 </pre>
 
-<dfn value noexport for="audio_element_obu()">codec_config_id</dfn> indicates the identifier for the codec configuration which this [=Audio Element=] refers to.
+<dfn value noexport for="audio_element_obu()">codec_config_id</dfn> indicates the identifier for the codec configuration which this [=Audio Element=] refers to. Parsers compliant to this version of the specification SHALL ignore [=Audio Element OBU=]s with a [=codec_config_id=] identifying an unknown [=codec_id=].
 
-<dfn noexport>num_substreams</dfn> specifies the number of [=Audio Substream=]s that are used to reconstruct this [=Audio Element=].
+<dfn noexport>num_substreams</dfn> specifies the number of [=Audio Substream=]s that are used to reconstruct this [=Audio Element=]. It SHALL NOT be set to 0.
 
 <dfn value noexport for="audio_element_obu()">audio_substream_id</dfn> indicates the identifier for an [=Audio Substream=] which this [=Audio Element=] refers to.
 
@@ -683,6 +688,8 @@ A [=ChannelGroup=] is defined in [[#iamfgeneration]]. The order of the [=Audio S
 - When the highest [=loudspeaker_layout=] of (non-)scalable channel audio is less than or equal to 3.1.2ch, the type PARAMETER_DEFINITION_DEMIXING SHALL NOT be present.
 - When the highest [=loudspeaker_layout=] of scalable channel audio ([=num_layers=] > 1) is greater than 3.1.2ch, the types of both PARAMETER_DEFINITION_DEMIXING and both PARAMETER_DEFINITION_RECON_GAIN SHALL be present.
 - When [=num_layers=] = 1 and [=loudspeaker_layout=] is greater than 3.1.2ch, the type PARAMETER_DEFINITION_DEMIXING MAY be present.
+- Parsers compliant to this version of the specification SHALL ignore a future parameter definition with [=param_definition_type=] = P (where, P > 2).
+- An OBU parser which is conformant with this version of the specification SHALL be able to parse [=param_definition_type=] = P (where, P > 2) and [=param_definition_size=]. And, the OBU Parser SHALL be able to ignore or skip the bytes indicated by [=param_definition_size=].
 
 <table class = "def">
 <tr>
@@ -698,6 +705,10 @@ A [=ChannelGroup=] is defined in [[#iamfgeneration]]. The order of the [=Audio S
   <td>2</td><td>PARAMETER_DEFINITION_RECON_GAIN</td><td>ReconGainParamDefinition</td>
 </tr>
 </table>
+
+<dfn noexport>param_definition_size</dfn> indicates the size in bytes of the parameter definition with [=param_definition_type=] = P (where, P > 2) including this field.
+
+NOTE: A future version of the specification may specify a new parameter definition by setting [=param_definition_type=] = P (where, P > 2) and setting the sum of the size of the new parameter definition and the size of this field to [=param_definition_size=].
 
 <dfn noexport>demixing_info</dfn> provides the parameter definition for the demixing information to reconstruct channel audios according to [=loudspeaker_layout=] from scalable channel audio. The parameter definition is provided by DemixingParamDefinition() and the corresponding parameter data to be provided in parameter blocks is specified in [=demixing_info_parameter_data()=].
 - In this parameter definition, [=parameter_rate=] SHALL be set to the sample rate of this [=Audio Element=] and [=param_definition_mode=] SHALL be set to 0.
