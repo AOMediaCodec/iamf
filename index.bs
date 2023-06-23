@@ -1015,8 +1015,7 @@ class mix_presentation_obu() {
       leb128() audio_element_id;
       for (i = 0; i < count_label; i++) {
         mix_presentation_element_annotations();
-      }
-      rendering_config();
+      }    
       element_mix_config();
     }
     output_mix_config();
@@ -1048,8 +1047,6 @@ class mix_presentation_obu() {
 <dfn value noexport for ="mix_presentation_obu()">audio_element_id</dfn> indicates the identifier for an [=Audio Element=] which this [=Mix Presentation=] refers to.
 
 <dfn noexport>mix_presentation_element_annotations()</dfn> is a class that provides informational metadata that an IA parser SHOULD refer to when selecting the referenced [=Audio Element=] to use. The metadata MAY also be used by the playback system to display information to the user, but is not used in the rendering or mixing process to generate the final output audio signal.
-
-<dfn noexport>rendering_config()</dfn> is a class that provides the metadata required for rendering the referenced [=Audio Element=]. 
 
 <dfn noexport>element_mix_config()</dfn> is a class that provides the metadata required for applying any processing to the referenced and rendered [=Audio Element=] before being summed with other processed [=Audio Element=]s.
 
@@ -1099,19 +1096,6 @@ class mix_presentation_element_annotations() {
 <b>Semantics</b>
 
 <dfn noexport>audio_element_friendly_label</dfn> specifies a human-friendly label to describe the referenced [=Audio Element=].
-
-### Rendering Config Syntax and Semantics ### {#syntax-rendering-config}
-
-During playback, an [=Audio Element=] SHOULD be rendered using a pre-defined renderer according to [[#processing-mixpresentation-rendering]]. In this version of the specification, no additional metadata is required to configure the renderers, and as such, <code>rendering_config()</code> has an empty payload.
-
-<b>Syntax</b>
-
-```
-class rendering_config() {
-}
-```
-
-<b>Semantics</b>
 
 ### Element Mix Config Syntax and Semantics ### {#syntax-element-mix-config}
 
@@ -2103,6 +2087,8 @@ When an [=IA Sequence=] contain multiple [=Mix Presentation=]s, the IA parser SH
 
 ### Rendering an Audio Element ### {#processing-mixpresentation-rendering}
 
+During playback, the rendering of each [=Audio Element=] SHOULD be applied before the processing according to [=element_mix_config()=]. 
+
 This specification supports the rendering of either a channel-based or scene-based [=Audio Element=] to either a target loudspeaker layout or a binaural output.
 
 In this section, for a given x.y.z layout, the next highest layout x'.y'.z' means that x', y' and z' are greater than or equal to x, y and z, respectively.
@@ -2511,7 +2497,7 @@ This section provides a way to generate algorithms for post processing.
 This section provides a way to generate [=loudness_info()=].
 		
 For a given [=Mix Presentation OBU=] and a given [=loudness_layout=], the followings are processed in order to produce [=loudness_info()=].
-- Each of the [=Audio Element=]s specified in the given [=Mix Presentation OBU=] is rendered to the given [=loudness_layout=] according to [=rendering_config()=] for the [=Audio Element=].
+- Each of the [=Audio Element=]s specified in the given [=Mix Presentation OBU=] is rendered to the given [=loudness_layout=].
 - Each of the [=Audio Element=]s specified in the given [=Mix Presentation OBU=] applies [=mix_gain=] according to [=element_mix_config()=] for the [=Audio Element=].
 - All of the [=Audio Element=]s specified in the given [=Mix Presentation OBU=] are summed, and then applies [=mix_gain=] according to [=output_mix_config()=].
 - Generate [=loudness_info()=] of the mixed audio according to [[#obu-mixpresentation-loudness]].
@@ -2634,8 +2620,8 @@ In the above figure,
 - [=Audio Frame OBU=] with [=audio_substream_id=] = 1 (i.e. [=obu_type=] = OBU_IA_Audio_Frame_ID1) is providing the coded data which has been coded by using [=Codec Config OBU=] with [=codec_config_id=] = 0 of [=Audio Substream=] with [=audio_substream_id=] = 1.
 - [=Audio Frame OBU=] with [=audio_substream_id=] = 2 (i.e. [=obu_type=] = OBU_IA_Audio_Frame_ID2) is providing the coded data which has been coded by using [=Codec Config OBU=] with [=codec_config_id=] = 0 of [=Audio Substream=] with [=audio_substream_id=] = 2.
 - [=Parameter Block OBU=] with [=parameter_id=] = 31 is providing [=demixing_info_parameter_data()=] to be applied for demixing of the [=Audio Element=] with [=audio_element_id=] = 11.
-- [=Parameter Block OBU=] with [=parameter_id=] = 32 is providing mix_gain_parameter_data() to be applied to the rendered [=Audio Element=] after rendering according to render_config() of the [=Audio Element=] with [=audio_element_id=] = 11.
-- [=Parameter Block OBU=] with [=parameter_id=] = 33 is providing mix_gain_parameter_data() to be applied to the rendered [=Audio Element=] after rendering according to render_config() of the [=Audio Element=] with [=audio_element_id=] = 12.
+- [=Parameter Block OBU=] with [=parameter_id=] = 32 is providing mix_gain_parameter_data() to be applied to the rendered [=Audio Element=] after rendering of the [=Audio Element=] with [=audio_element_id=] = 11.
+- [=Parameter Block OBU=] with [=parameter_id=] = 33 is providing mix_gain_parameter_data() to be applied to the rendered [=Audio Element=] after rendering of the [=Audio Element=] with [=audio_element_id=] = 12.
 - [=Parameter Block OBU=] with [=parameter_id=] = 34 is providing mix_gain_parameter_data() to be applied to the [=Mixed Audio Element=] of the two rendered [=Audio Element=]s.
 
 ## Annex B: Rules for Scalable Channel Audio (Normative) ## {#Annex_B}
