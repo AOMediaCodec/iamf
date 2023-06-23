@@ -375,6 +375,8 @@ This section specifies the OBU syntax elements and their semantics.
 
 ## Immersive Audio OBU Syntax and Semantics ## {#immersiveaudio-obu}
 
+obu_header() and all OBU payloads including the reserved_obu() are byte aligned.
+
 <b>Syntax</b>
 
 ```
@@ -400,7 +402,6 @@ class ia_open_bitstream_unit() {
   else if (obu_type == 5 or 6 or 7)
     reserved_obu();
 
-  byte_alignment():
 }
 ```
 
@@ -485,22 +486,6 @@ NOTE: A future version of the specification may use this flag to specify an exte
 <dfn noexport>num_samples_to_trim_at_end</dfn> indicates the number of samples that needs to be trimmed from the end of the samples in this [=Audio Frame OBU=].
 
 <dfn noexport>extension_header_size</dfn> indicates the size in bytes of the extension header including this field.
-
-
-## Byte Alignment Syntax and Semantics ## {#obu-bytealignment}
-
-<b>Syntax</b>
-
-```
-class byte_alignment() {
-  while (get_position() & 7)
-    unsigned int (1) zero_bit;
-}
-```
-
-<b>Semantics</b>
-
-<dfn noexport>zero_bit</dfn> SHALL be equal to 0 and is inserted into the bitstream to align the bit position to a multiple of 8 bits.
 
 
 ## Reserved OBU Syntax and Semantics ## {#obu-reserved}
