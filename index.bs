@@ -534,15 +534,14 @@ class ia_sequence_header_obu() {
 	
 NOTE: When IA OBUs are delivered over a protocol that does not provide explicit [=IA Sequence=] boundaries, a parser may locate the [=IA Sequence=] start by searching for the code 'iamf' preceded by specific OBU header values, e.g. assuming [=obu_extension_flag=] is set to 0 and because [=obu_trimming_status_flag=] is set to 0 for an [=IA Sequence Header OBU=], the OBU header can be 0xF806 or 0xFC06
 
-<dfn noexport>primary_profile</dfn> indicates that this [=IA Sequence=] is able to be processed by IA decoders that support the profile indicated in this field. The IA decoders SHALL be able to parse all OBUs explicitly listed in that profile and can still encounter reserved OBUs that it SHOULD skip and it is acceptable to do so. This allows future versions of the specification to define new profiles that can be backwards compatible to old profiles.
+<dfn noexport>primary_profile</dfn> indicates that this [=IA Sequence=] is able to be processed by IA decoders that support the profile indicated in this field. The IA decoders SHALL be able to parse all OBUs explicitly listed in that profile and can still encounter reserved OBUs that it SHOULD skip and it is acceptable to do so. This allows future versions of the specification to define new profiles that can be backwards compatible to old profiles. Parsers compliant to this version of the specification SHALL discard this OBU with [=primary_profile=] = a value of reserved and all subsequent OBUs until encounting the next [=IA Sequence Header OBU=].
+
+The below mappings are applied for both [=primary_profile=] and [=additional_profile=].
 - 0: Simple Profile
 - 1: Base Profile
 - 2~255: Reserved
 
-<dfn noexport>additional_profile</dfn> indicates an additional profile of this specification to which this [=IA Sequence=] complies. If a sequence only complies with the [=primary_profile=] profile, this field SHALL be set to same [=primary_profile=] value.  
-- 0: Simple Profile
-- 1: Base Profile
-- 2~255: Reserved
+<dfn noexport>additional_profile</dfn> indicates an additional profile of this specification to which this [=IA Sequence=] complies. If an [=IA Sequence=] only complies with the [=primary_profile=] profile, this field SHALL be set to same [=primary_profile=] value. It SHALL be set to greater than or equal to the value of [=primary_profile=]. Parsers compliant to this version of the specification SHALL discard this OBU with the value of [=additional_profile=] < the value of [=primary_value=] and all subsequent OBUs until encounting the next [=IA Sequence Header OBU=].
 
 NOTE: For example, an [=IA Sequence=] with [=primary_profile=] = 0 and [=additional_profile=] = 1 means that the [=IA Sequence=] complies to Base profile of specification and IA decoder to support Simple profile can playback the [=IA Sequence=]. When a future profile is defined with [=additional_profile=] = 2 as called Enhanced profile, an [=IA Sequence=] with [=primary_profile=] = 1 and [=additional_profile=] = 2 will mean that the [=IA Sequence=] will comply with Enhanced profile and IA decoder to support Base profile of specification will be able to playback it by ignoring unknown OBUs and/or unknown syntaxes if present.
 
