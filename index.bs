@@ -1102,16 +1102,23 @@ class mix_presentation_element_annotations() {
 
 ### Rendering Config Syntax and Semantics ### {#syntax-rendering-config}
 
-During playback, an [=Audio Element=] SHOULD be rendered using a pre-defined renderer according to [[#processing-mixpresentation-rendering]]. In this version of the specification, no additional metadata is required to configure the renderers, and as such, <code>rendering_config()</code> has an empty payload.
+During playback, an [=Audio Element=] SHOULD be rendered using a pre-defined renderer according to [[#processing-mixpresentation-rendering]].
 
 <b>Syntax</b>
 
 ```
 class rendering_config() {
+  unsigned int (1) rendering_to_loudspeaker;
+  unsigned int (7) reserved;
 }
 ```
 
 <b>Semantics</b>
+
+<dfn noexport>rendering_to_stereo</dfn> indicates whether or not the channel-based [=Audio Element=] is rendered to stereo loudspeakers.
+- 0: It indicates that the input [=Audio Element=] is rendered to the playback layout.
+- 1: It indicates that the input [=Audio Element=] is rendered to [=loudspeaker_layout=] = Stereo. If the playback layout is loudspeaker or for scene-based [=Audio Element=], parsers SHALL ignore it.
+
 
 ### Element Mix Config Syntax and Semantics ### {#syntax-element-mix-config}
 
@@ -2634,8 +2641,8 @@ In the above figure,
 - [=Audio Frame OBU=] with [=audio_substream_id=] = 1 (i.e. [=obu_type=] = OBU_IA_Audio_Frame_ID1) is providing the coded data which has been coded by using [=Codec Config OBU=] with [=codec_config_id=] = 0 of [=Audio Substream=] with [=audio_substream_id=] = 1.
 - [=Audio Frame OBU=] with [=audio_substream_id=] = 2 (i.e. [=obu_type=] = OBU_IA_Audio_Frame_ID2) is providing the coded data which has been coded by using [=Codec Config OBU=] with [=codec_config_id=] = 0 of [=Audio Substream=] with [=audio_substream_id=] = 2.
 - [=Parameter Block OBU=] with [=parameter_id=] = 31 is providing [=demixing_info_parameter_data()=] to be applied for demixing of the [=Audio Element=] with [=audio_element_id=] = 11.
-- [=Parameter Block OBU=] with [=parameter_id=] = 32 is providing mix_gain_parameter_data() to be applied to the rendered [=Audio Element=] after rendering according to render_config() of the [=Audio Element=] with [=audio_element_id=] = 11.
-- [=Parameter Block OBU=] with [=parameter_id=] = 33 is providing mix_gain_parameter_data() to be applied to the rendered [=Audio Element=] after rendering according to render_config() of the [=Audio Element=] with [=audio_element_id=] = 12.
+- [=Parameter Block OBU=] with [=parameter_id=] = 32 is providing mix_gain_parameter_data() to be applied to the rendered [=Audio Element=] after rendering according to [=rendering_config()=] of the [=Audio Element=] with [=audio_element_id=] = 11.
+- [=Parameter Block OBU=] with [=parameter_id=] = 33 is providing mix_gain_parameter_data() to be applied to the rendered [=Audio Element=] after rendering according to [=rendering_config()=] of the [=Audio Element=] with [=audio_element_id=] = 12.
 - [=Parameter Block OBU=] with [=parameter_id=] = 34 is providing mix_gain_parameter_data() to be applied to the [=Mixed Audio Element=] of the two rendered [=Audio Element=]s.
 
 ## Annex B: Rules for Scalable Channel Audio (Normative) ## {#Annex_B}
