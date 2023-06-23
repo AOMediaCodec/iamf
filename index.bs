@@ -1341,6 +1341,8 @@ class loudness_info() {
  2~7 : Reserved
 </pre>
 
+When a bitmask for reserved of [=info_type=] is set, parsers compliant to this version of the specification SHOULD ignore the syntaxes defined by the bitmask.
+
 <dfn noexport>integrated_loudness</dfn> provides the program integrated loudness information, specified in [=LKFS=] as defined in [[!ITU1770-4]], and measured according to [[!ITU1770-4]].
 
 <dfn noexport>digital_peak</dfn> specifies the digital (sampled) peak value of the audio signal, specified in dBFS.
@@ -1356,7 +1358,7 @@ class loudness_info() {
  3~255 : Reserved
 </pre>
 
-There SHALL be no duplicate values of [=anchor_element=] within one loudness_info().
+There SHALL be no duplicate values of [=anchor_element=] within one loudness_info(). When a reserved value of [=anchor_element=] is set, parsers compliant to this version of the specification MAY treat it as Unknown.
 
 <dfn noexport>anchored_loudness</dfn> specifies the loudness information according to the anchor element, specified in [=LKFS=] as defined in [[!ITU1770-4]].
 
@@ -1410,15 +1412,15 @@ class parameter_block_obu() {
 
 <dfn noexport>get_param_definition()</dfn> is a run-time function to get the parameter definition type, the parameter definition mode, duration, num_subblocks, constant_subblock_duration and subblock_duration mapped to the parameter_id. 
 
-<dfn value noexport for="parameter_block_obu()">duration</dfn> specifies the duration for which this parameter block is valid and applicable. 
+<dfn value noexport for="parameter_block_obu()">duration</dfn> specifies the duration for which this parameter block is valid and applicable. It SHALL NOT be set to 0.
 
-<dfn value noexport for="parameter_block_obu()">num_subblocks</dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different subblock of the timeline, contiguously.
+<dfn value noexport for="parameter_block_obu()">num_subblocks</dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different subblock of the timeline, contiguously. It SHALL NOT be set to 0.
 
 <dfn value noexport for="parameter_block_obu()">constant_subblock_duration</dfn> specifies the duration of each subblock, in the case where all subblocks except the last subblock have equal durations. If all subblocks except the last subblock do not have equal durations, the value of constant_subblock_duration SHALL be set to 0. 
 
 [=Audio Element OBU=] and/or [=Mix Presentation OBU=] is mapping a parameter_id to the parameter definition type. So, IA decoders can know the definition type mapped to the parameter_id.
 
-<dfn value noexport for="parameter_block_obu()">subblock_duration</dfn> specifies the duration for the given subblock.
+<dfn value noexport for="parameter_block_obu()">subblock_duration</dfn> specifies the duration for the given subblock. It SHALL NOT be set to 0.
 
 Each value of duration, constant_subblock_duration and subblock_duration SHALL be expressed as the number of ticks at the [=parameter_rate=] specified in the corresponding parameter definition.
 
