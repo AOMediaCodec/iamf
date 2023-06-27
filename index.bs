@@ -1331,8 +1331,7 @@ class loudness_info() {
       signed int (16) anchored_loudness;
     }
   }
-  for (i = 2; i < 8; i++) {
-    if (info_type & 2^i)) {
+  if (info_type & 4 or info_typ & 8 or info_typ & 16 or info_typ & 32 or info_typ & 64 or info_typ & 128)) {
       leb128() info_type_size;
       unsigned int (8*info_type_size) info_type_bytes;
     }
@@ -1346,9 +1345,9 @@ class loudness_info() {
 
 <pre class = "def">
  Bit : Type of information provided
-  0  : True peak
-  1  : Anchored Loudness (one or more)
- 2~7 : Reserved
+  0 (LSB)  : True peak
+  1        : Anchored Loudness (one or more)
+ 2~7 (MSB) : Reserved
 </pre>
 
 <dfn noexport>integrated_loudness</dfn> provides the program integrated loudness information, specified in [=LKFS=] as defined in [[!ITU1770-4]], and measured according to [[!ITU1770-4]].
@@ -1372,9 +1371,9 @@ There SHALL be no duplicate values of [=anchor_element=] within one loudness_inf
 
 NOTE: [[!ITU1770-4]] adopts the convention of using the dBov unit for dBFS, where the RMS value of a full-scale square wave is 0 dBov. The same convention is adopted here.
 
-<dfn noexport>info_type_size</dfn> indicates the size in bytes of a new info type with [=info_type=] & M = true (where, M = 4, 8, 16, 32, 64 or 128) immediately following this field.
+<dfn noexport>info_type_size</dfn> indicates the size in bytes of [=info_type_bytes=].
 
-<dfn noexport>info_type_bytes</dfn> indicates the byte representations of syntaxes defined by the new info type.
+<dfn noexport>info_type_bytes</dfn> represents reserved bytes for future use when new marks of [=info_type=] are defined. Parsers compliant to this version of the specification SHALL ignore these bytes.
 
 ## Parameter Block OBU Syntax and Semantics ## {#obu-parameterblock}
 
