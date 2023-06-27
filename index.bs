@@ -444,8 +444,8 @@ obu_type: Name of obu_type
    3    : OBU_IA_Parameter_Block
    4    : OBU_IA_Temporal_Delimiter
    5    : OBU_IA_Audio_Frame
-  6~23  : OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID17
- 24~30  : Reserved
+  6~22  : OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID16
+ 23~30  : Reserved
    31   : OBU_IA_Sequence_Header
 </pre>
 
@@ -455,9 +455,9 @@ It SHALL always be set to 0 for the following [=obu_type=] values:
 
 - OBU_IA_Temporal_Delimiter
 - OBU_IA_Audio_Frame
-- OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID17
+- OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID16
 
-<dfn noexport>obu_trimming_status_flag</dfn> indicates whether this OBU has audio samples to be trimmed or not. It SHALL be set only when [=obu_type=] is set to OBU_IA_Audio_Frame or OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID17.
+<dfn noexport>obu_trimming_status_flag</dfn> indicates whether this OBU has audio samples to be trimmed or not. It SHALL be set only when [=obu_type=] is set to OBU_IA_Audio_Frame or OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID16.
 
 For a given coded [=Audio Substream=], 
 - If an [=Audio Frame OBU=] has its [=num_samples_to_trim_at_start=] field set to a non-zero value N, the decoder SHALL discard the first N audio samples.
@@ -1534,7 +1534,7 @@ The each bit of [=recon_gain_flags=] indicates the presence of [=recon_gain=] ap
 
 ## Audio Frame OBU Syntax and Semantics ## {#obu-audioframe}
 
-This section specifies OBU payloads of OBU_IA_Audio_Frame and OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID17.
+This section specifies OBU payloads of OBU_IA_Audio_Frame and OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID16.
 
 <dfn noexport>audio_substream_id</dfn> is an identifier for the [=Audio Substream=] associated with this audio frame. Within an [=IA Sequence=], there SHALL be exactly one non-redundant [=Audio Element OBU=] with a [=audio_substream_id=].
 
@@ -1551,9 +1551,9 @@ class audio_frame_obu(audio_substream_id_in_bitstream) {
 
 <b>Semantics</b>
 
-<dfn noexport>explicit_audio_substream_id</dfn> defines the [=audio_substream_id=] of this frame. The value SHALL be greater than 17. When this field is not present [=audio_substream_id=] is implicit and is defined as a value from 0 to 17 for OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID17 respectively.
+<dfn noexport>explicit_audio_substream_id</dfn> defines the [=audio_substream_id=] of this frame. The value SHALL be greater than 16. When this field is not present [=audio_substream_id=] is implicit and is defined as a value from 0 to 16 for OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID16 respectively.
 
-NOTE: The first 18 [=Audio Substream=]s in an [=IA Sequence=] MAY use the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID17, which have predefined [=audio_substream_id=]s associated with them. This reduces bitrate by avoiding the extra [=explicit_audio_substream_id=] field in the bitstream.
+NOTE: The first 17 [=Audio Substream=]s in an [=IA Sequence=] MAY use the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID16, which have predefined [=audio_substream_id=]s associated with them. This reduces bitrate by avoiding the extra [=explicit_audio_substream_id=] field in the bitstream.
 
 <dfn noexport>coded_frame_size</dfn> is the size of [=audio_frame()=] in bytes.
 
