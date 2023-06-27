@@ -411,13 +411,15 @@ If the syntax element [=obu_type=] is equal to OBU_IA_Sequence_Header, an ordere
 
 ## OBU Header Syntax and Semantics ## {#obu-header}
 
+<dfn noexport>obu_redundant_copy</dfn> indicates whether this OBU is a redundant copy of the previous OBU in the IA sequence with the same obu_type. A value of 1 indicates that it is a redundant copy, while a value of 0 indicates that it is not.
+
 <b>Syntax</b>
 
 ```
 class obu_header() {
   unsigned int (5) obu_type;
-  unsigned int (1) obu_redundant_copy;
-  unsigned int (1) obu_trimming_status_flag;
+  unsigned int (1) obu_extra_flag;
+  unsigned int (1) reserved;
   unsigned int (1) obu_extension_flag;
   leb128() obu_size;
 
@@ -449,15 +451,29 @@ obu_type: Name of obu_type
    31   : OBU_IA_Sequence_Header
 </pre>
 
-<dfn noexport>obu_redundant_copy</dfn> indicates whether this OBU is a redundant copy of the previous OBU in the [=IA Sequence=] with the same [=obu_type=]. A value of 1 indicates that it is a redundant copy, while a value of 0 indicates that it is not.
+<dfn noexport>obu_extra_flag</dfn>
 
-It SHALL always be set to 0 for the following [=obu_type=] values:
+It shall always be set to 0 for the following [=obu_type=] values:
 
 - OBU_IA_Temporal_Delimiter
-- OBU_IA_Audio_Frame
-- OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID17
 
-<dfn noexport>obu_trimming_status_flag</dfn> indicates whether this OBU has audio samples to be trimmed or not. It SHALL be set only when [=obu_type=] is set to OBU_IA_Audio_Frame or OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID17.
+It may be set to 1 for other [=obu_type=] values.
+
+When [=obu_type=] is:
+
+- OBU_IA_Audio_Frame
+- OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID21
+
+It indicates that [=num_samples_to_trim_at_start=] and [=num_samples_to_trim_at_end=] are included in the bitstream.
+
+When [=obu_type=] is:
+
+- OBU_IA_Codec_Config
+- OBU_IA_Audio_Element
+- OBU_IA_Mix_Presentation
+- OBU_IA_Parameter_Block
+
+It indicates the value of [=obu_redundant_copy=].
 
 For a given coded [=Audio Substream=], 
 - If an [=Audio Frame OBU=] has its [=num_samples_to_trim_at_start=] field set to a non-zero value N, the decoder SHALL discard the first N audio samples.
