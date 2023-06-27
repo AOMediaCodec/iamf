@@ -1490,7 +1490,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 5edf5e459, updated Thu Jun 22 11:28:01 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="f9e69747527b61329680a3437e86ad336b0cac2e" name="document-revision">
+  <meta content="14a3223c7eab3aaec5747550edc2321b875f5dbe" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -3367,14 +3367,19 @@ class ambisonics_projection_config() {
       signed int (16) anchored_loudness;
     }
   }
+  if (info_type &amp; 0b11111100 > 0) {
+      leb128() info_type_size;
+      unsigned int (8*info_type_size) info_type_bytes;
+    }
+  }
 }
 </pre>
    <p><b>Semantics</b></p>
-   <p><dfn data-dfn-type="dfn" data-noexport id="info_type">info_type<a class="self-link" href="#info_type"></a></dfn> is a bitmask that specifies the type of OPTIONAL loudness information provided. The bits are set as follows, where the first bit is the LSB:</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="info_type">info_type</dfn> is a bitmask that specifies the type of loudness information provided. The bits are set as follows, where the first bit is the LSB:</p>
 <pre class="def">Bit : Type of information provided
- 0  : True peak
- 1  : Anchored Loudness (one or more)
-2~7 : Reserved
+ 0 (LSB)  : True peak
+ 1        : Anchored Loudness (one or more)
+2~7 (MSB) : Reserved
 </pre>
    <p><dfn data-dfn-type="dfn" data-noexport id="integrated_loudness">integrated_loudness<a class="self-link" href="#integrated_loudness"></a></dfn> provides the program integrated loudness information, specified in <a data-link-type="dfn" href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#" id="ref-for-something③⑤">LKFS</a> as defined in <a data-link-type="biblio" href="#biblio-itu1770-4" title="Algorithms to measure audio programme loudness and true-peak audio level">[ITU1770-4]</a>, and measured according to <a data-link-type="biblio" href="#biblio-itu1770-4" title="Algorithms to measure audio programme loudness and true-peak audio level">[ITU1770-4]</a>.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="digital_peak">digital_peak</dfn> specifies the digital (sampled) peak value of the audio signal, specified in dBFS.</p>
@@ -3388,6 +3393,8 @@ class ambisonics_projection_config() {
    <p>There SHALL be no duplicate values of <a data-link-type="dfn" href="#anchor_element" id="ref-for-anchor_element">anchor_element</a> within one loudness_info().</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="anchored_loudness">anchored_loudness<a class="self-link" href="#anchored_loudness"></a></dfn> specifies the loudness information according to the anchor element, specified in <a data-link-type="dfn" href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#" id="ref-for-something③⑥">LKFS</a> as defined in <a data-link-type="biblio" href="#biblio-itu1770-4" title="Algorithms to measure audio programme loudness and true-peak audio level">[ITU1770-4]</a>.</p>
    <p class="note" role="note"><span class="marker">NOTE:</span> <a data-link-type="biblio" href="#biblio-itu1770-4" title="Algorithms to measure audio programme loudness and true-peak audio level">[ITU1770-4]</a> adopts the convention of using the dBov unit for dBFS, where the RMS value of a full-scale square wave is 0 dBov. The same convention is adopted here.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="info_type_size">info_type_size<a class="self-link" href="#info_type_size"></a></dfn> indicates the size in bytes of <a data-link-type="dfn" href="#info_type_bytes" id="ref-for-info_type_bytes">info_type_bytes</a>.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="info_type_bytes">info_type_bytes</dfn> represents reserved bytes for future use when new marks of <a data-link-type="dfn" href="#info_type" id="ref-for-info_type">info_type</a> are defined. Parsers compliant to this version of the specification SHALL ignore these bytes.</p>
    <h3 class="heading settled" data-level="2.9" id="obu-parameterblock"><span class="secno">2.9. </span><span class="content">Parameter Block OBU Syntax and Semantics</span><a class="self-link" href="#obu-parameterblock"></a></h3>
    <p>This section specifies the OBU payload of OBU_IA_Parameter_Block.</p>
    <p>The metadata specified in this OBU defines the parameter values for an algorithm for an indicated duration, including any animation of the parameter values over this duration. The metadata are used in conjunction with a corresponding parameter definition and parameter data specification. The parameter definition is specified based on <a data-link-type="dfn" href="#paramdefinition" id="ref-for-paramdefinition">ParamDefinition()</a>. The parameter data provides the values to apply in each parameter block. These are specified using the <a data-link-type="dfn" href="#animatedparameterdata" id="ref-for-animatedparameterdata">AnimatedParameterData()</a> function template if parameter animation is supported.</p>
@@ -5368,6 +5375,8 @@ class Bar {
    <li><a href="#ia-sequence-header-obu">IA Sequence Header OBU</a><span>, in § 1.2.1</span>
    <li><a href="#immersive-audio">Immersive Audio</a><span>, in § 1</span>
    <li><a href="#info_type">info_type</a><span>, in § 2.8.7</span>
+   <li><a href="#info_type_bytes">info_type_bytes</a><span>, in § 2.8.7</span>
+   <li><a href="#info_type_size">info_type_size</a><span>, in § 2.8.7</span>
    <li><a href="#integrated_loudness">integrated_loudness</a><span>, in § 2.8.7</span>
    <li><a href="#language_label">language_label</a><span>, in § 2.8</span>
    <li><a href="#layout_type">layout_type</a><span>, in § 2.8.6</span>
@@ -6106,9 +6115,11 @@ window.dfnpanelData['audio_element_friendly_label'] = {"dfnID": "audio_element_f
 window.dfnpanelData['mix_gain'] = {"dfnID": "mix_gain", "url": "#mix_gain", "dfnText": "mix_gain", "refSections": [{"refs": [{"id": "ref-for-mix_gain"}, {"id": "ref-for-mix_gain\u2460"}], "title": "7.3. Mix Presentation Encoding"}, {"refs": [{"id": "ref-for-mix_gain\u2461"}, {"id": "ref-for-mix_gain\u2462"}], "title": "7.5.1. Loudness Information"}], "external": false};
 window.dfnpanelData['default_mix_gain'] = {"dfnID": "default_mix_gain", "url": "#default_mix_gain", "dfnText": "default_mix_gain", "refSections": [{"refs": [{"id": "ref-for-default_mix_gain"}, {"id": "ref-for-default_mix_gain\u2460"}], "title": "7.3. Mix Presentation Encoding"}], "external": false};
 window.dfnpanelData['output_mix_gain'] = {"dfnID": "output_mix_gain", "url": "#output_mix_gain", "dfnText": "output_mix_gain", "refSections": [{"refs": [{"id": "ref-for-output_mix_gain"}, {"id": "ref-for-output_mix_gain\u2460"}], "title": "7.3. Mix Presentation Encoding"}], "external": false};
+window.dfnpanelData['info_type'] = {"dfnID": "info_type", "url": "#info_type", "dfnText": "info_type", "refSections": [{"refs": [{"id": "ref-for-info_type"}], "title": "2.8.7. Loudness Info Syntax and Semantics"}], "external": false};
 window.dfnpanelData['digital_peak'] = {"dfnID": "digital_peak", "url": "#digital_peak", "dfnText": "digital_peak", "refSections": [{"refs": [{"id": "ref-for-digital_peak"}], "title": "6.5.1. Loudness Normalization"}], "external": false};
 window.dfnpanelData['true_peak'] = {"dfnID": "true_peak", "url": "#true_peak", "dfnText": "true_peak", "refSections": [{"refs": [{"id": "ref-for-true_peak"}], "title": "6.5.1. Loudness Normalization"}], "external": false};
 window.dfnpanelData['anchor_element'] = {"dfnID": "anchor_element", "url": "#anchor_element", "dfnText": "anchor_element", "refSections": [{"refs": [{"id": "ref-for-anchor_element"}], "title": "2.8.7. Loudness Info Syntax and Semantics"}], "external": false};
+window.dfnpanelData['info_type_bytes'] = {"dfnID": "info_type_bytes", "url": "#info_type_bytes", "dfnText": "info_type_bytes", "refSections": [{"refs": [{"id": "ref-for-info_type_bytes"}], "title": "2.8.7. Loudness Info Syntax and Semantics"}], "external": false};
 window.dfnpanelData['parameter_id'] = {"dfnID": "parameter_id", "url": "#parameter_id", "dfnText": "parameter_id", "refSections": [{"refs": [{"id": "ref-for-parameter_id"}, {"id": "ref-for-parameter_id\u2460"}], "title": "2.7. Audio Element OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-parameter_id\u2461"}, {"id": "ref-for-parameter_id\u2462"}, {"id": "ref-for-parameter_id\u2463"}], "title": "2.7.1. Parameter Definition Syntax and Semantics"}, {"refs": [{"id": "ref-for-parameter_id\u2464"}, {"id": "ref-for-parameter_id\u2465"}, {"id": "ref-for-parameter_id\u2466"}, {"id": "ref-for-parameter_id\u2467"}], "title": "7.4.1. Two Audio Elements with One Codec Config"}, {"refs": [{"id": "ref-for-parameter_id\u2468"}, {"id": "ref-for-parameter_id\u2460\u24ea"}, {"id": "ref-for-parameter_id\u2460\u2460"}, {"id": "ref-for-parameter_id\u2460\u2461"}, {"id": "ref-for-parameter_id\u2460\u2462"}, {"id": "ref-for-parameter_id\u2460\u2463"}, {"id": "ref-for-parameter_id\u2460\u2464"}, {"id": "ref-for-parameter_id\u2460\u2465"}], "title": "9.1. Annex A: ID Linking Scheme (Informative)"}], "external": false};
 window.dfnpanelData['mix_gain_parameter_data'] = {"dfnID": "mix_gain_parameter_data", "url": "#mix_gain_parameter_data", "dfnText": "mix_gain_parameter_data()", "refSections": [{"refs": [{"id": "ref-for-mix_gain_parameter_data"}], "title": "2.8.4. Element Mix Config Syntax and Semantics"}, {"refs": [{"id": "ref-for-mix_gain_parameter_data\u2460"}], "title": "2.8.5. Output Mix Config Syntax and Semantics"}], "external": false};
 window.dfnpanelData['animation_type'] = {"dfnID": "animation_type", "url": "#animation_type", "dfnText": "animation_type", "refSections": [{"refs": [{"id": "ref-for-animation_type"}], "title": "2.9.1. Mix Gain Parameter Data Syntax and Semantics"}, {"refs": [{"id": "ref-for-animation_type\u2460"}, {"id": "ref-for-animation_type\u2461"}, {"id": "ref-for-animation_type\u2462"}, {"id": "ref-for-animation_type\u2463"}], "title": "6.4. Animated Parameters"}], "external": false};
