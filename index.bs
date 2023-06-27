@@ -754,9 +754,9 @@ abstract class ParamDefinition() {
   unsigned int (7) reserved;
   if (param_definition_mode == 0) {
     leb128() duration;
-    leb128() num_subblocks;
     leb128() constant_subblock_duration;
     if (constant_subblock_duration == 0) {
+      leb128() num_subblocks;
       for (i=0; i< num_subblocks; i++) {
         leb128() subblock_duration;
       }
@@ -779,14 +779,14 @@ abstract class ParamDefinition() {
 
 <dfn noexport>duration</dfn> specifies the duration for which all of parameter blocks associated to this parameter definition are valid and applicable.
 
-<dfn noexport>num_subblocks</dfn> specifies the number of different sets of parameter values specified in all of parameter blocks associated to this parameter definition, where each set describes a different subblock of the timeline, contiguously.
-
 <dfn noexport>constant_subblock_duration</dfn> specifies the duration of each subblock, in the case where all subblocks except the last subblock have equal durations. If all subblocks except the last subblock do not have equal durations, the value of constant_subblock_duration SHALL be set to 0. 
 
-When it defines <dfn noexport>D</dfn> = the value of [=duration=], <dfn noexport>NS</dfn> = the value of [=num_subblocks=], <dfn noexport>CSI</dfn> = the value of [=constant_subblock_duration=] and <dfn noexport>SI</dfn> = the value of [=subblock_duration=].
-- When [=CSI=] != 0, [=NS=] x [=CSI=] SHALL be equal to or greater than [=D=].
-	- If [=NS=] x [=CSI=] > [=D=], the actual duration of the last subblock SHALL be [=D=] - ([=NS=] - 1) x [=CSI=].
-- When [=CSI=] = 0, the summation of all [=SI=]s in this parameter block SHALL be equal to [=D=].
+When it defines <dfn noexport>D</dfn> = the value of [=duration=], <dfn noexport>NS</dfn> = the value of [=num_subblocks=], <dfn noexport>CSD</dfn> = the value of [=constant_subblock_duration=] and <dfn noexport>SD</dfn> = the value of [=subblock_duration=].
+- When [=CSD=] != 0, [=NS=] = roundup([=D=] / [=CSD=]).
+	- If [=NS=] x [=CSD=] > [=D=], the actual duration of the last subblock SHALL be [=D=] - ([=NS=] - 1) x [=CSD=].
+- When [=CSD=] = 0, the summation of all [=SD=]s in this parameter block SHALL be equal to [=D=].
+
+<dfn noexport>num_subblocks</dfn> specifies the number of different sets of parameter values specified in all of parameter blocks associated to this parameter definition, where each set describes a different subblock of the timeline, contiguously.
 
 <dfn noexport>subblock_duration</dfn> specifies the duration for the given subblock.
 
@@ -1367,8 +1367,12 @@ class parameter_block_obu() {
   
   if (param_definition_mode) {
     leb128() duration;
-    leb128() num_subblocks;
     leb128() constant_subblock_duration;
+    if (constant_subblock_duration == 0) {
+      leb128() num_subblocks;
+    } else {
+      // num_subblocks = roundup(duration / constant_subblock_duration)
+    }
   }
 
   for (i = 0; i < num_subblocks; i++) {
@@ -1399,9 +1403,9 @@ class parameter_block_obu() {
 
 <dfn value noexport for="parameter_block_obu()">duration</dfn> specifies the duration for which this parameter block is valid and applicable. 
 
-<dfn value noexport for="parameter_block_obu()">num_subblocks</dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different subblock of the timeline, contiguously.
-
 <dfn value noexport for="parameter_block_obu()">constant_subblock_duration</dfn> specifies the duration of each subblock, in the case where all subblocks except the last subblock have equal durations. If all subblocks except the last subblock do not have equal durations, the value of constant_subblock_duration SHALL be set to 0. 
+
+<dfn value noexport for="parameter_block_obu()">num_subblocks</dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different subblock of the timeline, contiguously.
 
 [=Audio Element OBU=] and/or [=Mix Presentation OBU=] is mapping a parameter_id to the parameter definition type. So, IA decoders can know the definition type mapped to the parameter_id.
 
@@ -2601,6 +2605,10 @@ The round() function returns the integer value closest to <code>x</code> and may
 ```
 round(x) = floor(x + 0.5).
 ```
+
+<b>roundup(x)</b>
+
+The roundup() function returns the smallest integer value greater than or equal to <code>x</code>
 
 <b>MOD(Number, Divisor)</b>
 
