@@ -417,13 +417,12 @@ If the syntax element [=obu_type=] is equal to OBU_IA_Sequence_Header, an ordere
 
 ```
 class obu_header() {
-  unsigned int (5) obu_type;
+  unsigned int (6) obu_type;
   unsigned int (1) obu_extra_flag;
-  unsigned int (1) reserved;
   unsigned int (1) obu_extension_flag;
   leb128() obu_size;
 
-  if (obu_trimming_status_flag) {
+  if (obu_extra_flag && (8 <= obu_type && obu_type < 30)) {
     leb128() num_samples_to_trim_at_end;
     leb128() num_samples_to_trim_at_start;
   }
@@ -453,11 +452,11 @@ obu_type: Name of obu_type
 
 <dfn noexport>obu_extra_flag</dfn>
 
-It shall always be set to 0 for the following [=obu_type=] values:
+It SHALL always be set to 0 for the following [=obu_type=] values:
 
 - OBU_IA_Temporal_Delimiter
 
-It may be set to 1 for other [=obu_type=] values.
+It MAY be set to 1 for other [=obu_type=] values.
 
 When [=obu_type=] is:
 
