@@ -616,13 +616,20 @@ class audio_element_obu() {
     if (param_definition_type == PARAMETER_DEFINITION_RECON_GAIN) {
         ReconGainParamDefinition recon_gain_info;
     }
+    if (param_definition_type > 2) {
+        leb128() param_definition_size;
+        unsigned int (8*param_definition_size) param_definition_bytes;
+    }
   }
 
   if (audio_element_type == CHANNEL_BASED) {
     scalable_channel_layout_config();
   } else if (audio_element_type == SCENE_BASED) {
     ambisonics_config();
-  }  
+  } else {
+    leb128() audio_element_config_size;
+    unsigned int (8*audio_element_config_size) audio_element_config_bytes;
+  }
 }
 ```
 
@@ -711,9 +718,21 @@ A [=ChannelGroup=] is defined in [[#iamfgeneration]]. The order of the [=Audio S
 	- [=num_subblocks=] SHALL be set to 1.
 	- [=constant_subblock_duration=] SHALL be same as [=duration=]
 
+<dfn noexport>param_definition_size</dfn> indicates the size in bytes of a new parameter definition with [=param_definition_type=] = P (where, P > 2) immediately following this field.
+
+<dfn noexport>param_definition_bytes</dfn> indicates the byte representations of syntaxes for the new parameter definition with [=param_definition_type=] = P.
+
+NOTE: A future version of the specification may specify a new parameter definition by setting [=param_definition_type=] = P (where, P > 2) and setting the size of the new parameter definition to [=param_definition_size=] field.
+
 <dfn noexport>scalable_channel_layout_config()</dfn> is a class that provides the metadata required for combining the [=Audio Substream=]s identified here in order to reconstruct a scalable channel layout.
 
 <dfn noexport>ambisonics_config()</dfn> is a class that provides the metadata required for combining the [=Audio Substream=]s identified here in order to reconstruct an Ambisonics layout.
+
+<dfn noexport>audio_element_config_size</dfn> indicates the size in bytes of an Audio Element with a new [=audio_element_type=] immediately following this field.
+
+<dfn noexport>audio_element_config_bytes</dfn> indicates the byte representations of syntaxes for the Audio Element with the new [=audio_element_type=].
+
+NOTE: A future version of the specification may specify an [=Audio Element=] with a new [=audio_element_type=] and setting the size of the configuration of the new [=Audio Element=] to [=audio_element_config_size=] field.
 
 <dfn noexport>default_demixing_info_parameter_data()</dfn> and <dfn noexport>default_w</dfn> specify the default parameter data for demixing to apply to all audio samples when there are no [=Parameter Block OBU=]s (with [=parameter_id=] defined in this DemixingParamDefinition()) provided.
 - [=default_demixing_info_parameter_data()=] conforms to [=demixing_info_parameter_data()=] except that [=w_idx_offset=] SHALL be ignored.
