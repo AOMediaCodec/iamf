@@ -1108,17 +1108,27 @@ During playback, an [=Audio Element=] SHOULD be rendered using a pre-defined ren
 
 ```
 class rendering_config() {
-  if (audio_element_type == CHANNEL_BASED) {
-    unsigned int (2) headphones_rendering_mode;
-    unsigned int (6) reserved;
-  } 
+  unsigned int (2) headphones_rendering_mode;
+  unsigned int (6) reserved;
+  leb128() rendering_config_extension_size;
+  unsigned int (8*rendering_config_extension_size) rendering_config_extension_bytes;
+}
 ```
 
 <b>Semantics</b>
 
-<dfn noexport>headphones_rendering_mode</dfn> indicates whether the input channel-based [=Audio Element=] is rendered to stereo loudspeakers or spatialized with a binaural renderer when played back on headphones. If the playback layout is a loudspeaker layout, the parsers SHALL ignore this field.
+<dfn noexport>headphones_rendering_mode</dfn> indicates whether the input channel-based [=Audio Element=] is rendered to stereo loudspeakers or spatialized with a binaural renderer when played back on headphones. If the playback layout is a loudspeaker layout or the input [=Audio Element=] is not CHANNEL_BASED, the parsers SHALL ignore this field.
+
 - 0: It indicates that the input [=Audio Element=] is rendered to [=loudspeaker_layout=] = Stereo. 
 - 1: It indicates that the input [=Audio Element=] is rendered to binaural output.
+- 2~3: Reserved.
+
+Parsers encountering a Reserved value SHALL ignore the Mix Presentation OBU that contains this [=rendering_config()=].
+
+<dfn noexport>rendering_config_extension_size</dfn> indicates the size in bytes of [=rendering_config_extension_bytes=].
+
+<dfn noexport>rendering_config_extension_bytes</dfn> represents reserved bytes for future use. Parsers compliant to this version of the specification SHALL ignore these bytes.
+
 
 ### Element Mix Config Syntax and Semantics ### {#syntax-element-mix-config}
 
