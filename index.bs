@@ -1314,6 +1314,12 @@ class loudness_info() {
       signed int (16) anchored_loudness;
     }
   }
+  for (i = 2; i < 8; i++) {
+    if (info_type & 2^i)) {
+      leb128() info_type_size;
+      unsigned int (8*info_type_size) info_type_bytes;
+    }
+  }
 }
 ```
 
@@ -1347,9 +1353,11 @@ There SHALL be no duplicate values of [=anchor_element=] within one loudness_inf
 
 <dfn noexport>anchored_loudness</dfn> specifies the loudness information according to the anchor element, specified in [=LKFS=] as defined in [[!ITU1770-4]].
 
-
-
 NOTE: [[!ITU1770-4]] adopts the convention of using the dBov unit for dBFS, where the RMS value of a full-scale square wave is 0 dBov. The same convention is adopted here.
+
+<dfn noexport>info_type_size</dfn> indicates the size in bytes of a new info type with [=info_type=] & M = true (where, M = 4, 8, 16, 32, 64 or 128) immediately following this field.
+
+<dfn noexport>info_type_bytes</dfn> indicates the byte representations of syntaxes defined by the new info type.
 
 ## Parameter Block OBU Syntax and Semantics ## {#obu-parameterblock}
 
