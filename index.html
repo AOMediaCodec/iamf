@@ -1490,7 +1490,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 5edf5e459, updated Thu Jun 22 11:28:01 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="ac5e247132b33c6ce71b4ba00131b123eaee9956" name="document-revision">
+  <meta content="f9e69747527b61329680a3437e86ad336b0cac2e" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -2607,8 +2607,12 @@ class codec_config() {
     if (param_definition_type == PARAMETER_DEFINITION_DEMIXING) {
         DemixingParamDefinition demixing_info;
     }
-    if (param_definition_type == PARAMETER_DEFINITION_RECON_GAIN) {
+    else if (param_definition_type == PARAMETER_DEFINITION_RECON_GAIN) {
         ReconGainParamDefinition recon_gain_info;
+    }
+    else if (param_definition_type > 2) {
+        leb128() param_definition_size;
+        unsigned int (8*param_definition_size) param_definition_bytes;
     }
   }
 
@@ -2616,7 +2620,10 @@ class codec_config() {
     scalable_channel_layout_config();
   } else if (audio_element_type == SCENE_BASED) {
     ambisonics_config();
-  }  
+  } else {
+    leb128() audio_element_config_size;
+    unsigned int (8*audio_element_config_size) audio_element_config_bytes;
+  }
 }
 </pre>
 <pre>class DemixingParamDefinition() extends ParamDefinition() {
@@ -2659,7 +2666,7 @@ class codec_config() {
     <li data-md>
      <p>When <a data-link-type="dfn" href="#audio_element_type" id="ref-for-audio_element_type①">audio_element_type</a> = 1, this field SHALL be set to 0.</p>
    </ul>
-   <p><dfn data-dfn-type="dfn" data-noexport id="param_definition_type">param_definition_type<a class="self-link" href="#param_definition_type"></a></dfn> specifies the type of the parameter definition. All parameter definition types described in this version of the specification are listed in the table below, along with their associated parameter definitions.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="param_definition_type">param_definition_type</dfn> specifies the type of the parameter definition. All parameter definition types described in this version of the specification are listed in the table below, along with their associated parameter definitions.</p>
    <ul>
     <li data-md>
      <p>The type PARAMETER_DEFINITION_MIX_GAIN SHALL NOT be present in <a data-link-type="dfn" href="#audio-element-obu" id="ref-for-audio-element-obu①">Audio Element OBU</a>.</p>
@@ -2721,8 +2728,12 @@ class codec_config() {
        <p><a data-link-type="dfn" href="#constant_subblock_duration" id="ref-for-constant_subblock_duration①">constant_subblock_duration</a> SHALL be same as <a data-link-type="dfn" href="#duration" id="ref-for-duration③">duration</a></p>
      </ul>
    </ul>
+   <p><dfn data-dfn-type="dfn" data-noexport id="param_definition_size">param_definition_size<a class="self-link" href="#param_definition_size"></a></dfn> indicates the size in bytes of <a data-link-type="dfn" href="#param_definition_bytes" id="ref-for-param_definition_bytes">param_definition_bytes</a>.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="param_definition_bytes">param_definition_bytes</dfn> represents reserved bytes for future use when new <a data-link-type="dfn" href="#param_definition_type" id="ref-for-param_definition_type">param_definition_type</a> values are defined. Parsers compliant to this version of the specification SHALL ignore these bytes.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="scalable_channel_layout_config">scalable_channel_layout_config()</dfn> is a class that provides the metadata required for combining the <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream④④">Audio Substream</a>s identified here in order to reconstruct a scalable channel layout.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="ambisonics_config">ambisonics_config()</dfn> is a class that provides the metadata required for combining the <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream④⑤">Audio Substream</a>s identified here in order to reconstruct an Ambisonics layout.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="audio_element_config_size">audio_element_config_size<a class="self-link" href="#audio_element_config_size"></a></dfn> indicates the size in bytes of <a data-link-type="dfn" href="#audio_element_config_bytes" id="ref-for-audio_element_config_bytes">audio_element_config_bytes</a>.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_element_config_bytes">audio_element_config_bytes</dfn> represents reserved bytes for future use when new <a data-link-type="dfn" href="#audio_element_type" id="ref-for-audio_element_type②">audio_element_type</a> values are defined. Parsers compliant to this version of the specification SHALL ignore these bytes.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="default_demixing_info_parameter_data">default_demixing_info_parameter_data()</dfn> and <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="default_w">default_w</dfn> specify the default parameter data for demixing to apply to all audio samples when there are no <a data-link-type="dfn" href="#parameter-block-obu" id="ref-for-parameter-block-obu⑨">Parameter Block OBU</a>s (with <a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id">parameter_id</a> defined in this DemixingParamDefinition()) provided.</p>
    <ul>
     <li data-md>
@@ -2892,7 +2903,7 @@ Rs: Right Surround, Rss: Right Side Surround, Lrs: Left Rear Surroud, Rrs: Right
 Ltf: Left Top Front, Rtf: Right Top Front, Ltr: Left Top Rear, Rtr: Right Top Rear, 
 Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
 </pre>
-   <p>For a given input audio with <a data-link-type="dfn" href="#audio_element_type" id="ref-for-audio_element_type②">audio_element_type</a> = CHANNEL_BASED, if the input audio has height channels (e.g 7.1.4ch or 5.1.2ch), each of the list of channel layouts for scalable channel audio is RECOMMENDED to have height channels (i.e it is RECOMMENDED to be higher than or equal to 3.1.2ch).</p>
+   <p>For a given input audio with <a data-link-type="dfn" href="#audio_element_type" id="ref-for-audio_element_type③">audio_element_type</a> = CHANNEL_BASED, if the input audio has height channels (e.g 7.1.4ch or 5.1.2ch), each of the list of channel layouts for scalable channel audio is RECOMMENDED to have height channels (i.e it is RECOMMENDED to be higher than or equal to 3.1.2ch).</p>
    <ul>
     <li data-md>
      <p>Examples for RECOMMENDED list of channel layouts: 3.1.2ch/5.1.2ch, 3.1.2ch/5.1.2ch/7.1.4ch, 5.1.2ch/7.1.4ch etc..</p>
@@ -5268,6 +5279,8 @@ class Bar {
    <li><a href="#animatedparameterdata">AnimatedParameterData()</a><span>, in § 2.9.1</span>
    <li><a href="#animation_type">animation_type</a><span>, in § 2.9.1</span>
    <li><a href="#audio-element">Audio Element</a><span>, in § 1</span>
+   <li><a href="#audio_element_config_bytes">audio_element_config_bytes</a><span>, in § 2.7</span>
+   <li><a href="#audio_element_config_size">audio_element_config_size</a><span>, in § 2.7</span>
    <li><a href="#audio_element_friendly_label">audio_element_friendly_label</a><span>, in § 2.8.2</span>
    <li>
     audio_element_id
@@ -5402,7 +5415,9 @@ class Bar {
    <li><a href="#output_mix_gain">output_mix_gain</a><span>, in § 2.8.5</span>
    <li><a href="#param_data">param_data</a><span>, in § 2.9.1</span>
    <li><a href="#paramdefinition">ParamDefinition()</a><span>, in § 2.7.1</span>
+   <li><a href="#param_definition_bytes">param_definition_bytes</a><span>, in § 2.7</span>
    <li><a href="#param_definition_mode">param_definition_mode</a><span>, in § 2.7.1</span>
+   <li><a href="#param_definition_size">param_definition_size</a><span>, in § 2.7</span>
    <li><a href="#param_definition_type">param_definition_type</a><span>, in § 2.7</span>
    <li><a href="#parameter-block-obu">Parameter Block OBU</a><span>, in § 1.2.2</span>
    <li>
@@ -6039,12 +6054,15 @@ window.dfnpanelData['num_samples_per_frame'] = {"dfnID": "num_samples_per_frame"
 window.dfnpanelData['audio_roll_distance'] = {"dfnID": "audio_roll_distance", "url": "#audio_roll_distance", "dfnText": "audio_roll_distance", "refSections": [{"refs": [{"id": "ref-for-audio_roll_distance"}], "title": "5.2.2. Encapsulation Scheme"}], "external": false};
 window.dfnpanelData['decoder_config'] = {"dfnID": "decoder_config", "url": "#decoder_config", "dfnText": "decoder_config()", "refSections": [{"refs": [{"id": "ref-for-decoder_config"}, {"id": "ref-for-decoder_config\u2460"}, {"id": "ref-for-decoder_config\u2461"}, {"id": "ref-for-decoder_config\u2462"}, {"id": "ref-for-decoder_config\u2463"}], "title": "2.6. Codec Config OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-decoder_config\u2464"}, {"id": "ref-for-decoder_config\u2465"}, {"id": "ref-for-decoder_config\u2466"}], "title": "2.12. Codec Specific"}, {"refs": [{"id": "ref-for-decoder_config\u2467"}], "title": "2.12.1. OPUS Specific"}, {"refs": [{"id": "ref-for-decoder_config\u2468"}], "title": "2.12.2. AAC-LC Specific"}, {"refs": [{"id": "ref-for-decoder_config\u2460\u24ea"}], "title": "2.12.3. FLAC Specific"}, {"refs": [{"id": "ref-for-decoder_config\u2460\u2460"}], "title": "2.12.4. LPCM Specific"}, {"refs": [{"id": "ref-for-decoder_config\u2460\u2461"}], "title": "6. IAMF processing"}, {"refs": [{"id": "ref-for-decoder_config\u2460\u2462"}], "title": "6.2. Scalable Channel Audio decoding"}, {"refs": [{"id": "ref-for-decoder_config\u2460\u2463"}, {"id": "ref-for-decoder_config\u2460\u2464"}], "title": "7.2. Scalable Channel Audio Encoding"}, {"refs": [{"id": "ref-for-decoder_config\u2460\u2465"}], "title": "9.1. Annex A: ID Linking Scheme (Informative)"}], "external": false};
 window.dfnpanelData['audio_element_id'] = {"dfnID": "audio_element_id", "url": "#audio_element_id", "dfnText": "audio_element_id", "refSections": [{"refs": [{"id": "ref-for-audio_element_id"}], "title": "2.8. Mix Presentation OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-audio_element_id\u2460"}], "title": "6.3.1. Selecting a Mix Presentation"}, {"refs": [{"id": "ref-for-audio_element_id\u2461"}, {"id": "ref-for-audio_element_id\u2462"}, {"id": "ref-for-audio_element_id\u2463"}], "title": "7.4.1. Two Audio Elements with One Codec Config"}, {"refs": [{"id": "ref-for-audio_element_id\u2464"}, {"id": "ref-for-audio_element_id\u2465"}, {"id": "ref-for-audio_element_id\u2466"}, {"id": "ref-for-audio_element_id\u2467"}, {"id": "ref-for-audio_element_id\u2468"}, {"id": "ref-for-audio_element_id\u2460\u24ea"}, {"id": "ref-for-audio_element_id\u2460\u2460"}, {"id": "ref-for-audio_element_id\u2460\u2461"}, {"id": "ref-for-audio_element_id\u2460\u2462"}, {"id": "ref-for-audio_element_id\u2460\u2463"}, {"id": "ref-for-audio_element_id\u2460\u2464"}, {"id": "ref-for-audio_element_id\u2460\u2465"}], "title": "9.1. Annex A: ID Linking Scheme (Informative)"}], "external": false};
-window.dfnpanelData['audio_element_type'] = {"dfnID": "audio_element_type", "url": "#audio_element_type", "dfnText": "audio_element_type", "refSections": [{"refs": [{"id": "ref-for-audio_element_type"}, {"id": "ref-for-audio_element_type\u2460"}], "title": "2.7. Audio Element OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-audio_element_type\u2461"}], "title": "2.7.2. Scalable Channel Layout Config Syntax and Semantics"}], "external": false};
+window.dfnpanelData['audio_element_type'] = {"dfnID": "audio_element_type", "url": "#audio_element_type", "dfnText": "audio_element_type", "refSections": [{"refs": [{"id": "ref-for-audio_element_type"}, {"id": "ref-for-audio_element_type\u2460"}, {"id": "ref-for-audio_element_type\u2461"}], "title": "2.7. Audio Element OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-audio_element_type\u2462"}], "title": "2.7.2. Scalable Channel Layout Config Syntax and Semantics"}], "external": false};
 window.dfnpanelData['num_substreams'] = {"dfnID": "num_substreams", "url": "#num_substreams", "dfnText": "num_substreams", "refSections": [{"refs": [{"id": "ref-for-num_substreams"}], "title": "2.7.2. Scalable Channel Layout Config Syntax and Semantics"}, {"refs": [{"id": "ref-for-num_substreams\u2460"}], "title": "2.7.3. Ambisonics Config Syntax and Semantics"}], "external": false};
 window.dfnpanelData['c'] = {"dfnID": "c", "url": "#c", "dfnText": "c", "refSections": [{"refs": [{"id": "ref-for-c"}], "title": "2.7. Audio Element OBU Syntax and Semantics"}], "external": false};
 window.dfnpanelData['n_c'] = {"dfnID": "n_c", "url": "#n_c", "dfnText": "n_c", "refSections": [{"refs": [{"id": "ref-for-n_c"}], "title": "2.7. Audio Element OBU Syntax and Semantics"}], "external": false};
+window.dfnpanelData['param_definition_type'] = {"dfnID": "param_definition_type", "url": "#param_definition_type", "dfnText": "param_definition_type", "refSections": [{"refs": [{"id": "ref-for-param_definition_type"}], "title": "2.7. Audio Element OBU Syntax and Semantics"}], "external": false};
+window.dfnpanelData['param_definition_bytes'] = {"dfnID": "param_definition_bytes", "url": "#param_definition_bytes", "dfnText": "param_definition_bytes", "refSections": [{"refs": [{"id": "ref-for-param_definition_bytes"}], "title": "2.7. Audio Element OBU Syntax and Semantics"}], "external": false};
 window.dfnpanelData['scalable_channel_layout_config'] = {"dfnID": "scalable_channel_layout_config", "url": "#scalable_channel_layout_config", "dfnText": "scalable_channel_layout_config()", "refSections": [{"refs": [{"id": "ref-for-scalable_channel_layout_config"}], "title": "2.7.2. Scalable Channel Layout Config Syntax and Semantics"}, {"refs": [{"id": "ref-for-scalable_channel_layout_config\u2460"}], "title": "2.8. Mix Presentation OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-scalable_channel_layout_config\u2461"}], "title": "6.2. Scalable Channel Audio decoding"}, {"refs": [{"id": "ref-for-scalable_channel_layout_config\u2462"}], "title": "6.3.2.3. Rendering a channel-based audio element to a binaural output"}], "external": false};
 window.dfnpanelData['ambisonics_config'] = {"dfnID": "ambisonics_config", "url": "#ambisonics_config", "dfnText": "ambisonics_config()", "refSections": [{"refs": [{"id": "ref-for-ambisonics_config"}], "title": "2.7.3. Ambisonics Config Syntax and Semantics"}, {"refs": [{"id": "ref-for-ambisonics_config\u2460"}], "title": "7.1. Ambisonics Encoding"}], "external": false};
+window.dfnpanelData['audio_element_config_bytes'] = {"dfnID": "audio_element_config_bytes", "url": "#audio_element_config_bytes", "dfnText": "audio_element_config_bytes", "refSections": [{"refs": [{"id": "ref-for-audio_element_config_bytes"}], "title": "2.7. Audio Element OBU Syntax and Semantics"}], "external": false};
 window.dfnpanelData['default_demixing_info_parameter_data'] = {"dfnID": "default_demixing_info_parameter_data", "url": "#default_demixing_info_parameter_data", "dfnText": "default_demixing_info_parameter_data()", "refSections": [{"refs": [{"id": "ref-for-default_demixing_info_parameter_data"}], "title": "2.7. Audio Element OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-default_demixing_info_parameter_data\u2460"}], "title": "6.3.2.1. Rendering a channel-based audio element to loudspeakers"}], "external": false};
 window.dfnpanelData['default_w'] = {"dfnID": "default_w", "url": "#default_w", "dfnText": "default_w", "refSections": [{"refs": [{"id": "ref-for-default_w"}], "title": "2.7. Audio Element OBU Syntax and Semantics"}], "external": false};
 window.dfnpanelData['paramdefinition'] = {"dfnID": "paramdefinition", "url": "#paramdefinition", "dfnText": "ParamDefinition()", "refSections": [{"refs": [{"id": "ref-for-paramdefinition"}], "title": "2.9. Parameter Block OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-paramdefinition\u2460"}, {"id": "ref-for-paramdefinition\u2461"}, {"id": "ref-for-paramdefinition\u2462"}], "title": "7.4.1. Two Audio Elements with One Codec Config"}], "external": false};
