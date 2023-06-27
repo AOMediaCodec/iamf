@@ -1490,7 +1490,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 5edf5e459, updated Thu Jun 22 11:28:01 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="14a3223c7eab3aaec5747550edc2321b875f5dbe" name="document-revision">
+  <meta content="81f45fdccf9e5fcf8e60bbcff339c0d01898fd75" name="document-revision">
 <style>
 .col_border {
   border-left: 1px solid var(--def-border);
@@ -3424,11 +3424,15 @@ class ambisonics_projection_config() {
     if (param_definition_type == PARAMETER_DEFINITION_MIX_GAIN) {
       mix_gain_parameter_data();
     }
-    if (param_definition_type == PARAMETER_DEFINITION_DEMIXING) {
+    else if (param_definition_type == PARAMETER_DEFINITION_DEMIXING) {
       demixing_info_parameter_data();
     }
-    if (param_definition_type == PARAMETER_DEFINITION_RECON_GAIN) {
+    else if (param_definition_type == PARAMETER_DEFINITION_RECON_GAIN) {
       recon_gain_info_parameter_data();
+    }
+    else {
+      leb128 parameter_data_size;
+      unsigned int (8*parameter_data_size) parameter_data_bytes;
     }
   }
 }
@@ -3442,6 +3446,8 @@ class ambisonics_projection_config() {
    <p><a data-link-type="dfn" href="#audio-element-obu" id="ref-for-audio-element-obu⑤">Audio Element OBU</a> and/or <a data-link-type="dfn" href="#mix-presentation-obu" id="ref-for-mix-presentation-obu②">Mix Presentation OBU</a> is mapping a parameter_id to the parameter definition type. So, IA decoders can know the definition type mapped to the parameter_id.</p>
    <p><dfn class="css" data-dfn-for="parameter_block_obu()" data-dfn-type="value" data-noexport id="valdef-parameter_block_obu-subblock_duration">subblock_duration<a class="self-link" href="#valdef-parameter_block_obu-subblock_duration"></a></dfn> specifies the duration for the given subblock.</p>
    <p>Each value of duration, constant_subblock_duration and subblock_duration SHALL be expressed as the number of ticks at the <a data-link-type="dfn" href="#parameter_rate" id="ref-for-parameter_rate③">parameter_rate</a> specified in the corresponding parameter definition.</p>
+   <p><dfn data-dfn-type="dfn" data-noexport id="parameter_data_size">parameter_data_size<a class="self-link" href="#parameter_data_size"></a></dfn> indicates the size in bytes of <a data-link-type="dfn" href="#parameter_data_bytes" id="ref-for-parameter_data_bytes">parameter_data_bytes</a>.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="parameter_data_bytes">parameter_data_bytes</dfn> represents reserved bytes for future use when new syntaxes are defined. Parsers compliant to this version of the specification SHALL ignore these bytes.</p>
    <h4 class="heading settled" data-level="2.9.1" id="syntax-mix-gain-param"><span class="secno">2.9.1. </span><span class="content">Mix Gain Parameter Data Syntax and Semantics</span><a class="self-link" href="#syntax-mix-gain-param"></a></h4>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="mix_gain_parameter_data">mix_gain_parameter_data()</dfn> specifies a parameter data to be used for mixing of an <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element⑥④">Audio Element</a>.</p>
    <p><b>Syntax</b></p>
@@ -5429,6 +5435,8 @@ class Bar {
    <li><a href="#param_definition_size">param_definition_size</a><span>, in § 2.7</span>
    <li><a href="#param_definition_type">param_definition_type</a><span>, in § 2.7</span>
    <li><a href="#parameter-block-obu">Parameter Block OBU</a><span>, in § 1.2.2</span>
+   <li><a href="#parameter_data_bytes">parameter_data_bytes</a><span>, in § 2.9</span>
+   <li><a href="#parameter_data_size">parameter_data_size</a><span>, in § 2.9</span>
    <li>
     parameter_id
     <ul>
@@ -6121,6 +6129,7 @@ window.dfnpanelData['true_peak'] = {"dfnID": "true_peak", "url": "#true_peak", "
 window.dfnpanelData['anchor_element'] = {"dfnID": "anchor_element", "url": "#anchor_element", "dfnText": "anchor_element", "refSections": [{"refs": [{"id": "ref-for-anchor_element"}], "title": "2.8.7. Loudness Info Syntax and Semantics"}], "external": false};
 window.dfnpanelData['info_type_bytes'] = {"dfnID": "info_type_bytes", "url": "#info_type_bytes", "dfnText": "info_type_bytes", "refSections": [{"refs": [{"id": "ref-for-info_type_bytes"}], "title": "2.8.7. Loudness Info Syntax and Semantics"}], "external": false};
 window.dfnpanelData['parameter_id'] = {"dfnID": "parameter_id", "url": "#parameter_id", "dfnText": "parameter_id", "refSections": [{"refs": [{"id": "ref-for-parameter_id"}, {"id": "ref-for-parameter_id\u2460"}], "title": "2.7. Audio Element OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-parameter_id\u2461"}, {"id": "ref-for-parameter_id\u2462"}, {"id": "ref-for-parameter_id\u2463"}], "title": "2.7.1. Parameter Definition Syntax and Semantics"}, {"refs": [{"id": "ref-for-parameter_id\u2464"}, {"id": "ref-for-parameter_id\u2465"}, {"id": "ref-for-parameter_id\u2466"}, {"id": "ref-for-parameter_id\u2467"}], "title": "7.4.1. Two Audio Elements with One Codec Config"}, {"refs": [{"id": "ref-for-parameter_id\u2468"}, {"id": "ref-for-parameter_id\u2460\u24ea"}, {"id": "ref-for-parameter_id\u2460\u2460"}, {"id": "ref-for-parameter_id\u2460\u2461"}, {"id": "ref-for-parameter_id\u2460\u2462"}, {"id": "ref-for-parameter_id\u2460\u2463"}, {"id": "ref-for-parameter_id\u2460\u2464"}, {"id": "ref-for-parameter_id\u2460\u2465"}], "title": "9.1. Annex A: ID Linking Scheme (Informative)"}], "external": false};
+window.dfnpanelData['parameter_data_bytes'] = {"dfnID": "parameter_data_bytes", "url": "#parameter_data_bytes", "dfnText": "parameter_data_bytes", "refSections": [{"refs": [{"id": "ref-for-parameter_data_bytes"}], "title": "2.9. Parameter Block OBU Syntax and Semantics"}], "external": false};
 window.dfnpanelData['mix_gain_parameter_data'] = {"dfnID": "mix_gain_parameter_data", "url": "#mix_gain_parameter_data", "dfnText": "mix_gain_parameter_data()", "refSections": [{"refs": [{"id": "ref-for-mix_gain_parameter_data"}], "title": "2.8.4. Element Mix Config Syntax and Semantics"}, {"refs": [{"id": "ref-for-mix_gain_parameter_data\u2460"}], "title": "2.8.5. Output Mix Config Syntax and Semantics"}], "external": false};
 window.dfnpanelData['animation_type'] = {"dfnID": "animation_type", "url": "#animation_type", "dfnText": "animation_type", "refSections": [{"refs": [{"id": "ref-for-animation_type"}], "title": "2.9.1. Mix Gain Parameter Data Syntax and Semantics"}, {"refs": [{"id": "ref-for-animation_type\u2460"}, {"id": "ref-for-animation_type\u2461"}, {"id": "ref-for-animation_type\u2462"}, {"id": "ref-for-animation_type\u2463"}], "title": "6.4. Animated Parameters"}], "external": false};
 window.dfnpanelData['animatedparameterdata'] = {"dfnID": "animatedparameterdata", "url": "#animatedparameterdata", "dfnText": "AnimatedParameterData()", "refSections": [{"refs": [{"id": "ref-for-animatedparameterdata"}], "title": "2.9. Parameter Block OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-animatedparameterdata\u2460"}, {"id": "ref-for-animatedparameterdata\u2461"}], "title": "6.4. Animated Parameters"}], "external": false};
