@@ -534,7 +534,7 @@ class ia_sequence_header_obu() {
 	
 NOTE: When IA OBUs are delivered over a protocol that does not provide explicit [=IA Sequence=] boundaries, a parser may locate the [=IA Sequence=] start by searching for the code 'iamf' preceded by specific OBU header values, e.g. assuming [=obu_extension_flag=] is set to 0 and because [=obu_trimming_status_flag=] is set to 0 for an [=IA Sequence Header OBU=], the OBU header can be 0xF806 or 0xFC06
 
-<dfn noexport>primary_profile</dfn> indicates that this [=IA Sequence=] is able to be processed by IA decoders that support the profile indicated in this field. The IA decoders SHALL be able to parse all OBUs explicitly listed in that profile and can still encounter reserved OBUs that it SHOULD skip and it is acceptable to do so. This allows future versions of the specification to define new profiles that can be backwards compatible to old profiles. Parsers compliant to this version of the specification SHALL discard this OBU with [=primary_profile=] = a value of reserved and all subsequent OBUs until encounting the next [=IA Sequence Header OBU=].
+<dfn noexport>primary_profile</dfn> indicates the primary profile this [=IA Sequence=] complies to. Parsers compliant to this version of the specification SHALL discard the [=IA Sequence=] when this value is not one they support.
 
 The below mappings are applied for both [=primary_profile=] and [=additional_profile=].
 - 0: Simple Profile
