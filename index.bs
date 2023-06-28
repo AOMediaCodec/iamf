@@ -433,9 +433,10 @@ class obu_header() {
     leb128() num_samples_to_trim_at_end;
     leb128() num_samples_to_trim_at_start;
   }
-  if (obu_extension_flag == 1)
+  if (obu_extension_flag == 1) {
     leb128() extension_header_size;
     unsigned int (8*extension_header_size) extension_header_bytes;
+  }
 }
 ```
 
@@ -483,7 +484,7 @@ NOTE: This means that if one of the value is set to the the number of samples (i
 - When [=num_samples_to_trim_at_start=] is non-zero, all [=Audio Frame OBU=]s with the same [=audio_substream_id=], and preceding this OBU back until the [=Codec Config OBU=] defining this [=Audio Substream=], SHALL have their [=num_samples_to_trim_at_start=] field equal to the number of samples (i.e. [=num_samples_per_frame=]) in the corresponding Audio Frame OBU.
 - When [=num_samples_to_trim_at_end=] is non-zero in an [=Audio Frame OBU=], there SHALL be no subsequent [=Audio Frame OBU=] with the same [=audio_substream_id=] until a non-redundant [=Codec Config OBU=] defining an [=Audio Substream=] with the same [=audio_substream_id=].
 
-<dfn noexport>obu_extension_flag</dfn> indicates whether the [=extension_header_size=] field presents or not. If it set to 0, the [=extension_header_size=] field SHALL NOT be present. Otherwise, the [=extension_header_size=] field SHALL be present.
+<dfn noexport>obu_extension_flag</dfn> indicates whether the [=extension_header_size=] field is present. If it set to 0, the [=extension_header_size=] field SHALL NOT be present. Otherwise, the [=extension_header_size=] field SHALL be present.
 
 This flag SHALL be set to 0 for this version of the specification. An OBU parser which is conformant with this version of the specification SHALL ignore the [=extension_header_bytes=].
 
