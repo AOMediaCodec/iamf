@@ -1916,47 +1916,39 @@ NOTE: Per the restriction of the profiles carried in an IA track, all [=Audio Fr
 NOTE: In typical case, when a track contains a single [=IA Sequence=], trimming can only happen at the beginning or end of the [=IA Sequence=] and therefore at the beginning or end of the track and the edit list can describe the start and end trimming with a single edit entry. Track storing consecutive [=IA Sequence=]s may need multiple edits in the edit list.
 
 ## Codecs Parameter String ## {#codecsparameter}
-DASH and other applications require defined values for the 'Codecs' parameter specified in [[!RFC6381]] for ISO Media tracks. The codecs parameter string for the AOM IA codec SHALL be:
-- For OPUS
+
+DASH and other applications require defined values for the 'codecs' parameter specified in [[!RFC6381]] for ISO Media tracks. The codecs parameter string for [=codec_id=] SHALL be:
+- Per [[!RFC6381]] and [[!ISOBMFF]], the first element of the codecs parameter string is 'iamf'.
+- The second element indicates the [=primary_profile=]. It is three digits within the range 0 to 255.
+- The 3rd element indicates the [=additional_profile=]. It is three digits within the range 0 to 255.
+- The 4th element and any additional elements, if any, SHALL be the elements of the codecs parameter string if that stream was carried in its own track (i.e. not encapsulated in IAMF).
+
+For example,  
+- The codecs parameter string for [=codec_id=] = 'Opus'
 
 ```
-	iamf.IAMF-specific-needs.Opus
+	iamf.xxx.yyy.Opus
 ```
 
-- For AAC-LC
+- The codecs parameter string for [=codec_id=] = 'mp4a'
 
 ```
-	iamf.IAMF-specific-needs.mp4a.40.2
+	iamf.xxx.yyy.mp4a.40.2
 ```
 
-- For FLAC
+- The codecs parameter string for [=codec_id=] = 'fLaC'
 
 ```
-	iamf.IAMF-specific-needs.fLaC
+	iamf.xxx.yyy.fLaC
 ```
 
-- For LPCM
+- The codecs parameter string for [=codec_id=] = 'ipcm'
 
 ```
-	iamf.IAMF-specific-needs.ipcm
+	iamf.xxx.yyy.ipcm
 ```
 
-<b>IAMF-specific-needs</b> SHALL be <b>PP</b>.<b>AP</b> as follows:
-- <dfn noexport>PP</dfn> is three digits within the range 0 to 255 and represents that an IA decoder supports the profile of the specification or the [=primary_profile=] of an [=IA Sequence=].
-- <dfn noexport>AP</dfn> is three digits within the range 0 to 255 and represents that an IA decoder supports the profile of the specification or the [=additional_profile=] of an [=IA Sequence=].
-
-For example, for this version of the specification
-- The codecs parameter string of OPUS for [=primary_profile=] = simple profile and [=additional_profile=] = simple profile:
-
-```
-	iamf.000.000.Opus
-```
-
-- The codecs parameter string of AAC-LC for [=primary_profile=] = base profile and [=additional_profile=] = base profile:
-
-```
-	iamf.001.001.mp4a.40.2
-```
+Where, xxx is three digits to indicate the value of [=primary_profile=] and yyy is three digits to indicate the value of [=additional_profile=].
 
 ## ISOBMFF IAMF Decapsulation (Informative) ## {#isobmff-decapsulation}
 
