@@ -2599,15 +2599,15 @@ All of syntax elements conform to [=Syntactic Description Language=] specified i
 
  <b>leb128()</b> <b>syntaxName</b>
  
- <b>leb128()</b> indicates the type of an unsigned integer. It indicates the following unsigned integer <b>syntaxName</b> is encoded by [=leb128()=] specified in [[!AV1-Convention]].
- 
- <b>syntaxName</b> is an unsigned integer which is encoded by [=leb128()=] specified in [[!AV1-Convention]].
- 
+ <b>leb128()</b> indicates the type of an unsigned integer. To encode the following unsigned integer <b>syntaxName</b>, it first represents the integer in binary. Then zero extends the integer up to a multiple of 7 bits (such that if the number is non-zero, the most significant 7 bits are not all 0). Break the integer up into groups of 7 bits. Output one encoded byte for each 7 bits group, from least significant to most significant group. Each byte will have the group in its 7 least significant bits. Set the most significant bit on each byte except the last byte. The integer zero is encoded as a single byte 0x00.
+
+ <b>syntaxName</b> is an unsigned integer which is encoded by <b>leb128()</b>. Its size is limited to 32 bits.
+  
  <b>sleb128()</b> <b>syntaxName</b>
 
- <b>sleb128()</b> indicates the type of an signed integer. It indicates the following signed integer <b>syntaxName</b> is encoded by [=leb128()=] specified in [[!AV1-Convention]].
- 
- <b>syntaxName</b> is an signed integer which is encoded by [=leb128()=] specified in [[!AV1-Convention]].
+ <b>sleb128()</b> indicates the type of a signed integer. To encode the following a signed integer <b>syntaxName</b>, it first starts with an N-bit two's complement representation of the signed integer, where N is a multiple of 7, the N-bit representation is broken into groups as for the <b>leb128()</b> encoding.
+
+ <b>syntaxName</b> is a signed integer which is encoded by <b>sleb128()</b>. Its size is limited to 32 bits.
  
  <b>string</b> <b>syntaxName</b>
 
