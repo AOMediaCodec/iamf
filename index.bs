@@ -633,6 +633,11 @@ class audio_element_obu() {
 ```
 class DemixingParamDefinition() extends ParamDefinition() {
   default_demixing_info_parameter_data();
+}
+```
+
+```
+class default_demixing_info_parameter_data() extends demixing_info_parameter_data() {
   unsigned int (4) default_w;
   unsigned int (4) reserved;
 }
@@ -732,12 +737,13 @@ NOTE: For a given [=audio_element_type=], a future version of the specification 
 
 <dfn noexport>audio_element_config_bytes</dfn> represents reserved bytes for future use when new [=audio_element_type=] values are defined. Parsers compliant to this version of the specification SHALL ignore these bytes.
 
+<dfn noexport>default_demixing_info_parameter_data()</dfn> is a class that provides the default parameter data for demixing to apply to all audio samples when there are no [=Parameter Block OBU=]s (with [=parameter_id=] defined in this DemixingParamDefinition()) provided.
+- In this class, [=w_idx_offset=] of the [=demixing_info_parameter_data()=] SHALL be ignored.
+- Instead of that, [=default_w=] directly indicates the weight value w(k).
 
-<dfn noexport>default_demixing_info_parameter_data()</dfn> and <dfn noexport>default_w</dfn> specify the default parameter data for demixing to apply to all audio samples when there are no [=Parameter Block OBU=]s (with [=parameter_id=] defined in this DemixingParamDefinition()) provided.
-- [=default_demixing_info_parameter_data()=] conforms to [=demixing_info_parameter_data()=] except that [=w_idx_offset=] SHALL be ignored.
-- Instead of that, [=default_w=] directly indicates the weight value w(k) for [=TF2toT2 de-mixer=] specified in [[#processing-scalablechannelaudio-demixer]].
+<dfn noexport>default_w</dfn> indicates the weight value w(k) for [=TF2toT2 de-mixer=] specified in [[#processing-scalablechannelaudio-demixer]].
 
-Mapping of default_w to w(k) SHOULD be as follows:
+Mapping of [=default_w=] to w(k) SHOULD be as follows:
 <pre class = "def">
  default_w :   w(k)
     0      :    0
