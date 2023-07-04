@@ -27,6 +27,7 @@ url: https://www.iso.org/standard/68960.html#; spec: ISOBMFF; type: property;
 	text: roll
 	text: elst
 	text: trun
+	text: ctts
 
 url: https://aomedia.org/av1/specification/conventions/; spec: AV1-Convention; type: dfn;
 	text: leb128()
@@ -1873,7 +1874,9 @@ NOTE: Multiple sample entries may be used in a track, for example when the track
 	- The duration of [=IA Sample=] is duration including audio samples trimmed at the beginning but excluding audio samples trimmed at the end. 
 - Sample Group
 	- When [=codec_id=] is set to 'Opus' or 'mp4a', in an IA Track, every sample SHALL be associated with a sample group of type 'roll'. The [=roll_distance=] value SHALL equal to the value of the [=audio_roll_distance=] field in the [=Codec Config OBU=] stored in the [=configOBUs=] array in the sample entry.
-		
+- Composition Time Stamp (CTS)
+	- For each IA Sample, CTS = DTS (Decoding Time Stamp), and as a consequence, the 'ctts' box (and similar signaling in movie fragments) SHALL not be used.
+
 ### IA Sample Entry ### {#iasampleentry-section}
 
 <pre class="def">
