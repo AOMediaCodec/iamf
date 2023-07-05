@@ -1218,7 +1218,7 @@ class layout() {
     unsigned int (4) sound_system;
     unsigned int (2) reserved;
   }
-  else if (layout_type == BINAURAL or NOT_DEFINED) {
+  else if (layout_type == BINAURAL or RESERVED) {
     unsigned int (6) reserved;
   }
 }
@@ -1230,13 +1230,13 @@ class layout() {
 
 <pre class = "def">
 layout_type : Layout type
-     0      : NOT_DEFINED
+     0      : RESERVED
      1      : LOUDSPEAKERS_SP_LABEL
      2      : LOUDSPEAKERS_SS_CONVENTION
      3      : BINAURAL
 </pre>
 
-- A value of 0 indicates no specific layout.
+- A value of 0 is reserved.
 - A value of 1 indicates that the layout is defined using the [=SP Label=] of [[!ITU2051-3]].
 - A value of 2 indicates that the layout is defined using the sound system convention of [[!ITU2051-3]].
 - A value of 3 indicates that the layout is binaural.
@@ -1331,7 +1331,7 @@ layout_type : Layout type
  - 12: It indicates Mono
  - 13 ~ 15: Reserved
 
-When a value for [=sp_label=] or [=sound_system=] is not supported, parsers compliant to this version of the specification SHALL ignore this layout() and the following [=loudness_info()=].
+When a value for [=layout_type=], [=sp_label=] or [=sound_system=] is not supported, parsers compliant with this version of the specification SHOULD ignore this layout() and the following [=loudness_info()=].
 
 ### Loudness Info Syntax and Semantics ### {#obu-mixpresentation-loudness}
 
