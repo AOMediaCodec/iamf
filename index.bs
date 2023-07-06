@@ -1869,19 +1869,19 @@ Even though an [=IA Sequence=] can theoretically group audio data coded with dif
 
 The result of encapsulating an [=IA Sequence=] into an [[!ISOBMFF]] file is as follows:
 
-- If there are audio samples to be trimmed at the start or at the end, then 'edts' and 'elst' boxes SHALL be present to reflect the trimming status.
+- If there are audio samples to be trimmed at the start or at the end, the 'edts' and 'elst' boxes SHALL be present to reflect the trimming status.
 - Sample Entry
-	- For an [=IA Sample=], the [=Descriptors=] required for processing the samples SHALL be only one and SHALL be the [=configOBUs=] of the associated one single sample entry. 
+	- An [=IA Sample=] SHALL be associated with only one sample entry, and the [=configOBUs=] in that sample entry SHALL contain the [=Descriptors=] required to process the [=IA Sample=]. If a different set of [=Descriptors=] is needed, a new sample entry SHALL be defined.
 	
-NOTE: Multiple sample entries may be used in a track, for example when the track is the concatenation of multiple tracks or multiple [=IA Sequence=]s and some [=IA Sample=]s have different [=configOBUs=] values.
+NOTE: Multiple sample entries may be used in a track, for example when the track is the concatenation of multiple tracks or multiple [=IA Sequence=]s, and some [=IA Sample=]s have different [=configOBUs=] values.
 
 - Decoding Time to IA Sample
-	- 'stts' or 'trun' box SHALL indicate the number of audio samples which [=IA Sample=] includes (i.e. the duration of [=IA Sample=]). 
-	- The duration of [=IA Sample=] is duration including audio samples trimmed at the beginning but excluding audio samples trimmed at the end. 
+	- The 'stts' or 'trun' box SHALL indicate the number of audio samples in an [=IA Sample=] (i.e. the duration of an [=IA Sample=]).
+	- The duration of [=IA Sample=] includes audio samples trimmed at the beginning but excludes audio samples trimmed at the end.
 - Sample Group
-	- When [=codec_id=] is set to 'Opus' or 'mp4a', in an IA Track, every sample SHALL be associated with a sample group of type 'roll'. The [=roll_distance=] value SHALL equal to the value of the [=audio_roll_distance=] field in the [=Codec Config OBU=] stored in the [=configOBUs=] array in the sample entry.
+	- When the [=codec_id=] is set to 'Opus' or 'mp4a' in an IA Track, every sample SHALL be associated with a sample group of type 'roll'. The [=roll_distance=] value SHALL equal the value of the [=audio_roll_distance=] field in the [=Codec Config OBU=] stored in the [=configOBUs=] array in the sample entry.
 - Composition Time Stamp (CTS)
-	- For each IA Sample, CTS = DTS (Decoding Time Stamp), and as a consequence, the 'ctts' box (and similar signaling in movie fragments) SHALL not be used.
+	- For each [=IA Sample=], CTS = DTS (Decoding Time Stamp), and as a consequence, the 'ctts' box (and similar signaling in movie fragments) SHALL not be used.
 
 ### IA Sample Entry ### {#iasampleentry-section}
 
