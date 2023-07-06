@@ -27,6 +27,7 @@ url: https://www.iso.org/standard/68960.html#; spec: ISOBMFF; type: property;
 	text: roll
 	text: elst
 	text: trun
+	text: ctts
 
 url: https://aomedia.org/av1/specification/conventions/; spec: AV1-Convention; type: dfn;
 	text: leb128()
@@ -280,7 +281,7 @@ NOTE: Big-screen TVs select Mix Presentation 1 and Mobile devices select Mix Pre
 
 This specification defines a model for representing [=Immersive Audio=] contents based on [=Audio Substream=]s contributing to [=Audio Element=]s meant to be rendered and mixed to form one or more presentations as depicted in the figure below.
 
-<center><img src="images/decoding_flow_cropped.svg" style="width:100%; height:auto;"></center>
+<center><img src="images/decoding_flow_cropped.svg" width="800"></center>
 <center><figcaption>Processing flow to decode, reconstruct, render and mix the 3D audio signals for immersive audio playback.</figcaption></center>
 
 The model comprises a number of coded [=Audio Substream=]s and the metadata that describes how to decode, render and mix the [=Audio Substream=]s for playback. The model itself is codec-agnostic; any supported audio codec may be used to code the [=Audio Substream=]s.
@@ -367,10 +368,10 @@ Within an [=IA Sequence=], all [=Mix Presentation=]s have the same duration, def
 
 The term <dfn noexport>Temporal Unit</dfn> means a set of all [=Audio Frame OBU=]s with the same decode start time and the same duration from all coded [=Audio Substream=]s and all non-redundant [=Parameter Block OBU=]s with the decode start time within the duration.
 
-The below figure shows an example of Timing Model in terms of the decode start times and durations of coded [=Audio Substream=] and [=Parameter Substream=].
+The figure below shows an example of the Timing Model in terms of the decode start times and durations of the coded [=Audio Substream=] and [=Parameter Substream=].
 
 <center><img src="images/IAMF Timing Model.png" style="width:100%; height:auto;"></center>
-<center><figcaption>Example of IAMF Timing Model</figcaption></center>
+<center><figcaption>An example of the IAMF Timing Model. AFO: Audio Frame OBU, PBO: Parameter Block OBU, PT<code>x</code>: time <code>x</code> (ms) on the presentation layer's timeline, DT<code>y</code>: time <code>y</code> (ms) on the decoding layer's timeline.</figcaption></center>
 
 NOTE: For a given decoded [=Audio Substream=] (before trimming) and its associated [=Parameter Substream=](s), a decoder operates 1) or 2). 1) the decoder trims the audio samples to be trimmed of the [=Audio Substream=] after applying the [=Parameter Substream=](s) or 2) the decoder trims the audio samples to be trimmed of the [=Audio Substream=] and the parameter values of the [=Parameter Substream=](s) which are mapped to the audio samples to be trimmed, and then applies its remained [=Parameter Substream=](s) to the [=Audio Substream=] after trimming.
 
@@ -404,11 +405,10 @@ class ia_open_bitstream_unit() {
     temporal_delimiter_obu();
   else if (obu_type == OBU_IA_Audio_Frame)
     audio_frame_obu(true);
-  else if (obu_type >= 9 and <= 30)
+  else if (obu_type >= 6 and <= 23)
     audio_frame_obu(false);
-  else if (obu_type == 5 or 6 or 7)
+  else if (obu_type >=24 and <= 30)
     reserved_obu();
-
 }
 ```
 
@@ -433,9 +433,10 @@ class obu_header() {
     leb128() num_samples_to_trim_at_end;
     leb128() num_samples_to_trim_at_start;
   }
-  if (obu_extension_flag == 1)
+  if (obu_extension_flag == 1) {
     leb128() extension_header_size;
     unsigned int (8*extension_header_size) extension_header_bytes;
+  }
 }
 ```
 
@@ -483,7 +484,7 @@ NOTE: This means that if one of the value is set to the the number of samples (i
 - When [=num_samples_to_trim_at_start=] is non-zero, all [=Audio Frame OBU=]s with the same [=audio_substream_id=], and preceding this OBU back until the [=Codec Config OBU=] defining this [=Audio Substream=], SHALL have their [=num_samples_to_trim_at_start=] field equal to the number of samples (i.e. [=num_samples_per_frame=]) in the corresponding Audio Frame OBU.
 - When [=num_samples_to_trim_at_end=] is non-zero in an [=Audio Frame OBU=], there SHALL be no subsequent [=Audio Frame OBU=] with the same [=audio_substream_id=] until a non-redundant [=Codec Config OBU=] defining an [=Audio Substream=] with the same [=audio_substream_id=].
 
-<dfn noexport>obu_extension_flag</dfn> indicates whether the [=extension_header_size=] field presents or not. If it set to 0, the [=extension_header_size=] field SHALL NOT be present. Otherwise, the [=extension_header_size=] field SHALL be present.
+<dfn noexport>obu_extension_flag</dfn> indicates whether the [=extension_header_size=] field is present. If it set to 0, the [=extension_header_size=] field SHALL NOT be present. Otherwise, the [=extension_header_size=] field SHALL be present.
 
 This flag SHALL be set to 0 for this version of the specification. An OBU parser which is conformant with this version of the specification SHALL ignore the [=extension_header_bytes=].
 
@@ -633,6 +634,11 @@ class audio_element_obu() {
 ```
 class DemixingParamDefinition() extends ParamDefinition() {
   default_demixing_info_parameter_data();
+}
+```
+
+```
+class default_demixing_info_parameter_data() extends demixing_info_parameter_data() {
   unsigned int (4) default_w;
   unsigned int (4) reserved;
 }
@@ -732,12 +738,13 @@ NOTE: For a given [=audio_element_type=], a future version of the specification 
 
 <dfn noexport>audio_element_config_bytes</dfn> represents reserved bytes for future use when new [=audio_element_type=] values are defined. Parsers compliant to this version of the specification SHALL ignore these bytes.
 
+<dfn noexport>default_demixing_info_parameter_data()</dfn> is a class that provides the default parameter data for demixing to apply to all audio samples when there are no [=Parameter Block OBU=]s (with [=parameter_id=] defined in this DemixingParamDefinition()) provided.
+- In this class, [=w_idx_offset=] of the [=demixing_info_parameter_data()=] SHALL be ignored.
+- Instead of that, [=default_w=] directly indicates the weight value w(k).
 
-<dfn noexport>default_demixing_info_parameter_data()</dfn> and <dfn noexport>default_w</dfn> specify the default parameter data for demixing to apply to all audio samples when there are no [=Parameter Block OBU=]s (with [=parameter_id=] defined in this DemixingParamDefinition()) provided.
-- [=default_demixing_info_parameter_data()=] conforms to [=demixing_info_parameter_data()=] except that [=w_idx_offset=] SHALL be ignored.
-- Instead of that, [=default_w=] directly indicates the weight value w(k) for [=TF2toT2 de-mixer=] specified in [[#processing-scalablechannelaudio-demixer]].
+<dfn noexport>default_w</dfn> indicates the weight value w(k) for [=TF2toT2 de-mixer=] specified in [[#processing-scalablechannelaudio-demixer]].
 
-Mapping of default_w to w(k) SHOULD be as follows:
+Mapping of [=default_w=] to w(k) SHOULD be as follows:
 <pre class = "def">
  default_w :   w(k)
     0      :    0
@@ -786,7 +793,7 @@ abstract class ParamDefinition() {
 
 <b>Semantics</b>
 
-<dfn value noexport for="ParamDefinition()">parameter_id</dfn> indicates the identifier for the [=Parameter Substream=] which this parameter definition refers to.
+<dfn value noexport for="ParamDefinition()">parameter_id</dfn> indicates the identifier for the [=Parameter Substream=] which this parameter definition refers to. There SHALL be one unique [=parameter_id=] per Parameter Substream.
 
 <dfn noexport>parameter_rate</dfn> specifies the rate used by this [=Parameter Substream=], expressed as ticks per second. Time-related fields associated with this [=Parameter Substream=], such as durations, SHALL be expressed in the number of ticks.
 - The rate SHALL be such a value that (the rate x [=num_samples_per_frame=]) / (the sample rate of [=Audio Element=]) is a non-zero integer.
@@ -1211,7 +1218,7 @@ class layout() {
     unsigned int (4) sound_system;
     unsigned int (2) reserved;
   }
-  else if (layout_type == BINAURAL or NOT_DEFINED) {
+  else if (layout_type == BINAURAL or RESERVED) {
     unsigned int (6) reserved;
   }
 }
@@ -1223,13 +1230,13 @@ class layout() {
 
 <pre class = "def">
 layout_type : Layout type
-     0      : NOT_DEFINED
+     0      : RESERVED
      1      : LOUDSPEAKERS_SP_LABEL
      2      : LOUDSPEAKERS_SS_CONVENTION
      3      : BINAURAL
 </pre>
 
-- A value of 0 indicates no specific layout.
+- A value of 0 is reserved.
 - A value of 1 indicates that the layout is defined using the [=SP Label=] of [[!ITU2051-3]].
 - A value of 2 indicates that the layout is defined using the sound system convention of [[!ITU2051-3]].
 - A value of 3 indicates that the layout is binaural.
@@ -1324,7 +1331,7 @@ layout_type : Layout type
  - 12: It indicates Mono
  - 13 ~ 15: Reserved
 
-When a value for [=sp_label=] or [=sound_system=] is not supported, parsers compliant to this version of the specification SHALL ignore this layout() and the following [=loudness_info()=].
+When a value for [=layout_type=], [=sp_label=] or [=sound_system=] is not supported, parsers compliant with this version of the specification SHOULD ignore this layout() and the following [=loudness_info()=].
 
 ### Loudness Info Syntax and Semantics ### {#obu-mixpresentation-loudness}
 
@@ -1447,7 +1454,7 @@ class parameter_block_obu() {
 
 <b>Semantics</b>
 
-<dfn noexport>parameter_id</dfn> defines an identifier for a [=Parameter Substream=]. Within an [=IA Sequence=], there SHALL be exactly one non-redundant [=Audio Element OBU=] with this identifier. [=Parameter Block OBU=] refer to the [=Parameter Substream=] through this identifier.
+<dfn noexport>parameter_id</dfn> defines an identifier for a [=Parameter Substream=]. [=Parameter Block OBU=] refer to the [=Parameter Substream=] through this identifier.
 
 <dfn noexport>get_param_definition()</dfn> is a run-time function to get the parameter definition type, the parameter definition mode, duration, num_subblocks, constant_subblock_duration and subblock_duration mapped to the parameter_id. 
 
@@ -1611,6 +1618,8 @@ class audio_frame_obu(audio_substream_id_in_bitstream) {
 
 <b>Semantics</b>
 
+Where <b>audio_substream_id_in_bitstream</b> is not a syntax in an [=IA Sequence=] but indicates a status whether this OBU payload is including explicitly [=audio_substream_id=]. It is `true` for [=obu_type=] = OBU_IA_Audio_Frame and `false` for [=obu_type=] = OBU_IA_Audio_Frame_ID0, OBU_IA_Audio_Frame_ID1, ..., or OBU_IA_Audio_Frame_ID17.
+
 <dfn noexport>explicit_audio_substream_id</dfn> defines the [=audio_substream_id=] of this frame. The value SHALL be greater than 17. When this field is not present [=audio_substream_id=] is implicit and is defined as a value from 0 to 17 for OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID17 respectively.
 
 NOTE: The first 18 [=Audio Substream=]s in an [=IA Sequence=] MAY use the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID17, which have predefined [=audio_substream_id=]s associated with them. This reduces bitrate by avoiding the extra [=explicit_audio_substream_id=] field in the bitstream.
@@ -1737,9 +1746,7 @@ Common restrictions on the [=IA Sequence=] for all profiles specified in this ve
 
 NOTE: This behavior is to allow future versions of this specification to define new profiles that support a number of audio elements and/or a number of sub-mixes greater than those recommended in this profile, while still permitting streams compliant to these new profiles to be processed by parsers compliant to the profiles defined in this version of the specification.
 
-- When [=num_layers=] = 1, DemixingParamDefinition() for demixing MAY be present in the [=Audio Element OBU=] and IA decoders MAY use the (default) parameter data for demixing for (dynamic) down-mixing.
-- All parameter definitons except DemixingParamDefinition() and ReconGainParamDefinition() SHALL have the same [=param_definition_mode=].
-	- When [=param_definition_mode=] = 0, [=duration=], [=num_subblocks=], [=constant_subblock_duration=] and [=subblock_duration=] SHALL be same in all parameter definitions, respectively.
+- When [=num_layers=] = 1, DemixingParamDefinion() for demixing MAY be present in the [=Audio Element OBU=] and IA decoders MAY use the (default) parameter data for demixing for (dynamic) down-mixing.
 
 
 ## IA Simple Profile ## {#profiles-simple}
@@ -1864,7 +1871,7 @@ The result of encapsulating an [=IA Sequence=] into an [[!ISOBMFF]] file is as f
 
 - If there are audio samples to be trimmed at the start or at the end, then 'edts' and 'elst' boxes SHALL be present to reflect the trimming status.
 - Sample Entry
-	- For an [=IA Sample=], the [=Descriptors=] required for processing the samples SHALL be the [=configOBUs=] of the associated sample entry. 
+	- For an [=IA Sample=], the [=Descriptors=] required for processing the samples SHALL be only one and SHALL be the [=configOBUs=] of the associated one single sample entry. 
 	
 NOTE: Multiple sample entries may be used in a track, for example when the track is the concatenation of multiple tracks or multiple [=IA Sequence=]s and some [=IA Sample=]s have different [=configOBUs=] values.
 
@@ -1873,7 +1880,9 @@ NOTE: Multiple sample entries may be used in a track, for example when the track
 	- The duration of [=IA Sample=] is duration including audio samples trimmed at the beginning but excluding audio samples trimmed at the end. 
 - Sample Group
 	- When [=codec_id=] is set to 'Opus' or 'mp4a', in an IA Track, every sample SHALL be associated with a sample group of type 'roll'. The [=roll_distance=] value SHALL equal to the value of the [=audio_roll_distance=] field in the [=Codec Config OBU=] stored in the [=configOBUs=] array in the sample entry.
-		
+- Composition Time Stamp (CTS)
+	- For each IA Sample, CTS = DTS (Decoding Time Stamp), and as a consequence, the 'ctts' box (and similar signaling in movie fragments) SHALL not be used.
+
 ### IA Sample Entry ### {#iasampleentry-section}
 
 <pre class="def">
@@ -1907,55 +1916,61 @@ Parsers SHALL ignore these two fields.
 
 ### IA Sample Format ### {#iasampleformat}
 
+<b>Syntax</b>
+
+```
+class ia_sample() {
+  unsigned int (8) OBUs[];
+}
+```
+
+<b>Semantics</b>
+
+<dfn noexport>OBUs</dfn> is a sequence of OBUs to represent one single [=Temporal Unit=].
+
 For tracks using the [=IASampleEntry=], an <dfn noexport>IA Sample</dfn> has the following constraints:
+- All IA Samples SHALL be marked as sync samples.
 - One IA Sample data SHALL be one [=Temporal Unit=] and SHALL NOT contain [=Temporal Delimiter OBU=].
 - The decode duration of an IA Sample SHALL equal the duration of the underlying [=Temporal Unit=], i.e. the decode duration of the [=Audio Frame OBU=].
 
-NOTE: Per the restriction of the profiles carried in an IA track, all [=Audio Frame OBU=]s in an [=IA Sample=] have the same duration and have the same trimming information. If [=Audio Frame OBU=]s in the [=IA Sample=] contain trimming information, the corresponding audio samples is removed from presentation using edit list information.
+NOTE: Per the restriction of the profiles carried in an IA track, all [=Audio Frame OBU=]s in an [=IA Sample=] have the same duration and have the same trimming information. If [=Audio Frame OBU=]s in the [=IA Sample=] contain trimming information, the corresponding audio samples are removed from presentation using edit list information.
 
 NOTE: In typical case, when a track contains a single [=IA Sequence=], trimming can only happen at the beginning or end of the [=IA Sequence=] and therefore at the beginning or end of the track and the edit list can describe the start and end trimming with a single edit entry. Track storing consecutive [=IA Sequence=]s may need multiple edits in the edit list.
 
 ## Codecs Parameter String ## {#codecsparameter}
-DASH and other applications require defined values for the 'Codecs' parameter specified in [[!RFC6381]] for ISO Media tracks. The codecs parameter string for the AOM IA codec SHALL be:
-- For OPUS
+
+DASH and other applications require defined values for the 'codecs' parameter specified in [[!RFC6381]] for ISO Media tracks. The codecs parameter string for [=codec_id=] SHALL be:
+- Per [[!RFC6381]] and [[!ISOBMFF]], the first element of the codecs parameter string is 'iamf'.
+- The second element indicates the [=primary_profile=]. It is three digits within the range 0 to 255.
+- The 3rd element indicates the [=additional_profile=]. It is three digits within the range 0 to 255.
+- The 4th element and any additional elements, if any, SHALL be the elements of the codecs parameter string if that stream was carried in its own track (i.e. not encapsulated in IAMF).
+
+For example,  
+- The codecs parameter string for [=codec_id=] = 'Opus'
 
 ```
-	iamf.IAMF-specific-needs.Opus
+	iamf.xxx.yyy.Opus
 ```
 
-- For AAC-LC
+- The codecs parameter string for [=codec_id=] = 'mp4a'
 
 ```
-	iamf.IAMF-specific-needs.mp4a.40.2
+	iamf.xxx.yyy.mp4a.40.2
 ```
 
-- For FLAC
+- The codecs parameter string for [=codec_id=] = 'fLaC'
 
 ```
-	iamf.IAMF-specific-needs.fLaC
+	iamf.xxx.yyy.fLaC
 ```
 
-- For LPCM
+- The codecs parameter string for [=codec_id=] = 'ipcm'
 
 ```
-	iamf.IAMF-specific-needs.ipcm
+	iamf.xxx.yyy.ipcm
 ```
 
-<b>IAMF-specific-needs</b> SHALL be <b>PC</b> as follows:
-- <dfn noexport>PC</dfn> is three digits within the range 0 to 255 and represents that IA decoder supports the profile of the specification.
-
-For example, for this version of the specification
-- The codecs parameter string of OPUS for the simple profile:
-
-```
-	iamf.000.Opus
-```
-
-- The codecs parameter string of AAC-LC for the base profile:
-
-```
-	iamf.001.mp4a.40.2
-```
+Where, xxx is three digits to indicate the value of [=primary_profile=] and yyy is three digits to indicate the value of [=additional_profile=].
 
 ## ISOBMFF IAMF Decapsulation (Informative) ## {#isobmff-decapsulation}
 
@@ -2599,16 +2614,10 @@ All of syntax elements conform to [=Syntactic Description Language=] specified i
 
  <b>leb128()</b> <b>syntaxName</b>
  
- <b>leb128()</b> indicates the type of an unsigned integer. It indicates the following unsigned integer <b>syntaxName</b> is encoded by [=leb128()=] specified in [[!AV1-Convention]].
- 
- <b>syntaxName</b> is an unsigned integer which is encoded by [=leb128()=] specified in [[!AV1-Convention]].
- 
- <b>sleb128()</b> <b>syntaxName</b>
+ <b>leb128()</b> indicates the type of an unsigned integer. To encode the following unsigned integer <b>syntaxName</b>, it first represents the integer in binary with an N-bit representation, where N is a multiple of 7. Then break the integer up into groups of 7 bits. Output one encoded byte for each 7 bits group, from least significant to most significant group. Each byte will have the group in its 7 least significant bits. Set the most significant bit on each byte except the last byte.
 
- <b>sleb128()</b> indicates the type of an signed integer. It indicates the following signed integer <b>syntaxName</b> is encoded by [=leb128()=] specified in [[!AV1-Convention]].
- 
- <b>syntaxName</b> is an signed integer which is encoded by [=leb128()=] specified in [[!AV1-Convention]].
- 
+ <b>syntaxName</b> is an unsigned integer which is encoded by <b>leb128()</b>. Its size is limited to 32 bits.
+  
  <b>string</b> <b>syntaxName</b>
 
 <b>string</b> indicates a null-terminated (i.e. ending at the first byte set to 0x00), UTF-8 encoded as defined in [[!RFC3629]] and whose length SHALL be limited to 128 bytes. 
