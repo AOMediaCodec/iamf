@@ -1810,7 +1810,7 @@ NOTE: Multiple sample entries may be used in a track, for example when the track
 	Quantity:          One or more.
 </pre>
 
-<dfn noexport>IASampleEntry</dfn> identifies that the track contains [=IA Sample=]s, and contains [=configOBUs=].
+<dfn noexport>IASampleEntry</dfn> specifies that the track contains [=IA Sample=]s.
 
 <b>Syntax</b>
 
@@ -1838,22 +1838,22 @@ Parsers SHALL ignore these two fields.
 
 ```
 class ia_sample() {
-  unsigned int (8) OBUs[];
+  unsigned int (8) obus[];
 }
 ```
 
 <b>Semantics</b>
 
-<dfn noexport>OBUs</dfn> is a sequence of OBUs to represent one single [=Temporal Unit=].
+<dfn noexport>obus</dfn> is a sequence of OBUs representing one [=Temporal Unit=].
 
 For tracks using the [=IASampleEntry=], an <dfn noexport>IA Sample</dfn> has the following constraints:
-- All IA Samples SHALL be marked as sync samples.
-- One IA Sample data SHALL be one [=Temporal Unit=] and SHALL NOT contain [=Temporal Delimiter OBU=].
-- The decode duration of an IA Sample SHALL equal the duration of the underlying [=Temporal Unit=], i.e. the decode duration of the [=Audio Frame OBU=].
+- All [=IA Sample=]s SHALL be marked as sync samples.
+- One [=IA Sample=] SHALL be one [=Temporal Unit=] and SHALL NOT contain the [=Temporal Delimiter OBU=].
+- The decode duration of an [=IA Sample=] SHALL equal the duration of the underlying [=Temporal Unit=], i.e. the decode duration of the [=Audio Frame OBU=].
 
 NOTE: Per the restriction of the profiles carried in an IA track, all [=Audio Frame OBU=]s in an [=IA Sample=] have the same duration and have the same trimming information. If [=Audio Frame OBU=]s in the [=IA Sample=] contain trimming information, the corresponding audio samples are removed from presentation using edit list information.
 
-NOTE: In typical case, when a track contains a single [=IA Sequence=], trimming can only happen at the beginning or end of the [=IA Sequence=] and therefore at the beginning or end of the track and the edit list can describe the start and end trimming with a single edit entry. Track storing consecutive [=IA Sequence=]s may need multiple edits in the edit list.
+NOTE: In typical cases, when a track contains a single [=IA Sequence=], trimming can only happen at the beginning or the end of the [=IA Sequence=]. Therefore, the edit list can describe the start and end trimming with a single edit entry. A track storing consecutive [=IA Sequence=]s may need multiple edits in the edit list.
 
 ## Codecs Parameter String ## {#codecsparameter}
 
