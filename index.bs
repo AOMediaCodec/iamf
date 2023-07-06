@@ -1208,13 +1208,7 @@ The layout class specifies either a binaural system or the list of physical loud
 class layout() {
   unsigned int (2) layout_type;
   
-  if (layout_type == LOUDSPEAKERS_SP_LABEL) {
-    unsigned int (6) num_loudspeakers;
-    for (i = 0; i < num_loudspeakers; i++) {
-      unsigned int (8) sp_label;
-    }
-  } 
-  else if (layout_type == LOUDSPEAKERS_SS_CONVENTION) {
+  if (layout_type == LOUDSPEAKERS_SS_CONVENTION) {
     unsigned int (4) sound_system;
     unsigned int (2) reserved;
   }
@@ -1230,90 +1224,16 @@ class layout() {
 
 <pre class = "def">
 layout_type : Layout type
-     0      : RESERVED
-     1      : LOUDSPEAKERS_SP_LABEL
+   0 - 1    : RESERVED
      2      : LOUDSPEAKERS_SS_CONVENTION
      3      : BINAURAL
 </pre>
 
-- A value of 0 is reserved.
-- A value of 1 indicates that the layout is defined using the [=SP Label=] of [[!ITU2051-3]].
+- A value of 0 or 1 is reserved.
 - A value of 2 indicates that the layout is defined using the sound system convention of [[!ITU2051-3]].
 - A value of 3 indicates that the layout is binaural.
 
 <dfn noexport>num_loudspeakers</dfn> specifies the number of loudspeakers. It SHALL NOT be set to 0.
-
-<dfn noexport>sp_label</dfn> defines the [=SP Label=] as specified in [[!ITU2051-3]]. 
-
-<style>
-.col_border {
-  border-left: 1px solid var(--def-border);
-}
-</style>
-
-<table class="def">
-<tr>
-  <th>sp_label</th><th>SP label</th><th class="col_border">sp_label</th><th>SP label</th><th class="col_border">sp_label</th><th>SP label</th>
-</tr>
-<tr>
-  <td>0</td><td>M+000</td><td class="col_border">18</td><td>U+000</td><td class="col_border">36</td><td>B+000</td>
-</tr>
-<tr>
-  <td>1</td><td>M+022</td><td class="col_border">19</td><td>U+022</td><td class="col_border">37</td><td>B+022</td>
-</tr>
-<tr>
-  <td>2</td><td>M-022</td><td class="col_border">20</td><td>U-022</td><td class="col_border">38</td><td>B-022</td>
-</tr>
-<tr>
-  <td>3</td><td>M+SC</td><td class="col_border">21</td><td>U+030</td><td class="col_border">39</td><td>B+030</td>
-</tr>
-<tr>
-  <td>4</td><td>M-SC</td><td class="col_border">22</td><td>U-030</td><td class="col_border">40</td><td>B-030</td>
-</tr>
-<tr>
-  <td>5</td><td>M+030</td><td class="col_border">23</td><td>U+045</td><td class="col_border">41</td><td>B+045</td>
-</tr>
-<tr>
-  <td>6</td><td>M-030</td><td class="col_border">24</td><td>U-045</td><td class="col_border">42</td><td>B-045</td>
-</tr>
-<tr>
-  <td>7</td><td>M+045</td><td class="col_border">25</td><td>U+060</td><td class="col_border">43</td><td>B+060</td>
-</tr>
-<tr>
-  <td>8</td><td>M-045</td><td class="col_border">26</td><td>U-060</td><td class="col_border">44</td><td>B-060</td>
-</tr>
-<tr>
-  <td>9</td><td>M+060</td><td class="col_border">27</td><td>U+090</td><td class="col_border">45</td><td>B+090</td>
-</tr>
-<tr>
-  <td>10</td><td>M-060</td><td class="col_border">28</td><td>U-090</td><td class="col_border">46</td><td>B-090</td>
-</tr>
-<tr>
-  <td>11</td><td>M+090</td><td class="col_border">29</td><td>U+110</td><td class="col_border">47</td><td>B+110</td>
-</tr>
-<tr>
-  <td>12</td><td>M-090</td><td class="col_border">30</td><td>U-110</td><td class="col_border">48</td><td>B-110</td>
-</tr>
-<tr>
-  <td>13</td><td>M+110</td><td class="col_border">31</td><td>U+135</td><td class="col_border">49</td><td>B+135</td>
-</tr>
-<tr>
-  <td>14</td><td>M-110</td><td class="col_border">32</td><td>U-135</td><td class="col_border">50</td><td>B-135</td>
-</tr>
-<tr>
-  <td>15</td><td>M+135</td><td class="col_border">33</td><td>U+180</td><td class="col_border">51</td><td>B+180</td>
-</tr>
-<tr>
-  <td>16</td><td>M-135</td><td class="col_border">34</td><td>UH+180</td><td class="col_border">52</td><td>LFE1</td>
-</tr>
-<tr>
-  <td>17</td><td>M+180</td><td class="col_border">35</td><td>T+000</td><td class="col_border">53</td><td>LFE2</td>
-</tr>
-<tr>
-  <td></td><td></td><td class="col_border"></td><td></td><td class="col_border">54 ~ 256</td><td>Reserved</td>
-</tr>
-</table>
-
 
 <dfn noexport>sound_system</dfn> specifies the sound system A to J as specified in [[!ITU2051-3]], 7.1.2ch and 3.1.2ch of [=loudspeaker_layout=] as follows:
  - 0: It indicates [=Loudspeaker configuration for Sound System A (0+2+0)=]
@@ -1331,7 +1251,7 @@ layout_type : Layout type
  - 12: It indicates Mono
  - 13 ~ 15: Reserved
 
-When a value for [=layout_type=], [=sp_label=] or [=sound_system=] is not supported, parsers compliant with this version of the specification SHOULD ignore this layout() and the following [=loudness_info()=].
+When a value for [=layout_type=] or [=sound_system=] is not supported, parsers compliant with this version of the specification SHOULD ignore this layout() and the following [=loudness_info()=].
 
 ### Loudness Info Syntax and Semantics ### {#obu-mixpresentation-loudness}
 
