@@ -1945,63 +1945,60 @@ DASH and other applications require defined values for the 'codecs' parameter sp
 - The 3rd element indicates the [=additional_profile=]. It is three digits within the range 0 to 255.
 - The 4th element and any additional elements, if any, SHALL be the elements of the codecs parameter string if that stream was carried in its own track (i.e. not encapsulated in IAMF).
 
-For example,  
-- The codecs parameter string for [=codec_id=] = 'Opus'
+For example,
+- the codecs parameter string for [=codec_id=] = 'Opus' is
 
 ```
 	iamf.xxx.yyy.Opus
 ```
 
-- The codecs parameter string for [=codec_id=] = 'mp4a'
+- the codecs parameter string for [=codec_id=] = 'mp4a' is
 
 ```
 	iamf.xxx.yyy.mp4a.40.2
 ```
 
-- The codecs parameter string for [=codec_id=] = 'fLaC'
+- the codecs parameter string for [=codec_id=] = 'fLaC' is
 
 ```
 	iamf.xxx.yyy.fLaC
 ```
 
-- The codecs parameter string for [=codec_id=] = 'ipcm'
+- the codecs parameter string for [=codec_id=] = 'ipcm' is
 
 ```
 	iamf.xxx.yyy.ipcm
 ```
 
-Where, xxx is three digits to indicate the value of [=primary_profile=] and yyy is three digits to indicate the value of [=additional_profile=].
+where <code>xxx</code> is three digits to indicate the value of the [=primary_profile=] and <code>yyy</code> is three digits to indicate the value of the [=additional_profile=].
 
 ## ISOBMFF IAMF Decapsulation (Informative) ## {#isobmff-decapsulation}
 
-### ISOBMFF IAMF Decapsulation with single track ### {#isobmff-decapsulation-singletrack}
+### Decapsulating an ISOBMFF IAMF File with a Single Track ### {#isobmff-decapsulation-singletrack}
 
-This section provides a guideline for IAMF parser to reconstruct [=IA Sequence=]s from IAMF file.
+This section provides a guideline for IAMF parsers reconstructing [=IA Sequence=]s from an IAMF file with a single track, as follows.
 
-When IAMF parser feeds the reconstructed [=IA Sequence=]s to OBU parser, [=Descriptors=] shall be placed at the first and followed by [=Temporal Unit=]s.
+1. The [=configOBUs=] from the [=IASampleEntry=] are placed at the beginning of the [=IA Sequence=]. These are the [=Descriptors=]. 
 
-During decapsulation process, IAMF file is decapsulated into an [=IA Sequence=]s which conform to [[#obu-syntax]] as follows:
-- Step1: Take the [=configOBUs=] from an [=IASampleEntry=] as the [=Descriptors=] of the [=IA Sequence=].
-- Step2: Take the jth sample, which is associated with the [=IASampleEntry=], as the jth [=Temporal Unit=].
-	- If [=Temporal Delimiter OBU=] is inserted in front of the [=Temporal Unit=], then every [=Temporal Unit=] has [=Temporal Delimiter OBU=]. Otherwise,no [=Temporal Unit=] has [=Temporal Delimiter OBU=].
-- Step3: Place the [=Descriptors=], and followed by [=Temporal Unit=]s in order (j = 1, 2, …, m), to reconstruct the [=IA Sequence=].
+2. Next, place the OBUs from the <code>j = 1, 2, ..., m</code>-th [=IASampleEntry=]s in the [=IA Sequence=], in order. These form the <code>j = 1, 2, ..., m</code>-th [=Temporal Unit=]s.
 
-### Handling of Trimming Information ### {#isobmff-decapsulation-singletrack-trimming}
+    - If it is desirable to have [=Temporal Delimiter OBU=]s in the [=IA Sequence=], insert a [=Temporal Delimiter OBU=] in front of every [=Temporal Unit=].
+    - Otherwise, do not insert any [=Temporal Delimiter OBU=]s in the [=IA Sequence=].
 
-This section provides a guideline how to handle trimming information of ISOBMFF file.
+### Handling Trimming Information ### {#isobmff-decapsulation-singletrack-trimming}
+
+This section provides a guideline for handling trimming information in an ISOBMFF file.
 
 <center><img src="images/ISOBMFF Trimming Handling.png" style="width:80%; height:auto;"></center>
-<center><figcaption>Recommendation for ISOBMFF Trimming Information Handling</figcaption></center>
+<center><figcaption>Recommendation for handling ISOBMFF trimming information. PTS is the presentation start time. PTS1 is the presentation start time of the first audio sample before trimming. PTS2 is the presentation start time of the first audio sample after trimming.</figcaption></center>
 
-As depicted in the above figure, 
-- ISOBMFF parser passes [=Descriptors=], PTS1 and [=IA Sample=]s (or [=Temporal Unit=]s) to IAMF decoder.
-- ISOBMFF parser passes PTS1 and trimming information to ISOBMFF player. 
-- IAMF decoder passes PTS and audio samples after decoding to ISOBMFF player.
-	- If IAMF decoder trims the audio samples to be trimmed based on the trimming information within [=Audio Frame OBU=]s, then IAMF decoder passes PTS2 and audio samples after trimming.
-	- If IAMF decoder does not trim, then IAMF decoder passes PTS1 and audio samples before trimming.
-- ISOBMFF player playbacks audio samples starting at PTS2 to Loudspeakers.
-
-Where, PTS1 is the presentation start time of the first audio sample before trimming and PTS2 is the presentation start time of the first audio sample after trimming.
+As depicted in the figure above, 
+- The ISOBMFF parser passes the [=Descriptors=], PTS1 and [=IA Samples=] (or [=Temporal Unit=]s) to the IAMF decoder.
+- The ISOBMFF parser passes PTS1 and the trimming information to the ISOBMFF player. (This is optional if the IAMF decoder trims the audio samples.)
+- The IAMF decoder passes PTS and the audio samples after decoding to the ISOBMFF player.
+	- If the IAMF decoder trims the audio samples based on the trimming information within the [=Audio Frame OBU=]s, then the IAMF decoder passes PTS2 and the audio samples after trimming.
+	- If the IAMF decoder does not trim, then the IAMF decoder passes PTS1 and the audio samples before trimming.
+- The ISOBMFF player plays back the trimmed audio samples through the loudspeakers starting at PTS2.
 
 # IAMF processing # {#processing}
 
