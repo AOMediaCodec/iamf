@@ -2630,7 +2630,7 @@ The MOD() function returns the remainder after <b>Number</b> is divided by <b>Di
 
 ## Annex A: ID Linking Scheme (Informative) ## {#Annex_A}
 
-The below figure shows the linking scheme among IDs in obu_header or obu payload.
+The below figure shows the linking scheme among IDs in obu_header or OBU payload.
 
 <center><img src="images/ID Linking Example.png" style="width:100%; height:auto;"></center>
 <center><figcaption>ID Linking Scheme</figcaption></center>
@@ -2663,35 +2663,35 @@ This Annex specifies normative rules for scalable channel audio with [=num_layer
 
 ### Annex B-1: Down-mix parameter and Loudness ### {#iamfgeneration-scalablechannelaudio-downmixparameter}
 
-This section describes how to generate down-mix parameters and loudness level for a given channel audio and a given list of channel layouts for scalability (i.e. [=num_layers=] > 1).
+This section describes how to generate down-mix parameters and loudness levels for a given channel audio and a given list of channel layouts for scalability (i.e. [=num_layers=] > 1).
 
-Below figure shows a block diagram for down-mix parameter and loudness module including down-mixer.
+The below figure shows a block diagram for the down-mix parameter and loudness module including the down-mixer.
 
 <center><img src="images/Down-mix Parameter and Loudness.png" style="width:100%; height:auto;"></center>
 <center><figcaption>IA Down-mix Parameter and Loudness</figcaption></center>
 
 For a given channel-based input audio (e.g. 7.1.4ch) and a given list of channel layouts based on the input audio,
-- Down-mix parameter generator SHALL generate 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k)) by analyzing the input audio, by referring [[AI-CAD-Mixing]]. Where, k is a frame index.
-	- It is composed of Audio Scene Classification module and Height Energy Quantification module as depicted in Figure 11-2.
+- Down-mix parameter generator SHALL generate 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k)) by analyzing the input audio, by referring [[AI-CAD-Mixing]]. Where k is a frame index.
+	- It is composed of Audio Scene Classification module and a Height Energy Quantification module as depicted in Figure 11-2.
 	- Audio Scene Classification module generates 4 parameters (α(k), β(k), γ(k), δ(k)) by classifying audio scenes of the input audio in three modes.
 		- Default scene: Neither Dialog nor Effect
 		- Dialog scene: Center-channel oriented and clear dialog/voice sounds
 		- Effect scene: Directional and spatially moving sounds.
-	- Height Energy Quantification module generates a surround to height mixing parameter (w(k)) which is decided according to the relative energy difference between the top and surround channels of the input audio.
+	- The Height Energy Quantification module generates a surround-to-height mixing parameter (w(k)) which is decided according to the relative energy difference between the top and surround channels of the input audio.
 		- If the energy of top channels is bigger than that of surround ones, then w_idx_offset(k) is set to 1. Otherwise, it is set to -1. And, w(k) is calculated based on w_idx_offset(k) and conforms to [[#processing-scalablechannelaudio]].
-- Down-mixer generates [=down-mixed audio=] from the input audio according to the list of channel layouts and the down-mix parameters, and outputs [=down-mixed audio=] for each channel layout to Loudness module.
-	- It is not depicted in the figure but Down-mixer further generates [=dmixp_mode=] and [=recon_gain=] for each frame to be passed to OBU packetizer.
+- Down-mixer generates [=down-mixed audio=] from the input audio according to the list of channel layouts and the down-mix parameters, and outputs [=down-mixed audio=] for each channel layout to the Loudness module.
+	- It is not depicted in the figure but Down-mixer further generates [=dmixp_mode=] and [=recon_gain=] for each frame to be passed to the OBU packetizer.
 - Loudness module measures the loudness level ([=LKFS=]) of each [=down-mixed audio=] based on [[ITU1770-4]], and passes them to OBU packetizer.
 
 ### Annex B-2: Down-mix Mechanism ### {#iamfgeneration-scalablechannelaudio-downmixmechanism}
 
 This section specifies the down-mixing mechanism to generate <dfn noexport>down-mixed audio</dfn> for scalable channel audio.
 
-For a given channel-based input audio which conforms to [=loudspeaker_layout=], the surround and top channels (if any) are separately down-mixed and especially step by step until to get a target channels.
+For a given channel-based input audio that conforms to [=loudspeaker_layout=], the surround and top channels (if any) are separately down-mixed and especially step by step until to get a target channels.
 
 Implementers MAY use another method to get the [=down-mixed audio=] from the given input audio, but the [=down-mixed audio=] SHALL comply with that by this section.
 
-Therefore, a down-mixer based on the down-mix mechanism is a combination of following surround down-mixer(s) and top down-mixer(s) as depicted in below figure.
+Therefore, a down-mixer based on the down-mix mechanism is a combination of the following surround down-mixer(s) and top down-mixer(s) as depicted in the below figure.
 - Surround down-mixers 
 	- <dfn noexport>S7to5 enc.</dfn>: Ls5 = α(k) x Lss7 + β(k) x Lrs7 and Rs5 = α(k) x Rss7 + β(k) x Rrs7.
 	- <dfn noexport>S5to3 enc.</dfn>: L3 = L5 + δ(k) x Ls5 and R3 = R5 + δ(k) x Rs5
@@ -2714,11 +2714,11 @@ For example, to get [=down-mixed audio=] 3.1.2ch from 7.1.4ch:
 
 This section describes the generation rule for channel layouts for scalable channel audio.
 
-For a given channel layout (CL #n) of an channel-based input audio, any list of CLs ({CL #i: i = 1, 2, ..., n}) for a scalable channel audio SHALL conform with following rules:
+For a given channel layout (CL #n) of channel-based input audio, any list of CLs ({CL #i: i = 1, 2, ..., n}) for scalable channel audio SHALL conform with the following rules:
 - Si ≤ Si+1 and Wi ≤ Wi+1 and Ti ≤ Ti+1 except Si = Si+1, Wi = Wi+1 and Ti = Ti+1 for i = n-1, n-2, …, 1. Where the ith channel layout CL #i = Si.Wi.Ti.
 - CL #i is one of [=loudspeaker_layout=]s supported in this version of the specification.
 
-Down-mix paths, which conform to the above rule, SHALL be only allowed for scalable channel audio with [=num_layers=] > 1 as depicted in below figure.
+Down-mix paths, which conform to the above rule, SHALL be only allowed for scalable channel audio with [=num_layers=] > 1 as depicted in the below figure.
 
 <center><img src="images/Down-mix Path.png" style="width:90%; height:auto;"></center>
 <center><figcaption>IA Down-mix Path</figcaption></center>
@@ -2727,14 +2727,14 @@ Down-mix paths, which conform to the above rule, SHALL be only allowed for scala
 
 This section describes how to generate [=recon_gain=]. 
 
-NOTE: Recon gain generation is not required when the codec is lossless such as [=codec_id=] is set to 'ipcm' or 'fLaC'.
+NOTE: Recon gain generation is not required when the codec is lossless such as [=codec_id=] being set to 'ipcm' or 'fLaC'.
 
-Recon gain needs to be applied to de-mixed channels. For this, IA encoder needs to deliver it to IA decoders.
+Recon gain needs to be applied to de-mixed channels. For this, the IA encoder needs to deliver it to IA decoders.
 
-Let's define followings:
+Let's define the followings:
 - Level Ok is the signal power for the frame #k of a channel of the [=down-mixed audio=] for CL #i.
 - Level Mk is the signal power for the frame #k of the relevant mixed channel of the [=down-mixed audio=] for CL #i-1.
-- Level Dk is the signal power for the frame #k of the de-mixed channel for CL #i (after demixing in decode side).
+- Level Dk is the signal power for the frame #k of the de-mixed channel for CL #i (after demixing in the decoder side).
 
 If 10*log10(level Ok / maxL^2) is less than the first threshold value (e.g. -80dB), Recon_Gain (k, i)  = 0. Where, maxL = 32767 for 16bits.
 
@@ -2769,21 +2769,21 @@ Recon_Gain for D_Rtb4:
 
 This section describes the generation rule for [=ChannelGroup=].
 
-For a given channel-based input audio and the list of CLs ({CL #i: i = 1, 2, ..., n}), CG Generation module outputs the transformed audio (i.e. ChannelGroups) which SHALL conform to following rules:
+For a given channel-based input audio and the list of CLs ({CL #i: i = 1, 2, ..., n}), the CG Generation module outputs the transformed audio (i.e. ChannelGroups) which SHALL conform to the following rules:
 - It consists of C number of channels and is structured to n number of [=ChannelGroup=]s, where C is the number of channels for the input audio.
-- [=ChannelGroup=] #1 (as called BCG): This [=ChannelGroup=] is the [=down-mixed audio=] itself for CL #1 generated from the input audio. It contains C1 number of channels.
+- [=ChannelGroup=] #1 (as called BCG): This [=ChannelGroup=] is the [=down-mixed audio=] itself for CL #1 generated from the input audio. It contains a C1 number of channels.
 - [=ChannelGroup=] #i (as called DCG, i = 2, 3, …, n): This [=ChannelGroup=] contains (Ci – Ci-1) number of channels. (Ci – Ci-1) channel(s) consists of as follows:
 	- (Si – Si-1) surround channel(s) if Si > Si-1 . When S_set = { x | Si-1 < x ≤ Si and x is an integer},
 		- If 2 is an element of S_set, the L2 channel is contained in this CG #i.
 		- If 3 is an element of S_set, the Center channel is contained in this CG #i.
 		- If 5 is an element of S_set, the L5 and R5 channels are contained in this CG #i.
 		- If 7 is an element of S_set, the Lss7 and Rss7 channels are contained in this CG #i.
-	- The LFE channel if Wi > Wi-1 .
+	- The LFE channel if Wi > Wi-1.
 	- (Ti – Ti-1) top channels if Ti > Ti-1 .
 		- If Ti-1 = 0, the top channels of the [=down-mixed audio=] for CL #i are contained in this [=ChannelGroup=] #i.
 		- If Ti-1 = 2, the Ltf and Rtf channels of the [=down-mixed audio=] for CL #i are contained in this [=ChannelGroup=] #i.
 
-Below figure shows one example of transformation matrix with 4 CGs (2ch/3.1.2ch/5.1.2ch/7.1.4ch).
+The below figure shows one example of a transformation matrix with 4 CGs (2ch/3.1.2ch/5.1.2ch/7.1.4ch).
 
 <center><img src="images/Example of Transformation Matrix with 4 CGs.png" style="width:100%; height:auto;"></center>
 <center><figcaption>Example of Transformation Matrix with 4 CGs</figcaption></center>
