@@ -2126,20 +2126,38 @@ In this section, for a given x.y.z layout, the next highest layout x'.y'.z' mean
 
 This section defines the renderer to use, given a channel-based [=Audio Element=] and a loudspeaker playback layout.
 
-- The input layout of the IA renderer is set as follows:
+- The input layout (x.y.z) of the IA renderer is set as follows:
 	- If [=num_layers=] = 1, use the [=loudspeaker_layout=] of the [=Audio Element=].
 	- Else, if there is one of the [=Audio Element=]'s the [=loudspeaker_layout=]s that matches the playback layout, use it.
-	- Else, use the next highest available layout from all available [=loudspeaker_layout=] and [=loudness_layout=].
-- The output layout of the IA renderer is set to the playback layout.
+	- Else, use the next highest available layout from all available [=loudspeaker_layout=].
+- The output layout of the IA renderer is set to the playback layout (X.Y.Z).
 - The IA renderer used is selected according to the following rules:
-	- If the playback layout matches a [=loudspeaker_layout=] which can be generated from the highest loudspeaker layout of the [=Audio Element=] according to [[#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule]], use [=demixing_info_parameter_data()=] or [=default_demixing_info_parameter_data()=].
-		- If DemixingParamDefinition() is not present,
+	- If DemixingParamDefinition() is not present,
+		- If the playback layout is neither 3.1.2ch nor 7.1.2ch, 
 			- If the playback layout complies with loudspeaker layouts supported by [[!ITU2051-3]], use EAR Direct Speakers renderer ([[!ITU2127-0]]).
-			- Else if the playback layout is 3.1.2ch, use the static down-mix matrices specified in [[#processing-downmixmatrix-static]].
-			- Else, use implementation-specific renderer
-	- Else if the playback layout complies with loudspeaker layouts supported by [[!ITU2051-3]], use EAR Direct Speakers renderer ([[!ITU2127-0]]).
-	- Else if the playback layout is 3.1.2ch, use the static down-mix matrices specified in [[#processing-downmixmatrix-static]].
-	- Else, use implementation-specific renderer.
+			- Else, use an implementation-specific renderer.
+		- Else if the playback layout is 7.1.2ch, use EAR Direct Speakers renderer ([[!ITU2127-0]]) to render the input audio to 7.1.4ch first and followed by down-mixing from 7.1.4ch to 7.1.2ch.
+			- Where height channels of 7.1.4ch are down-mixed to height channels of 7.1.2ch as follows: Ltf2 = Ltf4 + 0.707 * Ltb and Rtf2 = Rtf4 + 0.707 * Rtb.
+		- Else,
+			- If the input layout has height channels, use the static down-mix matrices specified in [[#processing-downmixmatrix-static]].
+			- Else if the surround channels(x) of the input layout > 3, use the static down-mix matrices specified in [[#processing-downmixmatrix-static]] after padding empty height channels to the input audio relevant to the input layout. 
+			- Else, pad empty channels to the input audio relevant to the input layout to make 3.1.2ch.
+	- Else,
+		- If the playback layout matches a [=loudspeaker_layout=] which can be generated from the highest loudspeaker layout of the [=Audio Element=] according to [[#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule]], 
+			- If the playback layout has height channels, use [=demixing_info_parameter_data()=] or [=default_demixing_info_parameter_data()=].
+			- Else,
+				- If the input layout does not have height channels, use [=demixing_info_parameter_data()=] or [=default_demixing_info_parameter_data()=].
+				- Else, use EAR Direct Speakers renderer ([[!ITU2127-0]]).
+		- Else,
+			- If the playback layout is neither 3.1.2ch nor 7.1.2ch, 
+				- If the playback layout complies with loudspeaker layouts supported by [[!ITU2051-3]], use EAR Direct Speakers renderer ([[!ITU2127-0]]).
+				- Else, use an implementation-specific renderer.
+			- Else if the playback layout is 7.1.2ch, use EAR Direct Speakers renderer ([[!ITU2127-0]]) to render the input audio to 7.1.4ch first and followed by down-mixing from 7.1.4ch to 7.1.2ch.
+				- Where height channels of 7.1.4ch are down-mixed to height channels of 7.1.2ch as follows: Ltf2 = Ltf4 + 0.707 * Ltb and Rtf2 = Rtf4 + 0.707 * Rtb.
+			- Else,
+				- If the input layout has height channels, use the static down-mix matrices specified in [[#processing-downmixmatrix-static]].
+				- Else if the surround channels(x) of the input layout > 3, use the static down-mix matrices specified in [[#processing-downmixmatrix-static]] after padding empty height channels to the input audio relevant to the input layout. 
+				- Else, pad empty channels to the input audio relevant to the input layout to make 3.1.2ch. 
 
 If the EAR Direct Speakers renderer is used, the following SHOULD be provided for each audio channel of the [=Audio Element=]:
 
