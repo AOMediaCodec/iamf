@@ -131,6 +131,7 @@ url: https://xiph.org/flac/format.html; spec: FLAC; type: dfn;
 	text: minimum frame size
 	text: maximum frame size
 	text: number of channels
+	text: MD5 signature
 
 url: https://xiph.org/flac/format.html; spec: FLAC; type: property;
 	text: fLaC
@@ -1625,12 +1626,12 @@ The sample rate used for computing offsets SHALL be the rate indicated by the [=
 [=codec_id=] SHALL be 'fLaC', the FLAC stream marker in ASCII, meaning byte 0 of the stream is 0x66, followed by 0x4C 0x61 0x43.
 
 [=decoder_config()=] for FLAC are the [=METADATA_BLOCK=]s of [[!FLAC]]. The [=METADATA_BLOCK_STREAMINFO=] has the following constraints:
-- [=minimum block size=] block SHALL be set to [=num_samples_per_frame=].
-- [=maximum block size=] block SHALL be set to [=num_samples_per_frame=].
-- [=minimum frame size=] block SHOULD be set to 0.
-- [=maximum frame size=] block SHOULD be set to 0.
-- [=number of channels=] block SHALL be set to 2. [=number of channels=] can be ignored because the real value can be determined from the [=Audio Element OBU=].
-
+- [=minimum block size=] SHALL be set to [=num_samples_per_frame=].
+- [=maximum block size=] SHALL be set to [=num_samples_per_frame=].
+- [=minimum frame size=] SHOULD be set to 0.
+- [=maximum frame size=] SHOULD be set to 0.
+- [=number of channels=] SHALL be set to 2. [=number of channels=] can be ignored because the real value can be determined from the [=Audio Element OBU=].
+- [=MD5 signature=] SHOULD be set to 0.
 
 The format of [=audio_frame()=] is [=FRAME=] of [[!FLAC]], which is composed of [=FRAME_HEADER=], followed by [=SUBFRAME=](s) (one [=SUBFRAME=] per channel) and followed by [=FRAME_FOOTER=].
 
