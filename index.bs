@@ -579,7 +579,7 @@ NOTE: 'ipcm' should not be confused with 'lpcm' which is another 4CC to identify
 <dfn noexport>num_samples_per_frame</dfn> indicates the frame length, in samples, of the audio_frame() provided in by audio_frame_obu(). It SHALL NOT be set to zero. If the [=decoder_config()=] structure for a given codec specifies a value for the frame length, the two values SHALL be equal.
 
 <dfn noexport>audio_roll_distance</dfn> indicates how many audio frames prior to the current audio frame need to be decoded (and decoded samples discarded) to set the encoder in a state that will produce the perfect decoded audio signal. It SHALL be always a negative value or zero. For some audio codecs, even if an audio frame can be decoded independently, the decoded signal after decoding only that frame may not represent a perfect, decoded audio signal, even ignoring compression artifacts. This can be due to overlap transforms. While potentially acceptable when starting to decode an [=Audio Substream=], it may be problematic when automatically switching between similar [=Audio Substream=]s of different quality and/or bitrate. 
-- It SHALL be set to -R when [=codec_id=] is set to 'Opus'. Where R is the smallest integer greater than or equal to floor(3840 / [=num_samples_per_frame=]).
+- It SHALL be set to -R when [=codec_id=] is set to 'Opus'. Where R is roundup(3840 % [=num_samples_per_frame=]).
 - It SHALL be set to -1 when [=codec_id=] is set to 'mp4a'.
 - It SHALL be set to 0 when [=codec_id=] is set to  'fLaC' or 'ipcm'.
 
