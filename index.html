@@ -1490,7 +1490,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 5edf5e459, updated Thu Jun 22 11:28:01 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="7cfdbd81db397f4d3a262cf8776a9366c470cfce" name="document-revision">
+  <meta content="b1bfb99eb05e1dd8a26d9cdb363489770f1bff91" name="document-revision">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
     color: var(--a-normal-text);
@@ -4795,7 +4795,7 @@ class Bar {
    <p>The MOD() function returns the remainder after <b>Number</b> is divided by <b>Divisor</b>.</p>
    <h2 class="heading settled" data-level="10" id="annex"><span class="secno">10. </span><span class="content">Annex</span><a class="self-link" href="#annex"></a></h2>
    <h3 class="heading settled" data-level="10.1" id="Annex_A"><span class="secno">10.1. </span><span class="content">Annex A: ID Linking Scheme (Informative)</span><a class="self-link" href="#Annex_A"></a></h3>
-   <p>The below figure shows the linking scheme among IDs in obu_header or obu payload.</p>
+   <p>The figure below shows the linking scheme among IDs in the obu_header or OBU payload.</p>
    <center><img height="1044" src="images/ID Linking Example.png" style="width:100%; height:auto;" width="1783"></center>
    <center>
     <figcaption>ID Linking Scheme</figcaption>
@@ -4854,8 +4854,8 @@ class Bar {
    <h3 class="heading settled" data-level="10.2" id="Annex_B"><span class="secno">10.2. </span><span class="content">Annex B: Rules for Scalable Channel Audio (Normative)</span><a class="self-link" href="#Annex_B"></a></h3>
    <p>This Annex specifies normative rules for scalable channel audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②⑧">num_layers</a> > 1.</p>
    <h4 class="heading settled" data-level="10.2.1" id="iamfgeneration-scalablechannelaudio-downmixparameter"><span class="secno">10.2.1. </span><span class="content">Annex B-1: Down-mix parameter and Loudness</span><a class="self-link" href="#iamfgeneration-scalablechannelaudio-downmixparameter"></a></h4>
-   <p>This section describes how to generate down-mix parameters and loudness level for a given channel audio and a given list of channel layouts for scalability (i.e. <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②⑨">num_layers</a> > 1).</p>
-   <p>Below figure shows a block diagram for down-mix parameter and loudness module including down-mixer.</p>
+   <p>This section describes how to generate down-mix parameters and loudness levels for a given channel audio and a given list of channel layouts for scalability (i.e. <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②⑨">num_layers</a> > 1).</p>
+   <p>The figure below shows a block diagram for the down-mix parameter and loudness module including the down-mixer.</p>
    <center><img height="387" src="images/Down-mix Parameter and Loudness.png" style="width:100%; height:auto;" width="800"></center>
    <center>
     <figcaption>IA Down-mix Parameter and Loudness</figcaption>
@@ -4863,10 +4863,10 @@ class Bar {
    <p>For a given channel-based input audio (e.g. 7.1.4ch) and a given list of channel layouts based on the input audio,</p>
    <ul>
     <li data-md>
-     <p>Down-mix parameter generator SHALL generate 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k)) by analyzing the input audio, by referring <a data-link-type="biblio" href="#biblio-ai-cad-mixing" title="AI 3D immersive audio codec based on content-adaptive dynamic down-mixing and up-mixing framework">[AI-CAD-Mixing]</a>. Where, k is a frame index.</p>
+     <p>Down-mix parameter generator SHALL generate 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k), where k is the frame index) by analyzing the input audio and referring to <a data-link-type="biblio" href="#biblio-ai-cad-mixing" title="AI 3D immersive audio codec based on content-adaptive dynamic down-mixing and up-mixing framework">[AI-CAD-Mixing]</a>.</p>
      <ul>
       <li data-md>
-       <p>It is composed of Audio Scene Classification module and Height Energy Quantification module as depicted in Figure 11-2.</p>
+       <p>It is composed of an Audio Scene Classification module and a Height Energy Quantification module as depicted in Figure 11-2.</p>
       <li data-md>
        <p>Audio Scene Classification module generates 4 parameters (α(k), β(k), γ(k), δ(k)) by classifying audio scenes of the input audio in three modes.</p>
        <ul>
@@ -4878,26 +4878,26 @@ class Bar {
          <p>Effect scene: Directional and spatially moving sounds.</p>
        </ul>
       <li data-md>
-       <p>Height Energy Quantification module generates a surround to height mixing parameter (w(k)) which is decided according to the relative energy difference between the top and surround channels of the input audio.</p>
+       <p>The Height Energy Quantification module generates a surround-to-height mixing parameter (w(k)) which is decided according to the relative energy difference between the top and surround channels of the input audio.</p>
        <ul>
         <li data-md>
          <p>If the energy of top channels is bigger than that of surround ones, then w_idx_offset(k) is set to 1. Otherwise, it is set to -1. And, w(k) is calculated based on w_idx_offset(k) and conforms to <a href="#processing-scalablechannelaudio">§ 7.2 Scalable Channel Audio decoding</a>.</p>
        </ul>
      </ul>
     <li data-md>
-     <p>Down-mixer generates <a data-link-type="dfn" href="#down-mixed-audio" id="ref-for-down-mixed-audio①①">down-mixed audio</a> from the input audio according to the list of channel layouts and the down-mix parameters, and outputs <a data-link-type="dfn" href="#down-mixed-audio" id="ref-for-down-mixed-audio①②">down-mixed audio</a> for each channel layout to Loudness module.</p>
+     <p>Down-mixer generates <a data-link-type="dfn" href="#down-mixed-audio" id="ref-for-down-mixed-audio①①">down-mixed audio</a> from the input audio according to the list of channel layouts and the down-mix parameters, and outputs <a data-link-type="dfn" href="#down-mixed-audio" id="ref-for-down-mixed-audio①②">down-mixed audio</a> for each channel layout to the Loudness module.</p>
      <ul>
       <li data-md>
-       <p>It is not depicted in the figure but Down-mixer further generates <a data-link-type="dfn" href="#dmixp_mode" id="ref-for-dmixp_mode①">dmixp_mode</a> and <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain①②">recon_gain</a> for each frame to be passed to OBU packetizer.</p>
+       <p>It is not depicted in the figure but Down-mixer further generates <a data-link-type="dfn" href="#dmixp_mode" id="ref-for-dmixp_mode①">dmixp_mode</a> and <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain①②">recon_gain</a> for each frame to be passed to the OBU packetizer.</p>
      </ul>
     <li data-md>
      <p>Loudness module measures the loudness level (<a data-link-type="dfn" href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#" id="ref-for-something①⓪⑦">LKFS</a>) of each <a data-link-type="dfn" href="#down-mixed-audio" id="ref-for-down-mixed-audio①③">down-mixed audio</a> based on <a data-link-type="biblio" href="#biblio-itu1770-4" title="Algorithms to measure audio programme loudness and true-peak audio level">[ITU1770-4]</a>, and passes them to OBU packetizer.</p>
    </ul>
    <h4 class="heading settled" data-level="10.2.2" id="iamfgeneration-scalablechannelaudio-downmixmechanism"><span class="secno">10.2.2. </span><span class="content">Annex B-2: Down-mix Mechanism</span><a class="self-link" href="#iamfgeneration-scalablechannelaudio-downmixmechanism"></a></h4>
    <p>This section specifies the down-mixing mechanism to generate <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="down-mixed-audio">down-mixed audio</dfn> for scalable channel audio.</p>
-   <p>For a given channel-based input audio which conforms to <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout②④">loudspeaker_layout</a>, the surround and top channels (if any) are separately down-mixed and especially step by step until to get a target channels.</p>
+   <p>For a given channel-based input audio that conforms to <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout②④">loudspeaker_layout</a>, the surround and top channels (if any) are separately down-mixed and especially step by step until to get a target channels.</p>
    <p>Implementers MAY use another method to get the <a data-link-type="dfn" href="#down-mixed-audio" id="ref-for-down-mixed-audio①④">down-mixed audio</a> from the given input audio, but the <a data-link-type="dfn" href="#down-mixed-audio" id="ref-for-down-mixed-audio①⑤">down-mixed audio</a> SHALL comply with that by this section.</p>
-   <p>Therefore, a down-mixer based on the down-mix mechanism is a combination of following surround down-mixer(s) and top down-mixer(s) as depicted in below figure.</p>
+   <p>Therefore, a down-mixer based on the down-mix mechanism is a combination of the following surround down-mixer(s) and top down-mixer(s) as depicted in the figure below.</p>
    <ul>
     <li data-md>
      <p>Surround down-mixers</p>
@@ -4933,30 +4933,30 @@ class Bar {
    </ul>
    <h4 class="heading settled" data-level="10.2.3" id="iamfgeneration-scalablechannelaudio-channellayoutgenerationrule"><span class="secno">10.2.3. </span><span class="content">Annex B-3: Channel Layout Generation Rule</span><a class="self-link" href="#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule"></a></h4>
    <p>This section describes the generation rule for channel layouts for scalable channel audio.</p>
-   <p>For a given channel layout (CL #n) of an channel-based input audio, any list of CLs ({CL #i: i = 1, 2, ..., n}) for a scalable channel audio SHALL conform with following rules:</p>
+   <p>For a given channel layout (CL #n) of channel-based input audio, any list of CLs ({CL #i: i = 1, 2, ..., n}) for scalable channel audio SHALL conform with the following rules:</p>
    <ul>
     <li data-md>
      <p>Si ≤ Si+1 and Wi ≤ Wi+1 and Ti ≤ Ti+1 except Si = Si+1, Wi = Wi+1 and Ti = Ti+1 for i = n-1, n-2, …, 1. Where the ith channel layout CL #i = Si.Wi.Ti.</p>
     <li data-md>
      <p>CL #i is one of <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout②⑤">loudspeaker_layout</a>s supported in this version of the specification.</p>
    </ul>
-   <p>Down-mix paths, which conform to the above rule, SHALL be only allowed for scalable channel audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers③⓪">num_layers</a> > 1 as depicted in below figure.</p>
+   <p>Down-mix paths, which conform to the above rule, SHALL be only allowed for scalable channel audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers③⓪">num_layers</a> > 1 as depicted in the below figure.</p>
    <center><img height="716" src="images/Down-mix Path.png" style="width:90%; height:auto;" width="792"></center>
    <center>
     <figcaption>IA Down-mix Path</figcaption>
    </center>
    <h4 class="heading settled" data-level="10.2.4" id="iamfgeneration-scalablechannelaudio-recongaingeneration"><span class="secno">10.2.4. </span><span class="content">Annex B-4: Recon Gain Generation</span><a class="self-link" href="#iamfgeneration-scalablechannelaudio-recongaingeneration"></a></h4>
    <p>This section describes how to generate <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain①③">recon_gain</a>.</p>
-   <p class="note" role="note"><span class="marker">NOTE:</span> Recon gain generation is not required when the codec is lossless such as <a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id②④">codec_id</a> is set to <a class="property css" data-link-type="property" href="https://www.iso.org/standard/77752.html#" id="ref-for-something①⓪⑧">ipcm</a> or <a class="property css" data-link-type="property" href="https://xiph.org/flac/format.html" id="ref-for-something①⓪⑨">fLaC</a>.</p>
-   <p>Recon gain needs to be applied to de-mixed channels. For this, IA encoder needs to deliver it to IA decoders.</p>
-   <p>Let’s define followings:</p>
+   <p class="note" role="note"><span class="marker">NOTE:</span> Recon gain generation is not required when the codec is lossless, i.e., when <a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id②④">codec_id</a> is set to <a class="property css" data-link-type="property" href="https://www.iso.org/standard/77752.html#" id="ref-for-something①⓪⑧">ipcm</a> or <a class="property css" data-link-type="property" href="https://xiph.org/flac/format.html" id="ref-for-something①⓪⑨">fLaC</a>.</p>
+   <p>Recon gain needs to be applied to de-mixed channels. For this, the IA encoder needs to deliver it to IA decoders.</p>
+   <p>Let’s define the followings:</p>
    <ul>
     <li data-md>
      <p>Level Ok is the signal power for the frame #k of a channel of the <a data-link-type="dfn" href="#down-mixed-audio" id="ref-for-down-mixed-audio①⑦">down-mixed audio</a> for CL #i.</p>
     <li data-md>
      <p>Level Mk is the signal power for the frame #k of the relevant mixed channel of the <a data-link-type="dfn" href="#down-mixed-audio" id="ref-for-down-mixed-audio①⑧">down-mixed audio</a> for CL #i-1.</p>
     <li data-md>
-     <p>Level Dk is the signal power for the frame #k of the de-mixed channel for CL #i (after demixing in decode side).</p>
+     <p>Level Dk is the signal power for the frame #k of the de-mixed channel for CL #i (after demixing in the decoder side).</p>
    </ul>
    <p>If 10*log10(level Ok / maxL^2) is less than the first threshold value (e.g. -80dB), Recon_Gain (k, i)  = 0. Where, maxL = 32767 for 16bits.</p>
    <p>If 10*log10(level Ok / level Mk ) is less than the second threshold value (e.g. -6dB), Recon_Gain (k, i) is set to the value which makes level Ok = Recon_Gain (k, i)^2 x level Dk. Otherwise, Recon_Gain (k, i) = 1. Actual value (i.e. <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain①④">recon_gain</a>) to be delivered is floor(255*Recon_Gain).</p>
@@ -5005,12 +5005,12 @@ class Bar {
    </ul>
    <h4 class="heading settled" data-level="10.2.5" id="iamfgeneration-scalablechannelaudio-channelgroupgenerationrule"><span class="secno">10.2.5. </span><span class="content">Annex B-5: ChannelGroup Generation Rule</span><a class="self-link" href="#iamfgeneration-scalablechannelaudio-channelgroupgenerationrule"></a></h4>
    <p>This section describes the generation rule for <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑧⑨">ChannelGroup</a>.</p>
-   <p>For a given channel-based input audio and the list of CLs ({CL #i: i = 1, 2, ..., n}), CG Generation module outputs the transformed audio (i.e. ChannelGroups) which SHALL conform to following rules:</p>
+   <p>For a given channel-based input audio and the list of CLs ({CL #i: i = 1, 2, ..., n}), the CG Generation module outputs the transformed audio (i.e. ChannelGroups) which SHALL conform to the following rules:</p>
    <ul>
     <li data-md>
      <p>It consists of C number of channels and is structured to n number of <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑨⓪">ChannelGroup</a>s, where C is the number of channels for the input audio.</p>
     <li data-md>
-     <p><a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑨①">ChannelGroup</a> #1 (as called BCG): This <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑨②">ChannelGroup</a> is the <a data-link-type="dfn" href="#down-mixed-audio" id="ref-for-down-mixed-audio①⑨">down-mixed audio</a> itself for CL #1 generated from the input audio. It contains C1 number of channels.</p>
+     <p><a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑨①">ChannelGroup</a> #1 (as called BCG): This <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑨②">ChannelGroup</a> is the <a data-link-type="dfn" href="#down-mixed-audio" id="ref-for-down-mixed-audio①⑨">down-mixed audio</a> itself for CL #1 generated from the input audio. It contains a C1 number of channels.</p>
     <li data-md>
      <p><a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑨③">ChannelGroup</a> #i (as called DCG, i = 2, 3, …, n): This <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑨④">ChannelGroup</a> contains (Ci – Ci-1) number of channels. (Ci – Ci-1) channel(s) consists of as follows:</p>
      <ul>
@@ -5027,7 +5027,7 @@ class Bar {
          <p>If 7 is an element of S_set, the Lss7 and Rss7 channels are contained in this CG #i.</p>
        </ul>
       <li data-md>
-       <p>The LFE channel if Wi > Wi-1 .</p>
+       <p>The LFE channel if Wi > Wi-1.</p>
       <li data-md>
        <p>(Ti – Ti-1) top channels if Ti > Ti-1 .</p>
        <ul>
@@ -5038,7 +5038,7 @@ class Bar {
        </ul>
      </ul>
    </ul>
-   <p>Below figure shows one example of transformation matrix with 4 CGs (2ch/3.1.2ch/5.1.2ch/7.1.4ch).</p>
+   <p>The figure below shows one example of a transformation matrix with 4 CGs (2ch/3.1.2ch/5.1.2ch/7.1.4ch).</p>
    <center><img height="598" src="images/Example of Transformation Matrix with 4 CGs.png" style="width:100%; height:auto;" width="1765"></center>
    <center>
     <figcaption>Example of Transformation Matrix with 4 CGs</figcaption>
