@@ -1490,7 +1490,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 5edf5e459, updated Thu Jun 22 11:28:01 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="1602c01135e798400cfa9229578538881ba0b174" name="document-revision">
+  <meta content="afc6283402cbd4f4cdb80c5b1f31e1ae43827cbf" name="document-revision">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
     color: var(--a-normal-text);
@@ -4144,40 +4144,94 @@ Ltf = Ltf3 - w(k) x (L2 - 0.707 x C - L5) and Rtf = Rtf3 - w(k) x (R2 - 0.707 x 
    <p>This section defines the renderer to use, given a channel-based <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element⑨⑧">Audio Element</a> and a loudspeaker playback layout.</p>
    <ul>
     <li data-md>
-     <p>The input layout of the IA renderer is set as follows:</p>
+     <p>The input layout (x.y.z) of the IA renderer is set as follows:</p>
      <ul>
       <li data-md>
        <p>If <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⑨">num_layers</a> = 1, use the <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout①⑤">loudspeaker_layout</a> of the <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element⑨⑨">Audio Element</a>.</p>
       <li data-md>
        <p>Else, if there is one of the <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①⓪⓪">Audio Element</a>'s the <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout①⑥">loudspeaker_layout</a>s that matches the playback layout, use it.</p>
       <li data-md>
-       <p>Else, use the next highest available layout from all available <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout①⑦">loudspeaker_layout</a> and <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout①①">loudness_layout</a>.</p>
+       <p>Else, use the next highest available layout from all available <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout①⑦">loudspeaker_layout</a>.</p>
      </ul>
     <li data-md>
-     <p>The output layout of the IA renderer is set to the playback layout.</p>
+     <p>The output layout of the IA renderer is set to the playback layout (X.Y.Z).</p>
     <li data-md>
      <p>The IA renderer used is selected according to the following rules:</p>
      <ul>
       <li data-md>
-       <p>If the playback layout matches a <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout①⑧">loudspeaker_layout</a> which can be generated from the highest loudspeaker layout of the <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①⓪①">Audio Element</a> according to <a href="#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule">§ 10.2.3 Annex B-3: Channel Layout Generation Rule</a>, use <a data-link-type="dfn" href="#demixing_info_parameter_data" id="ref-for-demixing_info_parameter_data②">demixing_info_parameter_data()</a> or <a data-link-type="dfn" href="#default_demixing_info_parameter_data" id="ref-for-default_demixing_info_parameter_data">default_demixing_info_parameter_data()</a>.</p>
+       <p>If DemixingParamDefinition() is not present,</p>
        <ul>
         <li data-md>
-         <p>If DemixingParamDefinition() is not present,</p>
+         <p>If the playback layout is neither 3.1.2ch nor 7.1.2ch,</p>
          <ul>
           <li data-md>
            <p>If the playback layout complies with loudspeaker layouts supported by <a data-link-type="biblio" href="#biblio-itu2051-3" title="Advance sound system for programme production">[ITU2051-3]</a>, use EAR Direct Speakers renderer (<a data-link-type="biblio" href="#biblio-itu2127-0" title="Audio Definition Model renderer for advanced sound systems">[ITU2127-0]</a>).</p>
           <li data-md>
-           <p>Else if the playback layout is 3.1.2ch, use the static down-mix matrices specified in <a href="#processing-downmixmatrix-static">§ 7.6.2 Static Down-mix Matrix</a>.</p>
+           <p>Else, use an implementation-specific renderer.</p>
+         </ul>
+        <li data-md>
+         <p>Else if the playback layout is 7.1.2ch, use EAR Direct Speakers renderer (<a data-link-type="biblio" href="#biblio-itu2127-0" title="Audio Definition Model renderer for advanced sound systems">[ITU2127-0]</a>) to render the input audio to 7.1.4ch first and followed by down-mixing from 7.1.4ch to 7.1.2ch.</p>
+         <ul>
           <li data-md>
-           <p>Else, use implementation-specific renderer</p>
+           <p>Where height channels of 7.1.4ch are down-mixed to height channels of 7.1.2ch as follows: Ltf2 = Ltf4 + 0.707 * Ltb and Rtf2 = Rtf4 + 0.707 * Rtb.</p>
+         </ul>
+        <li data-md>
+         <p>Else if the playback layout is 3.1.2ch,</p>
+         <ul>
+          <li data-md>
+           <p>If the input layout has height channels, use the static down-mix matrices specified in <a href="#processing-downmixmatrix-static">§ 7.6.2 Static Down-mix Matrix</a>.</p>
+          <li data-md>
+           <p>Else if the surround channels(x) of the input layout > 3, use the static down-mix matrices specified in <a href="#processing-downmixmatrix-static">§ 7.6.2 Static Down-mix Matrix</a> after padding empty height channels to the input audio relevant to the input layout.</p>
+          <li data-md>
+           <p>Else, pad empty channels to the input audio relevant to the input layout to make 3.1.2ch.</p>
          </ul>
        </ul>
       <li data-md>
-       <p>Else if the playback layout complies with loudspeaker layouts supported by <a data-link-type="biblio" href="#biblio-itu2051-3" title="Advance sound system for programme production">[ITU2051-3]</a>, use EAR Direct Speakers renderer (<a data-link-type="biblio" href="#biblio-itu2127-0" title="Audio Definition Model renderer for advanced sound systems">[ITU2127-0]</a>).</p>
-      <li data-md>
-       <p>Else if the playback layout is 3.1.2ch, use the static down-mix matrices specified in <a href="#processing-downmixmatrix-static">§ 7.6.2 Static Down-mix Matrix</a>.</p>
-      <li data-md>
-       <p>Else, use implementation-specific renderer.</p>
+       <p>Else,</p>
+       <ul>
+        <li data-md>
+         <p>If the playback layout matches a <a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout①⑧">loudspeaker_layout</a> which can be generated from the highest loudspeaker layout of the <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①⓪①">Audio Element</a> according to <a href="#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule">§ 10.2.3 Annex B-3: Channel Layout Generation Rule</a>,</p>
+         <ul>
+          <li data-md>
+           <p>If the playback layout has height channels, use <a data-link-type="dfn" href="#demixing_info_parameter_data" id="ref-for-demixing_info_parameter_data②">demixing_info_parameter_data()</a> or <a data-link-type="dfn" href="#default_demixing_info_parameter_data" id="ref-for-default_demixing_info_parameter_data">default_demixing_info_parameter_data()</a>.</p>
+          <li data-md>
+           <p>Else,</p>
+           <ul>
+            <li data-md>
+             <p>If the input layout does not have height channels, use <a data-link-type="dfn" href="#demixing_info_parameter_data" id="ref-for-demixing_info_parameter_data③">demixing_info_parameter_data()</a> or <a data-link-type="dfn" href="#default_demixing_info_parameter_data" id="ref-for-default_demixing_info_parameter_data①">default_demixing_info_parameter_data()</a>.</p>
+            <li data-md>
+             <p>Else, use EAR Direct Speakers renderer (<a data-link-type="biblio" href="#biblio-itu2127-0" title="Audio Definition Model renderer for advanced sound systems">[ITU2127-0]</a>).</p>
+           </ul>
+         </ul>
+        <li data-md>
+         <p>Else,</p>
+         <ul>
+          <li data-md>
+           <p>If the playback layout is neither 3.1.2ch nor 7.1.2ch,</p>
+           <ul>
+            <li data-md>
+             <p>If the playback layout complies with loudspeaker layouts supported by <a data-link-type="biblio" href="#biblio-itu2051-3" title="Advance sound system for programme production">[ITU2051-3]</a>, use EAR Direct Speakers renderer (<a data-link-type="biblio" href="#biblio-itu2127-0" title="Audio Definition Model renderer for advanced sound systems">[ITU2127-0]</a>).</p>
+            <li data-md>
+             <p>Else, use an implementation-specific renderer.</p>
+           </ul>
+          <li data-md>
+           <p>Else if the playback layout is 7.1.2ch, use EAR Direct Speakers renderer (<a data-link-type="biblio" href="#biblio-itu2127-0" title="Audio Definition Model renderer for advanced sound systems">[ITU2127-0]</a>) to render the input audio to 7.1.4ch first and followed by down-mixing from 7.1.4ch to 7.1.2ch.</p>
+           <ul>
+            <li data-md>
+             <p>Where height channels of 7.1.4ch are down-mixed to height channels of 7.1.2ch as follows: Ltf2 = Ltf4 + 0.707 * Ltb and Rtf2 = Rtf4 + 0.707 * Rtb.</p>
+           </ul>
+          <li data-md>
+           <p>Else if the playback layout is 3.1.2ch,</p>
+           <ul>
+            <li data-md>
+             <p>If the input layout has height channels, use the static down-mix matrices specified in <a href="#processing-downmixmatrix-static">§ 7.6.2 Static Down-mix Matrix</a>.</p>
+            <li data-md>
+             <p>Else if the surround channels(x) of the input layout > 3, use the static down-mix matrices specified in <a href="#processing-downmixmatrix-static">§ 7.6.2 Static Down-mix Matrix</a> after padding empty height channels to the input audio relevant to the input layout.</p>
+            <li data-md>
+             <p>Else, pad empty channels to the input audio relevant to the input layout to make 3.1.2ch.</p>
+           </ul>
+         </ul>
+       </ul>
      </ul>
    </ul>
    <p>If the EAR Direct Speakers renderer is used, the following SHOULD be provided for each audio channel of the <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①⓪②">Audio Element</a>:</p>
@@ -4233,7 +4287,7 @@ degree  m = k - n * (n + 1).
     <li data-md>
      <p>If all <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①⓪⑨">Audio Element</a>s do not have a common bit-depth, convert to a common bit-depth. This specification RECOMMENDs using 16 bits.</p>
     <li data-md>
-     <p>If <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout①②">loudness_layout</a> matches with the playback layout, apply any per-element processing according to <a data-link-type="dfn" href="#element_mix_config" id="ref-for-element_mix_config①">element_mix_config()</a>.</p>
+     <p>If <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout①①">loudness_layout</a> matches with the playback layout, apply any per-element processing according to <a data-link-type="dfn" href="#element_mix_config" id="ref-for-element_mix_config①">element_mix_config()</a>.</p>
    </ol>
    <p>The rendered and processed <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①①⓪">Audio Element</a>s SHOULD be then summed, and then apply <a data-link-type="dfn" href="#output_mix_config" id="ref-for-output_mix_config①">output_mix_config()</a> to generate one sub-mixed audio signal.</p>
    <h3 class="heading settled" data-level="7.4" id="processing-animated-params"><span class="secno">7.4. </span><span class="content">Animated Parameters</span><a class="self-link" href="#processing-animated-params"></a></h3>
@@ -4286,8 +4340,8 @@ gamma = n0 - n.
    <h3 class="heading settled" data-level="7.5" id="processing-post"><span class="secno">7.5. </span><span class="content">Post Processing</span><a class="self-link" href="#processing-post"></a></h3>
    <h4 class="heading settled" data-level="7.5.1" id="processing-post-loudness"><span class="secno">7.5.1. </span><span class="content">Loudness Normalization</span><a class="self-link" href="#processing-post-loudness"></a></h4>
    <p>Loudness normalization SHOULD be done by adjusting the loudness level to a target output level using information provided in <a href="#obu-mixpresentation-loudness">§ 3.7.7 Loudness Info Syntax and Semantics</a>.  A control MAY be provided to set unique target output levels for each anchored loudness and/or the integrated loudness.  If loudness normalization increases the output level, a peak limiter to prevent saturation and/or clipping MAY be necessary; <a data-link-type="dfn" href="#true_peak" id="ref-for-true_peak">true_peak</a> or <a data-link-type="dfn" href="#digital_peak" id="ref-for-digital_peak">digital_peak</a> MAY be used to determine if peak limiting is needed.  Alternately, the total amount of normalization MAY be limited.</p>
-   <p>The rendered layouts that were used to measure the loudness information of a sub-mix are provided by <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout①③">loudness_layout</a>s.</p>
-   <p>If one of them matches the playback layout, the loudness information SHOULD be used directly for normalization. If there is a mismatch between <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout①④">loudness_layout</a> and the playback layout, the implementation MAY choose to use the provided loudness information of the highest <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout①⑤">loudness_layout</a> as-is.</p>
+   <p>The rendered layouts that were used to measure the loudness information of a sub-mix are provided by <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout①②">loudness_layout</a>s.</p>
+   <p>If one of them matches the playback layout, the loudness information SHOULD be used directly for normalization. If there is a mismatch between <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout①③">loudness_layout</a> and the playback layout, the implementation MAY choose to use the provided loudness information of the highest <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout①④">loudness_layout</a> as-is.</p>
    <h4 class="heading settled" data-level="7.5.2" id="processing-post-limiter"><span class="secno">7.5.2. </span><span class="content">Limiter</span><a class="self-link" href="#processing-post-limiter"></a></h4>
    <p>The limiter SHOULD limit the true peak of audio signal at -1 dBTP, where true peak is defined in <a data-link-type="biblio" href="#biblio-itu1770-4" title="Algorithms to measure audio programme loudness and true-peak audio level">[ITU1770-4]</a>. The limiter SHOULD apply to multichannel signals in a linked manner and further support auto-release.</p>
    <h3 class="heading settled" data-level="7.6" id="processing-downmixmatrix"><span class="secno">7.6. </span><span class="content">Down-mix Matrix</span><a class="self-link" href="#processing-downmixmatrix"></a></h3>
@@ -4488,7 +4542,7 @@ gamma = n0 - n.
          <p><a data-link-type="dfn" href="#parameter-substream" id="ref-for-parameter-substream④③">Parameter Substream</a>s can be composed of one for demixing info and the other for recon gain. When <a data-link-type="dfn" href="#recon_gain_is_present_flag" id="ref-for-recon_gain_is_present_flag①">recon_gain_is_present_flag</a> = 0 for all <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑥⑨">ChannelGroup</a>s, no <a data-link-type="dfn" href="#parameter-block-obu" id="ref-for-parameter-block-obu②⑥">Parameter Block OBU</a>s for recon gain info present in <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence⑦⑥">IA Sequence</a>.</p>
          <ul>
           <li data-md>
-           <p><a data-link-type="dfn" href="#dmixp_mode" id="ref-for-dmixp_mode">dmixp_mode</a> of <a data-link-type="dfn" href="#demixing_info_parameter_data" id="ref-for-demixing_info_parameter_data③">demixing_info_parameter_data()</a> for the kth frame is set to indicate (α(k), β(k), γ(k), δ(k)) and w_idx_offset(k). Where w_idx_offset(k) = 1 or -1.</p>
+           <p><a data-link-type="dfn" href="#dmixp_mode" id="ref-for-dmixp_mode">dmixp_mode</a> of <a data-link-type="dfn" href="#demixing_info_parameter_data" id="ref-for-demixing_info_parameter_data④">demixing_info_parameter_data()</a> for the kth frame is set to indicate (α(k), β(k), γ(k), δ(k)) and w_idx_offset(k). Where w_idx_offset(k) = 1 or -1.</p>
           <li data-md>
            <p><a data-link-type="dfn" href="#recon_gain_flags" id="ref-for-recon_gain_flags⑤">recon_gain_flags</a> of <a data-link-type="dfn" href="#recon_gain_info_parameter_data" id="ref-for-recon_gain_info_parameter_data⑥">recon_gain_info_parameter_data()</a> is set to indicate the de-mixed channels, which need to apply <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain①⓪">recon_gain</a> among the output channels after demixing for ith channel layout.</p>
           <li data-md>
@@ -4532,7 +4586,7 @@ gamma = n0 - n.
        <p><a data-link-type="dfn" href="#codec-config-obu" id="ref-for-codec-config-obu①②">Codec Config OBU</a> is generated based on <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config①⑤">decoder_config()</a>.</p>
      </ul>
     <li data-md>
-     <p>OBU packetizer generates <a data-link-type="dfn" href="#parameter-block-obu" id="ref-for-parameter-block-obu②⑧">Parameter Block OBU</a>s for each frame which contains <a data-link-type="dfn" href="#demixing_info_parameter_data" id="ref-for-demixing_info_parameter_data④">demixing_info_parameter_data()</a> and <a data-link-type="dfn" href="#recon_gain_info_parameter_data" id="ref-for-recon_gain_info_parameter_data⑦">recon_gain_info_parameter_data()</a>.</p>
+     <p>OBU packetizer generates <a data-link-type="dfn" href="#parameter-block-obu" id="ref-for-parameter-block-obu②⑧">Parameter Block OBU</a>s for each frame which contains <a data-link-type="dfn" href="#demixing_info_parameter_data" id="ref-for-demixing_info_parameter_data⑤">demixing_info_parameter_data()</a> and <a data-link-type="dfn" href="#recon_gain_info_parameter_data" id="ref-for-recon_gain_info_parameter_data⑦">recon_gain_info_parameter_data()</a>.</p>
     <li data-md>
      <p>OBU packetizer generates <a data-link-type="dfn" href="#audio-frame-obu" id="ref-for-audio-frame-obu④②">Audio Frame OBU</a>s for each frame of the <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream⑨②">Audio Substream</a>s.</p>
     <li data-md>
@@ -4566,7 +4620,7 @@ gamma = n0 - n.
     <li data-md>
      <p><a data-link-type="dfn" href="#num_layouts" id="ref-for-num_layouts①">num_layouts</a>: set to N. Where, N is the number of input channel layouts.</p>
     <li data-md>
-     <p><a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout①⑥">loudness_layout</a>: set to L(1), L(2), ..., L(N).</p>
+     <p><a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout①⑤">loudness_layout</a>: set to L(1), L(2), ..., L(N).</p>
      <ul>
       <li data-md>
        <p><a data-link-type="dfn" href="#loudness_info" id="ref-for-loudness_info②">loudness_info()</a> on L(1), <a data-link-type="dfn" href="#loudness_info" id="ref-for-loudness_info③">loudness_info()</a> on L(2), ..., <a data-link-type="dfn" href="#loudness_info" id="ref-for-loudness_info④">loudness_info()</a> on L(N): loudness information of the rendered audio to the measured layout L(i).</p>
@@ -4574,7 +4628,7 @@ gamma = n0 - n.
        <p>Where L(i) is the measured layout for the ith layer and i = 1, 2, ..., N.</p>
      </ul>
    </ul>
-   <p class="note" role="note"><span class="marker">NOTE:</span> If the input channel layouts do not include Stereo, then <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②⑦">num_layers</a> is set to N + 1 and the <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout①⑦">loudness_layout</a>s includes Stereo.</p>
+   <p class="note" role="note"><span class="marker">NOTE:</span> If the input channel layouts do not include Stereo, then <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②⑦">num_layers</a> is set to N + 1 and the <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout①⑥">loudness_layout</a>s includes Stereo.</p>
    <p>For <a data-link-type="dfn" href="#mix-presentation" id="ref-for-mix-presentation②⑧">Mix Presentation</a> for one single scene-based <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①①⑧">Audio Element</a>, <a data-link-type="dfn" href="#mix-presentation-obu" id="ref-for-mix-presentation-obu⑨">Mix Presentation OBU</a> follows following restrictions:</p>
    <ul>
     <li data-md>
@@ -4588,13 +4642,13 @@ gamma = n0 - n.
     <li data-md>
      <p><a data-link-type="dfn" href="#num_layouts" id="ref-for-num_layouts②">num_layouts</a>: set to M1, the number of loudness informations which are provided.</p>
     <li data-md>
-     <p><a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout①⑧">loudness_layout</a>: set to L(1), L(2), ..., L(M1). One of them is Stereo.</p>
+     <p><a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout①⑦">loudness_layout</a>: set to L(1), L(2), ..., L(M1). One of them is Stereo.</p>
     <li data-md>
      <p><a data-link-type="dfn" href="#loudness_info" id="ref-for-loudness_info⑤">loudness_info()</a> on L(1), <a data-link-type="dfn" href="#loudness_info" id="ref-for-loudness_info⑥">loudness_info()</a> on L(2), ..., <a data-link-type="dfn" href="#loudness_info" id="ref-for-loudness_info⑦">loudness_info()</a> on L(M1): loudness information of the rendered audio to the measured layout L(i).</p>
     <li data-md>
      <p>Where L(i) is the measured layout for the ith loudness information and i = 1, 2, ..., M1.</p>
     <li data-md>
-     <p>This <a data-link-type="dfn" href="#mix-presentation" id="ref-for-mix-presentation②⑨">Mix Presentation</a> is authored by using the highest <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout①⑨">loudness_layout</a>.</p>
+     <p>This <a data-link-type="dfn" href="#mix-presentation" id="ref-for-mix-presentation②⑨">Mix Presentation</a> is authored by using the highest <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout①⑧">loudness_layout</a>.</p>
    </ul>
    <p>For <a data-link-type="dfn" href="#mix-presentation" id="ref-for-mix-presentation③⓪">Mix Presentation</a> for 2 <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①①⑨">Audio Element</a>s, <a data-link-type="dfn" href="#mix-presentation-obu" id="ref-for-mix-presentation-obu①⓪">Mix Presentation OBU</a> follows following restrictions:</p>
    <ul>
@@ -4609,13 +4663,13 @@ gamma = n0 - n.
     <li data-md>
      <p><a data-link-type="dfn" href="#num_layouts" id="ref-for-num_layouts③">num_layouts</a>: set to M2, the number of loudness informations which are provided.</p>
     <li data-md>
-     <p><a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout②⓪">loudness_layout</a>: set to L(1), L(2), ..., L(M2). One of them is Stereo.</p>
+     <p><a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout①⑨">loudness_layout</a>: set to L(1), L(2), ..., L(M2). One of them is Stereo.</p>
     <li data-md>
      <p><a data-link-type="dfn" href="#loudness_info" id="ref-for-loudness_info⑧">loudness_info()</a> on L(1), <a data-link-type="dfn" href="#loudness_info" id="ref-for-loudness_info⑨">loudness_info()</a> on L(2), ..., <a data-link-type="dfn" href="#loudness_info" id="ref-for-loudness_info①⓪">loudness_info()</a> on L(M2): loudness information of the rendered audio to the measured layout L(i).</p>
     <li data-md>
      <p>Where L(i) is the measured layout for the ith loudness information and i = 1, 2, ..., M2.</p>
     <li data-md>
-     <p>This <a data-link-type="dfn" href="#mix-presentation" id="ref-for-mix-presentation③①">Mix Presentation</a> is authored by using the highest <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout②①">loudness_layout</a>.</p>
+     <p>This <a data-link-type="dfn" href="#mix-presentation" id="ref-for-mix-presentation③①">Mix Presentation</a> is authored by using the highest <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout②⓪">loudness_layout</a>.</p>
    </ul>
    <h4 class="heading settled" data-level="8.3.1" id="iamfgeneration-mixpresentation-mix"><span class="secno">8.3.1. </span><span class="content">Element Mix Config</span><a class="self-link" href="#iamfgeneration-mixpresentation-mix"></a></h4>
    <p>This section provide a guideline to generate <a data-link-type="dfn" href="#element_mix_config" id="ref-for-element_mix_config⑥">element_mix_config()</a>.</p>
@@ -4669,10 +4723,10 @@ gamma = n0 - n.
    <p>This section provides a way to generate algorithms for post processing.</p>
    <h4 class="heading settled" data-level="8.5.1" id="iamfgeneration-postprocessing-loudness"><span class="secno">8.5.1. </span><span class="content">Loudness Information</span><a class="self-link" href="#iamfgeneration-postprocessing-loudness"></a></h4>
    <p>This section provides a way to generate <a data-link-type="dfn" href="#loudness_info" id="ref-for-loudness_info①①">loudness_info()</a>.</p>
-   <p>For a given <a data-link-type="dfn" href="#mix-presentation-obu" id="ref-for-mix-presentation-obu①④">Mix Presentation OBU</a> and a given <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout②②">loudness_layout</a>, the followings are processed in order to produce <a data-link-type="dfn" href="#loudness_info" id="ref-for-loudness_info①②">loudness_info()</a>.</p>
+   <p>For a given <a data-link-type="dfn" href="#mix-presentation-obu" id="ref-for-mix-presentation-obu①④">Mix Presentation OBU</a> and a given <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout②①">loudness_layout</a>, the followings are processed in order to produce <a data-link-type="dfn" href="#loudness_info" id="ref-for-loudness_info①②">loudness_info()</a>.</p>
    <ul>
     <li data-md>
-     <p>Each of the <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①②⑧">Audio Element</a>s specified in the given <a data-link-type="dfn" href="#mix-presentation-obu" id="ref-for-mix-presentation-obu①⑤">Mix Presentation OBU</a> is rendered to the given <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout②③">loudness_layout</a> according to <a data-link-type="dfn" href="#rendering_config" id="ref-for-rendering_config①">rendering_config()</a> for the <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①②⑨">Audio Element</a>.</p>
+     <p>Each of the <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①②⑧">Audio Element</a>s specified in the given <a data-link-type="dfn" href="#mix-presentation-obu" id="ref-for-mix-presentation-obu①⑤">Mix Presentation OBU</a> is rendered to the given <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout②②">loudness_layout</a> according to <a data-link-type="dfn" href="#rendering_config" id="ref-for-rendering_config①">rendering_config()</a> for the <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①②⑨">Audio Element</a>.</p>
     <li data-md>
      <p>Each of the <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①③⓪">Audio Element</a>s specified in the given <a data-link-type="dfn" href="#mix-presentation-obu" id="ref-for-mix-presentation-obu①⑥">Mix Presentation OBU</a> applies <a data-link-type="dfn" href="#mix_gain" id="ref-for-mix_gain②">mix_gain</a> according to <a data-link-type="dfn" href="#element_mix_config" id="ref-for-element_mix_config⑧">element_mix_config()</a> for the <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①③①">Audio Element</a>.</p>
     <li data-md>
@@ -4789,7 +4843,7 @@ class Bar {
     <li data-md>
      <p><a data-link-type="dfn" href="#audio-frame-obu" id="ref-for-audio-frame-obu④⑨">Audio Frame OBU</a> with <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id②②">audio_substream_id</a> = 2 (i.e. <a data-link-type="dfn" href="#obu_type" id="ref-for-obu_type①②">obu_type</a> = OBU_IA_Audio_Frame_ID2) is providing the coded data which has been coded by using <a data-link-type="dfn" href="#codec-config-obu" id="ref-for-codec-config-obu②②">Codec Config OBU</a> with <a data-link-type="dfn" href="#codec_config_id" id="ref-for-codec_config_id⑧">codec_config_id</a> = 0 of <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream⑨⑦">Audio Substream</a> with <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id②③">audio_substream_id</a> = 2.</p>
     <li data-md>
-     <p><a data-link-type="dfn" href="#parameter-block-obu" id="ref-for-parameter-block-obu③⑧">Parameter Block OBU</a> with <a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id①④">parameter_id</a> = 31 is providing <a data-link-type="dfn" href="#demixing_info_parameter_data" id="ref-for-demixing_info_parameter_data⑤">demixing_info_parameter_data()</a> to be applied for demixing of the <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①④②">Audio Element</a> with <a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id①④">audio_element_id</a> = 11.</p>
+     <p><a data-link-type="dfn" href="#parameter-block-obu" id="ref-for-parameter-block-obu③⑧">Parameter Block OBU</a> with <a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id①④">parameter_id</a> = 31 is providing <a data-link-type="dfn" href="#demixing_info_parameter_data" id="ref-for-demixing_info_parameter_data⑥">demixing_info_parameter_data()</a> to be applied for demixing of the <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①④②">Audio Element</a> with <a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id①④">audio_element_id</a> = 11.</p>
     <li data-md>
      <p><a data-link-type="dfn" href="#parameter-block-obu" id="ref-for-parameter-block-obu③⑨">Parameter Block OBU</a> with <a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id①⑤">parameter_id</a> = 32 is providing mix_gain_parameter_data() to be applied to the rendered <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①④③">Audio Element</a> after rendering according to <a data-link-type="dfn" href="#rendering_config" id="ref-for-rendering_config②">rendering_config()</a> of the <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①④④">Audio Element</a> with <a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id①⑤">audio_element_id</a> = 11.</p>
     <li data-md>
@@ -5953,7 +6007,7 @@ window.dfnpanelData['param_definition_bytes'] = {"dfnID": "param_definition_byte
 window.dfnpanelData['scalable_channel_layout_config'] = {"dfnID": "scalable_channel_layout_config", "url": "#scalable_channel_layout_config", "dfnText": "scalable_channel_layout_config()", "refSections": [{"refs": [{"id": "ref-for-scalable_channel_layout_config"}], "title": "3.6.2. Scalable Channel Layout Config Syntax and Semantics"}, {"refs": [{"id": "ref-for-scalable_channel_layout_config\u2460"}], "title": "3.7. Mix Presentation OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-scalable_channel_layout_config\u2461"}], "title": "7.2. Scalable Channel Audio decoding"}, {"refs": [{"id": "ref-for-scalable_channel_layout_config\u2462"}], "title": "7.3.2.3. Rendering a channel-based audio element to a binaural output"}], "external": false};
 window.dfnpanelData['ambisonics_config'] = {"dfnID": "ambisonics_config", "url": "#ambisonics_config", "dfnText": "ambisonics_config()", "refSections": [{"refs": [{"id": "ref-for-ambisonics_config"}], "title": "3.6.3. Ambisonics Config Syntax and Semantics"}, {"refs": [{"id": "ref-for-ambisonics_config\u2460"}], "title": "8.1. Ambisonics Encoding"}], "external": false};
 window.dfnpanelData['audio_element_config_bytes'] = {"dfnID": "audio_element_config_bytes", "url": "#audio_element_config_bytes", "dfnText": "audio_element_config_bytes", "refSections": [{"refs": [{"id": "ref-for-audio_element_config_bytes"}], "title": "3.6. Audio Element OBU Syntax and Semantics"}], "external": false};
-window.dfnpanelData['default_demixing_info_parameter_data'] = {"dfnID": "default_demixing_info_parameter_data", "url": "#default_demixing_info_parameter_data", "dfnText": "default_demixing_info_parameter_data()", "refSections": [{"refs": [{"id": "ref-for-default_demixing_info_parameter_data"}], "title": "7.3.2.1. Rendering a channel-based audio element to loudspeakers"}], "external": false};
+window.dfnpanelData['default_demixing_info_parameter_data'] = {"dfnID": "default_demixing_info_parameter_data", "url": "#default_demixing_info_parameter_data", "dfnText": "default_demixing_info_parameter_data()", "refSections": [{"refs": [{"id": "ref-for-default_demixing_info_parameter_data"}, {"id": "ref-for-default_demixing_info_parameter_data\u2460"}], "title": "7.3.2.1. Rendering a channel-based audio element to loudspeakers"}], "external": false};
 window.dfnpanelData['default_w'] = {"dfnID": "default_w", "url": "#default_w", "dfnText": "default_w", "refSections": [{"refs": [{"id": "ref-for-default_w"}, {"id": "ref-for-default_w\u2460"}], "title": "3.6. Audio Element OBU Syntax and Semantics"}], "external": false};
 window.dfnpanelData['paramdefinition'] = {"dfnID": "paramdefinition", "url": "#paramdefinition", "dfnText": "ParamDefinition()", "refSections": [{"refs": [{"id": "ref-for-paramdefinition"}], "title": "3.8. Parameter Block OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-paramdefinition\u2460"}, {"id": "ref-for-paramdefinition\u2461"}, {"id": "ref-for-paramdefinition\u2462"}], "title": "8.4.1. Two Audio Elements with One Codec Config"}], "external": false};
 window.dfnpanelData['parameter_rate'] = {"dfnID": "parameter_rate", "url": "#parameter_rate", "dfnText": "parameter_rate", "refSections": [{"refs": [{"id": "ref-for-parameter_rate"}, {"id": "ref-for-parameter_rate\u2460"}], "title": "3.6. Audio Element OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-parameter_rate\u2461"}], "title": "3.6.1. Parameter Definition Syntax and Semantics"}, {"refs": [{"id": "ref-for-parameter_rate\u2462"}], "title": "3.8. Parameter Block OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-parameter_rate\u2463"}, {"id": "ref-for-parameter_rate\u2464"}], "title": "7.4. Animated Parameters"}], "external": false};
@@ -5989,7 +6043,7 @@ window.dfnpanelData['rendering_config'] = {"dfnID": "rendering_config", "url": "
 window.dfnpanelData['element_mix_config'] = {"dfnID": "element_mix_config", "url": "#element_mix_config", "dfnText": "element_mix_config()", "refSections": [{"refs": [{"id": "ref-for-element_mix_config"}], "title": "3.7.4. Element Mix Config Syntax and Semantics"}, {"refs": [{"id": "ref-for-element_mix_config\u2460"}], "title": "7.3.3. Mixing Audio Elements"}, {"refs": [{"id": "ref-for-element_mix_config\u2461"}, {"id": "ref-for-element_mix_config\u2462"}, {"id": "ref-for-element_mix_config\u2463"}, {"id": "ref-for-element_mix_config\u2464"}], "title": "8.3. Mix Presentation Encoding"}, {"refs": [{"id": "ref-for-element_mix_config\u2465"}, {"id": "ref-for-element_mix_config\u2466"}], "title": "8.3.1. Element Mix Config"}, {"refs": [{"id": "ref-for-element_mix_config\u2467"}], "title": "8.5.1. Loudness Information"}], "external": false};
 window.dfnpanelData['output_mix_config'] = {"dfnID": "output_mix_config", "url": "#output_mix_config", "dfnText": "output_mix_config()", "refSections": [{"refs": [{"id": "ref-for-output_mix_config"}], "title": "7.3. Mix Presentation"}, {"refs": [{"id": "ref-for-output_mix_config\u2460"}], "title": "7.3.3. Mixing Audio Elements"}, {"refs": [{"id": "ref-for-output_mix_config\u2461"}, {"id": "ref-for-output_mix_config\u2462"}, {"id": "ref-for-output_mix_config\u2463"}, {"id": "ref-for-output_mix_config\u2464"}], "title": "8.3. Mix Presentation Encoding"}, {"refs": [{"id": "ref-for-output_mix_config\u2465"}], "title": "8.5.1. Loudness Information"}], "external": false};
 window.dfnpanelData['num_layouts'] = {"dfnID": "num_layouts", "url": "#num_layouts", "dfnText": "num_layouts", "refSections": [{"refs": [{"id": "ref-for-num_layouts"}], "title": "3.7. Mix Presentation OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-num_layouts\u2460"}, {"id": "ref-for-num_layouts\u2461"}, {"id": "ref-for-num_layouts\u2462"}], "title": "8.3. Mix Presentation Encoding"}], "external": false};
-window.dfnpanelData['loudness_layout'] = {"dfnID": "loudness_layout", "url": "#loudness_layout", "dfnText": "loudness_layout", "refSections": [{"refs": [{"id": "ref-for-loudness_layout"}, {"id": "ref-for-loudness_layout\u2460"}, {"id": "ref-for-loudness_layout\u2461"}, {"id": "ref-for-loudness_layout\u2462"}, {"id": "ref-for-loudness_layout\u2463"}, {"id": "ref-for-loudness_layout\u2464"}, {"id": "ref-for-loudness_layout\u2465"}, {"id": "ref-for-loudness_layout\u2466"}], "title": "3.7. Mix Presentation OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-loudness_layout\u2467"}, {"id": "ref-for-loudness_layout\u2468"}, {"id": "ref-for-loudness_layout\u2460\u24ea"}], "title": "7.3.1. Selecting a Mix Presentation"}, {"refs": [{"id": "ref-for-loudness_layout\u2460\u2460"}], "title": "7.3.2.1. Rendering a channel-based audio element to loudspeakers"}, {"refs": [{"id": "ref-for-loudness_layout\u2460\u2461"}], "title": "7.3.3. Mixing Audio Elements"}, {"refs": [{"id": "ref-for-loudness_layout\u2460\u2462"}, {"id": "ref-for-loudness_layout\u2460\u2463"}, {"id": "ref-for-loudness_layout\u2460\u2464"}], "title": "7.5.1. Loudness Normalization"}, {"refs": [{"id": "ref-for-loudness_layout\u2460\u2465"}, {"id": "ref-for-loudness_layout\u2460\u2466"}, {"id": "ref-for-loudness_layout\u2460\u2467"}, {"id": "ref-for-loudness_layout\u2460\u2468"}, {"id": "ref-for-loudness_layout\u2461\u24ea"}, {"id": "ref-for-loudness_layout\u2461\u2460"}], "title": "8.3. Mix Presentation Encoding"}, {"refs": [{"id": "ref-for-loudness_layout\u2461\u2461"}, {"id": "ref-for-loudness_layout\u2461\u2462"}], "title": "8.5.1. Loudness Information"}], "external": false};
+window.dfnpanelData['loudness_layout'] = {"dfnID": "loudness_layout", "url": "#loudness_layout", "dfnText": "loudness_layout", "refSections": [{"refs": [{"id": "ref-for-loudness_layout"}, {"id": "ref-for-loudness_layout\u2460"}, {"id": "ref-for-loudness_layout\u2461"}, {"id": "ref-for-loudness_layout\u2462"}, {"id": "ref-for-loudness_layout\u2463"}, {"id": "ref-for-loudness_layout\u2464"}, {"id": "ref-for-loudness_layout\u2465"}, {"id": "ref-for-loudness_layout\u2466"}], "title": "3.7. Mix Presentation OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-loudness_layout\u2467"}, {"id": "ref-for-loudness_layout\u2468"}, {"id": "ref-for-loudness_layout\u2460\u24ea"}], "title": "7.3.1. Selecting a Mix Presentation"}, {"refs": [{"id": "ref-for-loudness_layout\u2460\u2460"}], "title": "7.3.3. Mixing Audio Elements"}, {"refs": [{"id": "ref-for-loudness_layout\u2460\u2461"}, {"id": "ref-for-loudness_layout\u2460\u2462"}, {"id": "ref-for-loudness_layout\u2460\u2463"}], "title": "7.5.1. Loudness Normalization"}, {"refs": [{"id": "ref-for-loudness_layout\u2460\u2464"}, {"id": "ref-for-loudness_layout\u2460\u2465"}, {"id": "ref-for-loudness_layout\u2460\u2466"}, {"id": "ref-for-loudness_layout\u2460\u2467"}, {"id": "ref-for-loudness_layout\u2460\u2468"}, {"id": "ref-for-loudness_layout\u2461\u24ea"}], "title": "8.3. Mix Presentation Encoding"}, {"refs": [{"id": "ref-for-loudness_layout\u2461\u2460"}, {"id": "ref-for-loudness_layout\u2461\u2461"}], "title": "8.5.1. Loudness Information"}], "external": false};
 window.dfnpanelData['loudness'] = {"dfnID": "loudness", "url": "#loudness", "dfnText": "loudness", "refSections": [{"refs": [{"id": "ref-for-loudness"}], "title": "3.7. Mix Presentation OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-loudness\u2460"}], "title": "8.2. Scalable Channel Audio Encoding"}], "external": false};
 window.dfnpanelData['mix_presentation_friendly_label'] = {"dfnID": "mix_presentation_friendly_label", "url": "#mix_presentation_friendly_label", "dfnText": "mix_presentation_friendly_label", "refSections": [{"refs": [{"id": "ref-for-mix_presentation_friendly_label"}], "title": "3.7. Mix Presentation OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-mix_presentation_friendly_label\u2460"}], "title": "7.3.1. Selecting a Mix Presentation"}], "external": false};
 window.dfnpanelData['audio_element_friendly_label'] = {"dfnID": "audio_element_friendly_label", "url": "#audio_element_friendly_label", "dfnText": "audio_element_friendly_label", "refSections": [{"refs": [{"id": "ref-for-audio_element_friendly_label"}], "title": "3.7. Mix Presentation OBU Syntax and Semantics"}], "external": false};
@@ -6013,7 +6067,7 @@ window.dfnpanelData['animation_type'] = {"dfnID": "animation_type", "url": "#ani
 window.dfnpanelData['animatedparameterdata'] = {"dfnID": "animatedparameterdata", "url": "#animatedparameterdata", "dfnText": "AnimatedParameterData()", "refSections": [{"refs": [{"id": "ref-for-animatedparameterdata"}], "title": "3.8. Parameter Block OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-animatedparameterdata\u2460"}, {"id": "ref-for-animatedparameterdata\u2461"}], "title": "7.4. Animated Parameters"}], "external": false};
 window.dfnpanelData['start_point_value'] = {"dfnID": "start_point_value", "url": "#start_point_value", "dfnText": "start_point_value", "refSections": [{"refs": [{"id": "ref-for-start_point_value"}, {"id": "ref-for-start_point_value\u2460"}, {"id": "ref-for-start_point_value\u2461"}], "title": "7.4. Animated Parameters"}], "external": false};
 window.dfnpanelData['end_point_value'] = {"dfnID": "end_point_value", "url": "#end_point_value", "dfnText": "end_point_value", "refSections": [{"refs": [{"id": "ref-for-end_point_value"}, {"id": "ref-for-end_point_value\u2460"}], "title": "7.4. Animated Parameters"}], "external": false};
-window.dfnpanelData['demixing_info_parameter_data'] = {"dfnID": "demixing_info_parameter_data", "url": "#demixing_info_parameter_data", "dfnText": "demixing_info_parameter_data()", "refSections": [{"refs": [{"id": "ref-for-demixing_info_parameter_data"}, {"id": "ref-for-demixing_info_parameter_data\u2460"}], "title": "3.6. Audio Element OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-demixing_info_parameter_data\u2461"}], "title": "7.3.2.1. Rendering a channel-based audio element to loudspeakers"}, {"refs": [{"id": "ref-for-demixing_info_parameter_data\u2462"}, {"id": "ref-for-demixing_info_parameter_data\u2463"}], "title": "8.2. Scalable Channel Audio Encoding"}, {"refs": [{"id": "ref-for-demixing_info_parameter_data\u2464"}], "title": "10.1. Annex A: ID Linking Scheme (Informative)"}], "external": false};
+window.dfnpanelData['demixing_info_parameter_data'] = {"dfnID": "demixing_info_parameter_data", "url": "#demixing_info_parameter_data", "dfnText": "demixing_info_parameter_data()", "refSections": [{"refs": [{"id": "ref-for-demixing_info_parameter_data"}, {"id": "ref-for-demixing_info_parameter_data\u2460"}], "title": "3.6. Audio Element OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-demixing_info_parameter_data\u2461"}, {"id": "ref-for-demixing_info_parameter_data\u2462"}], "title": "7.3.2.1. Rendering a channel-based audio element to loudspeakers"}, {"refs": [{"id": "ref-for-demixing_info_parameter_data\u2463"}, {"id": "ref-for-demixing_info_parameter_data\u2464"}], "title": "8.2. Scalable Channel Audio Encoding"}, {"refs": [{"id": "ref-for-demixing_info_parameter_data\u2465"}], "title": "10.1. Annex A: ID Linking Scheme (Informative)"}], "external": false};
 window.dfnpanelData['dmixp_mode'] = {"dfnID": "dmixp_mode", "url": "#dmixp_mode", "dfnText": "dmixp_mode", "refSections": [{"refs": [{"id": "ref-for-dmixp_mode"}], "title": "8.2. Scalable Channel Audio Encoding"}, {"refs": [{"id": "ref-for-dmixp_mode\u2460"}], "title": "10.2.1. Annex B-1: Down-mix parameter and Loudness"}], "external": false};
 window.dfnpanelData['w_idx_offset'] = {"dfnID": "w_idx_offset", "url": "#w_idx_offset", "dfnText": "w_idx_offset", "refSections": [{"refs": [{"id": "ref-for-w_idx_offset"}], "title": "3.6. Audio Element OBU Syntax and Semantics"}], "external": false};
 window.dfnpanelData['recon_gain_info_parameter_data'] = {"dfnID": "recon_gain_info_parameter_data", "url": "#recon_gain_info_parameter_data", "dfnText": "recon_gain_info_parameter_data()", "refSections": [{"refs": [{"id": "ref-for-recon_gain_info_parameter_data"}], "title": "3.6. Audio Element OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-recon_gain_info_parameter_data\u2460"}, {"id": "ref-for-recon_gain_info_parameter_data\u2461"}, {"id": "ref-for-recon_gain_info_parameter_data\u2462"}], "title": "3.6.2. Scalable Channel Layout Config Syntax and Semantics"}, {"refs": [{"id": "ref-for-recon_gain_info_parameter_data\u2463"}], "title": "3.8.3. Recon Gain Info Parameter Data Syntax and Semantics"}, {"refs": [{"id": "ref-for-recon_gain_info_parameter_data\u2464"}], "title": "7.2.3. Recon Gain"}, {"refs": [{"id": "ref-for-recon_gain_info_parameter_data\u2465"}, {"id": "ref-for-recon_gain_info_parameter_data\u2466"}], "title": "8.2. Scalable Channel Audio Encoding"}], "external": false};
