@@ -1490,7 +1490,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 5edf5e459, updated Thu Jun 22 11:28:01 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="6df53f0ae0abdb159812debe8f9caca322abb9cc" name="document-revision">
+  <meta content="c5fc4605a1f75fb09c8afc5809988a7577fcdbeb" name="document-revision">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
     color: var(--a-normal-text);
@@ -4946,7 +4946,7 @@ class Bar {
     <figcaption>IA Down-mix Path</figcaption>
    </center>
    <h4 class="heading settled" data-level="10.2.4" id="iamfgeneration-scalablechannelaudio-recongaingeneration"><span class="secno">10.2.4. </span><span class="content">Annex B-4: Recon Gain Generation</span><a class="self-link" href="#iamfgeneration-scalablechannelaudio-recongaingeneration"></a></h4>
-   <p>This section describes how to generate <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain①③">recon_gain</a>.</p>
+   <p>This section RECOMMENDs how to generate <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain①③">recon_gain</a>.</p>
    <p class="note" role="note"><span class="marker">NOTE:</span> Recon gain generation is not required when the codec is lossless, i.e., when <a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id②④">codec_id</a> is set to <a class="property css" data-link-type="property" href="https://www.iso.org/standard/77752.html#" id="ref-for-something①⓪⑧">ipcm</a> or <a class="property css" data-link-type="property" href="https://xiph.org/flac/format.html" id="ref-for-something①⓪⑨">fLaC</a>.</p>
    <p>Recon gain needs to be applied to de-mixed channels. For this, the IA encoder needs to deliver it to IA decoders.</p>
    <p>Let’s define the followings:</p>
@@ -4958,8 +4958,8 @@ class Bar {
     <li data-md>
      <p>Level Dk is the signal power for the frame #k of the de-mixed channel for CL #i (after demixing in the decoder side).</p>
    </ul>
-   <p>If 10*log10(level Ok / maxL^2) is less than the first threshold value (e.g. -80dB), Recon_Gain (k, i)  = 0. Where, maxL = 32767 for 16bits.</p>
-   <p>If 10*log10(level Ok / level Mk ) is less than the second threshold value (e.g. -6dB), Recon_Gain (k, i) is set to the value which makes level Ok = Recon_Gain (k, i)^2 x level Dk. Otherwise, Recon_Gain (k, i) = 1. Actual value (i.e. <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain①④">recon_gain</a>) to be delivered is floor(255*Recon_Gain).</p>
+   <p>If 10*log10(level Ok / maxL^2) is less than the first threshold value (-80dB is RECOMMENDED), Recon_Gain (k, i)  = 0. Where, maxL = 32767 for 16bits.</p>
+   <p>If 10*log10(level Ok / level Mk ) is less than the second threshold value (-6dB is RECOMMENDED), Recon_Gain (k, i) is set to the value which makes level Ok = Recon_Gain (k, i)^2 x level Dk. Otherwise, Recon_Gain (k, i) = 1. Actual value (i.e. <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain①④">recon_gain</a>) to be delivered is floor(255*Recon_Gain).</p>
    <p>For example, if we assume CL #i = 7.1.4ch and CL #i-1 = 5.1.2ch, then de-mixed channels are D_Lrs7, D_Rrs7, D_Ltb4 and D_Rtb4.</p>
    <ul>
     <li data-md>
