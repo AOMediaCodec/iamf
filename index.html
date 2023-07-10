@@ -1490,7 +1490,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 5edf5e459, updated Thu Jun 22 11:28:01 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="be3dc3dce9278a369f65d26ce1a317f9dcad7c30" name="document-revision">
+  <meta content="5c24d8c777df10b95a1722938a9a7d7ef3937ad7" name="document-revision">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
     color: var(--a-normal-text);
@@ -4379,15 +4379,15 @@ gamma = n0 - n.
     <li data-md>
      <p>Input Sampling Rate: 48000Hz</p>
     <li data-md>
-     <p>Bitdepth: 16 bits or 24 bits</p>
+     <p>Bit depth: 16 bits or 24 bits</p>
      <ul>
       <li data-md>
        <p>16 bits are recommended for OPUS.</p>
      </ul>
     <li data-md>
-     <p>Input file format: .wav file (Linear PCM, simply called as PCM)</p>
+     <p>Input file format: .wav file (Linear PCM, simply called PCM)</p>
    </ul>
-   <p>For a given input audio and user inputs, IA encoder outputs <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence⑦④">IA Sequence</a> which conforms to <a href="#obu-syntax">§ 3 Open Bitstream Unit (OBU) Syntax and Semantics</a>.</p>
+   <p>For a given input audio and user inputs, the IA encoder outputs <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence⑦④">IA Sequence</a> which conforms to <a href="#obu-syntax">§ 3 Open Bitstream Unit (OBU) Syntax and Semantics</a>.</p>
    <p>Input audio is as follows:</p>
    <ul>
     <li data-md>
@@ -4409,8 +4409,8 @@ gamma = n0 - n.
     <li data-md>
      <p>Encoding of a <a data-link-type="dfn" href="#mix-presentation" id="ref-for-mix-presentation②⑥">Mix Presentation</a></p>
    </ul>
-   <p>The below figure shows IA encoder configuration for one single <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①①②">Audio Element</a>.</p>
-   <p>The IA encoder is composed of Pre-processor, Codec encoder and OBU packetizer.</p>
+   <p>The figure below shows the IA encoder configuration for one single <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①①②">Audio Element</a>.</p>
+   <p>The IA encoder is composed of Pre-processor, Codec encoder, and OBU packetizer.</p>
    <ul>
     <li data-md>
      <p>Pre-processor outputs one or more <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup④⑥">ChannelGroup</a>s, <a data-link-type="dfn" href="#descriptors①" id="ref-for-descriptors①②⑨">Descriptors</a> and optional <a data-link-type="dfn" href="#parameter-substream" id="ref-for-parameter-substream③③">Parameter Substream</a>s based on the input audio and user inputs.</p>
@@ -4460,7 +4460,7 @@ gamma = n0 - n.
          <p><a data-link-type="dfn" href="#ambisonics_config" id="ref-for-ambisonics_config①">ambisonics_config()</a> is set to as follows:</p>
          <ul>
           <li data-md>
-           <p><a data-link-type="dfn" href="#output_channel_count" id="ref-for-output_channel_count③">output_channel_count</a> is set to the number of channels for Ambisonics. For example 1, 4, 9 or 16.</p>
+           <p><a data-link-type="dfn" href="#output_channel_count" id="ref-for-output_channel_count③">output_channel_count</a> is set to the number of channels for Ambisonics. For example 1, 4, 9, or 16.</p>
           <li data-md>
            <p><a data-link-type="dfn" href="#channel_mapping" id="ref-for-channel_mapping①">channel_mapping</a> for <a data-link-type="dfn" href="#ambisonics_mode" id="ref-for-ambisonics_mode④">ambisonics_mode</a> = 0 is assigned to according to the order of <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream⑧③">Audio Substream</a>s in the <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑤①">ChannelGroup</a>.</p>
           <li data-md>
@@ -4483,17 +4483,17 @@ gamma = n0 - n.
    <p>For Scalable Channel Audio encoding:</p>
    <ul>
     <li data-md>
-     <p>Pre-processor outputs N <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑤④">ChannelGroup</a>s (<a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②②">num_layers</a> = N), <a data-link-type="dfn" href="#descriptors①" id="ref-for-descriptors①③④">Descriptors</a> and <a data-link-type="dfn" href="#parameter-substream" id="ref-for-parameter-substream③⑨">Parameter Substream</a>s. It is composed of Down-mix parameter generator, Down-mixer, Loudness, ChannelGroup generator, Attenuation and Meta generator.</p>
+     <p>Pre-processor outputs N <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑤④">ChannelGroup</a>s (<a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②②">num_layers</a> = N), <a data-link-type="dfn" href="#descriptors①" id="ref-for-descriptors①③④">Descriptors</a> and <a data-link-type="dfn" href="#parameter-substream" id="ref-for-parameter-substream③⑨">Parameter Substream</a>s. It is composed of a Down-mix parameter generator, Down-mixer, Loudness, ChannelGroup generator, Attenuation, and Meta generator.</p>
      <ul>
       <li data-md>
        <p>For non-scalable channel audio (i.e. <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②③">num_layers</a> = 1):</p>
        <ul>
         <li data-md>
-         <p><a data-link-type="dfn" href="#parameter-substream" id="ref-for-parameter-substream④⓪">Parameter Substream</a> for recon gain is not be generated.</p>
+         <p><a data-link-type="dfn" href="#parameter-substream" id="ref-for-parameter-substream④⓪">Parameter Substream</a> for recon gain is not generated.</p>
         <li data-md>
-         <p><a data-link-type="dfn" href="#parameter-substream" id="ref-for-parameter-substream④①">Parameter Substream</a> for demixing info may be generated by implementers who assume it to be recommended for dynamic downmixing in a decoder side.</p>
+         <p><a data-link-type="dfn" href="#parameter-substream" id="ref-for-parameter-substream④①">Parameter Substream</a> for demixing info may be generated by implementers who assume it to be recommended for dynamic downmixing on a decoder side.</p>
         <li data-md>
-         <p>Down-mixer, ChannelGroup generator and Attenuation modules do not needed.</p>
+         <p>Down-mixer, ChannelGroup generator, and Attenuation modules are not needed.</p>
        </ul>
       <li data-md>
        <p>Down-mix parameter generator generates 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k)) by analyzing input channel audio.</p>
@@ -4504,7 +4504,7 @@ gamma = n0 - n.
       <li data-md>
        <p>ChannelGroup generator transforms the input channel audio to N <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑤⑤">ChannelGroup</a>s for scalable channel audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②④">num_layers</a> = N scalability by using the down-mix parameters and the list of channel layouts.</p>
       <li data-md>
-       <p>Attenuation module applies a gain to the transformed <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑤⑥">ChannelGroup</a>s to prevent clipping.</p>
+       <p>The Attenuation module applies a gain to the transformed <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑤⑥">ChannelGroup</a>s to prevent clipping.</p>
       <li data-md>
        <p>Meta generator generates <a data-link-type="dfn" href="#descriptors①" id="ref-for-descriptors①③⑤">Descriptors</a> and <a data-link-type="dfn" href="#parameter-substream" id="ref-for-parameter-substream④②">Parameter Substream</a>s.</p>
        <ul>
@@ -4519,7 +4519,7 @@ gamma = n0 - n.
             <li data-md>
              <p><a data-link-type="dfn" href="#loudspeaker_layout" id="ref-for-loudspeaker_layout②③">loudspeaker_layout</a> is set to the ith list of channel layouts for the ith <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑤⑦">ChannelGroup</a>.</p>
             <li data-md>
-             <p><a data-link-type="dfn" href="#output_gain_is_present_flag" id="ref-for-output_gain_is_present_flag③">output_gain_is_present_flag</a> is set to 1 for the ith <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑤⑧">ChannelGroup</a> if attenuation is applied to the mixed channels of the ith <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑤⑨">ChannelGroup</a>. Otherwise it is set to 0 for the ith <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑥⓪">ChannelGroup</a>.</p>
+             <p><a data-link-type="dfn" href="#output_gain_is_present_flag" id="ref-for-output_gain_is_present_flag③">output_gain_is_present_flag</a> is set to 1 for the ith <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑤⑧">ChannelGroup</a> if attenuation is applied to the mixed channels of the ith <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑤⑨">ChannelGroup</a>. Otherwise, it is set to 0 for the ith <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑥⓪">ChannelGroup</a>.</p>
             <li data-md>
              <p><a data-link-type="dfn" href="#recon_gain_is_present_flag" id="ref-for-recon_gain_is_present_flag">recon_gain_is_present_flag</a> is set to 1 for the ith <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑥①">ChannelGroup</a> if the preceding <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑥②">ChannelGroup</a>s has one or more mixed channels from the <a data-link-type="dfn" href="#down-mixed-audio" id="ref-for-down-mixed-audio⑨">down-mixed audio</a> for the ith channel layout. Otherwise, it is set to 0 for the ith <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑥③">ChannelGroup</a>. Especially, when <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers②⑥">num_layers</a> = 1, this flag is set to 0.</p>
              <ul>
@@ -4533,7 +4533,7 @@ gamma = n0 - n.
             <li data-md>
              <p><a data-link-type="dfn" href="#loudness" id="ref-for-loudness①">loudness</a> is set to the loudness (<a data-link-type="dfn" href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf#" id="ref-for-something①⓪④">LKFS</a>) of the <a data-link-type="dfn" href="#down-mixed-audio" id="ref-for-down-mixed-audio①⓪">down-mixed audio</a> for the ith channel layout.</p>
             <li data-md>
-             <p>Each bit of <a data-link-type="dfn" href="#output_gain_flags" id="ref-for-output_gain_flags③">output_gain_flags</a> is set to 1 for the ith <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑥⑥">ChannelGroup</a> if attenuation is applied to the relevant channel of the ith <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑥⑦">ChannelGroup</a>. Otherwise it is set to 0 for the ith <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑥⑧">ChannelGroup</a>.</p>
+             <p>Each bit of <a data-link-type="dfn" href="#output_gain_flags" id="ref-for-output_gain_flags③">output_gain_flags</a> is set to 1 for the ith <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑥⑥">ChannelGroup</a> if attenuation is applied to the relevant channel of the ith <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑥⑦">ChannelGroup</a>. Otherwise, it is set to 0 for the ith <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑥⑧">ChannelGroup</a>.</p>
             <li data-md>
              <p><a data-link-type="dfn" href="#output_gain" id="ref-for-output_gain⑧">output_gain</a> is set to the gain (i.e. the inverse of attenuation gain) which is applied to the channels which are indicated by <a data-link-type="dfn" href="#output_gain_flags" id="ref-for-output_gain_flags④">output_gain_flags</a>.</p>
            </ul>
@@ -4556,26 +4556,26 @@ gamma = n0 - n.
       <li data-md>
        <p>It may have the immediately preceding <a data-link-type="dfn" href="#temporal-delimiter-obu" id="ref-for-temporal-delimiter-obu①③">Temporal Delimiter OBU</a>,</p>
       <li data-md>
-       <p><a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑦①">ChannelGroup</a>s in <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit①⑨">Temporal Unit</a> is placed in order. In other words, <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑦②">ChannelGroup</a> for the first channel layout comes first, followed by <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑦③">ChannelGroup</a> for the second channel layout, followed by <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑦④">ChannelGroup</a> for the third channel layout and so on.</p>
+       <p><a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑦①">ChannelGroup</a>s in <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit①⑨">Temporal Unit</a> is placed in order. In other words, <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑦②">ChannelGroup</a> for the first channel layout comes first, followed by <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑦③">ChannelGroup</a> for the second channel layout, followed by <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑦④">ChannelGroup</a> for the third channel layout, and so on.</p>
      </ul>
    </ul>
-   <p>Below figure shows IA encoding flowchart for Scalable Channel Audio.</p>
+   <p>The figure below shows the IA encoding flowchart for Scalable Channel Audio.</p>
    <ul>
     <li data-md>
-     <p>For a given input channel audio and a given list of channel layouts for scalability, PCMs for the input channel audio are passed to CG Generation module.</p>
+     <p>For a given input channel audio and a given list of channel layouts for scalability, PCMs for the input channel audio are passed to the CG Generation module.</p>
     <li data-md>
-     <p>CG Generation module generates the transformed audio according to CG generation rule based on the list of CLs and the down-mix parameters.</p>
+     <p>CG Generation module generates the transformed audio according to the CG generation rule based on the list of CLs and the down-mix parameters.</p>
      <ul>
       <li data-md>
        <p>The transformed audio is structured as <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑦⑤">ChannelGroup</a>s.</p>
      </ul>
     <li data-md>
-     <p>Non-mixed channels of the transformed audio (i.e., the original channels of the input channel audio) are directly input to Codec encoder, but the mixed channels may be input first to Attenuation module and then to Codec encoder.</p>
+     <p>Non-mixed channels of the transformed audio (i.e., the original channels of the input channel audio) are directly input to the Codec encoder, but the mixed channels may be input first to the Attenuation module and then to the Codec encoder.</p>
     <li data-md>
      <p>The Attenuation module reduces all sample values of the mixed channels in the same <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup⑦⑥">ChannelGroup</a> at a uniform rate (<a data-link-type="dfn" href="#output_gain" id="ref-for-output_gain⑨">output_gain</a>).</p>
      <ul>
       <li data-md>
-       <p>A range of 0dB to -6dB is recommended for the attenuation. (i.e. a range of 0dB to 6dB for <a data-link-type="dfn" href="#output_gain" id="ref-for-output_gain①⓪">output_gain</a>)</p>
+       <p>A range of 0dB to -6dB is recommended for attenuation. (i.e. a range of 0dB to 6dB for <a data-link-type="dfn" href="#output_gain" id="ref-for-output_gain①⓪">output_gain</a>)</p>
      </ul>
     <li data-md>
      <p>Codec Enc. generates the coded <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream⑨⓪">Audio Substream</a>s from PCMs and passes the coded <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream⑨①">Audio Substream</a>s and one single <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config①④">decoder_config()</a> to OBU Packetizer.</p>
@@ -4618,7 +4618,7 @@ gamma = n0 - n.
     <li data-md>
      <p><a data-link-type="dfn" href="#output_mix_config" id="ref-for-output_mix_config②">output_mix_config()</a>: No <a data-link-type="dfn" href="#parameter-block-obu" id="ref-for-parameter-block-obu③①">Parameter Block OBU</a>s for <a data-link-type="dfn" href="#output_mix_config" id="ref-for-output_mix_config③">output_mix_config()</a> and <a data-link-type="dfn" href="#default_mix_gain" id="ref-for-default_mix_gain①">default_mix_gain</a> = 0dB</p>
     <li data-md>
-     <p><a data-link-type="dfn" href="#num_layouts" id="ref-for-num_layouts①">num_layouts</a>: set to N. Where, N is the number of input channel layouts.</p>
+     <p><a data-link-type="dfn" href="#num_layouts" id="ref-for-num_layouts①">num_layouts</a>: set to N, where N is the number of input channel layouts.</p>
     <li data-md>
      <p><a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout①⑤">loudness_layout</a>: set to L(1), L(2), ..., L(N).</p>
      <ul>
@@ -4672,20 +4672,20 @@ gamma = n0 - n.
      <p>This <a data-link-type="dfn" href="#mix-presentation" id="ref-for-mix-presentation③①">Mix Presentation</a> is authored by using the highest <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout②⓪">loudness_layout</a>.</p>
    </ul>
    <h4 class="heading settled" data-level="8.3.1" id="iamfgeneration-mixpresentation-mix"><span class="secno">8.3.1. </span><span class="content">Element Mix Config</span><a class="self-link" href="#iamfgeneration-mixpresentation-mix"></a></h4>
-   <p>This section provide a guideline to generate <a data-link-type="dfn" href="#element_mix_config" id="ref-for-element_mix_config⑥">element_mix_config()</a>.</p>
-   <p>An IA multiplexer may merge two <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence⑦⑧">IA Sequence</a>s (or two <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①②①">Audio Element</a>s). In this case, it adjust the gain values for <a data-link-type="dfn" href="#element_mix_config" id="ref-for-element_mix_config⑦">element_mix_config()</a>s as necessary to describe the desired relative gains between the <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence⑦⑨">IA Sequence</a>s (or two <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①②②">Audio Element</a>s) when they are summed to generate the final mix. It also ensure that the gains selected do not result in clipping when the final mix is generated.</p>
+   <p>This section provides a guideline to generate <a data-link-type="dfn" href="#element_mix_config" id="ref-for-element_mix_config⑥">element_mix_config()</a>.</p>
+   <p>An IA multiplexer may merge two <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence⑦⑧">IA Sequence</a>s (or two <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①②①">Audio Element</a>s). In this case, it adjusts the gain values for <a data-link-type="dfn" href="#element_mix_config" id="ref-for-element_mix_config⑦">element_mix_config()</a>s as necessary to describe the desired relative gains between the <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence⑦⑨">IA Sequence</a>s (or two <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①②②">Audio Element</a>s) when they are summed to generate the final mix. It also ensure that the gains selected do not result in clipping when the final mix is generated.</p>
    <h3 class="heading settled" data-level="8.4" id="iamfgeneration-multipleaudioelements"><span class="secno">8.4. </span><span class="content">Two Audio Elements Encoding</span><a class="self-link" href="#iamfgeneration-multipleaudioelements"></a></h3>
-   <p>This section provide a way to generate <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence⑧⓪">IA Sequence</a> having two <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①②③">Audio Element</a>s from two IA simple profiles.</p>
+   <p>This section provides a way to generate <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence⑧⓪">IA Sequence</a> having two <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①②③">Audio Element</a>s from two IA simple profiles.</p>
    <h4 class="heading settled" data-level="8.4.1" id="iamfgeneration-multipleaudioelements-onecodec"><span class="secno">8.4.1. </span><span class="content">Two Audio Elements with One Codec Config</span><a class="self-link" href="#iamfgeneration-multipleaudioelements-onecodec"></a></h4>
    <p>This section provides a way how to generate <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence⑧①">IA Sequence</a> having two <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①②④">Audio Element</a>s from two IA simple profiles with the same <a data-link-type="dfn" href="#codec-config-obu" id="ref-for-codec-config-obu①③">Codec Config OBU</a>. However, the result complies with the base profile of <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence⑧②">IA Sequence</a>.</p>
-   <p>Step1: <a data-link-type="dfn" href="#descriptors①" id="ref-for-descriptors①③⑨">Descriptors</a> are generated as follows:</p>
+   <p>Step 1: <a data-link-type="dfn" href="#descriptors①" id="ref-for-descriptors①③⑨">Descriptors</a> are generated as follows:</p>
    <ul>
     <li data-md>
      <p><a data-link-type="dfn" href="#ia-sequence-header-obu" id="ref-for-ia-sequence-header-obu⑦">IA Sequence Header OBU</a>: get the larger <a data-link-type="dfn" href="#primary_profile" id="ref-for-primary_profile①⓪">primary_profile</a> field and the larger <a data-link-type="dfn" href="#additional_profile" id="ref-for-additional_profile⑥">additional_profile</a> field, respectively.</p>
     <li data-md>
      <p><a data-link-type="dfn" href="#codec-config-obu" id="ref-for-codec-config-obu①④">Codec Config OBU</a>: just take the <a data-link-type="dfn" href="#codec-config-obu" id="ref-for-codec-config-obu①⑤">Codec Config OBU</a> of an <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence⑧③">IA Sequence</a>.</p>
     <li data-md>
-     <p>Two <a data-link-type="dfn" href="#audio-element-obu" id="ref-for-audio-element-obu②①">Audio Element OBU</a>s: just take both of them except followings:</p>
+     <p>Two <a data-link-type="dfn" href="#audio-element-obu" id="ref-for-audio-element-obu②①">Audio Element OBU</a>s: take both of them and make the following modifications:</p>
      <ul>
       <li data-md>
        <p><a data-link-type="dfn" href="#codec_config_id" id="ref-for-codec_config_id①">codec_config_id</a> in each <a data-link-type="dfn" href="#audio-element-obu" id="ref-for-audio-element-obu②②">Audio Element OBU</a> is updated to indicate the <a data-link-type="dfn" href="#codec_config_id" id="ref-for-codec_config_id②">codec_config_id</a> specified in the taken <a data-link-type="dfn" href="#codec-config-obu" id="ref-for-codec-config-obu①⑥">Codec Config OBU</a>.</p>
@@ -4697,7 +4697,7 @@ gamma = n0 - n.
        <p><a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id⑥">parameter_id</a>s in <a data-link-type="dfn" href="#paramdefinition" id="ref-for-paramdefinition①">ParamDefinition()</a>s carried in each <a data-link-type="dfn" href="#audio-element-obu" id="ref-for-audio-element-obu②⑤">Audio Element OBU</a> are updated to refer its associated <a data-link-type="dfn" href="#parameter-substream" id="ref-for-parameter-substream④④">Parameter Substream</a>s, respectively.</p>
      </ul>
     <li data-md>
-     <p><a data-link-type="dfn" href="#mix-presentation-obu" id="ref-for-mix-presentation-obu①①">Mix Presentation OBU</a>s: generate new ones which are used for mixing of two <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①②⑤">Audio Element</a>s except following:</p>
+     <p><a data-link-type="dfn" href="#mix-presentation-obu" id="ref-for-mix-presentation-obu①①">Mix Presentation OBU</a>s: generate new ones which are used for mixing the two <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①②⑤">Audio Element</a>s. Make the following modifications:</p>
      <ul>
       <li data-md>
        <p><a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id③">audio_element_id</a>s in each <a data-link-type="dfn" href="#mix-presentation-obu" id="ref-for-mix-presentation-obu①②">Mix Presentation OBU</a> are updated to indicate the <a data-link-type="dfn" href="#audio_element_id" id="ref-for-audio_element_id④">audio_element_id</a>s specified in <a data-link-type="dfn" href="#audio-element-obu" id="ref-for-audio-element-obu②⑥">Audio Element OBU</a>s, respectively.</p>
@@ -4705,7 +4705,7 @@ gamma = n0 - n.
        <p><a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id⑦">parameter_id</a>s in <a data-link-type="dfn" href="#paramdefinition" id="ref-for-paramdefinition②">ParamDefinition()</a>s carried in each <a data-link-type="dfn" href="#mix-presentation-obu" id="ref-for-mix-presentation-obu①③">Mix Presentation OBU</a> are updated to refer its associated <a data-link-type="dfn" href="#parameter-substream" id="ref-for-parameter-substream④⑤">Parameter Substream</a>s, respectively.</p>
      </ul>
    </ul>
-   <p>Step2: ith <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit②③">Temporal Unit</a> is generated as follows:</p>
+   <p>Step 2: ith <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit②③">Temporal Unit</a> is generated as follows:</p>
    <ul>
     <li data-md>
      <p>Place the <a data-link-type="dfn" href="#parameter-block-obu" id="ref-for-parameter-block-obu③②">Parameter Block OBU</a>s in the ith <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit②④">Temporal Unit</a> from each <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①②⑥">Audio Element</a> and followed by <a data-link-type="dfn" href="#audio-frame-obu" id="ref-for-audio-frame-obu④④">Audio Frame OBU</a>s in the ith <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit②⑤">Temporal Unit</a> from each <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①②⑦">Audio Element</a> except following:</p>
@@ -4718,9 +4718,9 @@ gamma = n0 - n.
     <li data-md>
      <p>It may have the immediately preceding <a data-link-type="dfn" href="#temporal-delimiter-obu" id="ref-for-temporal-delimiter-obu①⑤">Temporal Delimiter OBU</a> for each <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit②⑥">Temporal Unit</a>.</p>
    </ul>
-   <p>Step3: Generate <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence⑧⑤">IA Sequence</a> which starts <a data-link-type="dfn" href="#descriptors①" id="ref-for-descriptors①④①">Descriptors</a> and followed by <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit②⑦">Temporal Unit</a>s in order.</p>
+   <p>Step 3: Generate an <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence⑧⑤">IA Sequence</a> which starts with <a data-link-type="dfn" href="#descriptors①" id="ref-for-descriptors①④①">Descriptors</a> and is followed by <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit②⑦">Temporal Unit</a>s in order.</p>
    <h3 class="heading settled" data-level="8.5" id="iamfgeneration-postprocessing"><span class="secno">8.5. </span><span class="content">Post Processing</span><a class="self-link" href="#iamfgeneration-postprocessing"></a></h3>
-   <p>This section provides a way to generate algorithms for post processing.</p>
+   <p>This section provides a way to generate algorithms for post-processing.</p>
    <h4 class="heading settled" data-level="8.5.1" id="iamfgeneration-postprocessing-loudness"><span class="secno">8.5.1. </span><span class="content">Loudness Information</span><a class="self-link" href="#iamfgeneration-postprocessing-loudness"></a></h4>
    <p>This section provides a way to generate <a data-link-type="dfn" href="#loudness_info" id="ref-for-loudness_info①①">loudness_info()</a>.</p>
    <p>For a given <a data-link-type="dfn" href="#mix-presentation-obu" id="ref-for-mix-presentation-obu①④">Mix Presentation OBU</a> and a given <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout②①">loudness_layout</a>, the followings are processed in order to produce <a data-link-type="dfn" href="#loudness_info" id="ref-for-loudness_info①②">loudness_info()</a>.</p>
