@@ -927,10 +927,10 @@ Each pair of coupled stereo channels in the same [=ChannelGroup=] SHALL be coded
 - <dnf noexport>Non-coupled channels</dfn>: C, LFE, L
 
 The order of [=Audio Substream=]s in each [=ChannelGroup=] SHALL be as follows:
-- Coupled substreams come first and followed by non-coupled substreams.
-- Coupled substreams for surround channels comes first and followed by one(s) for top channels.
-- Coupled substreams for front channels comes first and followed by one(s) for side, rear and back channels.
-- Coupled substreams for side channels comes first and followed by one(s) for rear channels.
+- Coupled substreams come first and are followed by non-coupled substreams.
+- Coupled substreams for surround channels come first and are followed by one(s) for top channels.
+- Coupled substreams for front channels come first and are followed by one(s) for side, rear and back channels.
+- Coupled substreams for side channels come first and are followed by one(s) for rear channels.
 - Center channel comes first and is followed by LFE, and then L.
 - Where, <dfn noexport>non-coupled substream</dfn> is a coded [=Audio Substream=] from one of non-coupled channels.
 
@@ -995,7 +995,7 @@ If ambisonics_mode is equal to MONO, this indicates that the Ambisonics channels
 
 If ambisonics_mode is equal to PROJECTION, this indicates that the Ambisonics channels are first linearly projected onto another subspace before coding as a mix of coupled stereo and mono [=Audio Substream=]s.
 
-<dfn noexport>output_channel_count</dfn> complies with [=channel count=] in [[!RFC8486]] with following restrictions:
+<dfn noexport>output_channel_count</dfn> complies with [=channel count=] in [[!RFC8486]] with the following restrictions:
 - The allowed numbers of [=output_channel_count=] are (1+n)^2, where n = 0, 1, 2, ..., 14. 
 - In other words, the scene-based [=Audio Element=] SHALL NOT include non-diegetic channels.
 
@@ -1575,7 +1575,7 @@ For legacy codecs, [=decoder_config()=] SHALL be exactly the same information as
 
 [=codec_id=] SHALL be 'Opus'.
 
-[=decoder_config()=] for OPUS conforms to [=ID Header=] with [=ChannelMappingFamily=] = 0 of [[!RFC7845]] with following constraints:
+[=decoder_config()=] for OPUS conforms to [=ID Header=] with [=ChannelMappingFamily=] = 0 of [[!RFC7845]] with the following constraints:
 - [=Magic Signature=] SHALL NOT be present.
 - [=Output Channel Count=] SHALL be set to 2. [=Output Channel Count=] can be ignored because the real value can be determined from the [=Audio Element OBU=] and from the opus packet header.
 - [=Pre-skip=] SHALL be the same as the number of audio samples to be trimmed at the start of coded [=Audio Substream=]s.
@@ -1659,7 +1659,7 @@ Common restrictions on the [=IA Sequence=] for all profiles specified in this ve
 		- For example, when [=Audio Frame OBU=] has 960 audio samples at 48000Hz, the duration of every [=Parameter Block OBU=] SHALL be 960 units at 48000Hz or 480 units at 24000Hz.
 - In every [=Temporal Unit=], the start timestamp of every [=Audio Frame OBU=] SHALL be the same as that of every [=Parameter Block OBU=] if present.
 	- There SHALL be no redundant [=Parameter Block OBU=].
-	- [=Parameter Block OBU=]s shall come first and followed by [=Audio Frame OBU=]s. 	  
+	- [=Parameter Block OBU=]s SHALL come first and SHALL be followed by [=Audio Frame OBU=]s. 	  
 - [=num_sub_mixes=] SHOULD be set to 1. Mix Presentation OBUs with [=num_sub_mixes=] > 1 SHOULD be ignored.
 - [=num_audio_elements=] SHOULD be set to 1 or 2. Mix Presentation OBUs with [=num_audio_elements=] > 2 SHOULD be ignored.
 
@@ -1694,7 +1694,7 @@ Restrictions on [=IA Sequence=]:
 - There SHALL be at most two unique [=Audio Element OBU=]s at any one time.
 	- There SHALL be at most one Channel-based [=Audio Element=] having [=num_layers=] > 1 at any one time.
 	- There SHALL be at most one Scene-based [=Audio Element=] at any one time.
-	- In other words, following combinations of two [=Audio Element=]s are only allowed.
+	- In other words, the following combinations of two [=Audio Element=]s are only allowed.
 		- Channel-based [=Audio Element=] having [=num_layers=] = 1 + Channel-based [=Audio Element=] having [=num_layers=] = 1.
 		- Channel-based [=Audio Element=] having [=num_layers=] = 1 + Channel-based [=Audio Element=] having [=num_layers=] > 1.
 		- Scene-based [=Audio Element=] + Channel-based [=Audio Element=] having [=num_layers=] = 1.
@@ -1974,16 +1974,16 @@ For a given loudspeaker layout (i.e. CL #i) among the list of [=loudspeaker_layo
 - OBU Parser SHALL get [=Audio Substream=]s for [=ChannelGroup=] #1 ~ [=ChannelGroup=] #i and pass them to Codec decoder with [=decoder_config()=].
 - Codec decoder SHALL output decoded channels (PCM) in the transmission order.
 	- For non-scalable audio (i.e. i = [=num_layers=] = 1), its order SHALL be converted to the loudspeaker location order for CL #1.
-- Following are further processed for scalable audio (i.e. i > 1)
+- The following are further processed for scalable audio (i.e. i > 1)
 	- When [=output_gain_is_present_flag=](j) for [=ChannelGroup=] #j (j = 1, 2, …, i-1) is on, Gain module SHALL apply [=output_gain=](j) to all audio samples of the mixed channels in the [=ChannelGroup=] #j indicated by [=output_gain_flag=](j).
 	- De-Mixer SHALL output de-mixed channels (PCM) for CL #i generated through de-mixing of the mixed channels from the Gain module by using non-mixed channels and demixing parameters for each frame.
 	- Recon_Gain module SHALL output smoothed channels (PCM) by applying [=recon_gain=] to each frame of the de-mixed channels.
 	- The order for Non-mixed channels and Smoothed channels SHALL be converted to the loudspeaker location order for CL #i after going through necessary modules such as Gain, De-Mixer, Recon_Gain, etc.
-- Following may be further processed
+- The following may be further processed
 	- Loudness normalization module may output loudness normalized channels at -24 LKFS from non-mixed channels and smoothed channels (if present) by using loudness information for CL #i.
 	- Limiter module may limit the true peak of input channels at -1dB.
 
-Following sections, [[#processing-scalablechannelaudio-gain]], [[#processing-scalablechannelaudio-demixer]] and [[#processing-scalablechannelaudio-recongain]] are only needed for decoding of scalable audio with [=num_layers=] > 1.
+The following sections, [[#processing-scalablechannelaudio-gain]], [[#processing-scalablechannelaudio-demixer]] and [[#processing-scalablechannelaudio-recongain]] are only needed for decoding of scalable audio with [=num_layers=] > 1.
 
 ### Gain ### {#processing-scalablechannelaudio-gain}
 
@@ -2361,7 +2361,7 @@ User inputs are:
 - Ambisonics mode to indicate if [=ChannelMappingFamily=] = 2 or 3 of [[RFC8486]].
 - List of channel layouts to be supported for scalable channel audio: it conforms to [=loudspeaker_layout=].
 
-IA encoding can be done by using the combination of following generation processing.
+IA encoding can be done by using the combination of the following generation processing.
 - Encoding of an [=Audio Element=] (Ambisonics encoding or Scalable Channel Audio encoding)
 - Encoding of a [=Mix Presentation=]
 
@@ -2454,7 +2454,7 @@ The figure below shows the IA encoding flowchart for Scalable Channel Audio.
 
 ## Mix Presentation Encoding ## {#iamfgeneration-mixpresentation}
 
-For [=Mix Presentation=] for one single channel-based [=Audio Element=], [=Mix Presentation OBU=] follows following restrictions:
+For [=Mix Presentation=] for one single channel-based [=Audio Element=], [=Mix Presentation OBU=] follows the following restrictions:
 - [=num_sub_mixes=]: set to 1
 - [=num_audio_elements=]: set to 1
 - [=element_mix_config()=]: No [=Parameter Block OBU=]s for [=element_mix_config()=] and [=default_mix_gain=] = 0dB
@@ -2467,7 +2467,7 @@ For [=Mix Presentation=] for one single channel-based [=Audio Element=], [=Mix P
 NOTE: If the input channel layouts do not include Stereo, then [=num_layers=] is set to N + 1 and the [=loudness_layout=]s includes Stereo.
 
 
-For [=Mix Presentation=] for one single scene-based [=Audio Element=], [=Mix Presentation OBU=] follows following restrictions:
+For [=Mix Presentation=] for one single scene-based [=Audio Element=], [=Mix Presentation OBU=] follows the following restrictions:
 - [=num_sub_mixes=]: set to 1
 - [=num_audio_elements=]: set to 1
 - [=element_mix_config()=]: set to [=mix_gain=]
@@ -2478,7 +2478,7 @@ For [=Mix Presentation=] for one single scene-based [=Audio Element=], [=Mix Pre
 - Where L(i) is the measured layout for the ith loudness information and i = 1, 2, ..., M1.
 - This [=Mix Presentation=] is authored by using the highest [=loudness_layout=].
  
-For [=Mix Presentation=] for 2 [=Audio Element=]s, [=Mix Presentation OBU=] follows following restrictions:
+For [=Mix Presentation=] for 2 [=Audio Element=]s, [=Mix Presentation OBU=] follows the following restrictions:
 - [=num_sub_mixes=]: set to 1
 - [=num_audio_elements=]: set to 2
 - [=element_mix_config()=] for each [=Audio Element=]: set to [=mix_gain=]
@@ -2516,7 +2516,7 @@ Step 1: [=Descriptors=] are generated as follows:
 	- [=parameter_id=]s in [=ParamDefinition()=]s carried in each [=Mix Presentation OBU=] are updated to refer its associated [=Parameter Substream=]s, respectively.
 
 Step 2: ith [=Temporal Unit=] is generated as follows:
-- Place the [=Parameter Block OBU=]s in the ith [=Temporal Unit=] from each [=Audio Element=] and followed by [=Audio Frame OBU=]s in the ith [=Temporal Unit=] from each [=Audio Element=] except following:
+- Place the [=Parameter Block OBU=]s in the ith [=Temporal Unit=] from each [=Audio Element=] and followed by [=Audio Frame OBU=]s in the ith [=Temporal Unit=] from each [=Audio Element=] except the following:
 	- [=obu_type=]s are updated to be aligned according to [=audio_substream_id=]s specified in the two [=Audio Element OBU=]s.
 	- [=parameter_id=]s in [=Parameter Block OBU=]s are updated to indentify the [=Parameter Substream=] in [=IA Sequence=] and based on the [=parameter_id=]s in [=ParamDefinition()=]s carried in the [=Descriptors=].
 - It may have the immediately preceding [=Temporal Delimiter OBU=] for each [=Temporal Unit=].
