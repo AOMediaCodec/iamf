@@ -1718,18 +1718,16 @@ Capabilities of the IA parser, decoder, and processor:
 
 This section details the order in which the OBUs are sequenced in a standalone IAMF representation. 
 
-## OBU Sequence Order ## {#standalone-obu-sequence-order}
+## IA Sequence ## {#standalone-ia-sequence}
 
-An <dfn noexport>IA Sequence</dfn> is composed of a series of OBUs in the sequence of a set of [=Descriptors=] followed by their associated [=IA Data=]s. 
-
-NOTE: In a typical case, the first [=Descriptors=] of the [=IA Sequence=] are all non-redundant (i.e. [=obu_redundant_copy=] = 0). When two [=IA Sequence=]s are concatenated, every OBU of the first [=Descriptors=] of the second [=IA Sequence=] is markded as non-redundant (i.e. [=obu_redundant_copy=] = 0).
+An <dfn noexport>IA Sequence</dfn> is composed of a series of OBUs in the sequence of a set of [=Descriptors=] followed by their associated [=IA Data=]. 
 
 The [=Descriptors=] MAY additionally be repeated redundantly and as frequently as necessary. In this case, the [=obu_redundant_copy=] field in their OBU headers SHALL be set to 1.
 
-The below figure shows an example of [=IA Sequence=].
+The figure below shows an example of an [=IA Sequence=].
 
 <center><img src="images/IA sequence.png" style="width:100%; height:auto;"></center>
-<center><figcaption>Example of Immersive Audio Sequence</figcaption></center>
+<center><figcaption>Example of an Immersive Audio Sequence</figcaption></center>
 
 ### Descriptor OBUs ### {#standalone-descriptor-obus}
 A set of [=Descriptors=] SHALL be placed in the following order regardless of where they appear in the bitstream:
@@ -1751,15 +1749,16 @@ A set of [=Descriptors=] SHALL be placed in the following order regardless of wh
 
 Additionally, the following constraints apply to the [=Audio Frame OBU=]s and [=Parameter Block OBU=]s:
 
-- [=Audio Frame OBU=]s SHALL be provided non-redundantly, such that for each [=Audio Substream=], there are no two [=Audio Frame OBU=]s that are overlapping in time.
+- [=Audio Frame OBU=]s SHALL be provided non-redundantly (i.e., [=obu_redundant_copy=] = 0), such that for each [=Audio Substream=], there are no two [=Audio Frame OBU=]s that are overlapping in time.
 - Non-redundant [=Parameter Block OBU=]s SHALL NOT provide data for overlapping time regions.
 
-### Refreshing Descriptor OBUs ### {#standalone-obu-sequence-refreshes}
+## IAMF Configuration Changes ## {#standalone-iamf-configuration-changes}
 
-The above describes the full sequence of OBUs for a given set of [=Descriptors=] and their associated [=IA Data=]. 
+If the IAMF configuration changes, a new set of [=Descriptors=] is REQUIRED. In that case, a new [=IA Sequence=] of the complete set of [=Descriptors=] and their corresponding [=IA Data=] SHALL follow, in the same order as described above.
 
-If the IAMF configuration changes, a new set of [=Descriptors=] is REQUIRED. In that case, a new [=IA Sequence=] of the complete set of [=Descriptors=] and their corresponding [=IA Data=]s SHALL follow, in the same order as described above.
-- Each OBU of the [=Descriptors=] of the new [=IA Sequence=] SHALL be marked as non-redundant (i.e. [=obu_redundant_copy=] = 0 in the OBU header).
+Each OBU in the first set of [=Descriptors=] of the new [=IA Sequence=] SHALL be marked as non-redundant (i.e. [=obu_redundant_copy=] = 0 in the OBU header).
+
+NOTE: In a typical case, the OBUs in the first [=Descriptors=] of an [=IA Sequence=] are all marked as non-redundant. When two [=IA Sequence=]s are concatenated, every OBU in the first [=Descriptors=] of the second [=IA Sequence=] is marked as non-redundant.
 
 
 # ISOBMFF IAMF Encapsulation # {#isobmff}
