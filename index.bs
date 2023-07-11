@@ -1647,25 +1647,25 @@ The IA Profiles define a set of capabilities that are REQUIRED to parse, decode 
 
 IA decoders SHALL be able to parse all OBUs explicitly listed for this version of the specification. They can still encounter reserved OBUs that they SHOULD skip. This allows future versions of the specification to define new profiles that can be backward compatible with old profiles.
 
-NOTE: In this section and subsections, the meaning of a unique OBU is that it is still unique if it only varies by the redundant flag.
+NOTE: In this section and subsections, the meaning of a unique OBU is that it is still unique if it only varies by the [=obu_redundant_copy=] flag.
 
 Common restrictions on the [=IA Sequence=] for all profiles specified in this version of the specification:
-- There SHALL be only one unique [=Descriptors=]. So, if the [=Descriptors=] present in the middle of the [=IA Sequence=], all OBUs of the [=Descriptors=] SHALL be marked as redundant (i.e. [=obu_redundant_copy=] = 1) 
-	- When [=Descriptors=] are placed in the middle of the [=IA Sequence=], it SHALL NOT be placed in the middle of a [=Temporal Unit=]. In other words, [=Descriptors=] SHALL be present after the last OBU of a [=Temporal Unit=] and before the first OBU of the next [=Temporal Unit=].
+- There SHALL be only one unique set of [=Descriptors=] in an [=IA Sequence=]. If the [=Descriptors=] are repeated in the middle of the [=IA Sequence=], all the OBUs in that set of [=Descriptors=] SHALL be marked as redundant (i.e. [=obu_redundant_copy=] = 1).
+	- When a set of [=Descriptors=] is placed in the middle of the [=IA Sequence=], it SHALL NOT be placed in the middle of a [=Temporal Unit=]. In other words, if [=Descriptors=] are placed mid-sequence, they SHALL be present only after the last OBU of a [=Temporal Unit=] and before the first OBU of the next [=Temporal Unit=].
 - There SHALL be only one unique [=Codec Config OBU=].
 - Every [=Audio Substream=] in the [=IA Sequence=] SHALL have the same start timestamp, SHALL consist of the same number of [=Audio Frame OBU=]s, and SHALL have the same trimming information.
-- Every [=Parameter Substream=] in the [=IA Sequence=] SHALL have the same start timestamp as the [=Audio Substream=] which the [=Parameter Substream=] is applied to, SHALL consist of the same number of [=Parameter Block OBU=]s.
-	- Every [=Parameter Block OBU=] SHALL have the same duration as that of the [=Audio Frame OBU=] under the same sample rate.
-		- For example, when [=Audio Frame OBU=] has 960 audio samples at 48000Hz, the duration of every [=Parameter Block OBU=] SHALL be 960 units at 48000Hz or 480 units at 24000Hz.
-- In every [=Temporal Unit=], the start timestamp of every [=Audio Frame OBU=] SHALL be the same as that of every [=Parameter Block OBU=] if present.
-	- There SHALL be no redundant [=Parameter Block OBU=].
-	- [=Parameter Block OBU=]s shall come first and followed by [=Audio Frame OBU=]s. 	  
+- Every [=Parameter Substream=] in the [=IA Sequence=] SHALL have the same start timestamp as the [=Audio Substream=] which the [=Parameter Substream=] is applied to, and SHALL consist of the same number of [=Parameter Block OBU=]s.
+	- Every [=Parameter Block OBU=] SHALL have the same duration as its corresponding [=Audio Frame OBU=] under the same sample rate.
+		- For example, when the [=Audio Frame OBU=] has 960 audio samples at 48000 Hz, the duration of every [=Parameter Block OBU=] SHALL be 960 units if the parameter sample rate is 48000 Hz, or 480 units if the parameter sample rate is 24000 Hz.
+- In every [=Temporal Unit=], the start timestamp of every [=Audio Frame OBU=] SHALL be the same as its corresponding [=Parameter Block OBU=], if present.
+	- There SHALL be no redundant [=Parameter Block OBU=]s.
+	- [=Parameter Block OBU=]s SHALL come first and are followed by [=Audio Frame OBU=]s.
 - [=num_sub_mixes=] SHOULD be set to 1. Mix Presentation OBUs with [=num_sub_mixes=] > 1 SHOULD be ignored.
 - [=num_audio_elements=] SHOULD be set to 1 or 2. Mix Presentation OBUs with [=num_audio_elements=] > 2 SHOULD be ignored.
 
 NOTE: This behavior is to allow future versions of this specification to define new profiles that support a number of audio elements and/or a number of sub-mixes greater than those recommended in this profile, while still permitting streams compliant with these new profiles to be processed by parsers compliant to the profiles defined in this version of the specification.
 
-- When [=num_layers=] = 1, DemixingParamDefinion() for demixing MAY be present in the [=Audio Element OBU=] and IA decoders MAY use the (default) parameter data for demixing for (dynamic) down-mixing.
+- When [=num_layers=] = 1, DemixingParamDefinition() for demixing MAY be present in the [=Audio Element OBU=] and IA decoders MAY use the (default) demixing parameter data for (dynamic) down-mixing.
 
 
 ## IA Simple Profile ## {#profiles-simple}
@@ -1690,16 +1690,16 @@ Capabilities of the IA parser, decoder, and processor:
 
 This section specifies the conformance points of the base profile.
 
-Restrictions on [=IA Sequence=]:
+Restrictions on the [=IA Sequence=]:
 - There SHALL be at most two unique [=Audio Element OBU=]s at any one time.
 	- There SHALL be at most one Channel-based [=Audio Element=] having [=num_layers=] > 1 at any one time.
 	- There SHALL be at most one Scene-based [=Audio Element=] at any one time.
-	- In other words, following combinations of two [=Audio Element=]s are only allowed.
+	- In other words, only the following combinations of two [=Audio Element=]s are allowed.
 		- Channel-based [=Audio Element=] having [=num_layers=] = 1 + Channel-based [=Audio Element=] having [=num_layers=] = 1.
 		- Channel-based [=Audio Element=] having [=num_layers=] = 1 + Channel-based [=Audio Element=] having [=num_layers=] > 1.
 		- Scene-based [=Audio Element=] + Channel-based [=Audio Element=] having [=num_layers=] = 1.
 		- Scene-based [=Audio Element=] + Channel-based [=Audio Element=] having [=num_layers=] > 1.
-- There MAY be [=Temporal Delimiter OBU=]s present. If present, the first OBU of every [=Temporal Unit=] SHALL be [=Temporal Delimiter OBU=].
+- There MAY be [=Temporal Delimiter OBU=]s present. If present, the first OBU of every [=Temporal Unit=] SHALL be the [=Temporal Delimiter OBU=].
 - [=additional_profile=] SHALL be set to 1 to indicate that the [=IA Sequence=] complies to this profile.
 - [=primary_profile=] MAY be set to 0 or 1.
 
@@ -1708,8 +1708,8 @@ Capabilities of the IA parser, decoder, and processor:
 - They SHALL be able to parse an [=IA Sequence=] with [=primary_profile=] = 0 or 1.
 - They SHALL be able to support the capabilities of the Simple Profile.
 - They SHALL be able to decode and process up to 18 channels.
-	- Where 18 channels mean not the number of channels after mixing of two [=Audio Element=]s but the total sum of channels before mixing of two [=Audio Element=]s.
-	- One specific example of 18 channels is 3rd-order Ambisonics (16 channels) + non-diegetic stereo (2 channels).
+	- The 18 channels limit applies to the sum of channels across all [=Audio Element=]s in a [=Mix Presentation=] before mixing.
+	- One example is a mix with 3rd-order Ambisonics (16 channels) + non-diegetic stereo (2 channels).
 - They SHALL be able to reconstruct two [=Audio Element=]s.
 - They SHALL be able to mix two [=Audio Element=]s.
 
