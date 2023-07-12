@@ -815,7 +815,7 @@ abstract class ParamDefinition() {
 <dfn value noexport for="ParamDefinition()">parameter_id</dfn> indicates the identifier for the [=Parameter Substream=] which this parameter definition refers to. There SHALL be one unique [=parameter_id=] per [=Parameter Substream=].
 
 <dfn noexport>parameter_rate</dfn> specifies the rate used by this [=Parameter Substream=], expressed as ticks per second. Time-related fields associated with this [=Parameter Substream=], such as durations, SHALL be expressed in the number of ticks.
-- The rate SHALL be such a value that (the rate x [=num_samples_per_frame=]) / (the sample rate of [=Audio Element=]) is a non-zero integer.
+- The rate SHALL be such a value that (the rate * [=num_samples_per_frame=]) / (the sample rate of [=Audio Element=]) is a non-zero integer.
 
 <dfn noexport>param_definition_mode</dfn> indicates if this parameter definition specifies [=duration=], [=num_subblocks=], [=constant_subblock_duration=] and [=subblock_duration=] fields for the parameter blocks associated to the [=parameter_id=].
 - When this field is set to 0, all of [=duration=], [=num_subblocks=], [=constant_subblock_duration=], and [=subblock_duration=] fields SHALL be specified in this parameter definition mapped to the [=parameter_id=]. In that case, none of the parameter blocks associated with this parameter definition SHALL specify [=duration=], [=num_subblocks=], [=constant_subblock_duration=], and [=subblock_duration=] fields. 
@@ -827,7 +827,7 @@ abstract class ParamDefinition() {
 
 Given <dfn noexport>D</dfn> = the value of [=duration=], <dfn noexport>NS</dfn> = the value of [=num_subblocks=], <dfn noexport>CSD</dfn> = the value of [=constant_subblock_duration=] and <dfn noexport>SD</dfn> = the value of [=subblock_duration=].
 - When [=CSD=] != 0, [=num_subblocks=] is implicitly calculated as [=NS=] = ceil([=D=] / [=CSD=]).
-	- If [=NS=] x [=CSD=] > [=D=], the actual duration of the last subblock SHALL be [=D=] - ([=NS=] - 1) x [=CSD=].
+	- If [=NS=] * [=CSD=] > [=D=], the actual duration of the last subblock SHALL be [=D=] - ([=NS=] - 1) * [=CSD=].
 - When [=CSD=] = 0, the summation of all [=SD=]s in this parameter block SHALL be equal to [=D=].
 
 <dfn noexport>num_subblocks</dfn> specifies the number of different sets of parameter values specified in each parameter block with the same [=parameter_id=], where each set describes a different subblock of the timeline, contiguously.
@@ -1015,7 +1015,7 @@ If ambisonics_mode is equal to MONO, this indicates that the Ambisonics channels
 If ambisonics_mode is equal to PROJECTION, this indicates that the Ambisonics channels are first linearly projected onto another subspace before coding as a mix of coupled stereo and mono [=Audio Substream=]s.
 
 <dfn noexport>output_channel_count</dfn> complies with [=channel count=] in [[!RFC8486]] with following restrictions:
-- The allowed numbers of [=output_channel_count=] are (1+n)^2, where n = 0, 1, 2, ..., 14. 
+- The allowed numbers of [=output_channel_count=] are pow(1 + n, 2), where n = 0, 1, 2, ..., 14. 
 - In other words, the scene-based [=Audio Element=] SHALL NOT include non-diegetic channels.
 
 [=substream_count=] specifies the number of [=Audio Substream=]s. It SHALL be the same as [=num_substreams=] in this OBU.
@@ -1114,7 +1114,7 @@ The highest [=loudness_layout=] specified in one sub-mix except for zero-order A
 - The highest [=loudness_layout=] for zero-order Ambisonics or Mono is Stereo.
  
 Each sub-mix SHALL include [=loudness_layout=] to identify [=Loudspeaker configuration for Sound System A (0+2+0)=] (i.e., Stereo). In other words, each sub-mix SHALL include [=loudness_info()=] for Stereo. 
-- If the [=Rendered Mix Presentation=] by each sub-mix is Mono, then its [=loudness=] for [=loudness_layout=] = Stereo SHOULD be measured on the Stereo generated from the Mono by the equations, L = 0.707 x Mono and R = 0.707 x Mono. 
+- If the [=Rendered Mix Presentation=] by each sub-mix is Mono, then its [=loudness=] for [=loudness_layout=] = Stereo SHOULD be measured on the Stereo generated from the Mono by the equations, L = 0.707 * Mono and R = 0.707 * Mono. 
 
 ### Mix Presentation Annotations Syntax and Semantics ### {#obu-mixpresentation-annotation}
 
@@ -2022,7 +2022,7 @@ The Gain module is the mirror process of the Attenuation module. It recovers the
 To apply the gain, an implementation SHALL use the following:
 
 ```
-	Sample *= pow(10, [=output_gain=](i) / (20.0*256))
+	sample = sample * pow(10, output_gain(i) / (20.0*256))
 ```
 
 Where, n = [=num_layers=] and i = 1, 2, ..., n. [=output_gain=](i) is the raw 16-bit value for the ith layer which is specified in [=channel_audio_layer_config()=].
@@ -2035,13 +2035,13 @@ De-mixer module reconstructs the rest of the [=down-mixed audio=] for CL #i from
 
 De-mixing for [=down-mixed audio=] for CL #i SHALL comply with the result by the combination of the following surround and top de-mixers:
 - Surround de-mixers
-	- <dfn noexport>S1to2 de-mixer</dfn>: R2 = 2 x Mono – L2
-	- <dfn noexport>S2to3 de-mixer</dfn>: L3 = L2 – 0.707 x C and R3 = R2 – 0.707 x C
-	- <dfn noexport>S3to5 de-mixer</dfn>: Ls = 1/δ(k) x (L3 – L5) and Rs = 1/δ(k) x (R3 – R5)
-	- <dfn noexport>S5to7 de-mixer</dfn>: Lrs = 1/β(k) x (Ls – α(k) x Lss) and Rrs = 1/β(k) x (Rs – α(k) x Rss)
+	- <dfn noexport>S1to2 de-mixer</dfn>: R2 = 2 * Mono – L2
+	- <dfn noexport>S2to3 de-mixer</dfn>: L3 = L2 – 0.707 * C and R3 = R2 – 0.707 * C
+	- <dfn noexport>S3to5 de-mixer</dfn>: Ls = 1/δ(k) * (L3 – L5) and Rs = 1/δ(k) * (R3 – R5)
+	- <dfn noexport>S5to7 de-mixer</dfn>: Lrs = 1/β(k) * (Ls – α(k) * Lss) and Rrs = 1/β(k) * (Rs – α(k) * Rss)
 - Top de-mixers
-	- <dfn noexport>TF2toT2 de-mixer</dfn>: Ltf2 = Ltf3 – w(k) x (L3 – L5) and Rtf2 = Rtf3 – w(k) x (R3 – R5)
-	- <dfn noexport>T2to4 de-mixer</dfn>: Ltb = 1/γ(k) x (Ltf2 – Ltf4) and Rtb = 1/γ(k) x (Rtf2 – Rtf4)
+	- <dfn noexport>TF2toT2 de-mixer</dfn>: Ltf2 = Ltf3 – w(k) * (L3 – L5) and Rtf2 = Rtf3 – w(k) * (R3 – R5)
+	- <dfn noexport>T2to4 de-mixer</dfn>: Ltb = 1/γ(k) * (Ltf2 – Ltf4) and Rtb = 1/γ(k) * (Rtf2 – Rtf4)
 - Where, Ltf2 and Rtf2 are the top channels of x.1.2ch, Ltf3 and Rtf3 are the top channels of 3.1.2ch, and Ltf4 and Rtf4 are the top channels of x.1.4ch (x = 5 or 7) and [=w(k)=] is determined from the value of wIdx(k).
 
 Initially, wIdx(0) = 0 and the value of wIdx(k) SHALL be derived as follows:
@@ -2082,8 +2082,8 @@ For example, when CL #1 = 2ch, CL #2 = 3.1.2ch, CL #3 = 5.1.2ch and CL #4 = 7.1.
 - Ltf and Rtf are recovered by S2to3 de-mixer and TF2toT2 de-mixer.
 
 ```
-	Ls5 = 1/δ(k) × (L2 - 0.707 × C - L5) and Rs5 = 1/δ(k) × (R2 - 0.707 × C - R5).
-	Ltf = Ltf3 - w(k) x (L2 - 0.707 x C - L5) and Rtf = Rtf3 - w(k) x (R2 - 0.707 x C - R5).
+	Ls5 = 1/δ(k) * (L2 - 0.707 * C - L5) and Rs5 = 1/δ(k) * (R2 - 0.707 * C - R5).
+	Ltf = Ltf3 - w(k) * (L2 - 0.707 * C - L5) and Rtf = Rtf3 - w(k) * (R2 - 0.707 * C - R5).
 ```
 
 ### Recon Gain ### {#processing-scalablechannelaudio-recongain}
@@ -2092,9 +2092,9 @@ Recon gain is REQUIRED only for [=num_layers=] > 1 and when [=codec_id=] is set 
 
 [=recon_gain=] SHALL be only applied to all audio samples of the de-mixed channels from the De-mixer module.
 - [=recon_gain_info_parameter_data()=] indicates each channel of CL #i to which recon gain needs to be applied and provides [=recon_gain=] value for each frame of the channel.
-	- Sample (k,i) *= Smoothed_Recon_Gain (k,i), where k is the frame index and i is the sample index of the frame.
-	- Smoothed_Recon_Gain (k) = MA_gain (k-1) x e_window + MA_gain (k) x s_window
-	- MA_gain (k) = 2 / (N+1) x [=recon_gain=] (k) / 255 + (1 – 2/(N+1)) x MA_gain (k-1), where MA_gain (0) = 1.
+	- Sample (k,i) = Sample (k, i) * Smoothed_Recon_Gain (k,i), where k is the frame index and i is the sample index of the frame.
+	- Smoothed_Recon_Gain (k) = MA_gain (k-1) * e_window + MA_gain (k) * s_window
+	- MA_gain (k) = 2 / (N+1) * [=recon_gain=] (k) / 255 + (1 – 2/(N+1)) * MA_gain (k-1), where MA_gain (0) = 1.
 	- e_window[0: olen] = hanning[olen:], e_window[olen:flen] = 0.
 	- s_window[0: olen] = hanning[:olen], s_window[olen:flen] = 1.
 	- Where hanning = np.hanning (2*olen), flen is the frame size and olen is the overlap size.
@@ -2644,6 +2644,10 @@ round(x) = floor(x + 0.5).
 
 The MOD() function returns the remainder after <b>Number</b> is divided by <b>Divisor</b>.
 
+<b>pow(x, y)</b>
+
+The pow() function returns the value of x to the power of y.
+
 
 # Annex
 
@@ -2712,14 +2716,14 @@ Implementers MAY use another method to get the [=down-mixed audio=] from the giv
 
 Therefore, a down-mixer based on the down-mix mechanism is a combination of the following surround down-mixer(s) and top down-mixer(s) as depicted in the figure below.
 - Surround down-mixers 
-	- <dfn noexport>S7to5 enc.</dfn>: Ls5 = α(k) x Lss7 + β(k) x Lrs7 and Rs5 = α(k) x Rss7 + β(k) x Rrs7.
-	- <dfn noexport>S5to3 enc.</dfn>: L3 = L5 + δ(k) x Ls5 and R3 = R5 + δ(k) x Rs5
-	- <dfn noexport>S3to2 enc.</dfn>: L2 = L3 + 0.707 x C and R2 = R3 + 0.707 x C
-	- <dfn noexport>S2to1 enc.</dfn>: Mono = 0.5 x (L2 + R2)
+	- <dfn noexport>S7to5 enc.</dfn>: Ls5 = α(k) * Lss7 + β(k) * Lrs7 and Rs5 = α(k) * Rss7 + β(k) * Rrs7.
+	- <dfn noexport>S5to3 enc.</dfn>: L3 = L5 + δ(k) * Ls5 and R3 = R5 + δ(k) * Rs5
+	- <dfn noexport>S3to2 enc.</dfn>: L2 = L3 + 0.707 * C and R2 = R3 + 0.707 * C
+	- <dfn noexport>S2to1 enc.</dfn>: Mono = 0.5 * (L2 + R2)
 
 - Top Down-mixers
-	- <dfn noexport>T4to2 enc.</dfn>: Ltf2 = Ltf4 + γ(k) x Ltb4  and Rtf2 = Rtf4 + γ(k) x Rtb4.
-	- <dfn noexport>T2toTF2 enc.</dfn>: Ltf3 = Ltf2 + w(k) x δ(k) x Ls5 and Rtf3 = Rtf2 + w(k) x δ(k) x Rs5.
+	- <dfn noexport>T4to2 enc.</dfn>: Ltf2 = Ltf4 + γ(k) * Ltb4  and Rtf2 = Rtf4 + γ(k) * Rtb4.
+	- <dfn noexport>T2toTF2 enc.</dfn>: Ltf3 = Ltf2 + w(k) * δ(k) * Ls5 and Rtf3 = Rtf2 + w(k) * δ(k) * Rs5.
 
 <center><img src="images/Down-mix Mechanism.png" style="width:100%; height:auto;"></center>
 <center><figcaption>IA Down-mix Mechanism</figcaption></center>
@@ -2757,7 +2761,7 @@ Let's define the followings:
 
 If 10*log10(level Ok / maxL^2) is less than the first threshold value (-80dB is RECOMMENDED), Recon_Gain (k, i)  = 0. Where, maxL = 32767 for 16bits.
 
-If 10*log10(level Ok / level Mk ) is less than the second threshold value (-6dB is RECOMMENDED), Recon_Gain (k, i) is set to the value which makes level Ok = Recon_Gain (k, i)^2 x level Dk. Otherwise, Recon_Gain (k, i) = 1. Actual value (i.e. [=recon_gain=]) to be delivered is floor(255*Recon_Gain).
+If 10*log10(level Ok / level Mk ) is less than the second threshold value (-6dB is RECOMMENDED), Recon_Gain (k, i) is set to the value which makes level Ok = Recon_Gain (k, i)^2 * level Dk. Otherwise, Recon_Gain (k, i) = 1. Actual value (i.e. [=recon_gain=]) to be delivered is floor(255*Recon_Gain).
 
 For example, if we assume CL #i = 7.1.4ch and CL #i-1 = 5.1.2ch, then de-mixed channels are D_Lrs7, D_Rrs7, D_Ltb4 and D_Rtb4.
 - D_Lrs7 and D_Rrs7 are de-mixed from Ls5 and Rs5 in the (i-1)th [=ChannelGroup=] by using Lss7 and Rss7 in the ith [=ChannelGroup=] and its relevant demixing parameters (i.e., α(k) and β(k)) , respectively.
