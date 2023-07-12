@@ -579,7 +579,7 @@ NOTE: 'ipcm' should not be confused with 'lpcm' which is another 4CC to identify
 <dfn noexport>num_samples_per_frame</dfn> indicates the frame length, in samples, of the audio_frame() provided in by audio_frame_obu(). It SHALL NOT be set to zero. If the [=decoder_config()=] structure for a given codec specifies a value for the frame length, the two values SHALL be equal.
 
 <dfn noexport>audio_roll_distance</dfn> indicates how many audio frames prior to the current audio frame need to be decoded (and decoded samples discarded) to set the encoder in a state that will produce the perfect decoded audio signal. It SHALL always be a negative value or zero. For some audio codecs, even if an audio frame can be decoded independently, the decoded signal after decoding only that frame may not represent a perfect, decoded audio signal, even ignoring compression artifacts. This can be due to overlap transforms. While potentially acceptable when starting to decode an [=Audio Substream=], it may be problematic when automatically switching between similar [=Audio Substream=]s of different quality and/or bitrate. 
-- It SHALL be set to -R when [=codec_id=] is set to 'Opus'. Where R is roundup(3840 % [=num_samples_per_frame=]).
+- It SHALL be set to -R when [=codec_id=] is set to 'Opus'. Where R is ceil(3840 % [=num_samples_per_frame=]).
 - It SHALL be set to -1 when [=codec_id=] is set to 'mp4a'.
 - It SHALL be set to 0 when [=codec_id=] is set to  'fLaC' or 'ipcm'.
 
@@ -807,7 +807,7 @@ abstract class ParamDefinition() {
 <dfn noexport>constant_subblock_duration</dfn> specifies the duration of each subblock, in the case where all subblocks except the last subblock have equal durations. If all subblocks except the last subblock do not have equal durations, the value of constant_subblock_duration SHALL be set to 0. 
 
 Given <dfn noexport>D</dfn> = the value of [=duration=], <dfn noexport>NS</dfn> = the value of [=num_subblocks=], <dfn noexport>CSD</dfn> = the value of [=constant_subblock_duration=] and <dfn noexport>SD</dfn> = the value of [=subblock_duration=].
-- When [=CSD=] != 0, [=num_subblocks=] is implicitly calculated as [=NS=] = roundup([=D=] ÷ [=CSD=]).
+- When [=CSD=] != 0, [=num_subblocks=] is implicitly calculated as [=NS=] = ceil([=D=] ÷ [=CSD=]).
 	- If [=NS=] x [=CSD=] > [=D=], the actual duration of the last subblock SHALL be [=D=] - ([=NS=] - 1) x [=CSD=].
 - When [=CSD=] = 0, the summation of all [=SD=]s in this parameter block SHALL be equal to [=D=].
 
@@ -1343,7 +1343,7 @@ class parameter_block_obu() {
     if (constant_subblock_duration == 0) {
       leb128() num_subblocks;
     } else {
-      // num_subblocks = roundup(duration ÷ constant_subblock_duration)
+      // num_subblocks = ceil(duration ÷ constant_subblock_duration)
     }
   }
 
@@ -1383,7 +1383,7 @@ When it gets an unknown [=param_definition_type=], parsers compliant with this v
 
 <dfn value noexport for="parameter_block_obu()">constant_subblock_duration</dfn> specifies the duration of each subblock, in the case where all subblocks except the last subblock have equal durations. If all subblocks except the last subblock do not have equal durations, the value of constant_subblock_duration SHALL be set to 0. 
 
-<dfn value noexport for="parameter_block_obu()">num_subblocks</dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different subblock of the timeline, contiguously. When [=constant_subblock_duration=] != 0, [=num_subblocks=] is implicitly calculated as  [=num_subblocks=] = roundup([=duration=] ÷ [=constant_subblock_duration=]).
+<dfn value noexport for="parameter_block_obu()">num_subblocks</dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different subblock of the timeline, contiguously. When [=constant_subblock_duration=] != 0, [=num_subblocks=] is implicitly calculated as  [=num_subblocks=] = ceil([=duration=] ÷ [=constant_subblock_duration=]).
 
 [=Audio Element OBU=] and/or [=Mix Presentation OBU=] is mapping a parameter_id to the parameter definition type. So, IA decoders can know the definition type mapped to the parameter_id.
 
@@ -2580,6 +2580,9 @@ All syntax elements conform to the [=Syntactic Description Language=] specified 
   <td>floor(x)</td><td>The largest integer that is smaller than or equal to x.</td>
 </tr>
 <tr>
+  <td>ceil(x)</td><td>The smallest integer that is greater than or equal to x.</td>
+</tr>
+<tr>
   <td>sqrt(x)</td><td>The square root of x.</td>
 </tr>
 </table>
@@ -2616,10 +2619,6 @@ The round() function returns the integer value closest to <code>x</code> and may
 ```
 round(x) = floor(x + 0.5).
 ```
-
-<b>roundup(x)</b>
-
-The roundup() function returns the smallest integer value greater than or equal to <code>x</code>
 
 <b>MOD(Number, Divisor)</b>
 
