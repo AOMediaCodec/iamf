@@ -490,7 +490,7 @@ This flag SHALL be set to 0 for this version of the specification. An OBU parser
 
 NOTE: A future version of the specification may use this flag to specify an extension header field by setting [=obu_extension_flag=] = 1 and setting the size of the extended header to [=extension_header_size=].
 
-<dfn noexport>obu_size</dfn> indicates the size in bytes of the OBU immediately following the obu_size field of the OBU. An OBU MAY have extra bytes after consuming all the bytes per the OBU syntax definition, parsers compliant to this version of the specification SHALL ignore the extra bytes. 
+<dfn noexport>obu_size</dfn> indicates the size in bytes of the OBU immediately following the obu_size field of the OBU. An OBU MAY have extra bytes after consuming all the bytes per the OBU syntax definition, parsers compliant with this version of the specification SHALL ignore the extra bytes. 
 	
 <dfn noexport>num_samples_to_trim_at_start</dfn> indicates the number of samples that need to be trimmed from the start of the samples in this [=Audio Frame OBU=]. 
 
@@ -502,7 +502,7 @@ NOTE: A future version of the specification may use this flag to specify an exte
 
 ## Reserved OBU Syntax and Semantics ## {#obu-reserved}
 
-Reserved OBUs SHALL be ignored by parsers compliant with this version of the specification. Future versions of the specification MAY define semantics for these reserved OBUs that would only be supported by parsers compliant to these future versions.
+Reserved OBUs SHALL be ignored by parsers compliant with this version of the specification. Future versions of the specification MAY define semantics for these reserved OBUs that would only be supported by parsers compliant with these future versions.
 
 
 ## IA Sequence Header OBU Syntax and Semantics ## {#obu-iasequenceheader}
@@ -531,14 +531,14 @@ class ia_sequence_header_obu() {
 	
 NOTE: When IA OBUs are delivered over a protocol that does not provide explicit [=IA Sequence=] boundaries, a parser may locate the [=IA Sequence=] start by searching for the code 'iamf' preceded by specific OBU header values, e.g. assuming [=obu_extension_flag=] is set to 0 and because [=obu_trimming_status_flag=] is set to 0 for an [=IA Sequence Header OBU=], the OBU header can be 0xF806 or 0xFC06
 
-<dfn noexport>primary_profile</dfn> indicates the primary profile this [=IA Sequence=] complies to. Parsers compliant with this version of the specification SHALL discard the [=IA Sequence=] when this value is not one they support.
+<dfn noexport>primary_profile</dfn> indicates the primary profile that this [=IA Sequence=] complies with. Parsers compliant with this version of the specification SHALL discard the [=IA Sequence=] when this value is not one they support.
 
 The below mappings are applied for both [=primary_profile=] and [=additional_profile=].
 - 0: Simple Profile
 - 1: Base Profile
 - 2~255: Reserved
 
-<dfn noexport>additional_profile</dfn> indicates an additional profile of this specification to which this [=IA Sequence=] complies. If an [=IA Sequence=] only complies with the [=primary_profile=] profile, this field SHALL be set to the same [=primary_profile=] value.
+<dfn noexport>additional_profile</dfn> indicates an additional profile of the specification that this [=IA Sequence=] complies with. If an [=IA Sequence=] only complies with the [=primary_profile=], this field SHALL be set to the same [=primary_profile=] value.
 
 NOTE: If a future version defines a new profile, e.g. HypotheticalProfile, that is backward compatible with the Base profile, for example by defining new OBUs that would be ignored by the Base-compatible parser, an IA writer can decide to set the [=primary_profile=] to 'Base' while setting the [=additional_profile=] to 'HypotheticalProfile'. This way an old processor will know it can parse and produce an acceptable rendering, while a new processor still knows it can produce a better result because it will not ignore the additional featurest.
 
@@ -1153,7 +1153,7 @@ Parsers encountering a Reserved value of [=headphones_rendering_mode=] SHALL ign
 
 <dfn noexport>rendering_config_extension_size</dfn> indicates the size in bytes of [=rendering_config_extension_bytes=].
 
-<dfn noexport>rendering_config_extension_bytes</dfn> represents reserved bytes for future use. Parsers compliant to this version of the specification SHALL ignore these bytes.
+<dfn noexport>rendering_config_extension_bytes</dfn> represents reserved bytes for future use. Parsers compliant with this version of the specification SHALL ignore these bytes.
 
 
 ### Element Mix Config Syntax and Semantics ### {#syntax-element-mix-config}
@@ -1321,7 +1321,7 @@ NOTE: [[!ITU1770-4]] adopts the convention of using the dBov unit for dBFS, wher
 
 <dfn noexport>info_type_size</dfn> indicates the size in bytes of [=info_type_bytes=].
 
-<dfn noexport>info_type_bytes</dfn> represents reserved bytes for future use when new marks of [=info_type=] are defined. Parsers compliant to this version of the specification SHALL ignore these bytes.
+<dfn noexport>info_type_bytes</dfn> represents reserved bytes for future use when new marks of [=info_type=] are defined. Parsers compliant with this version of the specification SHALL ignore these bytes.
 
 ## Parameter Block OBU Syntax and Semantics ## {#obu-parameterblock}
 
@@ -1373,7 +1373,7 @@ class parameter_block_obu() {
 
 <b>Semantics</b>
 
-<dfn noexport>parameter_id</dfn> defines an identifier for a [=Parameter Substream=]. [=Parameter Block OBU=] refer to the [=Parameter Substream=] through this identifier.  If no [=Audio Element OBU=]s or [=Mix Presentation OBU=]s refer to this [=parameter_id=], parsers compliant to this version of the specification SHALL ignore [=Parameter Block OBU=]s with this identifier.
+<dfn noexport>parameter_id</dfn> defines an identifier for a [=Parameter Substream=]. [=Parameter Block OBU=] refer to the [=Parameter Substream=] through this identifier.  If no [=Audio Element OBU=]s or [=Mix Presentation OBU=]s refer to this [=parameter_id=], parsers compliant with this version of the specification SHALL ignore [=Parameter Block OBU=]s with this identifier.
 
 <dfn noexport>get_param_definition()</dfn> is a run-time function to get the parameter definition type, the parameter definition mode, duration, num_subblocks, constant_subblock_duration, and subblock_duration mapped to the parameter_id. 
 
