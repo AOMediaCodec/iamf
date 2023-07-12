@@ -807,7 +807,7 @@ abstract class ParamDefinition() {
 <dfn noexport>constant_subblock_duration</dfn> specifies the duration of each subblock, in the case where all subblocks except the last subblock have equal durations. If all subblocks except the last subblock do not have equal durations, the value of constant_subblock_duration SHALL be set to 0. 
 
 Given <dfn noexport>D</dfn> = the value of [=duration=], <dfn noexport>NS</dfn> = the value of [=num_subblocks=], <dfn noexport>CSD</dfn> = the value of [=constant_subblock_duration=] and <dfn noexport>SD</dfn> = the value of [=subblock_duration=].
-- When [=CSD=] != 0, [=num_subblocks=] is implicitly calculated as [=NS=] = roundup([=D=] ÷ [=CSD=]).
+- When [=CSD=] != 0, [=num_subblocks=] is implicitly calculated as [=NS=] = roundup([=D=] / [=CSD=]).
 	- If [=NS=] x [=CSD=] > [=D=], the actual duration of the last subblock SHALL be [=D=] - ([=NS=] - 1) x [=CSD=].
 - When [=CSD=] = 0, the summation of all [=SD=]s in this parameter block SHALL be equal to [=D=].
 
@@ -1343,7 +1343,7 @@ class parameter_block_obu() {
     if (constant_subblock_duration == 0) {
       leb128() num_subblocks;
     } else {
-      // num_subblocks = roundup(duration ÷ constant_subblock_duration)
+      // num_subblocks = roundup(duration / constant_subblock_duration)
     }
   }
 
@@ -1383,7 +1383,7 @@ When it gets an unknown [=param_definition_type=], parsers compliant with this v
 
 <dfn value noexport for="parameter_block_obu()">constant_subblock_duration</dfn> specifies the duration of each subblock, in the case where all subblocks except the last subblock have equal durations. If all subblocks except the last subblock do not have equal durations, the value of constant_subblock_duration SHALL be set to 0. 
 
-<dfn value noexport for="parameter_block_obu()">num_subblocks</dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different subblock of the timeline, contiguously. When [=constant_subblock_duration=] != 0, [=num_subblocks=] is implicitly calculated as  [=num_subblocks=] = roundup([=duration=] ÷ [=constant_subblock_duration=]).
+<dfn value noexport for="parameter_block_obu()">num_subblocks</dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different subblock of the timeline, contiguously. When [=constant_subblock_duration=] != 0, [=num_subblocks=] is implicitly calculated as  [=num_subblocks=] = roundup([=duration=] / [=constant_subblock_duration=]).
 
 [=Audio Element OBU=] and/or [=Mix Presentation OBU=] is mapping a parameter_id to the parameter definition type. So, IA decoders can know the definition type mapped to the parameter_id.
 
@@ -2252,9 +2252,9 @@ where <code>B_quad(a) = (t, y)</code> is a 2D coordinate with parameter value <c
 To apply the parameter values to the audio samples in the subblock without interpolation, the [=parameter_rate=] SHOULD be first resampled to the audio sample rate to give:
 
 ```
-n0 = t0 * audio_sample_rate / parameter_rate,
-n1 = t1 * audio_sample_rate / parameter_rate,
-n2 = t2 * audio_sample_rate / parameter_rate.
+n0 = t0 * floor(audio_sample_rate / parameter_rate),
+n1 = t1 * floor(audio_sample_rate / parameter_rate),
+n2 = t2 * floor(audio_sample_rate / parameter_rate).
 ```
 
 Then, <code>P0</code>, <code>P1</code>, <code>P2</code> can be rewritten as:
@@ -2270,7 +2270,7 @@ Next, the parameter value <code>y</code> is computed for each time <code>t</code
 In the case of <code>B_linear(a)</code>, the mapping between <code>n</code> and <code>a</code> is given by:
 
 ```
-a = n ÷ n2.
+a = n / n2.
 ```
 
 In the case of <code>B_quad(a)</code>, the mapping between <code>n</code> and <code>a</code> is given as follows. Let
@@ -2284,13 +2284,13 @@ gamma = n0 - n.
 If <code>alpha</code> is equal to 0, then
 
 ```
-a = -gamma ÷ beta,
+a = -gamma / beta,
 ```
 
 else,
 
 ```
-a = (-beta + sqrt(beta^2 - 4 * alpha * gamma)) ÷ (2 * alpha).
+a = (-beta + sqrt(beta^2 - 4 * alpha * gamma)) / (2 * alpha).
 ```
 
 
@@ -2571,10 +2571,7 @@ All syntax elements conform to the [=Syntactic Description Language=] specified 
   <td>*</td><td>Multiplication.</td>
 </tr>
 <tr>
-  <td>÷</td><td>Floating point (arithmetic) division.</td>
-</tr>
-<tr>
-  <td>/</td><td>Integer division with truncation of the result toward zero.</td>
+  <td>/</td><td>Floating point (arithmetic) division.</td>
 </tr>
 <tr>
   <td>floor(x)</td><td>The largest integer that is smaller than or equal to x.</td>
