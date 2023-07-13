@@ -1770,7 +1770,7 @@ A file conformant to this specification satisfies the following:
 - It SHALL conform to the normative requirements of [[!ISOBMFF]]
 - It SHALL have the <dfn value export for="ISOBMFF Brand">iamf</dfn> brand among the compatible brands array of the FileTypeBox
 - It SHALL contain at least one track using an [=IASampleEntry=]
-- It SHOULD indicate a structural ISOBMFF brand among the compatible brands array of the FileTypeBox, such as 'iso6'
+- It SHOULD indicate a structural ISOBMFF brand among the compatible brands' array of the FileTypeBox, such as 'iso6'
 - It MAY indicate other brands not specified in this specification provided that the associated requirements do not conflict with those given in this specification
 
 Parsers SHALL support the structures required by the <code>'iso6'</code> brand and MAY support structures required by further ISOBMFF structural brands.
@@ -1778,11 +1778,13 @@ Parsers SHALL support the structures required by the <code>'iso6'</code> brand a
 
 ## ISOBMFF IAMF Encapsulation ## {#isobmff-singletrack}
 
-This section describes the basic data structures used to signal encapsulation of [=IA Sequence=] in [[!ISOBMFF]] containers.
+This section describes the basic data structures used to signal encapsulation of an [=IA Sequence=] in [[!ISOBMFF]] containers.
 
 ### Requirement of IA Sequence ### {#isobmff-singletrack-iasequence}
 
 Even though an [=IA Sequence=] can theoretically group audio data coded with different codecs, potentially with different timing properties, which would require multiple tracks, this version of the specification only supports storing an [=IA Sequence=] as a single track thanks to the restrictions of the selected profiles. 
+
+In this version of the specification, <dfn noexport>IA Track</dfn> means the track storing an [=IA Sequence=].
 
 ### Encapsulation Scheme ### {#isobmff-singletrack-basicencapsulationscheme}
 
@@ -1795,12 +1797,12 @@ The result of encapsulating an [=IA Sequence=] into an [[!ISOBMFF]] file is as f
 NOTE: Multiple sample entries may be used in a track, for example when the track is the concatenation of multiple tracks or multiple [=IA Sequence=]s, and some [=IA Sample=]s have different [=configOBUs=] values.
 
 - Decoding Time to IA Sample
-	- The 'stts' or 'trun' box SHALL indicate the number of audio samples in an [=IA Sample=] (i.e. the duration of an [=IA Sample=]).
-	- The duration of [=IA Sample=] includes audio samples trimmed at the beginning but excludes audio samples trimmed at the end.
+	- The 'stts' or 'trun' box SHALL indicate the number of audio samples in an [=IA Sample=] (i.e., the duration of an [=IA Sample=]).
+	- The duration of an [=IA Sample=] includes audio samples trimmed at the beginning but excludes audio samples trimmed at the end.
 - Sample Group
-	- When the [=codec_id=] is set to 'Opus' or 'mp4a' in an IA Track, every sample SHALL be associated with a sample group of type 'roll'. The [=roll_distance=] value SHALL equal the value of the [=audio_roll_distance=] field in the [=Codec Config OBU=] stored in the [=configOBUs=] array in the sample entry.
+	- When the [=codec_id=] is set to 'Opus' or 'mp4a' in an [=IA Track=], every sample SHALL be associated with a sample group of type 'roll'. The [=roll_distance=] value SHALL equal the value of the [=audio_roll_distance=] field in the [=Codec Config OBU=] stored in the [=configOBUs=] array in the sample entry.
 - Composition Time Stamp (CTS)
-	- For each [=IA Sample=], CTS = DTS (Decoding Time Stamp), and as a consequence, the 'ctts' box (and similar signaling in movie fragments) SHALL not be used.
+	- For each [=IA Sample=], CTS = DTS (Decoding Time Stamp), and as a consequence, the 'ctts' box (and similar signaling in movie fragments) SHALL NOT be used.
 
 ### IA Sample Entry ### {#iasampleentry-section}
 
@@ -1850,9 +1852,9 @@ class ia_sample() {
 For tracks using the [=IASampleEntry=], an <dfn noexport>IA Sample</dfn> has the following constraints:
 - All [=IA Sample=]s SHALL be marked as sync samples.
 - One [=IA Sample=] SHALL be one [=Temporal Unit=] and SHALL NOT contain the [=Temporal Delimiter OBU=].
-- The decode duration of an [=IA Sample=] SHALL equal the duration of the underlying [=Temporal Unit=], i.e. the decode duration of the [=Audio Frame OBU=].
+- The decode duration of an [=IA Sample=] SHALL equal the duration of the underlying [=Temporal Unit=] (i.e., the decode duration of the [=Audio Frame OBU=]).
 
-NOTE: Per the restriction of the profiles carried in an IA track, all [=Audio Frame OBU=]s in an [=IA Sample=] have the same duration and have the same trimming information. If [=Audio Frame OBU=]s in the [=IA Sample=] contain trimming information, the corresponding audio samples are removed from the presentation using edit list information.
+NOTE: Per the restriction of the profiles carried in an [=IA Track=], all [=Audio Frame OBU=]s in an [=IA Sample=] have the same duration and have the same trimming information. If [=Audio Frame OBU=]s in the [=IA Sample=] contain trimming information, the corresponding audio samples are removed from the presentation using edit list information.
 
 NOTE: In typical cases, when a track contains a single [=IA Sequence=], trimming can only happen at the beginning or the end of the [=IA Sequence=]. Therefore, the edit list can describe the start and end trimming with a single edit entry. A track storing consecutive [=IA Sequence=]s may need multiple edits in the edit list.
 
@@ -1861,8 +1863,8 @@ NOTE: In typical cases, when a track contains a single [=IA Sequence=], trimming
 DASH and other applications require defined values for the 'codecs' parameter specified in [[!RFC6381]] for ISO Media tracks. The codecs parameter string for [=codec_id=] SHALL be:
 - Per [[!RFC6381]] and [[!ISOBMFF]], the first element of the codecs parameter string is 'iamf'.
 - The second element indicates the [=primary_profile=]. It is three digits within the range of 0 to 255.
-- The 3rd element indicates the [=additional_profile=]. It is three digits within the range of 0 to 255.
-- The 4th element and any additional elements, if any, SHALL be the elements of the codecs parameter string if that stream was carried in its own track (i.e. not encapsulated in IAMF).
+- The third element indicates the [=additional_profile=]. It is three digits within the range of 0 to 255.
+- The fourth element and any additional elements, if any, SHALL be the elements of the codecs parameter string if that stream was carried in its own track (i.e., not encapsulated in IAMF).
 
 For example,
 - the codecs parameter string for [=codec_id=] = 'Opus' is
@@ -1895,7 +1897,7 @@ where <code>xxx</code> is three digits to indicate the value of the [=primary_pr
 
 ### Decapsulating an ISOBMFF IAMF File with a Single Track ### {#isobmff-decapsulation-singletrack}
 
-This section provides a guideline for IAMF parsers reconstructing [=IA Sequence=]s from an IAMF file with a single track, as follows.
+This section provides a guideline for IAMF parsers reconstructing [=IA Sequence=] from an IAMF file with a single track, as follows.
 
 1. The [=configOBUs=] from the [=IASampleEntry=] are placed at the beginning of the [=IA Sequence=]. These are the [=Descriptors=]. 
 
@@ -1912,12 +1914,12 @@ This section provides a guideline for handling trimming information in an ISOBMF
 <center><figcaption>Recommendation for handling ISOBMFF trimming information. PTS is the presentation start time. PTS1 is the presentation start time of the first audio sample before trimming. PTS2 is the presentation start time of the first audio sample after trimming.</figcaption></center>
 
 As depicted in the figure above, 
-- The ISOBMFF parser passes the [=Descriptors=], PTS1 and [=IA Samples=] (or [=Temporal Unit=]s) to the IAMF decoder.
-- The ISOBMFF parser passes PTS1 and the trimming information to the ISOBMFF player. (This is optional if the IAMF decoder trims the audio samples.)
-- The IAMF decoder passes PTS and the audio samples after decoding to the ISOBMFF player.
+- The IAMF-ISOBMFF parser passes the [=Descriptors=], PTS1 and [=IA Samples=] (or [=Temporal Unit=]s) to the IAMF decoder.
+- The IAMF-ISOBMFF parser passes PTS1 and the trimming information to the IAMF-ISOBMFF player. (This is optional if the IAMF decoder trims the audio samples.)
+- The IAMF decoder passes PTS and the audio samples after decoding to the IAMF-ISOBMFF player.
 	- If the IAMF decoder trims the audio samples based on the trimming information within the [=Audio Frame OBU=]s, then the IAMF decoder passes PTS2 and the audio samples after trimming.
 	- If the IAMF decoder does not trim, then the IAMF decoder passes PTS1 and the audio samples before trimming.
-- The ISOBMFF player plays back the trimmed audio samples through the loudspeakers starting at PTS2.
+- The IAMF-ISOBMFF player plays back the trimmed audio samples through the loudspeakers starting at PTS2.
 
 # IAMF processing # {#processing}
 
