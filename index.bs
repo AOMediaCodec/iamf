@@ -132,6 +132,10 @@ url: https://xiph.org/flac/format.html; spec: FLAC; type: dfn;
 	text: maximum frame size
 	text: number of channels
 	text: MD5 signature
+	text: Block size in inter-channel samples
+	text: Sample rate
+	text: Channel assignment
+	text: Sample size in bits
 
 url: https://xiph.org/flac/format.html; spec: FLAC; type: property;
 	text: fLaC
@@ -1625,15 +1629,19 @@ The sample rate used for computing offsets SHALL be the rate indicated by the [=
 
 [=codec_id=] SHALL be 'fLaC', the FLAC stream marker in ASCII, meaning byte 0 of the stream is 0x66, followed by 0x4C 0x61 0x43.
 
-[=decoder_config()=] for FLAC are the [=METADATA_BLOCK=]s of [[!FLAC]]. The [=METADATA_BLOCK_STREAMINFO=] has the following constraints:
+[=decoder_config()=] for FLAC is the [=METADATA_BLOCK=]s of [[!FLAC]] for mono or stereo channels. The [=METADATA_BLOCK_STREAMINFO=] has the following constraints:
 - [=minimum block size=] SHALL be set to [=num_samples_per_frame=].
 - [=maximum block size=] SHALL be set to [=num_samples_per_frame=].
 - [=minimum frame size=] SHOULD be set to 0.
 - [=maximum frame size=] SHOULD be set to 0.
-- [=number of channels=] SHALL be set to 1. [=number of channels=] can be ignored because the real value can be determined from the [=Audio Element OBU=].
+- [=number of channels=] SHALL be set to 1. [=number of channels=] can be ignored because the real value can be determined from the [=Audio Element OBU=] and from the [=Frame_Header=].
 - [=MD5 signature=] SHOULD be set to 0.
 
-The format of [=audio_frame()=] is [=FRAME=] of [[!FLAC]], which is composed of [=FRAME_HEADER=], followed by [=SUBFRAME=](s) (one [=SUBFRAME=] per channel) and followed by [=FRAME_FOOTER=].
+The format of [=audio_frame()=] is [=FRAME=] of [[!FLAC]] which contains only one single frame of mono or stereo channels with the following constraints.
+- [=Block size in inter-channel samples=] in the [=FRAME_HEADER=] SHALL be set to [=num_samples_per_frame=].
+- [=Sample rate=] in the [=FRAME_HEADER=] SHALL indicate the same sample rate defined in the [=METADATA_BLOCK_STREAMINFO=].
+- [=Channel assignment=] in the [=FRAME_HEADER=] SHALL be set to 0 or 1 to indicate that the [=FRAME=] contains mono channel or stereo channels, respectively.
+- [=Sample size in bits=] in the [=FRAME_HEADER=] SHALL indicate the same sample size defined in the [=METADATA_BLOCK_STREAMINFO=]. 
 
 The sample rate used for computing offsets SHALL be the sampling rate indicated in the [=METADATA_BLOCK=].
 
