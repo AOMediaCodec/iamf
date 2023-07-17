@@ -296,12 +296,12 @@ The term <dfn noexport>Audio Element</dfn> means a [=3D audio signal=], and is c
 
 The term <dfn noexport>ChannelGroup</dfn> means a set of [=Audio Substream=](s) which is(are) able to provide a spatial resolution of audio contents by itself or which is(are) able to provide an enhanced spatial resolution of audio contents by combining with the preceding [=ChannelGroup=]s.
 
-The term <dfn noexport>Parameter Substream</dfn> means a sequence of parameter values that are associated with the algorithms used for decoding, reconstructing, rendering, and mixing. It is applied to its associated [=Audio Element=].
-- [=Parameter Substream=] may change their values over time and may further be animated; for example, any changes in values may be smoothed over some time duration. As such, they may be viewed as a 1D signal with different metadata specified for different time durations.
+The term <dfn noexport>Parameter Substream</dfn> means a sequence of parameter values that are associated with the algorithms used for reconstructing, rendering, and mixing. It is applied to its associated [=Audio Element=] or [=Mix Presentation=].
+- [=Parameter Substream=]s may change their values over time and may further be animated; for example, any changes in values may be smoothed over some time duration. As such, they may be viewed as a 1D signal with different metadata specified for different time durations.
 
-The term <dfn noexport>Mix Presentation</dfn> means a series of processes to present [=Immersive Audio=] contents to end-users by using [=Audio Element=](s). It contains metadata that describes how the [=Audio Element=](s) is(are) rendered and mixed together for playback through physical loudspeakers or headsets, and loudness information.
+The term <dfn noexport>Mix Presentation</dfn> means a series of processes to present [=Immersive Audio=] contents to end-users by using [=Audio Element=](s). It contains metadata that describes how the [=Audio Element=](s) is(are) rendered and mixed together for playback through physical loudspeakers or headphones, and loudness information.
 
-The term <dfn noexport>Rendered Mix Presentation</dfn> means a [=3D audio signal=] after the [=Audio Element=](s) defined in a [=Mix Presentation=] is(are) rendered and mixed together for playback through physical loudspeaker or headsets.
+The term <dfn noexport>Rendered Mix Presentation</dfn> means a [=3D audio signal=] after the [=Audio Element=](s) defined in a [=Mix Presentation=] is(are) rendered and mixed together for playback through physical loudspeakers or headphones.
 
 ## Architecture ## {#architecture}
 
@@ -320,8 +320,8 @@ For a given input 3D audio,
 - A Codec Dec outputs decoded [=ChannelGroup=](s) after decoding of the coded [=Audio Substream=](s).
 - A Post-Processor outputs an [=Immersive Audio=] by using the [=ChannelGroup=](s), the [=Descriptors=] and the [=Parameter Substream=](s).
 - Pre-Processor, [=ChannelGroup=](s), Codec Enc and OBU Packetizer are defined in [[#iamfgeneration]].
-- [=IA Sequence=] is defined in [[#iasequence]]
-- ISOBMFF Encapsulation, IAMF file (ISOBMFF file) and ISOBMFF Parser are deifned in [[#isobmff]].
+- [=IA Sequence=] is defined in [[#iasequence]].
+- ISOBMFF Encapsulation, IAMF file (ISOBMFF file) and ISOBMFF Parser are defined in [[#isobmff]].
 - OBU Parser, Codec Dec, and Post-Processor are defined in [[#processing]].
 
 ## Bitstream Structure ## {#bitstream}
@@ -339,30 +339,30 @@ The metadata in the [=Descriptors=] and [=IA Data=] are packetized into individu
 <dfn noexport>Descriptors</dfn> contain all the information that is required to set up and configure the decoders, reconstruction algorithm, renderers, and mixers. [=Descriptors=] do not contain audio signals.
 
 - <dfn noexport>IA Sequence Header OBU</dfn> indicates the start of a full [=IA Sequence=] description and contains information related to profiles.
-- <dfn noexport>Codec Config OBU</dfn> describes information to set up a decoder for an coded [=Audio Substream=].
-- <dfn noexport>Audio Element OBU</dfn> describes information to combine one or more [=Audio Substream=]s to reconstruct an [=Audio Element=].
-- <dfn noexport>Mix Presentation OBU</dfn> describes information to render and mix one or more [=Audio Element=]s to generate the final 3D audio output.
+- <dfn noexport>Codec Config OBU</dfn> provides information to set up a decoder for a coded [=Audio Substream=].
+- <dfn noexport>Audio Element OBU</dfn> provides information to combine one or more [=Audio Substream=]s to reconstruct an [=Audio Element=].
+- <dfn noexport>Mix Presentation OBU</dfn> provides information to render and mix one or more [=Audio Element=]s to generate the final 3D audio output.
 	- Multiple [=Mix Presentation=]s can be defined as alternatives to each other within the same [=IA Sequence=]. Furthermore, the choice of which [=Mix Presentation=] to use at playback is left to the user. For example, multi-language support is implemented by defining different [=Mix Presentation=]s, where the first mix describes the use of the [=Audio Element=] with English dialogue, and the second mix describes the use of the [=Audio Element=] with French dialogue.
 
 #### IA Data #### {#iadata}
 
-<dfn noexport>IA Data</dfn> contains the actual time-varying data that is required in the generation of the final 3D audio output.
+<dfn noexport>IA Data</dfn> contains the time-varying data that is required in the generation of the final 3D audio output.
 
-- <dfn noexport>Audio Frame OBU</dfn> provides the coded audio frame for an [=Audio Substream=]. It has the start timestamp  and duration. So, a coded [=Audio Substream=] is represented as a sequence of [=Audio Frame OBU=]s with the same identifier, in time order. It is represented by different types of OBUs.
-- <dfn noexport>Parameter Block OBU</dfn> provides the parameter values in a block for an time-varying [=Parameter Substream=]. It has the start timestamp and duration. So, a time-varying [=Parameter Substream=] is represented as a sequence of parameter values in [=Parameter Block OBU=]s with the same identifier, in time order.
-- <dfn noexport>Temporal Delimiter OBU</dfn> identifies the [=Temporal Unit=]s. It may or may not be present in [=IA Sequence=]. If present, the first OBU of every [=Temporal Unit=] is [=Temporal Delimiter OBU=].
+- <dfn noexport>Audio Frame OBU</dfn> provides the coded audio frame for an [=Audio Substream=]. Each frame has an implied start timestamp and an explicitly defined duration. A coded [=Audio Substream=] is represented as a sequence of [=Audio Frame OBU=]s with the same identifier, in time order.
+- <dfn noexport>Parameter Block OBU</dfn> provides the parameter values in a block for a [=Parameter Substream=]. Each block has an implied start timestamp and an explicitly defined duration. A time-varying [=Parameter Substream=] is represented as a sequence of parameter values in [=Parameter Block OBU=]s with the same identifier, in time order.
+- <dfn noexport>Temporal Delimiter OBU</dfn> identifies the [=Temporal Unit=]s. It may or may not be present in [=IA Sequence=]. If present, the first OBU of every [=Temporal Unit=] is the [=Temporal Delimiter OBU=].
 
 ## Timing Model ## {#timingmodel}
 
 A coded [=Audio Substream=] is made of consecutive [=Audio Frame OBU=]s. Each [=Audio Frame OBU=] is made of audio samples at a given sample rate. The decode duration of an [=Audio Frame OBU=] is the number of audio samples divided by the sample rate. The presentation duration of an [=Audio Frame OBU=] is the number of audio samples remaining after trimming divided by the sample rate. The decode start time (respectively presentation start time) of an [=Audio Frame OBU=] is the sum of the decode durations (respectively presentation durations) of previous [=Audio Frame OBU=]s in the IA Sequence, or 0 otherwise. The decode duration (respectively presentation duration) of a coded [=Audio Substream=] is the sum of the decode durations (respectively presentation durations) of all its [=Audio Frame OBU=]s. The decode start time of an [=Audio Substream=] is the decode start time of its first [=Audio Frame OBU=]. The presentation start time of an [=Audio Substream=] is the presentation start time of its first [=Audio Frame OBU=] which is not entirely trimmed.
 
-A [=Parameter Substream=] is made of consecutive [=Parameter Block OBU=]s. Each [=Parameter Block OBU=] is made of parameter values at a given sample rate. The decode duration of a [=Parameter Block OBU=] is the number of parameter values divided by the sample rate. The decode start time of a [=Parameter Block OBU=]s is the sum of the decode duration of previous [=Parameter Block OBU=]s if any, 0 otherwise. The decode duration of a [=Parameter Substream=] is the sum of all its [=Parameter Block OBU=]'s decode durations. The start time of an [=Parameter Substream=] is the decode start time of its first [=Audio Frame OBU=]. When all parameter values of [=Parameter Substream=] are constant, no [=Parameter Block OBU=]s may present in the [=IA Sequence=].
+A [=Parameter Substream=] is made of consecutive [=Parameter Block OBU=]s. Each [=Parameter Block OBU=] is made of parameter values at a given sample rate. The decode duration of a [=Parameter Block OBU=] is the number of parameter values divided by the sample rate. The decode start time of a [=Parameter Block OBU=] is the sum of the decode duration of previous [=Parameter Block OBU=]s if any, 0 otherwise. The decode duration of a [=Parameter Substream=] is the sum of all its [=Parameter Block OBU=]s' decode durations. The start time of a [=Parameter Substream=] is the decode start time of its first [=Parameter Block OBU=]. When all parameter values in a [=Parameter Substream=] are constant, no [=Parameter Block OBU=]s may be present in the [=IA Sequence=].
 
 Within an [=Audio Element=], the presentation start times of all [=Audio Substream=]s coincide and is the presentation start time of the [=Audio Element=]. All [=Audio Substream=]s have the same presentation duration which is the presentation duration of the [=Audio Element=].
 - The decode start times of all coded [=Audio Substream=]s and all [=Parameter Substream=]s coincide and is the decode start time of the [=Audio Element=]. 
 - All coded [=Audio Substream=]s and all [=Parameter Substream=]s have the same decode duration which is the decode duration of the [=Audio Element=]. 
 
-Within an [=Mix Presentation=], the presentation start time of all [=Audio Element=]s coincide and all [=Audio Element=]s have the same duration defining the duration of the [=Mix Presentation=].
+Within a [=Mix Presentation=], the presentation start time of all [=Audio Element=]s coincide and all [=Audio Element=]s have the same duration defining the duration of the [=Mix Presentation=].
 
 Within an [=IA Sequence=], all [=Mix Presentation=]s have the same duration, defining the duration of the [=IA Sequence=], and have the same presentation start time defining the presentation start time of the [=IA Sequence=].
 
@@ -373,7 +373,11 @@ The figure below shows an example of the Timing Model in terms of the decode sta
 <center><img src="images/IAMF Timing Model.png" style="width:100%; height:auto;"></center>
 <center><figcaption>An example of the IAMF Timing Model. AFO: Audio Frame OBU, PBO: Parameter Block OBU, PT<code>x</code>: time <code>x</code> (ms) on the presentation layer's timeline, DT<code>y</code>: time <code>y</code> (ms) on the decoding layer's timeline.</figcaption></center>
 
-NOTE: For a given decoded [=Audio Substream=] (before trimming) and its associated [=Parameter Substream=](s), a decoder operates 1) or 2). 1) the decoder trims the audio samples to be trimmed of the [=Audio Substream=] after applying the [=Parameter Substream=](s) or 2) the decoder trims the audio samples to be trimmed of the [=Audio Substream=] and the parameter values of the [=Parameter Substream=](s) which are mapped to the audio samples to be trimmed, and then applies its remained [=Parameter Substream=](s) to the [=Audio Substream=] after trimming.
+NOTE: For a given decoded [=Audio Substream=] (before trimming) and its associated [=Parameter Substream=](s), a decoder MAY apply trimming in 1 of 2 ways:
+<br/>
+1) The decoder processes the [=Audio Substream=] using the [=Parameter Substream=](s), and then trims the processed audio samples.
+<br/>
+2) The decoder trims both the [=Audio Substream=] and the [=Parameter Substream=](s). Then, the decoder processes the trimmed [=Audio Substream=] using the trimmed [=Parameter Substream=](s).
 
 # Open Bitstream Unit (OBU) Syntax and Semantics # {#obu-syntax}
 
