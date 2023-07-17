@@ -251,30 +251,30 @@ This specification defines an immersive audio model and formats (IAMF) to provid
 IAMF is used to provide [=Immersive Audio=] content for presentation on a wide range of devices in both streaming and offline applications. These applications include internet audio streaming, multicasting/broadcasting services, file download, gaming, communication, virtual and augmented reality, and others. In these applications, audio may be played back on a wide range of devices, e.g. headsets, mobile phones, tablets, TVs, sound bars, home theater systems, and big screens.
 
 Here are some typical IAMF use cases and examples of how to instantiate the model for the use cases.
-- UC1: One [=Audio Element=] (e.g., 3.1.2ch or First Order Ambisonics (FOA)) is delivered to a big-screen TV (in Home) or a Mobile device through a unicast network. It is rendered to a loudspeaker layout (e.g. 3.1.2ch) or Binaural (or Stereo) with loudness normalization and is played on loudspeakers built into the big-screen TV or headset through the Mobile device, respectively.
-- UC2: Two [=Audio Element=]s (e.g., 5.1.2ch and Stereo) are delivered to a big-screen TV through a unicast network. Both are rendered to the same loudspeaker layout built into the big-screen TV and are mixed. After loudness normalization appropriate to the Home environment, the [=Rendered Mix Presentation=] is played back on the loudspeakers.
+- UC1: One [=Audio Element=] (e.g., 3.1.2ch or First Order Ambisonics (FOA)) is delivered to a big-screen TV (in a home) or a mobile device through a unicast network. It is rendered to a loudspeaker layout (e.g. 3.1.2ch) or headphones with loudness normalization, and is played back on loudspeakers built into the big-screen TV or headphones connected to the mobile device, respectively.
+- UC2: Two [=Audio Element=]s (e.g., 5.1.2ch and Stereo) are delivered to a big-screen TV through a unicast network. Both are rendered to the same loudspeaker layout built into the big-screen TV and are mixed. After applying loudness normalization appropriate to the home environment, the [=Rendered Mix Presentation=] is played back on the loudspeakers.
 - UC3: Two [=Audio Element=]s (e.g., FOA and Stereo) are delivered to a Mobile device through a unicast network. Both are rendered to the same loudspeaker layout to be mixed. After mixing them, it is rendered to Binaural (or Stereo) with loudness normalization and is played back on the headset through the Mobile device.
 
-Example 1: [=3D audio signal=] = 3.1.2ch of UC1,
-- Audio Substream: L and R channels are coded as one audio stream, Ltf and Rtf channels as one audio stream, Center as one audio stream, and LFE as one audio stream.
+Example 1: UC1 with [=3D audio signal=] = 3.1.2ch.
+- Audio Substream: The left (L) and right (R) channels are coded as one audio stream, the left top front (Ltf) and right top front (Rtf) channels as one audio stream, the Center channel as one audio stream, and the low-frequency effects (LFE) channel as one audio stream.
 - Audio Element (3.1.2ch): Consists of 4 Audio Substreams which are grouped into one [=ChannelGroup=].
-- Mix Presentation: Provide rendering algorithm of Audio Element to popular loudspeaker layouts and loudness information of the [=3D audio signal=].
+- Mix Presentation: Provides rendering algorithms for rendering the Audio Element to popular loudspeaker layouts and headphones, and the loudness information of the [=3D audio signal=].
 
-Example 2: Two [=3D audio signal=]s = 5.1.2ch and Stereo of UC2,
-- Audio Substream: L and R channels are coded as one audio stream, Ls and Rs channels as one audio stream, Ltf and Rtf channels as one audio stream, Center as one audio stream, and LFE as one audio stream.
+Example 2: UC2 with two [=3D audio signal=]s = 5.1.2ch and Stereo.
+- Audio Substream: The L and R channels are coded as one audio stream, the left surround (Ls) and right surround (Rs) channels as one audio stream, the Ltf and Rtf channels as one audio stream, the Center channel as one audio stream, and the LFE channel as one audio stream.
 - Audio Element 1 (5.1.2ch): Consists of 5 Audio Substreams which are grouped into one [=ChannelGroup=].
 - Audio Element 2 (Stereo): Consists of 1 Audio Substream which is grouped into one [=ChannelGroup=].
-- Parameter Substream 1-1: Mixing parameter values applied to Audio Element 1 by considering the Home environment
-- Parameter Substream 1-2: Mixing parameter values applied to Audio Element 2 by considering the Home environment
-- Mix Presentation: Provide rendering algorithm of Audio Element 1 & 2 to popular loudspeaker layouts, mixing based on Parameter Substream 1-1 & 1-2 and loudness information of the [=Rendered Mix Presentation=].
+- Parameter Substream 1-1: Contains mixing parameter values which are applied to Audio Element 1 by considering the home environment.
+- Parameter Substream 1-2: Contains mixing parameter values which are applied to Audio Element 2 by considering the home environment.
+- Mix Presentation: Provides rendering algorithms for rendering Audio Elements 1 & 2 to popular loudspeaker layouts, mixing information based on Parameter Substreams 1-1 & 1-2, and loudness information of the [=Rendered Mix Presentation=].
 
-Example 3: Two [=3D audio signal=]s = FOA and Stereo of UC3,
-- Audio Substream: L and R channels are coded as one audio stream and each channel of FOA as one audio stream.
+Example 3: UC3 with two [=3D audio signal=]s = first order Ambisonics (FOA) and Stereo.
+- Audio Substream: The L and R channels are coded as one audio stream and each channel of the FOA signal as one audio stream.
 - Audio Element 1 (FOA): Consists of 4 Audio Substreams which are grouped into one [=ChannelGroup=].
 - Audio Element 2 (Stereo): Consists of 1 Audio Substream which is grouped into one [=ChannelGroup=].
-- Parameter Substream 1-1: Mixing parameter values applied to Audio Element 1 by considering the Mobile environment
-- Parameter Substream 1-2: Mixing parameter values applied to Audio Element 2 by considering the Mobile environment
-- Mix Presentation: Provide rendering algorithm of Audio Element 1 & 2 to popular loudspeaker layouts, mixing based on Parameter Substream 1-1 & 1-2 and loudness information of the [=Rendered Mix Presentation=].
+- Parameter Substream 1-1: Contains mixing parameter values which are applied to Audio Element 1 by considering the mobile environment.
+- Parameter Substream 1-2: Contains mixing parameter values which are applied to Audio Element 2 by considering the mobile environment.
+- Mix Presentation: Provides rendering algorithms for rendering Audio Elements 1 & 2 to popular loudspeaker layouts and headphones, mixing information based on Parameter Substreams 1-1 & 1-2, and loudness information of the [=Rendered Mix Presentation=].
 
 
 # Immersive Audio Model # {#iamodel}
