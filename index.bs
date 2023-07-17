@@ -2419,7 +2419,7 @@ For Scalable Channel Audio encoding:
 				- [=coupled_substream_count=] is set to the number of coupled substreams among the [=Audio Substream=]s that make up the ith [=ChannelGroup=].
 				- Each bit of [=output_gain_flags=] is set to 1 for the ith [=ChannelGroup=] if attenuation is applied to the relevant channel of the ith [=ChannelGroup=]. Otherwise, it is set to 0 for the ith [=ChannelGroup=].
 				- [=output_gain=] is set to the gain (i.e. the inverse of attenuation gain) which is applied to the channels which are indicated by [=output_gain_flags=].
-		- [=Parameter Substream=]s can be composed of one for demixing info and the other for recon gain. When [=recon_gain_is_present_flag=] = 0 for all [=ChannelGroup=]s, no [=Parameter Block OBU=]s for recon gain info is present in [=IA Sequence=].
+		- [=Parameter Substream=]s can be composed of one for demixing info and the other for recon gain. When [=recon_gain_is_present_flag=] = 0 for all [=ChannelGroup=]s, no [=Parameter Block OBU=]s for recon gain info are present in [=IA Sequence=].
 			- [=dmixp_mode=] of [=demixing_info_parameter_data()=] for the kth frame is set to indicate (α(k), β(k), γ(k), δ(k)) and w_idx_offset(k), where w_idx_offset(k) = 1 or -1.
 			- [=recon_gain_flags=] of [=recon_gain_info_parameter_data()=] is set to indicate the de-mixed channels which need to apply [=recon_gain=] among the output channels after demixing for the ith channel layout.
 			- [=recon_gain=] is set to the gain value to be applied to the channel which is indicated by [=recon_gain_flags=] for the ith [=ChannelGroup=].
@@ -2433,7 +2433,7 @@ The figure below shows the IA encoding flowchart for Scalable Channel Audio.
 	- The transformed audio is structured as [=ChannelGroup=]s.
 - Non-mixed channels of the transformed audio (i.e., the original channels of the input channel audio) are directly input to the Codec encoder, but the mixed channels may be input first to the Attenuation module and then to the Codec encoder.
 - The Attenuation module reduces all sample values of the mixed channels in the same [=ChannelGroup=] at a uniform rate ([=output_gain=]).
-	- A range of 0 dB to -6 dB is recommended for attenuation. (i.e. a range of 0 dB to 6 dB for [=output_gain=])
+	- A range of 0 dB to -6 dB is recommended for attenuation. (i.e., a range of 0 dB to 6 dB for [=output_gain=])
 - Codec Enc. generates the coded [=Audio Substream=]s from PCMs and passes the coded [=Audio Substream=]s and one single [=decoder_config()=] to OBU Packetizer.
 - OBU packetizer generates [=Descriptors=] which consists of one [=IA Sequence Header OBU=], one [=Codec Config OBU=], one [=Audio Element OBU=] and one or more [=Mix Presentation OBU=].
 		- [=Codec Config OBU=] is generated based on [=decoder_config()=].
@@ -2528,8 +2528,8 @@ This section provides a way to generate [=loudness_info()=], given a [=Mix Prese
 1. Each [=Audio Element=] specified in the given [=Mix Presentation OBU=] is rendered to the given [=loudness_layout=].
 2. Each [=Audio Element=] specified in the given [=Mix Presentation OBU=] has a gain applied using the value from [=mix_gain=] specified in its [=element_mix_config()=].
 3. All rendered and processed [=Audio Element=]s specified in the given [=Mix Presentation OBU=] are summed.
-3. The summed audio has a gain applied using the value from [=mix_gain=] specified in [=output_mix_config()=].
-4. Generate [=loudness_info()=] for the mixed audio according to [[#obu-mixpresentation-loudness]].
+3. The summed audio (i.e., [=Rendered Mix Presentation=]) has a gain applied using the value from [=mix_gain=] specified in [=output_mix_config()=].
+4. Generate [=loudness_info()=] for the [=Rendered Mix Presentation=] according to [[#obu-mixpresentation-loudness]].
 
 
 # Convention # {#convention}
