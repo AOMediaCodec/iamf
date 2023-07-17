@@ -1490,7 +1490,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version b06c00b8e, updated Tue Jul 11 13:41:16 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="926375a60f989188974bb52340e3c01a365a0aa0" name="document-revision">
+  <meta content="00d37597099d7d8970ade07e78ed8afa80cec1e8" name="document-revision">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
     color: var(--a-normal-text);
@@ -2779,7 +2779,7 @@ class codec_config() {
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="parameter_rate">parameter_rate</dfn> specifies the rate used by this <a data-link-type="dfn" href="#parameter-substream" id="ref-for-parameter-substream②⑦">Parameter Substream</a>, expressed as ticks per second. Time-related fields associated with this <a data-link-type="dfn" href="#parameter-substream" id="ref-for-parameter-substream②⑧">Parameter Substream</a>, such as durations, SHALL be expressed in the number of ticks.</p>
    <ul>
     <li data-md>
-     <p>The rate SHALL be such a value that (the rate x <a data-link-type="dfn" href="#num_samples_per_frame" id="ref-for-num_samples_per_frame⑥">num_samples_per_frame</a>) / (the sample rate of <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element④②">Audio Element</a>) is a non-zero integer.</p>
+     <p>The rate SHALL be such a value that (the rate * <a data-link-type="dfn" href="#num_samples_per_frame" id="ref-for-num_samples_per_frame⑥">num_samples_per_frame</a>) / (the sample rate of <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element④②">Audio Element</a>) is a non-zero integer.</p>
    </ul>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="param_definition_mode">param_definition_mode</dfn> indicates if this parameter definition specifies <a data-link-type="dfn" href="#duration" id="ref-for-duration④">duration</a>, <a data-link-type="dfn" href="#num_subblocks" id="ref-for-num_subblocks②">num_subblocks</a>, <a data-link-type="dfn" href="#constant_subblock_duration" id="ref-for-constant_subblock_duration②">constant_subblock_duration</a> and <a data-link-type="dfn" href="#subblock_duration" id="ref-for-subblock_duration">subblock_duration</a> fields for the parameter blocks associated to the <a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id③">parameter_id</a>.</p>
    <ul>
@@ -2796,7 +2796,7 @@ class codec_config() {
      <p>When <a data-link-type="dfn" href="#csd" id="ref-for-csd">CSD</a> != 0, <a data-link-type="dfn" href="#num_subblocks" id="ref-for-num_subblocks⑧">num_subblocks</a> is implicitly calculated as <a data-link-type="dfn" href="#ns" id="ref-for-ns">NS</a> = ceil(<a data-link-type="dfn" href="#d" id="ref-for-d">D</a> / <a data-link-type="dfn" href="#csd" id="ref-for-csd①">CSD</a>).</p>
      <ul>
       <li data-md>
-       <p>If <a data-link-type="dfn" href="#ns" id="ref-for-ns①">NS</a> x <a data-link-type="dfn" href="#csd" id="ref-for-csd②">CSD</a> > <a data-link-type="dfn" href="#d" id="ref-for-d①">D</a>, the actual duration of the last subblock SHALL be <a data-link-type="dfn" href="#d" id="ref-for-d②">D</a> - (<a data-link-type="dfn" href="#ns" id="ref-for-ns②">NS</a> - 1) x <a data-link-type="dfn" href="#csd" id="ref-for-csd③">CSD</a>.</p>
+       <p>If <a data-link-type="dfn" href="#ns" id="ref-for-ns①">NS</a> * <a data-link-type="dfn" href="#csd" id="ref-for-csd②">CSD</a> > <a data-link-type="dfn" href="#d" id="ref-for-d①">D</a>, the actual duration of the last subblock SHALL be <a data-link-type="dfn" href="#d" id="ref-for-d②">D</a> - (<a data-link-type="dfn" href="#ns" id="ref-for-ns②">NS</a> - 1) * <a data-link-type="dfn" href="#csd" id="ref-for-csd③">CSD</a>.</p>
      </ul>
     <li data-md>
      <p>When <a data-link-type="dfn" href="#csd" id="ref-for-csd④">CSD</a> = 0, the summation of all <a data-link-type="dfn" href="#sd" id="ref-for-sd">SD</a>s in this parameter block SHALL be equal to <a data-link-type="dfn" href="#d" id="ref-for-d③">D</a>.</p>
@@ -2992,7 +2992,7 @@ class ambisonics_projection_config() {
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="output_channel_count">output_channel_count</dfn> complies with <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc8486#" id="ref-for-something①⑨">channel count</a> in <a data-link-type="biblio" href="#biblio-rfc8486" title="Ambisonics in an Ogg Opus Container">[RFC8486]</a> with following restrictions:</p>
    <ul>
     <li data-md>
-     <p>The allowed numbers of <a data-link-type="dfn" href="#output_channel_count" id="ref-for-output_channel_count">output_channel_count</a> are (1+n)^2, where n = 0, 1, 2, ..., 14.</p>
+     <p>The allowed numbers of <a data-link-type="dfn" href="#output_channel_count" id="ref-for-output_channel_count">output_channel_count</a> are pow(1 + n, 2), where n = 0, 1, 2, ..., 14.</p>
     <li data-md>
      <p>In other words, the scene-based <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element④⑥">Audio Element</a> SHALL NOT include non-diegetic channels.</p>
    </ul>
@@ -3075,7 +3075,7 @@ class ambisonics_projection_config() {
    <p>Each sub-mix SHALL include <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout⑥">loudness_layout</a> to identify <a data-link-type="dfn" href="https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.2051-3-202205-I!!PDF-E.pdf#" id="ref-for-something②②">Loudspeaker configuration for Sound System A (0+2+0)</a> (i.e., Stereo). In other words, each sub-mix SHALL include <a data-link-type="dfn" href="#loudness_info" id="ref-for-loudness_info">loudness_info()</a> for Stereo.</p>
    <ul>
     <li data-md>
-     <p>If the <a data-link-type="dfn" href="#rendered-mix-presentation" id="ref-for-rendered-mix-presentation④">Rendered Mix Presentation</a> by each sub-mix is Mono, then its <a data-link-type="dfn" href="#loudness" id="ref-for-loudness">loudness</a> for <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout⑦">loudness_layout</a> = Stereo SHOULD be measured on the Stereo generated from the Mono by the equations, L = 0.707 x Mono and R = 0.707 x Mono.</p>
+     <p>If the <a data-link-type="dfn" href="#rendered-mix-presentation" id="ref-for-rendered-mix-presentation④">Rendered Mix Presentation</a> by each sub-mix is Mono, then its <a data-link-type="dfn" href="#loudness" id="ref-for-loudness">loudness</a> for <a data-link-type="dfn" href="#loudness_layout" id="ref-for-loudness_layout⑦">loudness_layout</a> = Stereo SHOULD be measured on the Stereo generated from the Mono by the equations, L = 0.707 * Mono and R = 0.707 * Mono.</p>
    </ul>
    <h4 class="heading settled" data-level="3.7.1" id="obu-mixpresentation-annotation"><span class="secno">3.7.1. </span><span class="content">Mix Presentation Annotations Syntax and Semantics</span><a class="self-link" href="#obu-mixpresentation-annotation"></a></h4>
    <p><b>Syntax</b></p>
@@ -3985,7 +3985,7 @@ Parsers SHALL ignore these two fields.</p>
    <h4 class="heading settled" data-level="7.2.1" id="processing-scalablechannelaudio-gain"><span class="secno">7.2.1. </span><span class="content">Gain</span><a class="self-link" href="#processing-scalablechannelaudio-gain"></a></h4>
    <p>The Gain module is the mirror process of the Attenuation module. It recovers the reduced sample values using <a data-link-type="dfn" href="#output_gain" id="ref-for-output_gain⑤">output_gain</a>(i) when its <a data-link-type="dfn" href="#output_gain_is_present_flag" id="ref-for-output_gain_is_present_flag①">output_gain_is_present_flag</a>(i) for <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup④②">ChannelGroup</a> #i is on. When its <a data-link-type="dfn" href="#output_gain_is_present_flag" id="ref-for-output_gain_is_present_flag②">output_gain_is_present_flag</a>(i) is off, then this module SHALL be bypassed for <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup④③">ChannelGroup</a> #i. <a data-link-type="dfn" href="#output_gain" id="ref-for-output_gain⑥">output_gain</a>(i) for <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup④④">ChannelGroup</a> #i SHALL be applied to all samples of the mixed channels in the <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup④⑤">ChannelGroup</a> #i, where mixed channels means the mixed channels from an input channel audio (i.e. a channel audio for CL #n).</p>
    <p>To apply the gain, an implementation SHALL use the following:</p>
-<pre>Sample *= pow(10, [=output_gain=](i) / (20.0*256))
+<pre>sample = sample * pow(10, output_gain(i) / (20.0*256))
 </pre>
    <p>Where, n = <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⑥">num_layers</a> and i = 1, 2, ..., n. <a data-link-type="dfn" href="#output_gain" id="ref-for-output_gain⑦">output_gain</a>(i) is the raw 16-bit value for the ith layer which is specified in <a data-link-type="dfn" href="#channel_audio_layer_config" id="ref-for-channel_audio_layer_config">channel_audio_layer_config()</a>.</p>
    <h4 class="heading settled" data-level="7.2.2" id="processing-scalablechannelaudio-demixer"><span class="secno">7.2.2. </span><span class="content">De-mixer</span><a class="self-link" href="#processing-scalablechannelaudio-demixer"></a></h4>
@@ -3997,21 +3997,21 @@ Parsers SHALL ignore these two fields.</p>
      <p>Surround de-mixers</p>
      <ul>
       <li data-md>
-       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="s1to2-de-mixer">S1to2 de-mixer</dfn>: R2 = 2 x Mono – L2</p>
+       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="s1to2-de-mixer">S1to2 de-mixer</dfn>: R2 = 2 * Mono – L2</p>
       <li data-md>
-       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="s2to3-de-mixer">S2to3 de-mixer</dfn>: L3 = L2 – 0.707 x C and R3 = R2 – 0.707 x C</p>
+       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="s2to3-de-mixer">S2to3 de-mixer</dfn>: L3 = L2 – 0.707 * C and R3 = R2 – 0.707 * C</p>
       <li data-md>
-       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="s3to5-de-mixer">S3to5 de-mixer</dfn>: Ls = 1/δ(k) x (L3 – L5) and Rs = 1/δ(k) x (R3 – R5)</p>
+       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="s3to5-de-mixer">S3to5 de-mixer</dfn>: Ls = 1/δ(k) * (L3 – L5) and Rs = 1/δ(k) * (R3 – R5)</p>
       <li data-md>
-       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="s5to7-de-mixer">S5to7 de-mixer</dfn>: Lrs = 1/β(k) x (Ls – α(k) x Lss) and Rrs = 1/β(k) x (Rs – α(k) x Rss)</p>
+       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="s5to7-de-mixer">S5to7 de-mixer</dfn>: Lrs = 1/β(k) * (Ls – α(k) * Lss) and Rrs = 1/β(k) * (Rs – α(k) * Rss)</p>
      </ul>
     <li data-md>
      <p>Top de-mixers</p>
      <ul>
       <li data-md>
-       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="tf2tot2-de-mixer">TF2toT2 de-mixer</dfn>: Ltf2 = Ltf3 – w(k) x (L3 – L5) and Rtf2 = Rtf3 – w(k) x (R3 – R5)</p>
+       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="tf2tot2-de-mixer">TF2toT2 de-mixer</dfn>: Ltf2 = Ltf3 – w(k) * (L3 – L5) and Rtf2 = Rtf3 – w(k) * (R3 – R5)</p>
       <li data-md>
-       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="t2to4-de-mixer">T2to4 de-mixer</dfn>: Ltb = 1/γ(k) x (Ltf2 – Ltf4) and Rtb = 1/γ(k) x (Rtf2 – Rtf4)</p>
+       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="t2to4-de-mixer">T2to4 de-mixer</dfn>: Ltb = 1/γ(k) * (Ltf2 – Ltf4) and Rtb = 1/γ(k) * (Rtf2 – Rtf4)</p>
      </ul>
     <li data-md>
      <p>Where, Ltf2 and Rtf2 are the top channels of x.1.2ch, Ltf3 and Rtf3 are the top channels of 3.1.2ch, and Ltf4 and Rtf4 are the top channels of x.1.4ch (x = 5 or 7) and <a data-link-type="dfn" href="#w-k" id="ref-for-w-k">w(k)</a> is determined from the value of wIdx(k).</p>
@@ -4067,8 +4067,8 @@ Parsers SHALL ignore these two fields.</p>
     <li data-md>
      <p>Ltf and Rtf are recovered by S2to3 de-mixer and TF2toT2 de-mixer.</p>
    </ul>
-<pre>Ls5 = 1/δ(k) × (L2 - 0.707 × C - L5) and Rs5 = 1/δ(k) × (R2 - 0.707 × C - R5).
-Ltf = Ltf3 - w(k) x (L2 - 0.707 x C - L5) and Rtf = Rtf3 - w(k) x (R2 - 0.707 x C - R5).
+<pre>Ls5 = 1/δ(k) * (L2 - 0.707 * C - L5) and Rs5 = 1/δ(k) * (R2 - 0.707 * C - R5).
+Ltf = Ltf3 - w(k) * (L2 - 0.707 * C - L5) and Rtf = Rtf3 - w(k) * (R2 - 0.707 * C - R5).
 </pre>
    <h4 class="heading settled" data-level="7.2.3" id="processing-scalablechannelaudio-recongain"><span class="secno">7.2.3. </span><span class="content">Recon Gain</span><a class="self-link" href="#processing-scalablechannelaudio-recongain"></a></h4>
    <p>Recon gain is REQUIRED only for <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⑧">num_layers</a> > 1 and when <a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id②⓪">codec_id</a> is set to <a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="ref-for-something①①①">Opus</a> or <a class="property css" data-link-type="property" href="https://www.iso.org/standard/79110.html#" id="ref-for-something①①②">mp4a</a>.</p>
@@ -4078,11 +4078,11 @@ Ltf = Ltf3 - w(k) x (L2 - 0.707 x C - L5) and Rtf = Rtf3 - w(k) x (R2 - 0.707 x 
      <p><a data-link-type="dfn" href="#recon_gain_info_parameter_data" id="ref-for-recon_gain_info_parameter_data⑤">recon_gain_info_parameter_data()</a> indicates each channel of CL #i to which recon gain needs to be applied and provides <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain⑦">recon_gain</a> value for each frame of the channel.</p>
      <ul>
       <li data-md>
-       <p>Sample (k,i) *= Smoothed_Recon_Gain (k,i), where k is the frame index and i is the sample index of the frame.</p>
+       <p>Sample (k,i) = Sample (k, i) * Smoothed_Recon_Gain (k,i), where k is the frame index and i is the sample index of the frame.</p>
       <li data-md>
-       <p>Smoothed_Recon_Gain (k) = MA_gain (k-1) x e_window + MA_gain (k) x s_window</p>
+       <p>Smoothed_Recon_Gain (k) = MA_gain (k-1) * e_window + MA_gain (k) * s_window</p>
       <li data-md>
-       <p>MA_gain (k) = 2 / (N+1) x <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain⑧">recon_gain</a> (k) / 255 + (1 – 2/(N+1)) x MA_gain (k-1), where MA_gain (0) = 1.</p>
+       <p>MA_gain (k) = 2 / (N+1) * <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain⑧">recon_gain</a> (k) / 255 + (1 – 2/(N+1)) * MA_gain (k-1), where MA_gain (0) = 1.</p>
       <li data-md>
        <p>e_window[0: olen] = hanning[olen:], e_window[olen:flen] = 0.</p>
       <li data-md>
@@ -4801,6 +4801,8 @@ class Bar {
 </pre>
    <p><b>MOD(Number, Divisor)</b></p>
    <p>The MOD() function returns the remainder after <b>Number</b> is divided by <b>Divisor</b>.</p>
+   <p><b>pow(x, y)</b></p>
+   <p>The pow() function returns the value of x to the power of y.</p>
    <h2 class="heading settled" data-level="10" id="annex"><span class="secno">10. </span><span class="content">Annex</span><a class="self-link" href="#annex"></a></h2>
    <h3 class="heading settled" data-level="10.1" id="Annex_A"><span class="secno">10.1. </span><span class="content">Annex A: ID Linking Scheme (Informative)</span><a class="self-link" href="#Annex_A"></a></h3>
    <p>The figure below shows the linking scheme among IDs in the obu_header or OBU payload.</p>
@@ -4911,21 +4913,21 @@ class Bar {
      <p>Surround down-mixers</p>
      <ul>
       <li data-md>
-       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="s7to5-enc">S7to5 enc.</dfn>: Ls5 = α(k) x Lss7 + β(k) x Lrs7 and Rs5 = α(k) x Rss7 + β(k) x Rrs7.</p>
+       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="s7to5-enc">S7to5 enc.</dfn>: Ls5 = α(k) * Lss7 + β(k) * Lrs7 and Rs5 = α(k) * Rss7 + β(k) * Rrs7.</p>
       <li data-md>
-       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="s5to3-enc">S5to3 enc.</dfn>: L3 = L5 + δ(k) x Ls5 and R3 = R5 + δ(k) x Rs5</p>
+       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="s5to3-enc">S5to3 enc.</dfn>: L3 = L5 + δ(k) * Ls5 and R3 = R5 + δ(k) * Rs5</p>
       <li data-md>
-       <p><dfn data-dfn-type="dfn" data-noexport id="s3to2-enc">S3to2 enc.<a class="self-link" href="#s3to2-enc"></a></dfn>: L2 = L3 + 0.707 x C and R2 = R3 + 0.707 x C</p>
+       <p><dfn data-dfn-type="dfn" data-noexport id="s3to2-enc">S3to2 enc.<a class="self-link" href="#s3to2-enc"></a></dfn>: L2 = L3 + 0.707 * C and R2 = R3 + 0.707 * C</p>
       <li data-md>
-       <p><dfn data-dfn-type="dfn" data-noexport id="s2to1-enc">S2to1 enc.<a class="self-link" href="#s2to1-enc"></a></dfn>: Mono = 0.5 x (L2 + R2)</p>
+       <p><dfn data-dfn-type="dfn" data-noexport id="s2to1-enc">S2to1 enc.<a class="self-link" href="#s2to1-enc"></a></dfn>: Mono = 0.5 * (L2 + R2)</p>
      </ul>
     <li data-md>
      <p>Top Down-mixers</p>
      <ul>
       <li data-md>
-       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="t4to2-enc">T4to2 enc.</dfn>: Ltf2 = Ltf4 + γ(k) x Ltb4  and Rtf2 = Rtf4 + γ(k) x Rtb4.</p>
+       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="t4to2-enc">T4to2 enc.</dfn>: Ltf2 = Ltf4 + γ(k) * Ltb4  and Rtf2 = Rtf4 + γ(k) * Rtb4.</p>
       <li data-md>
-       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="t2totf2-enc">T2toTF2 enc.</dfn>: Ltf3 = Ltf2 + w(k) x δ(k) x Ls5 and Rtf3 = Rtf2 + w(k) x δ(k) x Rs5.</p>
+       <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="t2totf2-enc">T2toTF2 enc.</dfn>: Ltf3 = Ltf2 + w(k) * δ(k) * Ls5 and Rtf3 = Rtf2 + w(k) * δ(k) * Rs5.</p>
      </ul>
    </ul>
    <center><img height="373" src="images/Down-mix Mechanism.png" style="width:100%; height:auto;" width="800"></center>
@@ -4967,7 +4969,7 @@ class Bar {
      <p>Level Dk is the signal power for the frame #k of the de-mixed channel for CL #i (after demixing in the decoder side).</p>
    </ul>
    <p>If 10*log10(level Ok / maxL^2) is less than the first threshold value (-80dB is RECOMMENDED), Recon_Gain (k, i)  = 0. Where, maxL = 32767 for 16bits.</p>
-   <p>If 10*log10(level Ok / level Mk ) is less than the second threshold value (-6dB is RECOMMENDED), Recon_Gain (k, i) is set to the value which makes level Ok = Recon_Gain (k, i)^2 x level Dk. Otherwise, Recon_Gain (k, i) = 1. Actual value (i.e. <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain①④">recon_gain</a>) to be delivered is floor(255*Recon_Gain).</p>
+   <p>If 10*log10(level Ok / level Mk ) is less than the second threshold value (-6dB is RECOMMENDED), Recon_Gain (k, i) is set to the value which makes level Ok = Recon_Gain (k, i)^2 * level Dk. Otherwise, Recon_Gain (k, i) = 1. Actual value (i.e. <a data-link-type="dfn" href="#recon_gain" id="ref-for-recon_gain①④">recon_gain</a>) to be delivered is floor(255*Recon_Gain).</p>
    <p>For example, if we assume CL #i = 7.1.4ch and CL #i-1 = 5.1.2ch, then de-mixed channels are D_Lrs7, D_Rrs7, D_Ltb4 and D_Rtb4.</p>
    <ul>
     <li data-md>
