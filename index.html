@@ -1490,7 +1490,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version b06c00b8e, updated Tue Jul 11 13:41:16 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="bf52e62ab59c34a171424479c9a76b4772b8e6d2" name="document-revision">
+  <meta content="9b0f58e32dfbc852b367405bf6009f96cf12c170" name="document-revision">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
     color: var(--a-normal-text);
@@ -2562,10 +2562,10 @@ class codec_config() {
    <p>Parsers compliant with this version of the specification SHOULD ignore <a data-link-type="dfn" href="#codec-config-obu" id="ref-for-codec-config-obu④">Codec Config OBU</a>s with an unknown <a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id①">codec_id</a>.</p>
    <p class="note" role="note"><span class="marker">NOTE:</span> <a class="property css" data-link-type="property" href="https://www.iso.org/standard/77752.html#" id="ref-for-something④">ipcm</a> should not be confused with <a class="property css" data-link-type="property">lpcm</a> which is another 4CC to identify codecs in other container formats (e.g. QuickTime).</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_samples_per_frame">num_samples_per_frame</dfn> indicates the frame length, in samples, of the audio_frame() provided in by audio_frame_obu(). It SHALL NOT be set to zero. If the <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config④">decoder_config()</a> structure for a given codec specifies a value for the frame length, the two values SHALL be equal.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_roll_distance">audio_roll_distance</dfn> indicates how many audio frames prior to the current audio frame need to be decoded (and decoded samples discarded) to set the encoder in a state that will produce the perfect decoded audio signal. It SHALL always be a negative value or zero. For some audio codecs, even if an audio frame can be decoded independently, the decoded signal after decoding only that frame may not represent a perfect, decoded audio signal, even ignoring compression artifacts. This can be due to overlap transforms. While potentially acceptable when starting to decode an <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream③⑨">Audio Substream</a>, it may be problematic when automatically switching between similar <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream④⓪">Audio Substream</a>s of different quality and/or bitrate.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_roll_distance">audio_roll_distance</dfn> indicates how many audio frames prior to the current audio frame need to be decoded (and the decoded samples discarded) to set the encoder in a state that will produce the perfect decoded audio signal. It SHALL always be a negative value or zero. For some audio codecs, even if an audio frame can be decoded independently, the decoded signal after decoding only that frame may not represent a perfect, decoded audio signal, even ignoring compression artifacts. This can be due to overlap transforms. While potentially acceptable when starting to decode an <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream③⑨">Audio Substream</a>, it may be problematic when automatically switching between similar <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream④⓪">Audio Substream</a>s of different quality and/or bitrate.</p>
    <ul>
     <li data-md>
-     <p>It SHALL be set to -R when <a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id②">codec_id</a> is set to <a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="ref-for-something⑤">Opus</a>. Where R is roundup(3840 % <a data-link-type="dfn" href="#num_samples_per_frame" id="ref-for-num_samples_per_frame③">num_samples_per_frame</a>).</p>
+     <p>It SHALL be set to -R when <a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id②">codec_id</a> is set to <a class="property css" data-link-type="property" href="https://opus-codec.org/docs/opus_in_isobmff.html#" id="ref-for-something⑤">Opus</a>, where R is <code>ceil(3840 / <a data-link-type="dfn" href="#num_samples_per_frame" id="ref-for-num_samples_per_frame③">num_samples_per_frame</a>)</code>.</p>
     <li data-md>
      <p>It SHALL be set to -1 when <a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id③">codec_id</a> is set to <a class="property css" data-link-type="property" href="https://www.iso.org/standard/79110.html#" id="ref-for-something⑥">mp4a</a>.</p>
     <li data-md>
@@ -2793,7 +2793,7 @@ class codec_config() {
    <p>Given <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="d">D</dfn> = the value of <a data-link-type="dfn" href="#duration" id="ref-for-duration⑨">duration</a>, <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="ns">NS</dfn> = the value of <a data-link-type="dfn" href="#num_subblocks" id="ref-for-num_subblocks⑦">num_subblocks</a>, <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="csd">CSD</dfn> = the value of <a data-link-type="dfn" href="#constant_subblock_duration" id="ref-for-constant_subblock_duration⑦">constant_subblock_duration</a> and <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="sd">SD</dfn> = the value of <a data-link-type="dfn" href="#subblock_duration" id="ref-for-subblock_duration⑤">subblock_duration</a>.</p>
    <ul>
     <li data-md>
-     <p>When <a data-link-type="dfn" href="#csd" id="ref-for-csd">CSD</a> != 0, <a data-link-type="dfn" href="#num_subblocks" id="ref-for-num_subblocks⑧">num_subblocks</a> is implicitly calculated as <a data-link-type="dfn" href="#ns" id="ref-for-ns">NS</a> = roundup(<a data-link-type="dfn" href="#d" id="ref-for-d">D</a> ÷ <a data-link-type="dfn" href="#csd" id="ref-for-csd①">CSD</a>).</p>
+     <p>When <a data-link-type="dfn" href="#csd" id="ref-for-csd">CSD</a> != 0, <a data-link-type="dfn" href="#num_subblocks" id="ref-for-num_subblocks⑧">num_subblocks</a> is implicitly calculated as <a data-link-type="dfn" href="#ns" id="ref-for-ns">NS</a> = ceil(<a data-link-type="dfn" href="#d" id="ref-for-d">D</a> / <a data-link-type="dfn" href="#csd" id="ref-for-csd①">CSD</a>).</p>
      <ul>
       <li data-md>
        <p>If <a data-link-type="dfn" href="#ns" id="ref-for-ns①">NS</a> x <a data-link-type="dfn" href="#csd" id="ref-for-csd②">CSD</a> > <a data-link-type="dfn" href="#d" id="ref-for-d①">D</a>, the actual duration of the last subblock SHALL be <a data-link-type="dfn" href="#d" id="ref-for-d②">D</a> - (<a data-link-type="dfn" href="#ns" id="ref-for-ns②">NS</a> - 1) x <a data-link-type="dfn" href="#csd" id="ref-for-csd③">CSD</a>.</p>
@@ -3266,7 +3266,7 @@ class ambisonics_projection_config() {
     if (constant_subblock_duration == 0) {
       leb128() num_subblocks;
     } else {
-      // num_subblocks = roundup(duration ÷ constant_subblock_duration)
+      // num_subblocks = ceil(duration / constant_subblock_duration)
     }
   }
 
@@ -3299,7 +3299,7 @@ class ambisonics_projection_config() {
    <p>When it gets an unknown <a data-link-type="dfn" href="#param_definition_type" id="ref-for-param_definition_type③">param_definition_type</a>, parsers compliant with this version of the specification SHOULD ignore the <a data-link-type="dfn" href="#parameter-block-obu" id="ref-for-parameter-block-obu①④">Parameter Block OBU</a>.</p>
    <p><dfn class="css" data-dfn-for="parameter_block_obu()" data-dfn-type="value" data-noexport id="valdef-parameter_block_obu-duration">duration<a class="self-link" href="#valdef-parameter_block_obu-duration"></a></dfn> specifies the duration for which this parameter block is valid and applicable. It SHALL NOT be set to 0.</p>
    <p><dfn class="css" data-dfn-for="parameter_block_obu()" data-dfn-type="value" data-noexport id="valdef-parameter_block_obu-constant_subblock_duration">constant_subblock_duration<a class="self-link" href="#valdef-parameter_block_obu-constant_subblock_duration"></a></dfn> specifies the duration of each subblock, in the case where all subblocks except the last subblock have equal durations. If all subblocks except the last subblock do not have equal durations, the value of constant_subblock_duration SHALL be set to 0.</p>
-   <p><dfn class="css" data-dfn-for="parameter_block_obu()" data-dfn-type="value" data-noexport id="valdef-parameter_block_obu-num_subblocks">num_subblocks<a class="self-link" href="#valdef-parameter_block_obu-num_subblocks"></a></dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different subblock of the timeline, contiguously. When <a data-link-type="dfn" href="#constant_subblock_duration" id="ref-for-constant_subblock_duration⑨">constant_subblock_duration</a> != 0, <a data-link-type="dfn" href="#num_subblocks" id="ref-for-num_subblocks⑨">num_subblocks</a> is implicitly calculated as <a data-link-type="dfn" href="#num_subblocks" id="ref-for-num_subblocks①⓪">num_subblocks</a> = roundup(<a data-link-type="dfn" href="#duration" id="ref-for-duration①①">duration</a> ÷ <a data-link-type="dfn" href="#constant_subblock_duration" id="ref-for-constant_subblock_duration①⓪">constant_subblock_duration</a>).</p>
+   <p><dfn class="css" data-dfn-for="parameter_block_obu()" data-dfn-type="value" data-noexport id="valdef-parameter_block_obu-num_subblocks">num_subblocks<a class="self-link" href="#valdef-parameter_block_obu-num_subblocks"></a></dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different subblock of the timeline, contiguously. When <a data-link-type="dfn" href="#constant_subblock_duration" id="ref-for-constant_subblock_duration⑨">constant_subblock_duration</a> != 0, <a data-link-type="dfn" href="#num_subblocks" id="ref-for-num_subblocks⑨">num_subblocks</a> is implicitly calculated as <a data-link-type="dfn" href="#num_subblocks" id="ref-for-num_subblocks①⓪">num_subblocks</a> = ceil(<a data-link-type="dfn" href="#duration" id="ref-for-duration①①">duration</a> / <a data-link-type="dfn" href="#constant_subblock_duration" id="ref-for-constant_subblock_duration①⓪">constant_subblock_duration</a>).</p>
    <p><a data-link-type="dfn" href="#audio-element-obu" id="ref-for-audio-element-obu⑨">Audio Element OBU</a> and/or <a data-link-type="dfn" href="#mix-presentation-obu" id="ref-for-mix-presentation-obu④">Mix Presentation OBU</a> is mapping a parameter_id to the parameter definition type. So, IA decoders can know the definition type mapped to the parameter_id.</p>
    <p><dfn class="css" data-dfn-for="parameter_block_obu()" data-dfn-type="value" data-noexport id="valdef-parameter_block_obu-subblock_duration">subblock_duration<a class="self-link" href="#valdef-parameter_block_obu-subblock_duration"></a></dfn> specifies the duration for the given subblock. It SHALL NOT be set to 0.</p>
    <p>Each value of duration, constant_subblock_duration, and subblock_duration SHALL be expressed as the number of ticks at the <a data-link-type="dfn" href="#parameter_rate" id="ref-for-parameter_rate③">parameter_rate</a> specified in the corresponding parameter definition.</p>
@@ -3989,7 +3989,7 @@ Parsers SHALL ignore these two fields.</p>
        <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="t2to4-de-mixer">T2to4 de-mixer</dfn>: Ltb = 1/γ(k) x (Ltf2 – Ltf4) and Rtb = 1/γ(k) x (Rtf2 – Rtf4)</p>
      </ul>
     <li data-md>
-     <p>Where, Ltf2 / Rtf2 is top channel of x.1.2ch, Ltf3 / Rtf3 is top channel of 3.1.2ch, and Ltf4 / Rtf4 is top channel of x.1.4ch (x = 5 or 7) and <a data-link-type="dfn" href="#w-k" id="ref-for-w-k">w(k)</a> is determined from the value of wIdx(k).</p>
+     <p>Where, Ltf2 and Rtf2 are the top channels of x.1.2ch, Ltf3 and Rtf3 are the top channels of 3.1.2ch, and Ltf4 and Rtf4 are the top channels of x.1.4ch (x = 5 or 7) and <a data-link-type="dfn" href="#w-k" id="ref-for-w-k">w(k)</a> is determined from the value of wIdx(k).</p>
    </ul>
    <p>Initially, wIdx(0) = 0 and the value of wIdx(k) SHALL be derived as follows:</p>
    <ul>
@@ -4308,9 +4308,9 @@ P2 = (t2, end_point_value),
 </pre>
    <p>where <code>B_quad(a) = (t, y)</code> is a 2D coordinate with parameter value <code>y</code> at time <code>t</code>.</p>
    <p>To apply the parameter values to the audio samples in the subblock without interpolation, the <a data-link-type="dfn" href="#parameter_rate" id="ref-for-parameter_rate⑤">parameter_rate</a> SHOULD be first resampled to the audio sample rate to give:</p>
-<pre>n0 = t0 * audio_sample_rate / parameter_rate,
-n1 = t1 * audio_sample_rate / parameter_rate,
-n2 = t2 * audio_sample_rate / parameter_rate.
+<pre>n0 = floor(t0 * (audio_sample_rate / parameter_rate)),
+n1 = floor(t1 * (audio_sample_rate / parameter_rate)),
+n2 = floor(t2 * (audio_sample_rate / parameter_rate)).
 </pre>
    <p>Then, <code>P0</code>, <code>P1</code>, <code>P2</code> can be rewritten as:</p>
 <pre>P0 = (n0, start_point_value),
@@ -4319,7 +4319,7 @@ P2 = (n2, end_point_value).
 </pre>
    <p>Next, the parameter value <code>y</code> is computed for each time <code>t</code> that corresponds to an integer audio sample index, <code>t = n = [0, 1, 2, ..., n2]</code>. This is done by computing the equivalent value of <code>a</code> for every <code>n</code>, and then applying the Bezier equations <code>B_linear(a)</code> and <code>B_quad(a)</code> to find the parameter value <code>y</code>.</p>
    <p>In the case of <code>B_linear(a)</code>, the mapping between <code>n</code> and <code>a</code> is given by:</p>
-<pre>a = n ÷ n2.
+<pre>a = n / n2.
 </pre>
    <p>In the case of <code>B_quad(a)</code>, the mapping between <code>n</code> and <code>a</code> is given as follows. Let</p>
 <pre>alpha = n0 - 2 * n1 + n2,
@@ -4327,10 +4327,10 @@ beta = 2 * (n1 - n0),
 gamma = n0 - n.
 </pre>
    <p>If <code>alpha</code> is equal to 0, then</p>
-<pre>a = -gamma ÷ beta,
+<pre>a = -gamma / beta,
 </pre>
    <p>else,</p>
-<pre>a = (-beta + sqrt(beta^2 - 4 * alpha * gamma)) ÷ (2 * alpha).
+<pre>a = (-beta + sqrt(beta^2 - 4 * alpha * gamma)) / (2 * alpha).
 </pre>
    <h3 class="heading settled" data-level="7.5" id="processing-post"><span class="secno">7.5. </span><span class="content">Post Processing</span><a class="self-link" href="#processing-post"></a></h3>
    <h4 class="heading settled" data-level="7.5.1" id="processing-post-loudness"><span class="secno">7.5.1. </span><span class="content">Loudness Normalization</span><a class="self-link" href="#processing-post-loudness"></a></h4>
@@ -4752,14 +4752,14 @@ gamma = n0 - n.
       <td>*
       <td>Multiplication.
      <tr>
-      <td>÷
-      <td>Floating point (arithmetic) division.
-     <tr>
       <td>/
-      <td>Integer division with truncation of the result toward zero.
+      <td>Floating point (arithmetic) division.
      <tr>
       <td>floor(x)
       <td>The largest integer that is smaller than or equal to x.
+     <tr>
+      <td>ceil(x)
+      <td>The smallest integer that is greater than or equal to x.
      <tr>
       <td>sqrt(x)
       <td>The square root of x.
@@ -4784,8 +4784,6 @@ class Bar {
    <p>The round() function returns the integer value closest to <code>x</code> and may be implemented as</p>
 <pre>round(x) = floor(x + 0.5).
 </pre>
-   <p><b>roundup(x)</b></p>
-   <p>The roundup() function returns the smallest integer value greater than or equal to <code>x</code></p>
    <p><b>MOD(Number, Divisor)</b></p>
    <p>The MOD() function returns the remainder after <b>Number</b> is divided by <b>Divisor</b>.</p>
    <h2 class="heading settled" data-level="10" id="annex"><span class="secno">10. </span><span class="content">Annex</span><a class="self-link" href="#annex"></a></h2>
