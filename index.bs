@@ -2031,16 +2031,16 @@ For a given loudspeaker layout (i.e. CL #i) among the list of [=loudspeaker_layo
 - OBU Parser SHALL get [=Audio Substream=]s for [=ChannelGroup=] #1 ~ [=ChannelGroup=] #i and pass them to Codec decoder with [=decoder_config()=].
 - Codec decoder SHALL output decoded channels (PCM) in the transmission order.
 	- For non-scalable audio (i.e. i = [=num_layers=] = 1), its order SHALL be converted to the loudspeaker location order for CL #1.
-- Following are further processed for scalable audio (i.e. i > 1)
+- The following are further processed for scalable audio (i.e. i > 1)
 	- When [=output_gain_is_present_flag=](j) for [=ChannelGroup=] #j (j = 1, 2, …, i-1) is on, Gain module SHALL apply [=output_gain=](j) to all audio samples of the mixed channels in the [=ChannelGroup=] #j indicated by [=output_gain_flag=](j).
 	- De-Mixer SHALL output de-mixed channels (PCM) for CL #i generated through de-mixing of the mixed channels from the Gain module by using non-mixed channels and demixing parameters for each frame.
 	- Recon_Gain module SHALL output smoothed channels (PCM) by applying [=recon_gain=] to each frame of the de-mixed channels.
 	- The order for Non-mixed channels and Smoothed channels SHALL be converted to the loudspeaker location order for CL #i after going through necessary modules such as Gain, De-Mixer, Recon_Gain, etc.
-- Following may be further processed
+- The following may be further processed
 	- Loudness normalization module may output loudness normalized channels at -24 LKFS from non-mixed channels and smoothed channels (if present) by using loudness information for CL #i.
 	- Limiter module may limit the true peak of input channels at -1dB.
 
-Following sections, [[#processing-scalablechannelaudio-gain]], [[#processing-scalablechannelaudio-demixer]] and [[#processing-scalablechannelaudio-recongain]] are only needed for decoding of scalable audio with [=num_layers=] > 1.
+The following sections, [[#processing-scalablechannelaudio-gain]], [[#processing-scalablechannelaudio-demixer]] and [[#processing-scalablechannelaudio-recongain]] are only needed for decoding scalable audio with [=num_layers=] > 1.
 
 ### Gain ### {#processing-scalablechannelaudio-gain}
 
@@ -2412,7 +2412,6 @@ Example user inputs include:
 
 - The Ambisonics mode to indicate if [=ChannelMappingFamily=] = 2 or 3 from [[!RFC8486]] is used for encoding.
 - A list of channel layouts to be supported for scalable channel audio, which conforms to [=loudspeaker_layout=].
-
 
 The figure below shows an example architecture for an IA encoder that generates an [=IA Sequence=] with one [=Audio Element=].
 
