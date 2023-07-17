@@ -2342,44 +2342,36 @@ Where, p1 = 0.707. Implementations MAY use a limiter defined in [[#processing-po
 
 # IAMF Generation Process (Informative) # {#iamfgeneration}
 
-This section provides a guideline for IA encoding for a given input audio format.
+This section provides a guideline for encoding an [=IA Sequence=] that conforms to [[#obu-syntax]], given a set of input audio and user inputs.
 
-Recommended input audio format for IA encoding is as follows:
-- Ambisonics format: It conforms to [=ChannelMappingFamily=] = 2 or 3 of [[RFC8486]].
-- Channel Audio format: It conforms to [=loudspeaker_layout=] specified in [=channel_audio_layer_config()=].
-- Input Sampling Rate: 48000Hz
+The RECOMMENDED input audio formats for IA encoding are as follows:
+- Ambisonics audio: a full-order Ambisonics signal with ACN channel ordering and SN3D normalization
+- Channel-based audio: one of the [=loudspeaker_layout=]s specified in [=channel_audio_layer_config()=]
+- Sampling rate: 48000 Hz
 - Bit depth: 16 bits or 24 bits
-	- 16 bits are recommended for OPUS.
-- Input file format: .wav file (Linear PCM, simply called PCM)
+	- 16 bits is recommended for Opus
+- File format: .wav file (Linear PCM, simply called PCM)
 
-For a given input audio and user inputs, the IA encoder outputs [=IA Sequence=] which conforms to [[#obu-syntax]].
+Example user inputs include:
 
-Input audio is as follows:
-- Ambisonics format
-- Channel Audio format
+- The Ambisonics mode to indicate if [=ChannelMappingFamily=] = 2 or 3 from [[!RFC8486]] is used for encoding.
+- A list of channel layouts to be supported for scalable channel audio, which conforms to [=loudspeaker_layout=].
 
-User inputs are:
-- Ambisonics mode to indicate if [=ChannelMappingFamily=] = 2 or 3 of [[RFC8486]].
-- List of channel layouts to be supported for scalable channel audio: it conforms to [=loudspeaker_layout=].
 
-IA encoding can be done by using the combination of following generation processing.
-- Encoding of an [=Audio Element=] (Ambisonics encoding or Scalable Channel Audio encoding)
-- Encoding of a [=Mix Presentation=]
+The figure below shows an example architecture for an IA encoder that generates an [=IA Sequence=] with one [=Audio Element=].
 
-The figure below shows the IA encoder configuration for one single [=Audio Element=].
-
-The IA encoder is composed of Pre-processor, Codec encoder, and OBU packetizer.
+The IA encoder is composed of the Pre-processor, Codec encoder, and OBU packetizer modules.
 - Pre-processor outputs one or more [=ChannelGroup=]s, [=Descriptors=] and optional [=Parameter Substream=]s based on the input audio and user inputs.
-	- It outputs one single [=ChannelGroup=] for scene-based [=Audio Element=].
-	- It outputs one or more [=ChannelGroup=]s for channel-based [=Audio Element=].
-	- It outputs [=Descriptors=] which are composed of one [=IA Sequence Header OBU=], one [=Codec Config OBU=], one [=Audio Element OBU=], one or more [=Mix Presentation OBU=]s. 
+	- It outputs one single [=ChannelGroup=] for a scene-based [=Audio Element=].
+	- It outputs one or more [=ChannelGroup=]s for a channel-based [=Audio Element=].
+	- It outputs [=Descriptors=] which are composed of one [=IA Sequence Header OBU=], one [=Codec Config OBU=], one [=Audio Element OBU=], and one or more [=Mix Presentation OBU=]s.
 	- It may output [=Parameter Substream=]s
-		- For channel-based [=Audio Element=] with [=num_layers=] = 1, it may output [=Parameter Substream=] for demixing info.
-		- For channel-based [=Audio Element=] with [=num_layers=] > 1, it outputs [=Parameter Substream=]s for demixing info and recon gain info, respectively.
-		- It may further output [=Parameter Substream=] for mixing gain.
+		- For a channel-based [=Audio Element=] with [=num_layers=] = 1, it may output a [=Parameter Substream=] with demixing info.
+		- For a channel-based [=Audio Element=] with [=num_layers=] > 1, it outputs [=Parameter Substream=]s with demixing info and recon gain info.
+		- It may further output [=Parameter Substream=]s with mixing gain.
 - Codec encoder generates one or more [=Audio Substream=]s from each [=ChannelGroup=] based on [=Codec Config OBU=].
-- OBU packetizer packetizes [=Descriptors=], [=Parameter Substream=]s and [=Audio Substream=]s by OBU, and outputs [=IA Sequence=].
-	- Temporal unit generator generates [=Temporal Unit=] for each frame from [=Audio Frame OBU=]s and [=Parameter Block OBU=]s (if present).
+- OBU packetizer packetizes [=Descriptors=], [=Parameter Substream=]s and [=Audio Substream=]s into OBUs, and outputs an [=IA Sequence=].
+	- Temporal unit generator generates a [=Temporal Unit=] for each frame from [=Audio Frame OBU=]s and [=Parameter Block OBU=]s (if present).
 
 <center><img src="images/IA Encoder Configuration.png" style="width:100%; height:auto;"></center>
 <center><figcaption>IA Encoder Configuration</figcaption></center>
@@ -2387,51 +2379,53 @@ The IA encoder is composed of Pre-processor, Codec encoder, and OBU packetizer.
 ## Ambisonics Encoding ## {#iamfgeneration-ambisonics}
 
 For Ambisonics encoding:
-- Pre-processor outputs one [=ChannelGroup=] and [=Descriptors=] and it is only composed of Meta Generator.
-	- Meta generator generates [=Descriptors=] based on Ambisonics mode and the number of channels for Ambisonics.
-		- [=ambisonics_mode=] is set to 0 for [=ChannelMappingFamily=] = 2 of [[RFC8486]] or 1 for [=ChannelMappingFamily=] = 3 of [[RFC8486]].
-		- [=ambisonics_config()=] is set to as follows:
-			- [=output_channel_count=] is set to the number of channels for Ambisonics. For example 1, 4, 9, or 16.
-			- [=channel_mapping=] for [=ambisonics_mode=] = 0 is assigned to according to the order of [=Audio Substream=]s in the [=ChannelGroup=].
-			- [=demixing_matrix=] for [=ambisonics_mode=] = 1 is assigned to according to the order of [=Audio Substream=]s in the [=ChannelGroup=].
-- Codec Enc. outputs [=Audio Substream=]s as many as the number of channels which is indicated in [=substream_count=].
-- [=Temporal Unit=] is composed of [=Audio Frame OBU=]s for the [=Audio Substream=]s.
-	- It may have the immediately preceding [=Temporal Delimiter OBU=].
-	- The order of [=Audio Substream=]s in the [=ChannelGroup=] is aligned with [=channel_mapping=] for [=ambisonics_mode=] = 0 or [=demixing_matrix=] for [=ambisonics_mode=] = 1.
+
+- The Pre-Processor outputs one [=ChannelGroup=] and one set of [=Descriptors=]. It is composed of only the Meta Generator.
+	- The Meta Generator generates [=Descriptors=] based on the Ambisonics mode and the number of channels.
+		- [=ambisonics_mode=] is set as follows:
+			- 0 if [=ChannelMappingFamily=] = 2, as specified in [[RFC8486]].
+			- 1 if [=ChannelMappingFamily=] = 3, as speciifed in [[RFC8486]].
+		- [=ambisonics_config()=] is set as follows:
+			- [=output_channel_count=] is set to the number of Ambisonics channels, e.g., 4, 9, or 16.
+			- [=channel_mapping=] for [=ambisonics_mode=] = 0 is assigned based on the order of the [=Audio Substream=]s in the [=ChannelGroup=].
+			- [=demixing_matrix=] for [=ambisonics_mode=] = 1 is assigned based on the order of the [=Audio Substream=]s in the [=ChannelGroup=].
+- Codec Enc. outputs [=substream_count=] number of [=Audio Substream=]s.
+- The i-th [=Temporal Unit=] is composed of the [=Audio Frame OBU=]s for the i-th frame.
+	- It may have an immediately preceding [=Temporal Delimiter OBU=].
 
 ## Scalable Channel Audio Encoding ## {#iamfgeneration-scalablechannelaudio}
 
 For Scalable Channel Audio encoding:
-- Pre-processor outputs N [=ChannelGroup=]s ([=num_layers=] = N), [=Descriptors=] and [=Parameter Substream=]s. It is composed of a Down-mix parameter generator, Down-mixer, Loudness, ChannelGroup generator, Attenuation, and Meta generator.
+
+- The Pre-processor outputs N [=ChannelGroup=]s ([=num_layers=] = N), [=Descriptors=] and [=Parameter Substream=]s. It is composed of a Down-mix parameter generator, Down-mixer, Loudness, ChannelGroup generator, Attenuation, and Meta generator.
 	- For non-scalable channel audio (i.e. [=num_layers=] = 1):
 		- [=Parameter Substream=] for recon gain is not generated. 
-		- [=Parameter Substream=] for demixing info may be generated by implementers who assume it to be recommended for dynamic downmixing on a decoder side.
+		- [=Parameter Substream=] for demixing info may be generated by implementers who assume it to be recommended for dynamic downmixing on the decoder side.
 		- Down-mixer, ChannelGroup generator, and Attenuation modules are not needed.
-	- Down-mix parameter generator generates 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k)) by analyzing input channel audio.
+	- Down-mix parameter generator generates 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k)) by analyzing the input channel audio.
 	- Down-mixer generates [=down-mixed audio=]s according to the list of channel layouts and the down-mix parameters.
 	- Loudness module outputs the loudness level ([=LKFS=]) of each [=down-mixed audio=] based on [[ITU1770-4]].
-	- ChannelGroup generator transforms the input channel audio to N [=ChannelGroup=]s for scalable channel audio with [=num_layers=] = N scalability by using the down-mix parameters and the list of channel layouts.
+	- ChannelGroup generator transforms the input channel audio to N [=ChannelGroup=]s for scalable channel audio with [=num_layers=] = N by using the down-mix parameters and the list of channel layouts.
 	- The Attenuation module applies a gain to the transformed [=ChannelGroup=]s to prevent clipping.
 	- Meta generator generates [=Descriptors=] and [=Parameter Substream=]s.
-		- [=Descriptors=] are set to as follows:
+		- [=Descriptors=] are set as follows:
 			- [=num_layers=] is set to N (i.e. the number of channel layouts).
-			- [=channel_audio_layer_config()=] is set to as follows:
+			- [=channel_audio_layer_config()=] is set as follows:
 				- [=loudspeaker_layout=] is set to the ith list of channel layouts for the ith [=ChannelGroup=].
 				- [=output_gain_is_present_flag=] is set to 1 for the ith [=ChannelGroup=] if attenuation is applied to the mixed channels of the ith [=ChannelGroup=]. Otherwise, it is set to 0 for the ith [=ChannelGroup=].
 				- [=recon_gain_is_present_flag=] is set to 1 for the ith [=ChannelGroup=] if the preceding [=ChannelGroup=]s has one or more mixed channels from the [=down-mixed audio=] for the ith channel layout. Otherwise, it is set to 0 for the ith [=ChannelGroup=]. Especially, when [=num_layers=] = 1, this flag is set to 0.
 					- This flag is set to 0 for lossless codecs including LPCM.
-				- [=substream_count=] is set to the number of [=Audio Substream=]s composing of the ith [=ChannelGroup=].
-				- [=coupled_substream_count=] is set to the number of coupled substreams among the [=Audio Substream=]s composing of the ith [=ChannelGroup=].
-				- [=loudness=] is set to the loudness ([=LKFS=]) of the [=down-mixed audio=] for the ith channel layout.
+				- [=substream_count=] is set to the number of [=Audio Substream=]s in the ith [=ChannelGroup=].
+				- [=coupled_substream_count=] is set to the number of coupled substreams among the [=Audio Substream=]s that make up the ith [=ChannelGroup=].
 				- Each bit of [=output_gain_flags=] is set to 1 for the ith [=ChannelGroup=] if attenuation is applied to the relevant channel of the ith [=ChannelGroup=]. Otherwise, it is set to 0 for the ith [=ChannelGroup=].
 				- [=output_gain=] is set to the gain (i.e. the inverse of attenuation gain) which is applied to the channels which are indicated by [=output_gain_flags=].
-		- [=Parameter Substream=]s can be composed of one for demixing info and the other for recon gain. When [=recon_gain_is_present_flag=] = 0 for all [=ChannelGroup=]s, no [=Parameter Block OBU=]s for recon gain info present in [=IA Sequence=].
-			- [=dmixp_mode=] of [=demixing_info_parameter_data()=] for the kth frame is set to indicate (α(k), β(k), γ(k), δ(k)) and w_idx_offset(k). Where w_idx_offset(k) = 1 or -1.
-			- [=recon_gain_flags=] of [=recon_gain_info_parameter_data()=] is set to indicate the de-mixed channels, which need to apply [=recon_gain=] among the output channels after demixing for ith channel layout.
+		- [=Parameter Substream=]s can be composed of one for demixing info and the other for recon gain. When [=recon_gain_is_present_flag=] = 0 for all [=ChannelGroup=]s, no [=Parameter Block OBU=]s for recon gain info is present in [=IA Sequence=].
+			- [=dmixp_mode=] of [=demixing_info_parameter_data()=] for the kth frame is set to indicate (α(k), β(k), γ(k), δ(k)) and w_idx_offset(k), where w_idx_offset(k) = 1 or -1.
+			- [=recon_gain_flags=] of [=recon_gain_info_parameter_data()=] is set to indicate the de-mixed channels which need to apply [=recon_gain=] among the output channels after demixing for the ith channel layout.
 			- [=recon_gain=] is set to the gain value to be applied to the channel which is indicated by [=recon_gain_flags=] for the ith [=ChannelGroup=].
-- [=Temporal Unit=] for kth frame is composed of zero or more [=Parameter Block OBU=]s and followed by [=Audio Frame OBU=]s for the kth frames.
-	- It may have the immediately preceding [=Temporal Delimiter OBU=],
-	- [=ChannelGroup=]s in [=Temporal Unit=] is placed in order. In other words, [=ChannelGroup=] for the first channel layout comes first, followed by [=ChannelGroup=] for the second channel layout, followed by [=ChannelGroup=] for the third channel layout, and so on.
+- [=Temporal Unit=] for the kth frame is composed of zero or more [=Parameter Block OBU=]s and followed by the [=Audio Frame OBU=]s for the kth frames.
+	- It may have the immediately preceding [=Temporal Delimiter OBU=].
+	- [=ChannelGroup=]s in a [=Temporal Unit=] are placed in order. In other words, the [=ChannelGroup=] for the first channel layout comes first, followed by the [=ChannelGroup=] for the second channel layout, followed by the [=ChannelGroup=] for the third channel layout, and so on.
 
 The figure below shows the IA encoding flowchart for Scalable Channel Audio.
 - For a given input channel audio and a given list of channel layouts for scalability, PCMs for the input channel audio are passed to the CG Generation module.
@@ -2439,62 +2433,61 @@ The figure below shows the IA encoding flowchart for Scalable Channel Audio.
 	- The transformed audio is structured as [=ChannelGroup=]s.
 - Non-mixed channels of the transformed audio (i.e., the original channels of the input channel audio) are directly input to the Codec encoder, but the mixed channels may be input first to the Attenuation module and then to the Codec encoder.
 - The Attenuation module reduces all sample values of the mixed channels in the same [=ChannelGroup=] at a uniform rate ([=output_gain=]).
-	- A range of 0dB to -6dB is recommended for attenuation. (i.e. a range of 0dB to 6dB for [=output_gain=])
+	- A range of 0 dB to -6 dB is recommended for attenuation. (i.e. a range of 0 dB to 6 dB for [=output_gain=])
 - Codec Enc. generates the coded [=Audio Substream=]s from PCMs and passes the coded [=Audio Substream=]s and one single [=decoder_config()=] to OBU Packetizer.
 - OBU packetizer generates [=Descriptors=] which consists of one [=IA Sequence Header OBU=], one [=Codec Config OBU=], one [=Audio Element OBU=] and one or more [=Mix Presentation OBU=].
 		- [=Codec Config OBU=] is generated based on [=decoder_config()=].
 - OBU packetizer generates [=Parameter Block OBU=]s for each frame which contains [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=].
 - OBU packetizer generates [=Audio Frame OBU=]s for each frame of the [=Audio Substream=]s.
-- OBU packetizer generates [=Temporal Unit=] for each frame.
+- OBU packetizer generates a [=Temporal Unit=] for each frame.
 	- [=Temporal Unit=] consists of zero or more [=Parameter Block OBU=]s and followed by [=Audio Frame OBU=]s.
 		- It may have the immediately preceding [=Temporal Delimiter OBU=], 
-- OBU Packetizer outputs [=IA Sequence=] which is composed of OBUs for [=Descriptors=] and followed by OBUs for [=Temporal Unit=]s.
+- OBU Packetizer outputs an [=IA Sequence=] which is composed of OBUs for [=Descriptors=] and followed by OBUs for [=Temporal Unit=]s.
 
 <center><img src="images/IA Encoding Flowchart for Channel Audio Format.png" style="width:80%; height:auto;"></center>
-<center><figcaption>IA Encoding Flowchart for Scalable Channel Audio</figcaption></center>
+<center><figcaption>IA Encoding Flowchart for Scalable Channel Audio.</figcaption></center>
 
 ## Mix Presentation Encoding ## {#iamfgeneration-mixpresentation}
 
-For [=Mix Presentation=] for one single channel-based [=Audio Element=], [=Mix Presentation OBU=] follows following restrictions:
-- [=num_sub_mixes=]: set to 1
-- [=num_audio_elements=]: set to 1
-- [=element_mix_config()=]: No [=Parameter Block OBU=]s for [=element_mix_config()=] and [=default_mix_gain=] = 0dB
-- [=output_mix_config()=]: No [=Parameter Block OBU=]s for [=output_mix_config()=] and [=default_mix_gain=] = 0dB
+The [=Mix Presentation OBU=] for one single channel-based [=Audio Element=] is set as follows:
+- [=num_sub_mixes=]: set to 1.
+- [=num_audio_elements=]: set to 1.
+- [=element_mix_config()=]: No [=Parameter Block OBU=]s for [=element_mix_config()=] and [=default_mix_gain=] = 0 dB.
+- [=output_mix_config()=]: No [=Parameter Block OBU=]s for [=output_mix_config()=] and [=default_mix_gain=] = 0 dB.
 - [=num_layouts=]: set to N, where N is the number of input channel layouts.
-- [=loudness_layout=]: set to L(1), L(2), ..., L(N).
-	- [=loudness_info()=] on L(1), [=loudness_info()=] on L(2), ..., [=loudness_info()=] on L(N): loudness information of the rendered audio to the measured layout L(i).
-	- Where L(i) is the measured layout for the ith layer and i = 1, 2, ..., N.
+- [=loudness_layout=]: set to L(1), L(2), ..., L(N), where L(i) is the measured layout for the ith layer and i = 1, 2, ..., N.
+	- [=loudness_info()=] for L(1), [=loudness_info()=] for L(2), ..., [=loudness_info()=] for L(N): loudness information of the audio rendered to to the measured layout L(i).
 
 NOTE: If the input channel layouts do not include Stereo, then [=num_layers=] is set to N + 1 and the [=loudness_layout=]s includes Stereo.
 
 
-For [=Mix Presentation=] for one single scene-based [=Audio Element=], [=Mix Presentation OBU=] follows following restrictions:
+The [=Mix Presentation OBU=] for one single scene-based [=Audio Element=] is set as follows:
 - [=num_sub_mixes=]: set to 1
 - [=num_audio_elements=]: set to 1
 - [=element_mix_config()=]: set to [=mix_gain=]
 - [=output_mix_config()=]: set to [=output_mix_gain=]
 - [=num_layouts=]: set to M1, the number of loudness informations which are provided.
-- [=loudness_layout=]: set to L(1), L(2), ..., L(M1). One of them is Stereo.
-- [=loudness_info()=] on L(1), [=loudness_info()=] on L(2), ..., [=loudness_info()=] on L(M1): loudness information of the rendered audio to the measured layout L(i).
-- Where L(i) is the measured layout for the ith loudness information and i = 1, 2, ..., M1.
-- This [=Mix Presentation=] is authored by using the highest [=loudness_layout=].
+- [=loudness_layout=]: set to L(1), L(2), ..., L(M1), where L(i) is the measured layout for the ith loudness information and i = 1, 2, ..., M1.
+	- One of them is Stereo.
+- [=loudness_info()=] on L(1), [=loudness_info()=] on L(2), ..., [=loudness_info()=] on L(M1): loudness information of the audio rendered to the measured layout L(i).
+- This [=Mix Presentation=] is authored using the highest [=loudness_layout=].
  
-For [=Mix Presentation=] for 2 [=Audio Element=]s, [=Mix Presentation OBU=] follows following restrictions:
+The [=Mix Presentation OBU=] for 2 [=Audio Element=]s is set as follows:
 - [=num_sub_mixes=]: set to 1
 - [=num_audio_elements=]: set to 2
 - [=element_mix_config()=] for each [=Audio Element=]: set to [=mix_gain=]
 - [=output_mix_config()=]: set to [=output_mix_gain=]
 - [=num_layouts=]: set to M2, the number of loudness informations which are provided.
-- [=loudness_layout=]: set to L(1), L(2), ..., L(M2). One of them is Stereo.
-- [=loudness_info()=] on L(1), [=loudness_info()=] on L(2), ..., [=loudness_info()=] on L(M2): loudness information of the rendered audio to the measured layout L(i).
-- Where L(i) is the measured layout for the ith loudness information and i = 1, 2, ..., M2.
-- This [=Mix Presentation=] is authored by using the highest [=loudness_layout=].
+- [=loudness_layout=]: set to L(1), L(2), ..., L(M2), where L(i) is the measured layout for the ith loudness information and i = 1, 2, ..., M2.
+	- One of them is Stereo.
+- [=loudness_info()=] on L(1), [=loudness_info()=] on L(2), ..., [=loudness_info()=] on L(M2): loudness information of the audio rendered to the measured layout L(i).
+- This [=Mix Presentation=] is authored using the highest [=loudness_layout=].
 
 ### Element Mix Config ###  {#iamfgeneration-mixpresentation-mix}
 
 This section provides a guideline to generate [=element_mix_config()=].
 
-An IA multiplexer may merge two [=IA Sequence=]s (or two [=Audio Element=]s). In this case, it adjusts the gain values for [=element_mix_config()=]s as necessary to describe the desired relative gains between the [=IA Sequence=]s (or two [=Audio Element=]s) when they are summed to generate the final mix. It also ensure that the gains selected do not result in clipping when the final mix is generated.
+An IA multiplexer may merge two [=IA Sequence=]s (or two [=Audio Element=]s). In this case, it adjusts the gain values for [=element_mix_config()=]s as necessary to describe the desired relative gains between the [=IA Sequence=]s (or two [=Audio Element=]s) when they are summed to generate the final mix. It also ensures that the gains selected do not result in clipping when the final mix is generated.
 
 ## Two Audio Elements Encoding ## {#iamfgeneration-multipleaudioelements}
 
@@ -2502,41 +2495,41 @@ This section provides a way to generate [=IA Sequence=] having two [=Audio Eleme
 
 ### Two Audio Elements with One Codec Config ### {#iamfgeneration-multipleaudioelements-onecodec}
 
-This section provides a way how to generate [=IA Sequence=] having two [=Audio Element=]s from two IA simple profiles with the same [=Codec Config OBU=]. However, the result complies with the base profile of [=IA Sequence=].
+This section provides a way to generate an [=IA Sequence=] with two [=Audio Element=]s from two IA simple profiles with the same [=Codec Config OBU=]. The result complies with the base profile.
 
 Step 1: [=Descriptors=] are generated as follows:
-- [=IA Sequence Header OBU=]: get the larger [=primary_profile=] field and the larger [=additional_profile=] field, respectively.
-- [=Codec Config OBU=]: just take the [=Codec Config OBU=] of an [=IA Sequence=].
+- [=IA Sequence Header OBU=]: take the larger [=primary_profile=] field and the larger [=additional_profile=] field, respectively.
+- [=Codec Config OBU=]: take the [=Codec Config OBU=] of an [=IA Sequence=].
 - Two [=Audio Element OBU=]s: take both of them and make the following modifications:
 	- [=codec_config_id=] in each [=Audio Element OBU=] is updated to indicate the [=codec_config_id=] specified in the taken [=Codec Config OBU=].
-	- Each [=audio_element_id=] is updated to be unique between two [=Audio Element OBU=]s.
-	- Each [=audio_substream_id=] is updated to be unique between two [=Audio Element OBU=]s. 
-	- [=parameter_id=]s in [=ParamDefinition()=]s carried in each [=Audio Element OBU=] are updated to refer its associated [=Parameter Substream=]s, respectively.
-- [=Mix Presentation OBU=]s: generate new ones which are used for mixing the two [=Audio Element=]s. Make the following modifications:
-	- [=audio_element_id=]s in each [=Mix Presentation OBU=] are updated to indicate the [=audio_element_id=]s specified in [=Audio Element OBU=]s, respectively.
-	- [=parameter_id=]s in [=ParamDefinition()=]s carried in each [=Mix Presentation OBU=] are updated to refer its associated [=Parameter Substream=]s, respectively.
+	- Each [=audio_element_id=] is updated to be unique between the two [=Audio Element OBU=]s.
+	- Each [=audio_substream_id=] is updated to be unique between the two [=Audio Element OBU=]s.
+	- [=parameter_id=]s in [=ParamDefinition()=]s carried in each [=Audio Element OBU=] are updated to be unique within the new [=IA Sequence=], if necessary.
+- [=Mix Presentation OBU=]s: generate new ones which are used for mixing the two [=Audio Element=]s.
+	- [=audio_element_id=]s in each [=Mix Presentation OBU=] are set to indicate the [=audio_element_id=]s of the referred [=Audio Element OBU=]s.
+	- [=parameter_id=]s in [=ParamDefinition()=]s carried in each [=Mix Presentation OBU=] are set to refer their associated [=Parameter Substream=]s.
 
-Step 2: ith [=Temporal Unit=] is generated as follows:
-- Place the [=Parameter Block OBU=]s in the ith [=Temporal Unit=] from each [=Audio Element=] and followed by [=Audio Frame OBU=]s in the ith [=Temporal Unit=] from each [=Audio Element=] except following:
-	- [=obu_type=]s are updated to be aligned according to [=audio_substream_id=]s specified in the two [=Audio Element OBU=]s.
-	- [=parameter_id=]s in [=Parameter Block OBU=]s are updated to indentify the [=Parameter Substream=] in [=IA Sequence=] and based on the [=parameter_id=]s in [=ParamDefinition()=]s carried in the [=Descriptors=].
-- It may have the immediately preceding [=Temporal Delimiter OBU=] for each [=Temporal Unit=].
+Step 2: The ith [=Temporal Unit=] is generated as follows:
+- Place all [=Parameter Block OBU=]s for the ith frame, followed by the [=Audio Frame OBU=]s ith frame (grouped by [=Audio Element=]s). Make the following modifications:
+	- The [=obu_type=]s of the [=Audio Frame OBU=]s are updated to be aligned with the [=audio_substream_id=]s specified in the [=Audio Element OBU=]s.
+	- [=parameter_id=]s in [=Parameter Block OBU=]s are updated to identify their associated [=Parameter Substream=]s based on the [=parameter_id=]s carried in the [=Descriptors=].
+- It may have the immediately preceding [=Temporal Delimiter OBU=].
 
 Step 3: Generate an [=IA Sequence=] which starts with [=Descriptors=] and is followed by [=Temporal Unit=]s in order.
 
 ## Post Processing ## {#iamfgeneration-postprocessing}
 
-This section provides a way to generate algorithms for post-processing.
+This section provides a way to generate metadata for post-processing.
 
 ### Loudness Information ###  {#iamfgeneration-postprocessing-loudness}
 
-This section provides a way to generate [=loudness_info()=].
-		
-For a given [=Mix Presentation OBU=] and a given [=loudness_layout=], the followings are processed in order to produce [=loudness_info()=].
-- Each of the [=Audio Element=]s specified in the given [=Mix Presentation OBU=] is rendered to the given [=loudness_layout=] according to [=rendering_config()=] for the [=Audio Element=].
-- Each of the [=Audio Element=]s specified in the given [=Mix Presentation OBU=] applies [=mix_gain=] according to [=element_mix_config()=] for the [=Audio Element=].
-- All of the [=Audio Element=]s specified in the given [=Mix Presentation OBU=] are summed, and then applies [=mix_gain=] according to [=output_mix_config()=].
-- Generate [=loudness_info()=] of the mixed audio according to [[#obu-mixpresentation-loudness]].
+This section provides a way to generate [=loudness_info()=], given a [=Mix Presentation OBU=] and a [=loudness_layout=].
+
+1. Each [=Audio Element=] specified in the given [=Mix Presentation OBU=] is rendered to the given [=loudness_layout=].
+2. Each [=Audio Element=] specified in the given [=Mix Presentation OBU=] has a gain applied using the value from [=mix_gain=] specified in its [=element_mix_config()=].
+3. All rendered and processed [=Audio Element=]s specified in the given [=Mix Presentation OBU=] are summed.
+3. The summed audio has a gain applied using the value from [=mix_gain=] specified in [=output_mix_config()=].
+4. Generate [=loudness_info()=] for the mixed audio according to [[#obu-mixpresentation-loudness]].
 
 
 # Convention # {#convention}
