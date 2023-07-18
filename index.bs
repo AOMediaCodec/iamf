@@ -349,7 +349,7 @@ The metadata in the [=Descriptors=] and [=IA Data=] are packetized into individu
 
 ### Use of OBU ### {#use-of-obu}
 
-#### Descriptors #### {#descriptors}
+#### Descriptors #### {#bitstream-descriptors}
 
 <dfn noexport>Descriptors</dfn> contain all the information that is required to set up and configure the decoders, reconstruction algorithm, renderers, and mixers. [=Descriptors=] do not contain audio signals.
 
@@ -553,9 +553,9 @@ class ia_sequence_header_obu() {
 
 <b>Semantics</b>
 
-<dfn noexport>ia_code</dfn> is a ‘four-character code’ (4CC), ‘iamf’. 
+<dfn noexport>ia_code</dfn> is a ‘four-character code’ (4CC), <code>iamf</code>.
 	
-NOTE: When IA OBUs are delivered over a protocol that does not provide explicit [=IA Sequence=] boundaries, a parser may locate the [=IA Sequence=] start by searching for the code 'iamf' preceded by specific OBU header values. For example, by assuming that [=obu_extension_flag=] is set to 0 and because [=obu_trimming_status_flag=] is set to 0 for an [=IA Sequence Header OBU=], the OBU header can be 0xF806 or 0xFC06.
+NOTE: When IA OBUs are delivered over a protocol that does not provide explicit [=IA Sequence=] boundaries, a parser may locate the [=IA Sequence=] start by searching for the code <code>iamf</code> preceded by specific OBU header values. For example, by assuming that [=obu_extension_flag=] is set to 0 and because [=obu_trimming_status_flag=] is set to 0 for an [=IA Sequence Header OBU=], the OBU header can be 0xF806 or 0xFC06.
 
 <dfn noexport>primary_profile</dfn> indicates the primary profile that this [=IA Sequence=] complies with. Parsers compliant with this version of the specification SHOULD discard the [=IA Sequence=] if they do not support the value indicated here.
 
@@ -566,7 +566,7 @@ The mappings below are applied for both [=primary_profile=] and [=additional_pro
 
 <dfn noexport>additional_profile</dfn> indicates an additional profile that this [=IA Sequence=] complies with. If an [=IA Sequence=] only complies with the [=primary_profile=], this field SHALL be set to the same value as [=primary_profile=].
 
-NOTE: If a future version defines a new profile, e.g., HypotheticalProfile, that is backward compatible with the Base profile, for example by defining new OBUs that would be ignored by the Base-compatible parser, an IA writer can decide to set the [=primary_profile=] to 'Base' while setting the [=additional_profile=] to 'HypotheticalProfile'. This way an old processor will know it can parse and produce an acceptable rendering, while a new processor still knows it can produce a better result because it will not ignore the additional features.
+NOTE: If a future version defines a new profile, e.g., HypotheticalProfile, that is backward compatible with the Base profile, for example by defining new OBUs that would be ignored by the Base-compatible parser, an IA writer can decide to set the [=primary_profile=] to "Base Profile" while setting the [=additional_profile=] to "HypotheticalProfile". This way an old processor will know it can parse and produce an acceptable rendering, while a new processor still knows it can produce a better result because it will not ignore the additional features.
 
 ## Codec Config OBU Syntax and Semantics ## {#obu-codecconfig}
 
@@ -600,7 +600,7 @@ class codec_config() {
 
 Parsers compliant with this version of the specification SHOULD ignore [=Codec Config OBU=]s with an unknown [=codec_id=].
 
-NOTE: 'ipcm' should not be confused with 'lpcm', which is another 4CC to identify codecs in other container formats (e.g., QuickTime).
+NOTE: 'ipcm' should not be confused with <code>lpcm</code>, which is another 4CC to identify codecs in other container formats (e.g., QuickTime).
 
 <dfn noexport>num_samples_per_frame</dfn> indicates the frame length, in samples, of the [=audio_frame()=] provided in the audio_frame_obu(). It SHALL NOT be set to zero. If the [=decoder_config()=] structure for a given codec specifies a value for the frame length, the two values SHALL be equal.
 
@@ -1372,7 +1372,7 @@ NOTE: [[!ITU1770-4]] adopts the convention of using the dBov unit for dBFS, wher
 
 This section specifies the OBU payload of OBU_IA_Parameter_Block.
 
-The metadata specified in this OBU defines the parameter values for an algorithm for an indicated duration, including any animation of the parameter values over this duration. The metadata is used in conjunction with a corresponding parameter definition and parameter data specification. The parameter definition is specified based on [=ParamDefinition()=]. The parameter data provides the values to apply in each parameter block. These are specified using the [=AnimatedParameterData()=] function template if parameter animation is supported.
+The metadata specified in this OBU defines the parameter values for an algorithm for an indicated duration, including any animation of the parameter values over this duration. The metadata is used in conjunction with a corresponding parameter definition and parameter data specification. The parameter definition is specified based on [=ParamDefinition()=]. The parameter data provides the values to apply in each parameter block. These are specified using the AnimatedParameterData() function template if parameter animation is supported.
 
 <b>Syntax</b>
 
@@ -1918,7 +1918,7 @@ NOTE: In typical cases, when a track contains a single [=IA Sequence=], trimming
 ## Codecs Parameter String ## {#codecsparameter}
 
 DASH and other applications require defined values for the 'codecs' parameter specified in [[!RFC6381]] for ISO Media tracks. The codecs parameter string for [=codec_id=] SHALL be:
-- Per [[!RFC6381]] and [[!ISOBMFF]], the first element of the codecs parameter string is 'iamf'.
+- Per [[!RFC6381]] and [[!ISOBMFF]], the first element of the codecs parameter string is <code>iamf</code>.
 - The second element indicates the [=primary_profile=]. It is three digits within the range of 0 to 255.
 - The third element indicates the [=additional_profile=]. It is three digits within the range of 0 to 255.
 - The fourth element and any additional elements, if any, SHALL be the elements of the codecs parameter string if that stream was carried in its own track (i.e., not encapsulated in IAMF).
@@ -2280,11 +2280,11 @@ Finally, the output mix gain SHALL be applied using the value specified in [=out
 
 ## Animated Parameters ## {#processing-animated-params}
 
-This section describes how a set of parameter values is animated over a subblock in a parameter_block_obu() and applied to the corresponding audio samples, using the information provided in [=AnimatedParameterData()=].
+This section describes how a set of parameter values is animated over a subblock in a parameter_block_obu() and applied to the corresponding audio samples, using the information provided in AnimatedParameterData().
 
 If [=animation_type=] is equal to STEP, the parameter value provided by [=start_point_value=] SHOULD be applied to all time steps in the subblock.
 
-If [=animation_type=] is equal to LINEAR or BEZIER, the information provided in [=AnimatedParameterData()=] describes how the set of parameter values is animated as a Bezier curve. Let <code>T</code> be the [=subblock_duration=] defined in the parameter_block_obu() and <code>P0</code>, <code>P1</code> and <code>P2</code> be 2D coordinates defined as
+If [=animation_type=] is equal to LINEAR or BEZIER, the information provided in AnimatedParameterData() describes how the set of parameter values is animated as a Bezier curve. Let <code>T</code> be the [=subblock_duration=] defined in the parameter_block_obu() and <code>P0</code>, <code>P1</code> and <code>P2</code> be 2D coordinates defined as
 
 ```
 P0 = (t0, start_point_value),
@@ -2683,7 +2683,7 @@ The MOD() function returns the remainder after <b>Number</b> is divided by <b>Di
 The pow() function returns the value of x to the power of y.
 
 
-# Annex
+# Annex # {#annex}
 
 ## Annex A: ID Linking Scheme (Informative) ## {#Annex_A}
 
