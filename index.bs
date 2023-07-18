@@ -402,6 +402,8 @@ This section specifies the OBU syntax elements and their semantics.
 
 ## Immersive Audio OBU Syntax and Semantics ## {#immersiveaudio-obu}
 
+OBUs are structured with an obu_header() and an OBU payload.
+
 obu_header() and all OBU payloads including reserved_obu() are byte aligned.
 
 <b>Syntax</b>
@@ -588,7 +590,7 @@ class codec_config() {
 
 <b>Semantics</b>
 
-<dfn noexport>codec_config_id</dfn> defines an identifier for a codec configuration. Within an [=IA Sequence=], there SHALL be exactly one non-redundant [=Codec Config OBU=] with a given identifier. Each [=Codec Config OBU=] in the first [=Descriptors=] within the [=IA Sequence=] is regarded as a non-redundant OBU regardless of the value of its [=obu_redundant_copy=]. [=Audio Element=]s use this identifier to indicate that its corresponding [=Audio Substream=]s are coded with this codec configuration.
+<dfn noexport>codec_config_id</dfn> defines an identifier for a codec configuration. Within an [=IA Sequence=], there SHALL be one unique [=codec_config_id=] per codec. There SHALL be exactly one [=Codec Config OBU=] with a given identifier in a set of [=Descriptors=]. [=Audio Element=]s use this identifier to indicate that its corresponding [=Audio Substream=]s are coded with this codec configuration.
 
 <dfn noexport>codec_id</dfn> indicates a ‘four-character code’ (4CC) to identify the codec used to generate the coded [=Audio Substream=]s. For this version of the specification, it SHALL be set to one of the four [=codec_id=] values defined below:
 - 'Opus': All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL comply with the [[!RFC6716]] specification and the [=decoder_config()=] structure SHALL comply with the constraints given in [[#opus-specific]].
@@ -676,7 +678,7 @@ class ReconGainParamDefinition() extends ParamDefinition() {
 
 <b>Semantics</b>
 
-<dfn noexport>audio_element_id</dfn> defines an identifier for an [=Audio Element=]. Within an [=IA Sequence=], there SHALL be exactly one non-redundant [=Audio Element OBU=] with a given identifier. Each [=Audio Element OBU=] in the first [=Descriptors=] of the [=IA Sequence=] is regarded as a non-redundant OBU regardless of the value of its [=obu_redundant_copy=] field. [=Mix Presentation=]s refer to a particular [=Audio Element=] using this identifier.
+<dfn noexport>audio_element_id</dfn> defines an identifier for an [=Audio Element=]. Within an [=IA Sequence=], there SHALL be one unique [=audio_element_id=] per [=Audio Element=]. There SHALL be exactly one [=Audio Element OBU=] with a given identifier in a set of [=Descriptors=]. [=Mix Presentation=]s refer to a particular [=Audio Element=] using this identifier.
 
 <dfn noexport>audio_element_type</dfn> specifies the audio representation of this [=Audio Element=], which is constructed from one or more [=Audio Substream=]s. Parsers compliant with this version of the specification SHOULD ignore [=Audio Element OBU=]s with a reserved [=audio_element_type=].
 
@@ -1098,7 +1100,7 @@ class mix_presentation_obu() {
 
 <b>Semantics</b>
 
-<dfn noexport>mix_presentation_id</dfn> defines an identifier for a [=Mix Presentation=]. Within an [=IA Sequence=], there SHALL be exactly one non-redundant [=Mix Presentation OBU=] with a given identifier. Each [=Mix Presentation OBU=] in the first [=Descriptors=] within the [=IA Sequence=] is regarded as a non-redundant OBU regardless of the value of its [=obu_redundant_copy=]. This identifier MAY be used by the application to select which [=Mix Presentation=](s) to offer.
+<dfn noexport>mix_presentation_id</dfn> defines an identifier for a [=Mix Presentation=]. Within an [=IA Sequence=], there SHALL be one unique [=mix_presentation_id=] per [=Mix Presentation=]. There SHALL be exactly one [=Mix Presentation OBU=] with a given identifier in a set of [=Descriptors=]. This identifier MAY be used by the application to select which [=Mix Presentation=](s) to offer.
 
 <dfn noexport>count_label</dfn> indicates the number of labels in different languages.
 
@@ -1565,7 +1567,7 @@ class recon_gain_info_parameter_data() {
 
 This section specifies the OBU payloads of OBU_IA_Audio_Frame and OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID17.
 
-<dfn noexport>audio_substream_id</dfn> is an identifier for the [=Audio Substream=] associated with this audio frame. Within an [=IA Sequence=], there SHALL be exactly one non-redundant [=Audio Element OBU=] with an [=audio_substream_id=]. Each [=Audio Element OBU=] in the first [=Descriptors=] within the [=IA Sequence=] is regarded as a non-redundant OBU regardless of the value of its [=obu_redundant_copy=].
+<dfn noexport>audio_substream_id</dfn> is an identifier for an [=Audio Substream=] associated with this audio frame. Within an [=IA Sequence=], there SHALL be one unique [=audio_substream_id=] per [=Audio Substream=]. There SHALL be exactly one [=Audio Element OBU=] with a given [=audio_substream_id=] in a set of [=Descriptors=].
 
 <b>Syntax</b>
 
