@@ -1188,7 +1188,7 @@ class rendering_config() {
 <dfn noexport>headphones_rendering_mode</dfn> indicates whether the input channel-based [=Audio Element=] is rendered to stereo loudspeakers or spatialized with a binaural renderer when played back on headphones. If the playback layout is a loudspeaker layout or the input [=Audio Element=] is not CHANNEL_BASED, the parsers SHALL ignore this field.
 
 - 0: It indicates that the input [=Audio Element=] is rendered to [=loudspeaker_layout=] = Stereo. 
-- 1: It indicates that the input [=Audio Element=] is rendered to binaural output.
+- 1: It indicates that the input [=Audio Element=] is rendered to headphones.
 - 2~3: Reserved.
 
 Parsers encountering a reserved value of [=headphones_rendering_mode=] SHALL ignore the Mix Presentation OBU that contains this [=rendering_config()=].
@@ -1980,23 +1980,23 @@ As depicted in the figure above,
 
 # IAMF Processing # {#processing}
 
-An [=IA Sequence=] SHALL be decoded and processed according to the following steps:
+An [=IA Sequence=] SHALL be decoded and processed to output an [=Immersive Audio=] according to a given playback layout. It SHALL include the following steps but an IA decoder MAY process the steps in a different order to produce the same result:
 
 1. Parsing OBUs to obtain the [=Descriptors=] and [=IA Data=].
 2. Selecting a [=Mix Presentation=] to use.
     - Details are provided in [[#processing-mixpresentation-selection]].
-2. Decoding and reconstructing one or more [=Audio Element=]s that are referenced by the [=Mix Presentation=], and used in the remainder of the steps below.
+3. Decoding and reconstructing one or more [=Audio Element=]s that are referenced by the [=Mix Presentation=], and used in the remainder of the steps below.
     - Ambisonics decoding is described in [[#processing-ambisonics]].
     - Scalable Channel Audio decoding is described in [[#processing-scalablechannelaudio]].
-3. Rendering each [=Audio Element=] to the playback layout.
+4. Rendering each [=Audio Element=] to the playback layout.
     - Details are provided in [[#processing-mixpresentation-rendering]].
-4. Applying mixing parameters to the rendered [=Audio Element=].
+5. Applying mixing parameters to the rendered [=Audio Element=].
     - Details are provided in [[#processing-mixpresentation-mixing]].
-5. Synchronizing and then summing all rendered and individually processed [=Audio Elements=].
+6. Synchronizing and then summing all rendered and individually processed [=Audio Elements=].
     - Details are provided in [[#processing-mixpresentation-mixing]].
-6. Applying further mixing parameters to the mixed [=Audio Element=]s.
+7. Applying further mixing parameters to the mixed [=Audio Element=]s.
     - Details are provided in [[#processing-mixpresentation-mixing]].
-7. Post-processing the output mix to perform loudness normalization and peak limiting.
+8. Post-processing the output mix to perform loudness normalization and peak limiting.
     - Details are provided in [[#processing-post]].
 
 NOTE: The IA decoder MAY choose to lazily parse OBUs to avoid unnecessarily parsing OBUs that are not used by the selected [=Mix Presentation=].
@@ -2038,10 +2038,10 @@ The output of this process SHALL be the [=3D audio signal=] (e.g. 3.1.2ch or 7.1
 The figure below shows the decoding and reconstruction flowchart.
 
 <center><img src="images/Channel Audio Decoding Flowchart.png" style="width:80%; height:auto;"></center>
-<center><figcaption>Scalable Channel Audio Decoding Flowchart</figcaption></center>
+<center><figcaption>Scalable Channel Audio Decoding and Reconstruction Flowchart</figcaption></center>
 
 For a given loudspeaker layout (i.e., CL #i) among the list of [=loudspeaker_layout=] in [=scalable_channel_layout_config()=],
-- THe OBU Parser SHALL output the [=Audio Substream=]s for [=ChannelGroup=] #1 to [=ChannelGroup=] #i and pass them to the Codec Decoder, along with [=decoder_config()=].
+- The OBU Parser SHALL output the [=Audio Substream=]s for [=ChannelGroup=] #1 to [=ChannelGroup=] #i and pass them to the Codec Decoder, along with [=decoder_config()=].
 - The Codec Decoder SHALL output the decoded PCM channels.
 	- For non-scalable audio (i.e., i = [=num_layers=] = 1), its order SHALL be converted to the loudspeaker location order for CL #1.
 	- For scalable audio (i.e., i > 1), the output channels SHALL have the same order as the originally transmitted order of the coded channels.
@@ -2055,7 +2055,7 @@ The following sections, [[#processing-scalablechannelaudio-gain]], [[#processing
 
 ### Gain ### {#processing-scalablechannelaudio-gain}
 
-The Gain module is the mirror process of the Attenuation module (described in [[#iamfgeneration-scalablechannelaudio]]). It recovers the reduced sample values using [=output_gain=](i) when its [=output_gain_is_present_flag=](i) for [=ChannelGroup=] #i is set to 1. When its [=output_gain_is_present_flag=](i) is set to 0, then this module SHALL be bypassed for [=ChannelGroup=] #i. The value of [=output_gain=](i) for [=ChannelGroup=] #i SHALL be applied to all samples of the mixed channels in [=ChannelGroup=] #i, where mixed channels means the mixed channels from an input channel audio (i.e. a channel audio for CL #n).
+The Gain module is the mirror process of the Attenuation module (described in [[#iamfgeneration-scalablechannelaudio]]). It recovers the reduced sample values using [=output_gain=](i) when its [=output_gain_is_present_flag=](i) for [=ChannelGroup=] #i is set to 1. When its [=output_gain_is_present_flag=](i) is set to 0, then this module SHALL be bypassed for [=ChannelGroup=] #i. The value of [=output_gain=](i) for [=ChannelGroup=] #i SHALL be applied to all samples of the mixed channels in [=ChannelGroup=] #i, where a mixed channel means the channel created by mixing multiple channels of an input channel audio when generating [=down-mixed audio=] from the input channel audio (i.e., the channel audio for CL #n).
 
 To apply the gain, an implementation SHALL use the following:
 
@@ -2115,7 +2115,7 @@ When Ti = 4,
 - Else if Tj = 2 (j=1,2,…, i-1), the combination SHALL include [=T2to4 de-mixer=].
 
 For example, consider the case where CL #1 = 2ch, CL #2 = 3.1.2ch, CL #3 = 5.1.2ch and CL #4 = 7.1.4ch. To reconstruct the rest (i.e. Ls5/Rs5/Ltf/Rtf) of the [=down-mixed audio=] 5.1.2ch,
-- The combination includes [=S2to3 de-mixer=], [=S3to5 de-mixer=] and [=TF2toF2 de-mixer=].
+- The combination includes [=S2to3 de-mixer=], [=S3to5 de-mixer=] and [=TF2toT2 de-mixer=].
 - Ls5 and Rs5 are recovered by [=S2to3 de-mixer=] and [=S3to5 de-mixer=].
 - Ltf and Rtf are recovered by [=S2to3 de-mixer=] and [=TF2toT2 de-mixer=].
 
@@ -2129,7 +2129,7 @@ For example, consider the case where CL #1 = 2ch, CL #2 = 3.1.2ch, CL #3 = 5.1.2
 Recon gain is REQUIRED only for [=num_layers=] > 1 and when [=codec_id=] is set to 'Opus' or 'mp4a'.
 
 [=recon_gain=] SHALL only be applied to all audio samples of the de-mixed channels from the De-mixer module.
-- [=recon_gain_info_parameter_data()=] indicates each channel of CL #i to which [=recon gain=] needs to be applied and provides the [=recon_gain=] value for each frame of the channel.
+- [=recon_gain_info_parameter_data()=] indicates each channel of CL #i to which [=recon_gain=] needs to be applied and provides the [=recon_gain=] value for each frame of the channel.
 	- Sample (k,i) = Sample (k, i) * Smoothed_Recon_Gain (k,i), where k is the frame index and i is the sample index of the frame.
 	- Smoothed_Recon_Gain (k) = MA_gain (k-1) * e_window + MA_gain (k) * s_window
 	- MA_gain (k) = 2 / (N+1) * [=recon_gain=] (k) / 255 + (1 – 2/(N+1)) * MA_gain (k-1), where MA_gain (0) = 1.
@@ -2217,7 +2217,7 @@ This section defines the renderer to use, given a channel-based [=Audio Element=
 - Else if the playback layout is 3.1.2ch,
     - If the input layout has height channels, use the static down-mix matrices specified in [[#processing-downmixmatrix-static]].
     - Else if the surround channels (x) of the input layout > 3, use the static down-mix matrices specified in [[#processing-downmixmatrix-static]] after inserting empty height channels into the input audio.
-    - Else, pad empty channels to the input audio relevant to the input layout to make 3.1.2ch.
+    - Else, pad empty channels to the input audio relevant to the input layout to make 3.1.2ch. In that case, Mono is regarded as a center channel.
 
 
 ##### Configuring the EAR Direct Speakers Renderer ##### {#processing-mixpresentation-rendering-m2l-configureear}
@@ -2274,8 +2274,8 @@ After rendering all [=Audio Element=]s to a common playback layout, each [=Audio
 
 The rendered and processed [=Audio Element=]s SHALL then be summed.
 
-Finally, the output gain SHALL be applied using the value specified in [=output_mix_config()=] to generate one sub-mixed audio signal. 
-    - If there are no output mix gain [=Parameter Substream=]s associated with the [=Mix Presentation=], use the [=default_mix_gain=] value.
+Finally, the output mix gain SHALL be applied using the value specified in [=output_mix_config()=] to generate one sub-mixed audio signal. 
+    - If there are no [=Parameter Block OBU=]s for the [=Parameter Substream=]s associated with the [=Mix Presentation=], use the [=default_mix_gain=] value.
     - Else, use the [=param_data=] value provided in [=mix_gain_parameter_data()=].
 
 ## Animated Parameters ## {#processing-animated-params}
