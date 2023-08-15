@@ -402,34 +402,34 @@ This section specifies the OBU syntax elements and their semantics.
 
 ## Immersive Audio OBU Syntax and Semantics ## {#immersiveaudio-obu}
 
-OBUs are structured with an obu_header() and an OBU payload.
+OBUs are structured with an <code>obu_header</code> and an OBU payload.
 
-obu_header() and all OBU payloads including reserved_obu() are byte aligned.
+The <code>obu_header</code> and all OBU payloads including <code>reserved_obu</code> are byte aligned.
 
 <b>Syntax</b>
 
 ```
-class ia_open_bitstream_unit() {
-  obu_header();
+class IaOpenBitstreamUnit() {
+  ObuHeader obu_header;
 
   if (obu_type == OBU_IA_Sequence_Header)
-    ia_sequence_header_obu();
+    IaSequenceHeaderObu ia_sequence_header_obu;
   else if (obu_type == OBU_IA_Codec_Config)
-    codec_config_obu();
+    CodecConfigObu codec_config_obu;
   else if (obu_type == OBU_IA_Audio_Element)
-    audio_element_obu();
+    AudioElementObu audio_element_obu;
   else if (obu_type == OBU_IA_Mix_Presentation)
-    mix_presentation_obu();
+    MixPresentationObu mix_presentation_obu;
   else if (obu_type == OBU_IA_Parameter_Block)
-    parameter_block_obu();
+    ParameterBlockObu parameter_block_obu;
   else if (obu_type == OBU_IA_Temporal_Delimiter)
-    temporal_delimiter_obu();
+    TemporalDelimiterObu temporal_delimiter_obu;
   else if (obu_type == OBU_IA_Audio_Frame)
-    audio_frame_obu(true);
+    AudioFrameObu audio_frame_obu(true);
   else if (obu_type >= 6 and <= 23)
-    audio_frame_obu(false);
+    AudioFrameObu audio_frame_obu(false);
   else if (obu_type >=24 and <= 30)
-    reserved_obu();
+    ReservedObu reserved_obu;
 }
 ```
 
@@ -443,7 +443,7 @@ If the syntax element [=obu_type=] is equal to OBU_IA_Sequence_Header, an ordere
 <b>Syntax</b>
 
 ```
-class obu_header() {
+class ObuHeader() {
   unsigned int (5) obu_type;
   unsigned int (1) obu_redundant_copy;
   unsigned int (1) obu_trimming_status_flag;
@@ -526,7 +526,7 @@ Reserved OBUs SHOULD be ignored by parsers compliant with this version of the sp
 <b>Syntax</b>
 
 ```
-class reserved_obu() {
+class ReservedObu() {
 }
 ```
 
@@ -544,7 +544,7 @@ This OBU MAY be placed frequently within one single [=IA Sequence=] for an appli
 <b>Syntax</b>
 
 ```
-class ia_sequence_header_obu() {
+class IaSequenceHeaderObu() {
   unsigned int (32) ia_code;
   unsigned int (8) primary_profile;
   unsigned int (8) additional_profile;
@@ -575,7 +575,7 @@ This section specifies the OBU payload of OBU_IA_Codec_Config.
 <b>Syntax</b>
 
 ```
-class codec_config_obu() {
+class CodecConfigObu() {
   leb128() codec_config_id;  
   codec_config();
 }
@@ -602,7 +602,7 @@ Parsers compliant with this version of the specification SHOULD ignore [=Codec C
 
 NOTE: 'ipcm' should not be confused with <code>lpcm</code>, which is another 4CC to identify codecs in other container formats (e.g., QuickTime).
 
-<dfn noexport>num_samples_per_frame</dfn> indicates the frame length, in samples, of the [=audio_frame()=] provided in the audio_frame_obu(). It SHALL NOT be set to zero. If the [=decoder_config()=] structure for a given codec specifies a value for the frame length, the two values SHALL be equal.
+<dfn noexport>num_samples_per_frame</dfn> indicates the frame length, in samples, of the [=audio_frame()=] provided in the <code>audio_frame_obu</code>. It SHALL NOT be set to zero. If the [=decoder_config()=] structure for a given codec specifies a value for the frame length, the two values SHALL be equal.
 
 <dfn noexport>audio_roll_distance</dfn> indicates how many audio frames prior to the current audio frame need to be decoded (and the decoded samples discarded) to set the encoder in a state that will produce the perfect decoded audio signal. It SHALL always be a negative value or zero. For some audio codecs, even if an audio frame can be decoded independently, the decoded signal after decoding only that frame may not represent a perfect, decoded audio signal, even ignoring compression artifacts. This can be due to overlap transforms. While potentially acceptable when starting to decode an [=Audio Substream=], it may be problematic when automatically switching between similar [=Audio Substream=]s of different quality and/or bitrate. 
 - It SHALL be set to -R when [=codec_id=] is set to 'Opus', where R is <code>ceil(3840 / [=num_samples_per_frame=])</code>.
@@ -619,7 +619,7 @@ This section specifies the OBU payload of OBU_IA_Audio_Element.
 <b>Syntax</b>
 
 ```
-class audio_element_obu() {
+class AudioElementObu() {
   leb128() audio_element_id;
   unsigned int (3) audio_element_type;
   unsigned int (5) reserved;
@@ -689,11 +689,11 @@ audio_element_type: The type of audio representation.
   2~7   : Reserved
 </pre>
 
-<dfn value noexport for="audio_element_obu()">codec_config_id</dfn> indicates the identifier for the codec configuration which this [=Audio Element=] refers to. Parsers compliant with this version of the specification SHOULD ignore [=Audio Element OBU=]s with a [=codec_config_id=] identifying an unknown [=codec_id=].
+<dfn value noexport for="audio_element_obu">codec_config_id</dfn> indicates the identifier for the codec configuration which this [=Audio Element=] refers to. Parsers compliant with this version of the specification SHOULD ignore [=Audio Element OBU=]s with a [=codec_config_id=] identifying an unknown [=codec_id=].
 
 <dfn noexport>num_substreams</dfn> specifies the number of [=Audio Substream=]s that are used to reconstruct this [=Audio Element=]. It SHALL NOT be set to 0.
 
-<dfn value noexport for="audio_element_obu()">audio_substream_id</dfn> indicates the identifier for an [=Audio Substream=] which this [=Audio Element=] refers to.
+<dfn value noexport for="audio_element_obu">audio_substream_id</dfn> indicates the identifier for an [=Audio Substream=] which this [=Audio Element=] refers to.
 
 Let a particular [=ChannelGroup=]'s [=Audio Substream=]s be indexed as [<dfn noexport>c</dfn>, <dfn noexport>n_c</dfn>], where a [=ChannelGroup=] generation rule is described in [[#iamfgeneration-scalablechannelaudio-channelgroupgenerationrule]] and
 - [=c=] = [1, ..., C] is the [=ChannelGroup=] index and C is the number of [=ChannelGroup=]s.
@@ -1058,7 +1058,7 @@ A scene-based [=Audio Element=] has only one [=ChannelGroup=], which includes al
 
 This section specifies the OBU payload of OBU_IA_Mix_Presentation.
 
-The metadata in mix_presentation_obu() specifies how to render, process and mix one or more [=Audio Element=]s, with details provided in [[#processing-mixpresentation]].
+The metadata in <code>mix_presentation_obu</code> specifies how to render, process and mix one or more [=Audio Element=]s, with details provided in [[#processing-mixpresentation]].
 
 An [=IA Sequence=] MAY have one or more [=Mix Presentation=]s specified. The IA parser SHALL select the appropriate [=Mix Presentation=] to process according to the rules specified in [[#processing-mixpresentation-selection]].
 
@@ -1066,7 +1066,7 @@ A [=Mix Presentation=] MAY contain one or more sub-mixes. Common use cases MAY s
 
 <b>Syntax</b>
 ```
-class mix_presentation_obu() {
+class MixPresentationObu() {
   leb128() mix_presentation_id;
   leb128() count_label;
   for (i = 0; i < count_label; i++) {
@@ -1113,7 +1113,7 @@ class mix_presentation_obu() {
 
 <dfn noexport>num_audio_elements</dfn> specifies the number of [=Audio Element=]s that are used in this [=Mix Presentation=] to generate the final output audio signal for playback. It SHALL NOT be set to 0. 
 
-<dfn value noexport for ="mix_presentation_obu()">audio_element_id</dfn> indicates the identifier for an [=Audio Element=] which this [=Mix Presentation=] refers to.
+<dfn value noexport for ="mix_presentation_obu">audio_element_id</dfn> indicates the identifier for an [=Audio Element=] which this [=Mix Presentation=] refers to.
 
 <dfn noexport>mix_presentation_element_annotations()</dfn> provides informational metadata that the playback system MAY use to display information to the user. It is not used in the rendering or mixing process to generate the final output audio signal.
 
@@ -1377,7 +1377,7 @@ The metadata specified in this OBU defines the parameter values for an algorithm
 <b>Syntax</b>
 
 ```
-class parameter_block_obu() {
+class ParameterBlockObu() {
   leb128() parameter_id;
   
   (param_definition_type, param_definition_mode, duration, num_subblocks, constant_subblock_duration, subblock_duration) = get_param_definition(parameter_id);
@@ -1426,13 +1426,13 @@ If [=param_definition_mode=] = 0, this function additionally gets the following 
 
 When it gets an unknown [=param_definition_type=], parsers compliant with this version of the specification SHOULD ignore the [=Parameter Block OBU=]. 
 
-<dfn value noexport for="parameter_block_obu()">duration</dfn> specifies the duration for which this parameter block is valid and applicable. It SHALL NOT be set to 0.
+<dfn value noexport for="parameter_block_obu">duration</dfn> specifies the duration for which this parameter block is valid and applicable. It SHALL NOT be set to 0.
 
-<dfn value noexport for="parameter_block_obu()">constant_subblock_duration</dfn> specifies the duration of each subblock, in the case where all subblocks except the last subblock have equal durations. If all subblocks except the last subblock do not have equal durations, the value of constant_subblock_duration SHALL be set to 0. 
+<dfn value noexport for="parameter_block_obu">constant_subblock_duration</dfn> specifies the duration of each subblock, in the case where all subblocks except the last subblock have equal durations. If all subblocks except the last subblock do not have equal durations, the value of constant_subblock_duration SHALL be set to 0.
 
-<dfn value noexport for="parameter_block_obu()">num_subblocks</dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different subblock of the timeline, contiguously. When [=constant_subblock_duration=] != 0, [=num_subblocks=] is implicitly calculated as  [=num_subblocks=] = ceil([=duration=] / [=constant_subblock_duration=]).
+<dfn value noexport for="parameter_block_obu">num_subblocks</dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different subblock of the timeline, contiguously. When [=constant_subblock_duration=] != 0, [=num_subblocks=] is implicitly calculated as  [=num_subblocks=] = ceil([=duration=] / [=constant_subblock_duration=]).
 
-<dfn value noexport for="parameter_block_obu()">subblock_duration</dfn> specifies the duration for the given subblock. It SHALL NOT be set to 0.
+<dfn value noexport for="parameter_block_obu">subblock_duration</dfn> specifies the duration for the given subblock. It SHALL NOT be set to 0.
 
 The values of [=duration=], [=constant_subblock_duration=], and [=subblock_duration=] SHALL be expressed as the number of ticks at the [=parameter_rate=] specified in the corresponding parameter definition.
 
@@ -1572,7 +1572,7 @@ This section specifies the OBU payloads of OBU_IA_Audio_Frame and OBU_IA_Audio_F
 <b>Syntax</b>
 
 ```
-class audio_frame_obu(audio_substream_id_in_bitstream) {
+class AudioFrameObu(audio_substream_id_in_bitstream) {
   if (audio_substream_id_in_bitstream) {
      leb128() explicit_audio_substream_id;
   }
@@ -1602,7 +1602,7 @@ This section specifies the OBU payload of OBU_IA_Temporal_Delimiter.
 <b>Syntax</b>
 
 ```
-class temporal_delimiter_obu() {
+class TemporalDelimiterObu() {
 }
 ```
 
@@ -2280,11 +2280,11 @@ Finally, the output mix gain SHALL be applied using the value specified in [=out
 
 ## Animated Parameters ## {#processing-animated-params}
 
-This section describes how a set of parameter values is animated over a subblock in a parameter_block_obu() and applied to the corresponding audio samples, using the information provided in AnimatedParameterData().
+This section describes how a set of parameter values is animated over a subblock in a <code>parameter_block_obu</code> and applied to the corresponding audio samples, using the information provided in AnimatedParameterData().
 
 If [=animation_type=] is equal to STEP, the parameter value provided by [=start_point_value=] SHOULD be applied to all time steps in the subblock.
 
-If [=animation_type=] is equal to LINEAR or BEZIER, the information provided in AnimatedParameterData() describes how the set of parameter values is animated as a Bezier curve. Let <code>T</code> be the [=subblock_duration=] defined in the parameter_block_obu() and <code>P0</code>, <code>P1</code> and <code>P2</code> be 2D coordinates defined as
+If [=animation_type=] is equal to LINEAR or BEZIER, the information provided in AnimatedParameterData() describes how the set of parameter values is animated as a Bezier curve. Let <code>T</code> be the [=subblock_duration=] defined in the <code>parameter_block_obu</code> and <code>P0</code>, <code>P1</code> and <code>P2</code> be 2D coordinates defined as
 
 ```
 P0 = (t0, start_point_value),
@@ -2687,7 +2687,7 @@ The pow() function returns the value of x to the power of y.
 
 ## Annex A: ID Linking Scheme (Informative) ## {#Annex_A}
 
-The figure below shows the linking scheme among IDs in the obu_header or OBU payload.
+The figure below shows the linking scheme among IDs in the <code>obu_header</code> or OBU payload.
 
 <center><img src="images/ID Linking Example.png" style="width:100%; height:auto;"></center>
 <center><figcaption>ID Linking Scheme</figcaption></center>
