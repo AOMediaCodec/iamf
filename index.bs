@@ -325,7 +325,7 @@ Based on the model, this specification defines the immersive audio model and for
 <center><img src="images/Hypothetical IAMF Architecture.png" style="width:100%; height:auto;"></center>
 <center><figcaption>IAMF Architecture</figcaption></center>
 
-For a given input 3D audio,
+For a given input [=3D audio signal=],
 - A Pre-Processor generates [=ChannelGroup=](s), [=Descriptors=] and [=Parameter Substream=](s).
 - A Codec Enc generates coded [=Audio Substream=](s).
 - An OBU Packetizer generates an [=IA Sequence=] from the coded [=Audio Substream=](s) and [=Descriptors=] and [=Parameter Substream=](s).
@@ -356,12 +356,12 @@ The metadata in the [=Descriptors=] and [=IA Data=] are packetized into individu
 - <dfn noexport>IA Sequence Header OBU</dfn> indicates the start of a full [=IA Sequence=] description and contains information related to profiles.
 - <dfn noexport>Codec Config OBU</dfn> provides information to set up a decoder for a coded [=Audio Substream=].
 - <dfn noexport>Audio Element OBU</dfn> provides information to combine one or more [=Audio Substream=]s to reconstruct an [=Audio Element=].
-- <dfn noexport>Mix Presentation OBU</dfn> provides information to render and mix one or more [=Audio Element=]s to generate the final 3D audio output.
+- <dfn noexport>Mix Presentation OBU</dfn> provides information to render and mix one or more [=Audio Element=]s to generate the final [=Immersive Audio=] output.
 	- Multiple [=Mix Presentation=]s can be defined as alternatives to each other within the same [=IA Sequence=]. Furthermore, the choice of which [=Mix Presentation=] to use at playback is left to the user. For example, multi-language support is implemented by defining different [=Mix Presentation=]s, where the first mix describes the use of the [=Audio Element=] with English dialogue, and the second mix describes the use of the [=Audio Element=] with French dialogue.
 
 #### IA Data #### {#iadata}
 
-<dfn noexport>IA Data</dfn> contains the time-varying data that is required in the generation of the final 3D audio output.
+<dfn noexport>IA Data</dfn> contains the time-varying data that is required in the generation of the final [=Immersive Audio=] output.
 
 - <dfn noexport>Audio Frame OBU</dfn> provides the coded audio frame for an [=Audio Substream=]. Each frame has an implied start timestamp and an explicitly defined duration. A coded [=Audio Substream=] is represented as a sequence of [=Audio Frame OBU=]s with the same identifier, in time order.
 - <dfn noexport>Parameter Block OBU</dfn> provides the parameter values in a block for a [=Parameter Substream=]. Each block has an implied start timestamp and an explicitly defined duration. A time-varying [=Parameter Substream=] is represented as a sequence of parameter values in [=Parameter Block OBU=]s with the same identifier, in time order.
@@ -948,11 +948,11 @@ Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
 
 NOTE: The Ltr and Rtr of 5.1.4ch down-mixed from 7.1.4ch is within the range of Ltb and Rtb of 7.1.4ch, in terms of their positions according to [[!ITU2051-3]].
 
-For a given input audio with [=audio_element_type=] = CHANNEL_BASED, if the input audio has height channels (e.g., 7.1.4ch or 5.1.2ch), it is RECOMMENDED to use channel layouts with height channels (i.e., higher than or equal to 3.1.2ch) for all [=loudspeaker_layouts=].
+For a given input [=3D audio signal=] with [=audio_element_type=] = CHANNEL_BASED, if the input [=3D audio signal=] has height channels (e.g., 7.1.4ch or 5.1.2ch), it is RECOMMENDED to use channel layouts with height channels (i.e., higher than or equal to 3.1.2ch) for all [=loudspeaker_layouts=].
 - Examples for RECOMMENDED list of channel layouts: 3.1.2ch/5.1.2ch, 3.1.2ch/5.1.2ch/7.1.4ch, 5.1.2ch/7.1.4ch, etc.
 - Examples for NOT RECOMMENDED list of channel layouts: 2ch/3.1.2ch/5.1.2ch, 2ch/3.1.2ch/5.1.2ch/7.1.4ch, 2ch/5.1.2ch/7.1.4ch, 2ch/7.1.4ch, etc.
 
-NOTE: This specification allows down-mixing mechanisms (e.g., as specified in [[#iamfgeneration-scalablechannelaudio-downmixmechanism]]) to drop the height channel if the output layout has no height channels. An example is down-mixing from 7.1.4ch to Mono, Stereo, 5.1ch or 7.1ch. Therefore, given an input audio with height channels, an encoder may generate a set of scalable audio channel groups with layouts that do not have height channels.
+NOTE: This specification allows down-mixing mechanisms (e.g., as specified in [[#iamfgeneration-scalablechannelaudio-downmixmechanism]]) to drop the height channel if the output layout has no height channels. An example is down-mixing from 7.1.4ch to Mono, Stereo, 5.1ch or 7.1ch. Therefore, given an input [=3D audio signal=] with height channels, an encoder may generate a set of scalable audio channel groups with layouts that do not have height channels.
 
 <dfn noexport>output_gain_is_present_flag</dfn> indicates if the output_gain information fields for the [=ChannelGroup=] are present.
 - 0: No output_gain information fields for the [=ChannelGroup=] are present.
@@ -1691,7 +1691,7 @@ class decoder_config(ipcm) {
 
 <dfn noexport>sample_size</dfn> complies with [=PCM_sample_size=] specified in [[!MP4-PCM]]. In other words, it SHALL take a value from the set {16, 24, 32}. 
 
-<dfn noexport>sample_rate</dfn> indicates the sample rate of the input audio in Hz. It SHALL take a value from the set {44.1k, 16k, 32k, 48k, 96k}.
+<dfn noexport>sample_rate</dfn> indicates the sample rate of the input [=3D audio signal=] in Hz. It SHALL take a value from the set {44.1k, 16k, 32k, 48k, 96k}.
 
 The format of [=audio_frame()=] is only one single mono or stereo PCM audio frame.
 	- If [=audio_frame()=] contains a stereo PCM audio frame, the ith audio sample of the left channel is followed by the ith audio sample of the right channel, and then the (i+1)th audio sample of the left channel is followed by the (i+1)th audio sample of the right channel, where i = 1, 2, ..., [=num_samples_per_frame=] - 1.
@@ -2406,7 +2406,7 @@ In the matrices above, p1 = 0.707. Implementations MAY use a limiter defined in 
 
 # IAMF Generation Process (Informative) # {#iamfgeneration}
 
-This section provides a guideline for encoding an [=IA Sequence=] that conforms to [[#obu-syntax]], given a set of input audio and user inputs.
+This section provides a guideline for encoding an [=IA Sequence=] that conforms to [[#obu-syntax]], given a set of input [=3D audio signal=] and user inputs.
 
 The RECOMMENDED input audio formats for IA encoding are as follows:
 - Ambisonics audio: a full-order Ambisonics signal with ACN channel ordering and SN3D normalization
@@ -2424,7 +2424,7 @@ Example user inputs include:
 The figure below shows an example architecture for an IA encoder that generates an [=IA Sequence=] with one [=Audio Element=].
 
 The IA encoder is composed of the Pre-processor, Codec encoder, and OBU packetizer modules.
-- Pre-processor outputs one or more [=ChannelGroup=]s, [=Descriptors=] and optional [=Parameter Substream=]s based on the input audio and user inputs.
+- Pre-processor outputs one or more [=ChannelGroup=]s, [=Descriptors=] and optional [=Parameter Substream=]s based on the input [=3D audio signal=] and user inputs.
 	- It outputs one single [=ChannelGroup=] for a scene-based [=Audio Element=].
 	- It outputs one or more [=ChannelGroup=]s for a channel-based [=Audio Element=].
 	- It outputs [=Descriptors=] which are composed of one [=IA Sequence Header OBU=], one [=Codec Config OBU=], one [=Audio Element OBU=], and one or more [=Mix Presentation OBU=]s.
@@ -2727,16 +2727,16 @@ The figure below shows a block diagram for the down-mix parameter and loudness m
 <center><img src="images/Down-mix Parameter and Loudness.png" style="width:100%; height:auto;"></center>
 <center><figcaption>IA Down-mix Parameter and Loudness</figcaption></center>
 
-For a given channel-based input audio (e.g., 7.1.4ch) and a given list of channel layouts based on the input audio,
-- Down-mix parameter generator SHALL generate 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k), where k is the frame index) by analyzing the input audio and referring to [[AI-CAD-Mixing]].
+For a given channel-based input [=3D audio signal=] (e.g., 7.1.4ch) and a given list of channel layouts based on the input [=3D audio signal=],
+- Down-mix parameter generator SHALL generate 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k), where k is the frame index) by analyzing the input [=3D audio signal=] and referring to [[AI-CAD-Mixing]].
 	- It is composed of an Audio Scene Classification module and a Height Energy Quantification module as depicted in Figure 11-2.
-	- Audio Scene Classification module generates 4 parameters (α(k), β(k), γ(k), δ(k)) by classifying audio scenes of the input audio in three modes.
+	- Audio Scene Classification module generates 4 parameters (α(k), β(k), γ(k), δ(k)) by classifying audio scenes of the input [=3D audio signal=] in three modes.
 		- Default scene: Neither Dialog nor Effect
 		- Dialog scene: Center-channel oriented and clear dialog/voice sounds
 		- Effect scene: Directional and spatially moving sounds.
-	- The Height Energy Quantification module generates a surround-to-height mixing parameter (w(k)) which is decided according to the relative energy difference between the top and surround channels of the input audio.
+	- The Height Energy Quantification module generates a surround-to-height mixing parameter (w(k)) which is decided according to the relative energy difference between the top and surround channels of the input [=3D audio signal=].
 		- If the energy of top channels is bigger than that of surround ones, then w_idx_offset(k) is set to 1. Otherwise, it is set to -1. And, w(k) is calculated based on w_idx_offset(k) and conforms to [[#processing-scalablechannelaudio]].
-- Down-mixer generates [=down-mixed audio=] from the input audio according to the list of channel layouts and the down-mix parameters, and outputs [=down-mixed audio=] for each channel layout to the Loudness module.
+- Down-mixer generates [=down-mixed audio=] from the input [=3D audio signal=] according to the list of channel layouts and the down-mix parameters, and outputs [=down-mixed audio=] for each channel layout to the Loudness module.
 	- It is not depicted in the figure but Down-mixer further generates [=dmixp_mode=] and [=recon_gain=] for each frame to be passed to the OBU packetizer.
 - Loudness module measures the loudness level ([=LKFS=]) of each [=down-mixed audio=] based on [[ITU1770-4]], and passes them to OBU packetizer.
 
@@ -2744,9 +2744,9 @@ For a given channel-based input audio (e.g., 7.1.4ch) and a given list of channe
 
 This section specifies the down-mixing mechanism to generate <dfn noexport>down-mixed audio</dfn> for scalable channel audio.
 
-For a given channel-based input audio that conforms to [=loudspeaker_layout=], the surround and top channels (if any) are separately down-mixed and especially step by step until to get a target channels.
+For a given channel-based input [=3D audio signal=] that conforms to [=loudspeaker_layout=], the surround and top channels (if any) are separately down-mixed and especially step by step until to get a target channels.
 
-Implementers MAY use another method to get the [=down-mixed audio=] from the given input audio, but the [=down-mixed audio=] SHALL comply with that by this section.
+Implementers MAY use another method to get the [=down-mixed audio=] from the given input [=3D audio signal=], but the [=down-mixed audio=] SHALL comply with that by this section.
 
 Therefore, a down-mixer based on the down-mix mechanism is a combination of the following surround down-mixer(s) and top down-mixer(s) as depicted in the figure below.
 - Surround down-mixers 
@@ -2771,7 +2771,7 @@ For example, to get [=down-mixed audio=] 3.1.2ch from 7.1.4ch:
 
 This section describes the generation rule for channel layouts for scalable channel audio.
 
-For a given channel layout (CL #n) of channel-based input audio, any list of CLs ({CL #i: i = 1, 2, ..., n}) for scalable channel audio SHALL conform with the following rules:
+For a given channel layout (CL #n) of channel-based input [=3D audio signal=], any list of CLs ({CL #i: i = 1, 2, ..., n}) for scalable channel audio SHALL conform with the following rules:
 - Si ≤ Si+1 and Wi ≤ Wi+1 and Ti ≤ Ti+1 except Si = Si+1, Wi = Wi+1 and Ti = Ti+1 for i = n-1, n-2, …, 1. Where the ith channel layout CL #i = Si.Wi.Ti.
 - CL #i is one of [=loudspeaker_layout=]s supported in this version of the specification.
 
@@ -2826,9 +2826,9 @@ Recon_Gain for D_Rtb4:
 
 This section describes the generation rule for [=ChannelGroup=].
 
-For a given channel-based input audio and the list of CLs ({CL #i: i = 1, 2, ..., n}), the CG Generation module outputs the transformed audio (i.e., ChannelGroups) which SHALL conform to the following rules:
-- It consists of C number of channels and is structured to n number of [=ChannelGroup=]s, where C is the number of channels for the input audio.
-- [=ChannelGroup=] #1 (as called BCG): This [=ChannelGroup=] is the [=down-mixed audio=] itself for CL #1 generated from the input audio. It contains a C1 number of channels.
+For a given channel-based input [=3D audio signal=] and the list of CLs ({CL #i: i = 1, 2, ..., n}), the CG Generation module outputs the transformed audio (i.e., ChannelGroups) which SHALL conform to the following rules:
+- It consists of C number of channels and is structured to n number of [=ChannelGroup=]s, where C is the number of channels for the input [=3D audio signal=].
+- [=ChannelGroup=] #1 (as called BCG): This [=ChannelGroup=] is the [=down-mixed audio=] itself for CL #1 generated from the input [=3D audio signal=]. It contains a C1 number of channels.
 - [=ChannelGroup=] #i (as called DCG, i = 2, 3, …, n): This [=ChannelGroup=] contains (Ci – Ci-1) number of channels. (Ci – Ci-1) channel(s) consists of as follows:
 	- (Si – Si-1) surround channel(s) if Si > Si-1 . When S_set = { x | Si-1 < x ≤ Si and x is an integer},
 		- If 2 is an element of S_set, the L2 channel is contained in this CG #i.
