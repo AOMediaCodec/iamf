@@ -327,17 +327,15 @@ Based on the model, this specification defines the immersive audio model and for
 
 For a given input 3D audio,
 - A Pre-Processor generates [=ChannelGroup=](s), [=Descriptors=] and [=Parameter Substream=](s).
-- A Codec Enc generates coded [=Audio Substream=](s).
+- A Codec Encoder generates coded [=Audio Substream=](s).
 - An OBU Packetizer generates an [=IA Sequence=] from the coded [=Audio Substream=](s) and [=Descriptors=] and [=Parameter Substream=](s).
 - A File Packager (ISOBMFF Encapsulation) generates an IAMF File by encapsulating the [=IA Sequence=] into [[!ISOBMFF]] track(s).
 - A File Parser (ISOBMFF Parser) reconstructs the [=IA Sequence=] by decapsulating the IAMF File.
 - An OBU Parser outputs the coded [=Audio Substream=](s) and the [=Parameter Substream=](s).
-- A Codec Dec outputs decoded [=ChannelGroup=](s) after decoding of the coded [=Audio Substream=](s).
+- A Codec Decoder outputs decoded [=ChannelGroup=](s) after decoding of the coded [=Audio Substream=](s).
 - A Post-Processor outputs an [=Immersive Audio=] by using the [=ChannelGroup=](s), the [=Descriptors=] and the [=Parameter Substream=](s).
-- Pre-Processor, [=ChannelGroup=](s), Codec Enc and OBU Packetizer are defined in [[#iamfgeneration]].
-- [=IA Sequence=] is defined in [[#iasequence]].
-- ISOBMFF Encapsulation, IAMF file (ISOBMFF file), and ISOBMFF Parser are defined in [[#isobmff]].
-- OBU Parser, Codec Dec, and Post-Processor are defined in [[#processing]].
+
+Pre-Processor, [=ChannelGroup=](s), Codec Encoder, and OBU Packetizer are defined in [[#iamfgeneration]]. [=IA Sequence=] is defined in [[#iasequence]]. ISOBMFF Encapsulation, IAMF file (ISOBMFF file), and ISOBMFF Parser are defined in [[#isobmff]]. OBU Parser, Codec Decoder, and Post-Processor are defined in [[#processing]].
 
 ## Bitstream Structure ## {#bitstream}
 
@@ -2423,7 +2421,7 @@ Example user inputs include:
 
 The figure below shows an example architecture for an IA encoder that generates an [=IA Sequence=] with one [=Audio Element=].
 
-The IA encoder is composed of the Pre-processor, Codec encoder, and OBU packetizer modules.
+The IA encoder is composed of the Pre-processor, Codec Encoder, and OBU packetizer modules.
 - Pre-processor outputs one or more [=ChannelGroup=]s, [=Descriptors=] and optional [=Parameter Substream=]s based on the input audio and user inputs.
 	- It outputs one single [=ChannelGroup=] for a scene-based [=Audio Element=].
 	- It outputs one or more [=ChannelGroup=]s for a channel-based [=Audio Element=].
@@ -2432,7 +2430,7 @@ The IA encoder is composed of the Pre-processor, Codec encoder, and OBU packetiz
 		- For a channel-based [=Audio Element=] with [=num_layers=] = 1, it may output a [=Parameter Substream=] with demixing info.
 		- For a channel-based [=Audio Element=] with [=num_layers=] > 1, it outputs [=Parameter Substream=]s with demixing info and recon gain info.
 		- It may further output [=Parameter Substream=]s with mixing gain.
-- Codec encoder generates one or more [=Audio Substream=]s from each [=ChannelGroup=] based on [=Codec Config OBU=].
+- Codec Encoder generates one or more [=Audio Substream=]s from each [=ChannelGroup=] based on [=Codec Config OBU=].
 - OBU packetizer packetizes [=Descriptors=], [=Parameter Substream=]s and [=Audio Substream=]s into OBUs, and outputs an [=IA Sequence=].
 	- Temporal unit generator generates a [=Temporal Unit=] for each frame from [=Audio Frame OBU=]s and [=Parameter Block OBU=]s (if present).
 
@@ -2452,7 +2450,7 @@ For Ambisonics encoding:
 			- [=output_channel_count=] is set to the number of Ambisonics channels, e.g., 4, 9, or 16.
 			- [=channel_mapping=] for [=ambisonics_mode=] = 0 is assigned based on the order of the [=Audio Substream=]s in the [=ChannelGroup=].
 			- [=demixing_matrix=] for [=ambisonics_mode=] = 1 is assigned based on the order of the [=Audio Substream=]s in the [=ChannelGroup=].
-- Codec Enc. outputs [=substream_count=] number of [=Audio Substream=]s.
+- Codec Encoder outputs [=substream_count=] number of [=Audio Substream=]s.
 - The i-th [=Temporal Unit=] is composed of the [=Audio Frame OBU=]s for the i-th frame.
 	- It may have an immediately preceding [=Temporal Delimiter OBU=].
 
@@ -2494,10 +2492,10 @@ The figure below shows the IA encoding flowchart for Scalable Channel Audio.
 - For a given input channel audio and a given list of channel layouts for scalability, PCMs for the input channel audio are passed to the CG Generation module.
 - CG Generation module generates the transformed audio according to the CG generation rule based on the list of CLs and the down-mix parameters.
 	- The transformed audio is structured as [=ChannelGroup=]s.
-- Non-mixed channels of the transformed audio (i.e., the original channels of the input channel audio) are directly input to the Codec encoder, but the mixed channels may be input first to the Attenuation module and then to the Codec encoder.
+- Non-mixed channels of the transformed audio (i.e., the original channels of the input channel audio) are directly input to the Codec Encoder, but the mixed channels may be input first to the Attenuation module and then to the Codec Encoder.
 - The Attenuation module reduces all sample values of the mixed channels in the same [=ChannelGroup=] at a uniform rate ([=output_gain=]).
 	- A range of 0 dB to -6 dB is recommended for attenuation. (i.e., a range of 0 dB to 6 dB for [=output_gain=])
-- Codec Enc. generates the coded [=Audio Substream=]s from PCMs and passes the coded [=Audio Substream=]s and one single [=decoder_config()=] to OBU Packetizer.
+- Codec Encoder generates the coded [=Audio Substream=]s from PCMs and passes the coded [=Audio Substream=]s and one single [=decoder_config()=] to OBU Packetizer.
 - OBU packetizer generates [=Descriptors=] which consists of one [=IA Sequence Header OBU=], one [=Codec Config OBU=], one [=Audio Element OBU=] and one or more [=Mix Presentation OBU=].
 		- [=Codec Config OBU=] is generated based on [=decoder_config()=].
 - OBU packetizer generates [=Parameter Block OBU=]s for each frame which contains [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=].
