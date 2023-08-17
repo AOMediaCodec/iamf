@@ -1490,7 +1490,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version d29f71adb, updated Wed Jul 19 11:08:56 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="0820e1d104790c2879773c6b06b1708ce0e2b7fa" name="document-revision">
+  <meta content="9ae2ad1756d9bd35981dadeae0ee89a4b7097d26" name="document-revision">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
     color: var(--a-normal-text);
@@ -2408,37 +2408,37 @@ dfn > a.self-link::before      { content: "#"; }
    <p>The <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence①②">IA Sequence</a> uses the OBU syntax.</p>
    <p>This section specifies the OBU syntax elements and their semantics.</p>
    <h3 class="heading settled" data-level="3.1" id="immersiveaudio-obu"><span class="secno">3.1. </span><span class="content">Immersive Audio OBU Syntax and Semantics</span><a class="self-link" href="#immersiveaudio-obu"></a></h3>
-   <p>OBUs are structured with an obu_header() and an OBU payload.</p>
-   <p>obu_header() and all OBU payloads including reserved_obu() are byte aligned.</p>
+   <p>OBUs are structured with an <code>obu_header</code> and an OBU payload.</p>
+   <p>The <code>obu_header</code> and all OBU payloads including <code>reserved_obu</code> are byte aligned.</p>
    <p><b>Syntax</b></p>
-<pre>class ia_open_bitstream_unit() {
-  obu_header();
+<pre>class IAOpenBitstreamUnit() {
+  ObuHeader obu_header;
 
   if (obu_type == OBU_IA_Sequence_Header)
-    ia_sequence_header_obu();
+    IaSequenceHeaderObu ia_sequence_header_obu;
   else if (obu_type == OBU_IA_Codec_Config)
-    codec_config_obu();
+    CodecConfigObu codec_config_obu;
   else if (obu_type == OBU_IA_Audio_Element)
-    audio_element_obu();
+    AudioElementObu audio_element_obu;
   else if (obu_type == OBU_IA_Mix_Presentation)
-    mix_presentation_obu();
+    MixPresentationObu mix_presentation_obu;
   else if (obu_type == OBU_IA_Parameter_Block)
-    parameter_block_obu();
+    ParameterBlockObu parameter_block_obu;
   else if (obu_type == OBU_IA_Temporal_Delimiter)
-    temporal_delimiter_obu();
+    TemporalDelimiterObu temporal_delimiter_obu;
   else if (obu_type == OBU_IA_Audio_Frame)
-    audio_frame_obu(true);
+    AudioFrameObu audio_frame_obu(true);
   else if (obu_type >= 6 and &lt;= 23)
-    audio_frame_obu(false);
+    AudioFrameObu audio_frame_obu(false);
   else if (obu_type >=24 and &lt;= 30)
-    reserved_obu();
+    ReservedObu reserved_obu;
 }
 </pre>
    <p><b>Semantics</b></p>
    <p>If the syntax element <a data-link-type="dfn" href="#obu_type" id="ref-for-obu_type">obu_type</a> is equal to OBU_IA_Sequence_Header, an ordered series of OBUs is presented to the decoding process as a string of bytes.</p>
    <h3 class="heading settled" data-level="3.2" id="obu-header"><span class="secno">3.2. </span><span class="content">OBU Header Syntax and Semantics</span><a class="self-link" href="#obu-header"></a></h3>
    <p><b>Syntax</b></p>
-<pre>class obu_header() {
+<pre>class ObuHeader() {
   unsigned int (5) obu_type;
   unsigned int (1) obu_redundant_copy;
   unsigned int (1) obu_trimming_status_flag;
@@ -2503,14 +2503,14 @@ dfn > a.self-link::before      { content: "#"; }
    <p>This flag SHALL be set to 0 for this version of the specification. An OBU parser that is conformant with this version of the specification SHOULD ignore the <a data-link-type="dfn" href="#extension_header_bytes" id="ref-for-extension_header_bytes">extension_header_bytes</a>.</p>
    <p class="note" role="note"><span class="marker">NOTE:</span> A future version of the specification may use this flag to specify an extension header field by setting <a data-link-type="dfn" href="#obu_extension_flag" id="ref-for-obu_extension_flag">obu_extension_flag</a> = 1 and setting the size of the extended header to <a data-link-type="dfn" href="#extension_header_size" id="ref-for-extension_header_size③">extension_header_size</a>.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="obu_size">obu_size<a class="self-link" href="#obu_size"></a></dfn> indicates the size in bytes of the OBU immediately following the obu_size field of the OBU. An OBU MAY have extra bytes after consuming all the bytes per the OBU syntax definition. Parsers compliant with this version of the specification SHOULD ignore the extra bytes.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_samples_to_trim_at_start">num_samples_to_trim_at_start</dfn> indicates the number of samples that need to be trimmed from the start of the samples in this <a data-link-type="dfn" href="#audio-frame-obu" id="ref-for-audio-frame-obu②⓪">Audio Frame OBU</a>.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_samples_to_trim_at_end">num_samples_to_trim_at_end</dfn> indicates the number of samples that need to be trimmed from the end of the samples in this <a data-link-type="dfn" href="#audio-frame-obu" id="ref-for-audio-frame-obu②①">Audio Frame OBU</a>.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_samples_to_trim_at_end">num_samples_to_trim_at_end</dfn> indicates the number of samples that need to be trimmed from the end of the samples in this <a data-link-type="dfn" href="#audio-frame-obu" id="ref-for-audio-frame-obu②⓪">Audio Frame OBU</a>.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_samples_to_trim_at_start">num_samples_to_trim_at_start</dfn> indicates the number of samples that need to be trimmed from the start of the samples in this <a data-link-type="dfn" href="#audio-frame-obu" id="ref-for-audio-frame-obu②①">Audio Frame OBU</a>.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="extension_header_size">extension_header_size</dfn> indicates the size in bytes of the extension header immediately following this field.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="extension_header_bytes">extension_header_bytes</dfn> indicates the byte representations of the syntaxes of the extension header.</p>
    <h3 class="heading settled" data-level="3.3" id="obu-reserved"><span class="secno">3.3. </span><span class="content">Reserved OBU Syntax and Semantics</span><a class="self-link" href="#obu-reserved"></a></h3>
    <p>Reserved OBUs SHOULD be ignored by parsers compliant with this version of the specification. Future versions of the specification MAY define semantics for these reserved OBUs that would only be supported by parsers compliant with these future versions.</p>
    <p><b>Syntax</b></p>
-<pre>class reserved_obu() {
+<pre>class ReservedObu() {
 }
 </pre>
    <h3 class="heading settled" data-level="3.4" id="obu-iasequenceheader"><span class="secno">3.4. </span><span class="content">IA Sequence Header OBU Syntax and Semantics</span><a class="self-link" href="#obu-iasequenceheader"></a></h3>
@@ -2519,7 +2519,7 @@ dfn > a.self-link::before      { content: "#"; }
    <p class="note" role="note"><span class="marker">NOTE:</span> When an <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence①⑥">IA Sequence</a> is stored in a file, the <a data-link-type="dfn" href="#ia-sequence-header-obu" id="ref-for-ia-sequence-header-obu">IA Sequence Header OBU</a> can be used to identify that the file contains an <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence①⑦">IA Sequence</a>.</p>
    <p>This OBU MAY be placed frequently within one single <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence①⑧">IA Sequence</a> for an application such as broadcasting or multicasting. In that case, all <a data-link-type="dfn" href="#ia-sequence-header-obu" id="ref-for-ia-sequence-header-obu①">IA Sequence Header OBU</a>s except the first one SHALL be marked as redundant (i.e., <a data-link-type="dfn" href="#obu_redundant_copy" id="ref-for-obu_redundant_copy①">obu_redundant_copy</a> = 1).</p>
    <p><b>Syntax</b></p>
-<pre>class ia_sequence_header_obu() {
+<pre>class IaSequenceHeaderObu() {
   unsigned int (32) ia_code;
   unsigned int (8) primary_profile;
   unsigned int (8) additional_profile;
@@ -2543,7 +2543,7 @@ dfn > a.self-link::before      { content: "#"; }
    <h3 class="heading settled" data-level="3.5" id="obu-codecconfig"><span class="secno">3.5. </span><span class="content">Codec Config OBU Syntax and Semantics</span><a class="self-link" href="#obu-codecconfig"></a></h3>
    <p>This section specifies the OBU payload of OBU_IA_Codec_Config.</p>
    <p><b>Syntax</b></p>
-<pre>class codec_config_obu() {
+<pre>class CodecConfigObu() {
   leb128() codec_config_id;  
   codec_config();
 }
@@ -2570,7 +2570,7 @@ class codec_config() {
    </ul>
    <p>Parsers compliant with this version of the specification SHOULD ignore <a data-link-type="dfn" href="#codec-config-obu" id="ref-for-codec-config-obu③">Codec Config OBU</a>s with an unknown <a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id①">codec_id</a>.</p>
    <p class="note" role="note"><span class="marker">NOTE:</span> <a class="property css" data-link-type="property" href="https://www.iso.org/standard/77752.html#" id="ref-for-something④">ipcm</a> should not be confused with <code>lpcm</code>, which is another 4CC to identify codecs in other container formats (e.g., QuickTime).</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_samples_per_frame">num_samples_per_frame</dfn> indicates the frame length, in samples, of the <a data-link-type="dfn" href="#audio_frame" id="ref-for-audio_frame">audio_frame()</a> provided in the audio_frame_obu(). It SHALL NOT be set to zero. If the <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config④">decoder_config()</a> structure for a given codec specifies a value for the frame length, the two values SHALL be equal.</p>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_samples_per_frame">num_samples_per_frame</dfn> indicates the frame length, in samples, of the <a data-link-type="dfn" href="#audio_frame" id="ref-for-audio_frame">audio_frame()</a> provided in the <code>audio_frame_obu</code>. It SHALL NOT be set to zero. If the <a data-link-type="dfn" href="#decoder_config" id="ref-for-decoder_config④">decoder_config()</a> structure for a given codec specifies a value for the frame length, the two values SHALL be equal.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_roll_distance">audio_roll_distance</dfn> indicates how many audio frames prior to the current audio frame need to be decoded (and the decoded samples discarded) to set the encoder in a state that will produce the perfect decoded audio signal. It SHALL always be a negative value or zero. For some audio codecs, even if an audio frame can be decoded independently, the decoded signal after decoding only that frame may not represent a perfect, decoded audio signal, even ignoring compression artifacts. This can be due to overlap transforms. While potentially acceptable when starting to decode an <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream④⓪">Audio Substream</a>, it may be problematic when automatically switching between similar <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream④①">Audio Substream</a>s of different quality and/or bitrate.</p>
    <ul>
     <li data-md>
@@ -2584,7 +2584,7 @@ class codec_config() {
    <h3 class="heading settled" data-level="3.6" id="obu-audioelement"><span class="secno">3.6. </span><span class="content">Audio Element OBU Syntax and Semantics</span><a class="self-link" href="#obu-audioelement"></a></h3>
    <p>This section specifies the OBU payload of OBU_IA_Audio_Element.</p>
    <p><b>Syntax</b></p>
-<pre>class audio_element_obu() {
+<pre>class AudioElementObu() {
   leb128() audio_element_id;
   unsigned int (3) audio_element_type;
   unsigned int (5) reserved;
@@ -2642,9 +2642,9 @@ class codec_config() {
    1    : SCENE_BASED
   2~7   : Reserved
 </pre>
-   <p><dfn class="css" data-dfn-for="audio_element_obu()" data-dfn-type="value" data-noexport id="valdef-audio_element_obu-codec_config_id">codec_config_id<a class="self-link" href="#valdef-audio_element_obu-codec_config_id"></a></dfn> indicates the identifier for the codec configuration which this <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element③①">Audio Element</a> refers to. Parsers compliant with this version of the specification SHOULD ignore <a data-link-type="dfn" href="#audio-element-obu" id="ref-for-audio-element-obu②">Audio Element OBU</a>s with a <a data-link-type="dfn" href="#codec_config_id" id="ref-for-codec_config_id①">codec_config_id</a> identifying an unknown <a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id⑤">codec_id</a>.</p>
+   <p><dfn class="css" data-dfn-for="audio_element_obu" data-dfn-type="value" data-noexport id="valdef-audio_element_obu-codec_config_id">codec_config_id<a class="self-link" href="#valdef-audio_element_obu-codec_config_id"></a></dfn> indicates the identifier for the codec configuration which this <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element③①">Audio Element</a> refers to. Parsers compliant with this version of the specification SHOULD ignore <a data-link-type="dfn" href="#audio-element-obu" id="ref-for-audio-element-obu②">Audio Element OBU</a>s with a <a data-link-type="dfn" href="#codec_config_id" id="ref-for-codec_config_id①">codec_config_id</a> identifying an unknown <a data-link-type="dfn" href="#codec_id" id="ref-for-codec_id⑤">codec_id</a>.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_substreams">num_substreams</dfn> specifies the number of <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream④④">Audio Substream</a>s that are used to reconstruct this <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element③②">Audio Element</a>. It SHALL NOT be set to 0.</p>
-   <p><dfn class="css" data-dfn-for="audio_element_obu()" data-dfn-type="value" data-noexport id="valdef-audio_element_obu-audio_substream_id">audio_substream_id<a class="self-link" href="#valdef-audio_element_obu-audio_substream_id"></a></dfn> indicates the identifier for an <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream④⑤">Audio Substream</a> which this <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element③③">Audio Element</a> refers to.</p>
+   <p><dfn class="css" data-dfn-for="audio_element_obu" data-dfn-type="value" data-noexport id="valdef-audio_element_obu-audio_substream_id">audio_substream_id<a class="self-link" href="#valdef-audio_element_obu-audio_substream_id"></a></dfn> indicates the identifier for an <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream④⑤">Audio Substream</a> which this <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element③③">Audio Element</a> refers to.</p>
    <p>Let a particular <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup①①">ChannelGroup</a>'s <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream④⑥">Audio Substream</a>s be indexed as [<dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="c">c</dfn>, <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="n_c">n_c</dfn>], where a <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup①②">ChannelGroup</a> generation rule is described in <a href="#iamfgeneration-scalablechannelaudio-channelgroupgenerationrule">§ 10.2.5 Annex B-5: ChannelGroup Generation Rule</a> and</p>
    <ul>
     <li data-md>
@@ -3014,11 +3014,11 @@ class ambisonics_projection_config() {
    <p>A scene-based <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element④③">Audio Element</a> has only one <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup③⑥">ChannelGroup</a>, which includes all <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream⑥⑤">Audio Substream</a>s that it refers to. The order of the <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream⑥⑥">Audio Substream</a>s in the <a data-link-type="dfn" href="#channelgroup" id="ref-for-channelgroup③⑦">ChannelGroup</a> SHALL conform to <a data-link-type="biblio" href="#biblio-rfc8486" title="Ambisonics in an Ogg Opus Container">[RFC8486]</a>.</p>
    <h3 class="heading settled" data-level="3.7" id="obu-mixpresentation"><span class="secno">3.7. </span><span class="content">Mix Presentation OBU Syntax and Semantics</span><a class="self-link" href="#obu-mixpresentation"></a></h3>
    <p>This section specifies the OBU payload of OBU_IA_Mix_Presentation.</p>
-   <p>The metadata in mix_presentation_obu() specifies how to render, process and mix one or more <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element④④">Audio Element</a>s, with details provided in <a href="#processing-mixpresentation">§ 7.3 Mix Presentation</a>.</p>
+   <p>The metadata in <code>mix_presentation_obu</code> specifies how to render, process and mix one or more <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element④④">Audio Element</a>s, with details provided in <a href="#processing-mixpresentation">§ 7.3 Mix Presentation</a>.</p>
    <p>An <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence②⑧">IA Sequence</a> MAY have one or more <a data-link-type="dfn" href="#mix-presentation" id="ref-for-mix-presentation①⓪">Mix Presentation</a>s specified. The IA parser SHALL select the appropriate <a data-link-type="dfn" href="#mix-presentation" id="ref-for-mix-presentation①①">Mix Presentation</a> to process according to the rules specified in <a href="#processing-mixpresentation-selection">§ 7.3.1 Selecting a Mix Presentation</a>.</p>
    <p>A <a data-link-type="dfn" href="#mix-presentation" id="ref-for-mix-presentation①②">Mix Presentation</a> MAY contain one or more sub-mixes. Common use cases MAY specify only one sub-mix, which includes all rendered and processed <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element④⑤">Audio Element</a>s used in the <a data-link-type="dfn" href="#mix-presentation" id="ref-for-mix-presentation①③">Mix Presentation</a>. The use-case for specifying more than one sub-mix arises if an IA multiplexer is merging two or more <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence②⑨">IA Sequence</a>s. In this case, it MAY choose to capture the loudness information from the original <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence③⓪">IA Sequence</a>s in multiple sub-mixes, instead of recomputing the loudness information for the final mix.</p>
    <p><b>Syntax</b></p>
-<pre>class mix_presentation_obu() {
+<pre>class MixPresentationObu() {
   leb128() mix_presentation_id;
   leb128() count_label;
   for (i = 0; i &lt; count_label; i++) {
@@ -3060,7 +3060,7 @@ class ambisonics_projection_config() {
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="mix_presentation_annotations">mix_presentation_annotations()</dfn> provides informational metadata that an IA parser SHOULD refer to when selecting the <a data-link-type="dfn" href="#mix-presentation" id="ref-for-mix-presentation①⑦">Mix Presentation</a> to use. The metadata MAY also be used by the playback system to display information to the user but is not used in the rendering or mixing process to generate the final output audio signal.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_sub_mixes">num_sub_mixes</dfn> specifies the number of sub-mixes. It SHALL NOT be set to 0.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="num_audio_elements">num_audio_elements</dfn> specifies the number of <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element④⑥">Audio Element</a>s that are used in this <a data-link-type="dfn" href="#mix-presentation" id="ref-for-mix-presentation①⑧">Mix Presentation</a> to generate the final output audio signal for playback. It SHALL NOT be set to 0.</p>
-   <p><dfn class="css" data-dfn-for="mix_presentation_obu()" data-dfn-type="value" data-noexport id="valdef-mix_presentation_obu-audio_element_id">audio_element_id<a class="self-link" href="#valdef-mix_presentation_obu-audio_element_id"></a></dfn> indicates the identifier for an <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element④⑦">Audio Element</a> which this <a data-link-type="dfn" href="#mix-presentation" id="ref-for-mix-presentation①⑨">Mix Presentation</a> refers to.</p>
+   <p><dfn class="css" data-dfn-for="mix_presentation_obu" data-dfn-type="value" data-noexport id="valdef-mix_presentation_obu-audio_element_id">audio_element_id<a class="self-link" href="#valdef-mix_presentation_obu-audio_element_id"></a></dfn> indicates the identifier for an <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element④⑦">Audio Element</a> which this <a data-link-type="dfn" href="#mix-presentation" id="ref-for-mix-presentation①⑨">Mix Presentation</a> refers to.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="mix_presentation_element_annotations">mix_presentation_element_annotations()</dfn> provides informational metadata that the playback system MAY use to display information to the user. It is not used in the rendering or mixing process to generate the final output audio signal.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="rendering_config">rendering_config()</dfn> provides the metadata required for rendering the referenced <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element④⑧">Audio Element</a>.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="element_mix_config">element_mix_config()</dfn> provides the metadata required for applying any processing to the referenced and rendered <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element④⑨">Audio Element</a> before being summed with other processed <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element⑤⓪">Audio Element</a>s.</p>
@@ -3267,7 +3267,7 @@ class ambisonics_projection_config() {
    <p>This section specifies the OBU payload of OBU_IA_Parameter_Block.</p>
    <p>The metadata specified in this OBU defines the parameter values for an algorithm for an indicated duration, including any animation of the parameter values over this duration. The metadata is used in conjunction with a corresponding parameter definition and parameter data specification. The parameter definition is specified based on <a data-link-type="dfn" href="#paramdefinition" id="ref-for-paramdefinition">ParamDefinition()</a>. The parameter data provides the values to apply in each parameter block. These are specified using the AnimatedParameterData() function template if parameter animation is supported.</p>
    <p><b>Syntax</b></p>
-<pre>class parameter_block_obu() {
+<pre>class ParameterBlockObu() {
   leb128() parameter_id;
   
   (param_definition_type, param_definition_mode, duration, num_subblocks, constant_subblock_duration, subblock_duration) = get_param_definition(parameter_id);
@@ -3310,10 +3310,10 @@ class ambisonics_projection_config() {
    <p><dfn data-dfn-type="dfn" data-noexport id="get_param_definition">get_param_definition()<a class="self-link" href="#get_param_definition"></a></dfn> is a run-time function to get the <a data-link-type="dfn" href="#param_definition_type" id="ref-for-param_definition_type③">param_definition_type</a> and <a data-link-type="dfn" href="#param_definition_mode" id="ref-for-param_definition_mode②">param_definition_mode</a> from the <a data-link-type="dfn" href="#audio-element-obu" id="ref-for-audio-element-obu⑦">Audio Element OBU</a> or <a data-link-type="dfn" href="#mix-presentation-obu" id="ref-for-mix-presentation-obu③">Mix Presentation OBU</a> that references this <a data-link-type="dfn" href="#parameter_id" id="ref-for-parameter_id①②">parameter_id</a>.</p>
    <p>If <a data-link-type="dfn" href="#param_definition_mode" id="ref-for-param_definition_mode③">param_definition_mode</a> = 0, this function additionally gets the following fields from the same <a data-link-type="dfn" href="#audio-element-obu" id="ref-for-audio-element-obu⑧">Audio Element OBU</a>: <a data-link-type="dfn" href="#duration" id="ref-for-duration⑨">duration</a>, <a data-link-type="dfn" href="#num_subblocks" id="ref-for-num_subblocks⑦">num_subblocks</a>, <a data-link-type="dfn" href="#constant_subblock_duration" id="ref-for-constant_subblock_duration⑦">constant_subblock_duration</a>, and <a data-link-type="dfn" href="#subblock_duration" id="ref-for-subblock_duration⑤">subblock_duration</a>.</p>
    <p>When it gets an unknown <a data-link-type="dfn" href="#param_definition_type" id="ref-for-param_definition_type④">param_definition_type</a>, parsers compliant with this version of the specification SHOULD ignore the <a data-link-type="dfn" href="#parameter-block-obu" id="ref-for-parameter-block-obu①⑤">Parameter Block OBU</a>.</p>
-   <p><dfn class="css" data-dfn-for="parameter_block_obu()" data-dfn-type="value" data-noexport id="valdef-parameter_block_obu-duration">duration<a class="self-link" href="#valdef-parameter_block_obu-duration"></a></dfn> specifies the duration for which this parameter block is valid and applicable. It SHALL NOT be set to 0.</p>
-   <p><dfn class="css" data-dfn-for="parameter_block_obu()" data-dfn-type="value" data-noexport id="valdef-parameter_block_obu-constant_subblock_duration">constant_subblock_duration<a class="self-link" href="#valdef-parameter_block_obu-constant_subblock_duration"></a></dfn> specifies the duration of each subblock, in the case where all subblocks except the last subblock have equal durations. If all subblocks except the last subblock do not have equal durations, the value of constant_subblock_duration SHALL be set to 0.</p>
-   <p><dfn class="css" data-dfn-for="parameter_block_obu()" data-dfn-type="value" data-noexport id="valdef-parameter_block_obu-num_subblocks">num_subblocks<a class="self-link" href="#valdef-parameter_block_obu-num_subblocks"></a></dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different subblock of the timeline, contiguously. When <a data-link-type="dfn" href="#constant_subblock_duration" id="ref-for-constant_subblock_duration⑧">constant_subblock_duration</a> != 0, <a data-link-type="dfn" href="#num_subblocks" id="ref-for-num_subblocks⑧">num_subblocks</a> is implicitly calculated as <a data-link-type="dfn" href="#num_subblocks" id="ref-for-num_subblocks⑨">num_subblocks</a> = ceil(<a data-link-type="dfn" href="#duration" id="ref-for-duration①⓪">duration</a> / <a data-link-type="dfn" href="#constant_subblock_duration" id="ref-for-constant_subblock_duration⑨">constant_subblock_duration</a>).</p>
-   <p><dfn class="css" data-dfn-for="parameter_block_obu()" data-dfn-type="value" data-noexport id="valdef-parameter_block_obu-subblock_duration">subblock_duration<a class="self-link" href="#valdef-parameter_block_obu-subblock_duration"></a></dfn> specifies the duration for the given subblock. It SHALL NOT be set to 0.</p>
+   <p><dfn class="css" data-dfn-for="parameter_block_obu" data-dfn-type="value" data-noexport id="valdef-parameter_block_obu-duration">duration<a class="self-link" href="#valdef-parameter_block_obu-duration"></a></dfn> specifies the duration for which this parameter block is valid and applicable. It SHALL NOT be set to 0.</p>
+   <p><dfn class="css" data-dfn-for="parameter_block_obu" data-dfn-type="value" data-noexport id="valdef-parameter_block_obu-constant_subblock_duration">constant_subblock_duration<a class="self-link" href="#valdef-parameter_block_obu-constant_subblock_duration"></a></dfn> specifies the duration of each subblock, in the case where all subblocks except the last subblock have equal durations. If all subblocks except the last subblock do not have equal durations, the value of constant_subblock_duration SHALL be set to 0.</p>
+   <p><dfn class="css" data-dfn-for="parameter_block_obu" data-dfn-type="value" data-noexport id="valdef-parameter_block_obu-num_subblocks">num_subblocks<a class="self-link" href="#valdef-parameter_block_obu-num_subblocks"></a></dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different subblock of the timeline, contiguously. When <a data-link-type="dfn" href="#constant_subblock_duration" id="ref-for-constant_subblock_duration⑧">constant_subblock_duration</a> != 0, <a data-link-type="dfn" href="#num_subblocks" id="ref-for-num_subblocks⑧">num_subblocks</a> is implicitly calculated as <a data-link-type="dfn" href="#num_subblocks" id="ref-for-num_subblocks⑨">num_subblocks</a> = ceil(<a data-link-type="dfn" href="#duration" id="ref-for-duration①⓪">duration</a> / <a data-link-type="dfn" href="#constant_subblock_duration" id="ref-for-constant_subblock_duration⑨">constant_subblock_duration</a>).</p>
+   <p><dfn class="css" data-dfn-for="parameter_block_obu" data-dfn-type="value" data-noexport id="valdef-parameter_block_obu-subblock_duration">subblock_duration<a class="self-link" href="#valdef-parameter_block_obu-subblock_duration"></a></dfn> specifies the duration for the given subblock. It SHALL NOT be set to 0.</p>
    <p>The values of <a data-link-type="dfn" href="#duration" id="ref-for-duration①①">duration</a>, <a data-link-type="dfn" href="#constant_subblock_duration" id="ref-for-constant_subblock_duration①⓪">constant_subblock_duration</a>, and <a data-link-type="dfn" href="#subblock_duration" id="ref-for-subblock_duration⑥">subblock_duration</a> SHALL be expressed as the number of ticks at the <a data-link-type="dfn" href="#parameter_rate" id="ref-for-parameter_rate③">parameter_rate</a> specified in the corresponding parameter definition.</p>
    <p><dfn data-dfn-type="dfn" data-noexport id="parameter_data_size">parameter_data_size<a class="self-link" href="#parameter_data_size"></a></dfn> indicates the size in bytes of <a data-link-type="dfn" href="#parameter_data_bytes" id="ref-for-parameter_data_bytes">parameter_data_bytes</a>.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="parameter_data_bytes">parameter_data_bytes</dfn> represents reserved bytes for future use when new syntaxes are defined. Parsers compliant with this version of the specification SHOULD ignore these bytes.</p>
@@ -3422,7 +3422,7 @@ class AnimatedParameterData(animation_type) {
    <p>This section specifies the OBU payloads of OBU_IA_Audio_Frame and OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID17.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="audio_substream_id">audio_substream_id</dfn> is an identifier for an <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream⑥⑦">Audio Substream</a> associated with this audio frame. Within an <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence③②">IA Sequence</a>, there SHALL be one unique <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id④">audio_substream_id</a> per <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream⑥⑧">Audio Substream</a>. There SHALL be exactly one <a data-link-type="dfn" href="#audio-element-obu" id="ref-for-audio-element-obu⑨">Audio Element OBU</a> with a given <a data-link-type="dfn" href="#audio_substream_id" id="ref-for-audio_substream_id⑤">audio_substream_id</a> in a set of <a data-link-type="dfn" href="#descriptors" id="ref-for-descriptors⑨">Descriptors</a>.</p>
    <p><b>Syntax</b></p>
-<pre>class audio_frame_obu(audio_substream_id_in_bitstream) {
+<pre>class AudioFrameObu(audio_substream_id_in_bitstream) {
   if (audio_substream_id_in_bitstream) {
      leb128() explicit_audio_substream_id;
   }
@@ -3444,7 +3444,7 @@ class AnimatedParameterData(animation_type) {
    <h3 class="heading settled" data-level="3.10" id="obu-temporaldelimiter"><span class="secno">3.10. </span><span class="content">Temporal Delimiter OBU Syntax and Semantics</span><a class="self-link" href="#obu-temporaldelimiter"></a></h3>
    <p>This section specifies the OBU payload of OBU_IA_Temporal_Delimiter.</p>
    <p><b>Syntax</b></p>
-<pre>class temporal_delimiter_obu() {
+<pre>class TemporalDelimiterObu() {
 }
 </pre>
    <p class="note" role="note"><span class="marker">NOTE:</span> The <a data-link-type="dfn" href="#temporal-delimiter-obu" id="ref-for-temporal-delimiter-obu①">Temporal Delimiter OBU</a> has an empty payload.</p>
@@ -4324,9 +4324,9 @@ degree  m = k - n * (n + 1).
      <p>Else, use the <a data-link-type="dfn" href="#param_data" id="ref-for-param_data①">param_data</a> value provided in <a data-link-type="dfn" href="#mix_gain_parameter_data" id="ref-for-mix_gain_parameter_data④">mix_gain_parameter_data()</a>.</p>
    </ul>
    <h3 class="heading settled" data-level="7.4" id="processing-animated-params"><span class="secno">7.4. </span><span class="content">Animated Parameters</span><a class="self-link" href="#processing-animated-params"></a></h3>
-   <p>This section describes how a set of parameter values is animated over a subblock in a parameter_block_obu() and applied to the corresponding audio samples, using the information provided in AnimatedParameterData().</p>
+   <p>This section describes how a set of parameter values is animated over a subblock in a <code>parameter_block_obu</code> and applied to the corresponding audio samples, using the information provided in AnimatedParameterData().</p>
    <p>If <a data-link-type="dfn" href="#animation_type" id="ref-for-animation_type①">animation_type</a> is equal to STEP, the parameter value provided by <a data-link-type="dfn" href="#start_point_value" id="ref-for-start_point_value①">start_point_value</a> SHOULD be applied to all time steps in the subblock.</p>
-   <p>If <a data-link-type="dfn" href="#animation_type" id="ref-for-animation_type②">animation_type</a> is equal to LINEAR or BEZIER, the information provided in AnimatedParameterData() describes how the set of parameter values is animated as a Bezier curve. Let <code>T</code> be the <a data-link-type="dfn" href="#subblock_duration" id="ref-for-subblock_duration⑦">subblock_duration</a> defined in the parameter_block_obu() and <code>P0</code>, <code>P1</code> and <code>P2</code> be 2D coordinates defined as</p>
+   <p>If <a data-link-type="dfn" href="#animation_type" id="ref-for-animation_type②">animation_type</a> is equal to LINEAR or BEZIER, the information provided in AnimatedParameterData() describes how the set of parameter values is animated as a Bezier curve. Let <code>T</code> be the <a data-link-type="dfn" href="#subblock_duration" id="ref-for-subblock_duration⑦">subblock_duration</a> defined in the <code>parameter_block_obu</code> and <code>P0</code>, <code>P1</code> and <code>P2</code> be 2D coordinates defined as</p>
 <pre>P0 = (t0, start_point_value),
 P1 = (t1, control_point_value),
 P2 = (t2, end_point_value),
@@ -4816,7 +4816,7 @@ class Bar {
    <p>The pow() function returns the value of x to the power of y.</p>
    <h2 class="heading settled" data-level="10" id="annex"><span class="secno">10. </span><span class="content">Annex</span><a class="self-link" href="#annex"></a></h2>
    <h3 class="heading settled" data-level="10.1" id="Annex_A"><span class="secno">10.1. </span><span class="content">Annex A: ID Linking Scheme (Informative)</span><a class="self-link" href="#Annex_A"></a></h3>
-   <p>The figure below shows the linking scheme among IDs in the obu_header or OBU payload.</p>
+   <p>The figure below shows the linking scheme among IDs in the <code>obu_header</code> or OBU payload.</p>
    <center><img height="1044" src="images/ID Linking Example.png" style="width:100%; height:auto;" width="1783"></center>
    <center>
     <figcaption>ID Linking Scheme</figcaption>
@@ -5236,7 +5236,7 @@ class Bar {
     audio_element_id
     <ul>
      <li><a href="#audio_element_id">definition of</a><span>, in § 3.6</span>
-     <li><a href="#valdef-mix_presentation_obu-audio_element_id">value for mix_presentation_obu()</a><span>, in § 3.7</span>
+     <li><a href="#valdef-mix_presentation_obu-audio_element_id">value for mix_presentation_obu</a><span>, in § 3.7</span>
     </ul>
    <li><a href="#audio-element-obu">Audio Element OBU</a><span>, in § 2.3.2.1</span>
    <li><a href="#audio_element_type">audio_element_type</a><span>, in § 3.6</span>
@@ -5248,7 +5248,7 @@ class Bar {
     audio_substream_id
     <ul>
      <li><a href="#audio_substream_id">definition of</a><span>, in § 3.9</span>
-     <li><a href="#valdef-audio_element_obu-audio_substream_id">value for audio_element_obu()</a><span>, in § 3.6</span>
+     <li><a href="#valdef-audio_element_obu-audio_substream_id">value for audio_element_obu</a><span>, in § 3.6</span>
     </ul>
    <li><a href="#beta">beta</a><span>, in § 3.8.2</span>
    <li><a href="#c">c</a><span>, in § 3.6</span>
@@ -5259,7 +5259,7 @@ class Bar {
     codec_config_id
     <ul>
      <li><a href="#codec_config_id">definition of</a><span>, in § 3.5</span>
-     <li><a href="#valdef-audio_element_obu-codec_config_id">value for audio_element_obu()</a><span>, in § 3.6</span>
+     <li><a href="#valdef-audio_element_obu-codec_config_id">value for audio_element_obu</a><span>, in § 3.6</span>
     </ul>
    <li><a href="#codec-config-obu">Codec Config OBU</a><span>, in § 2.3.2.1</span>
    <li><a href="#codec_id">codec_id</a><span>, in § 3.5</span>
@@ -5269,7 +5269,7 @@ class Bar {
     constant_subblock_duration
     <ul>
      <li><a href="#constant_subblock_duration">definition of</a><span>, in § 3.6.1</span>
-     <li><a href="#valdef-parameter_block_obu-constant_subblock_duration">value for parameter_block_obu()</a><span>, in § 3.8</span>
+     <li><a href="#valdef-parameter_block_obu-constant_subblock_duration">value for parameter_block_obu</a><span>, in § 3.8</span>
     </ul>
    <li><a href="#control_point_relative_time">control_point_relative_time</a><span>, in § 3.8.1</span>
    <li><a href="#control_point_value">control_point_value</a><span>, in § 3.8.1</span>
@@ -5294,7 +5294,7 @@ class Bar {
     duration
     <ul>
      <li><a href="#duration">definition of</a><span>, in § 3.6.1</span>
-     <li><a href="#valdef-parameter_block_obu-duration">value for parameter_block_obu()</a><span>, in § 3.8</span>
+     <li><a href="#valdef-parameter_block_obu-duration">value for parameter_block_obu</a><span>, in § 3.8</span>
     </ul>
    <li><a href="#element_mix_config">element_mix_config()</a><span>, in § 3.7</span>
    <li><a href="#end_point_value">end_point_value</a><span>, in § 3.8.1</span>
@@ -5352,7 +5352,7 @@ class Bar {
     num_subblocks
     <ul>
      <li><a href="#num_subblocks">definition of</a><span>, in § 3.6.1</span>
-     <li><a href="#valdef-parameter_block_obu-num_subblocks">value for parameter_block_obu()</a><span>, in § 3.8</span>
+     <li><a href="#valdef-parameter_block_obu-num_subblocks">value for parameter_block_obu</a><span>, in § 3.8</span>
     </ul>
    <li><a href="#num_sub_mixes">num_sub_mixes</a><span>, in § 3.7</span>
    <li><a href="#num_substreams">num_substreams</a><span>, in § 3.6</span>
@@ -5416,7 +5416,7 @@ class Bar {
     subblock_duration
     <ul>
      <li><a href="#subblock_duration">definition of</a><span>, in § 3.6.1</span>
-     <li><a href="#valdef-parameter_block_obu-subblock_duration">value for parameter_block_obu()</a><span>, in § 3.8</span>
+     <li><a href="#valdef-parameter_block_obu-subblock_duration">value for parameter_block_obu</a><span>, in § 3.8</span>
     </ul>
    <li><a href="#substream_count">substream_count</a><span>, in § 3.6.2</span>
    <li><a href="#t2to4-de-mixer">T2to4 de-mixer</a><span>, in § 7.2.2</span>
@@ -6021,8 +6021,8 @@ window.dfnpanelData['obu_type'] = {"dfnID": "obu_type", "url": "#obu_type", "dfn
 window.dfnpanelData['obu_redundant_copy'] = {"dfnID": "obu_redundant_copy", "url": "#obu_redundant_copy", "dfnText": "obu_redundant_copy", "refSections": [{"refs": [{"id": "ref-for-obu_redundant_copy"}], "title": "3.2. OBU Header Syntax and Semantics"}, {"refs": [{"id": "ref-for-obu_redundant_copy\u2460"}], "title": "3.4. IA Sequence Header OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-obu_redundant_copy\u2461"}, {"id": "ref-for-obu_redundant_copy\u2462"}], "title": "4. Profiles"}, {"refs": [{"id": "ref-for-obu_redundant_copy\u2463"}, {"id": "ref-for-obu_redundant_copy\u2464"}], "title": "5.1. IA Sequence"}, {"refs": [{"id": "ref-for-obu_redundant_copy\u2465"}], "title": "5.1.2. IA Data OBUs"}, {"refs": [{"id": "ref-for-obu_redundant_copy\u2466"}], "title": "5.2. IAMF Configuration Changes"}], "external": false};
 window.dfnpanelData['obu_trimming_status_flag'] = {"dfnID": "obu_trimming_status_flag", "url": "#obu_trimming_status_flag", "dfnText": "obu_trimming_status_flag", "refSections": [{"refs": [{"id": "ref-for-obu_trimming_status_flag"}], "title": "3.4. IA Sequence Header OBU Syntax and Semantics"}], "external": false};
 window.dfnpanelData['obu_extension_flag'] = {"dfnID": "obu_extension_flag", "url": "#obu_extension_flag", "dfnText": "obu_extension_flag", "refSections": [{"refs": [{"id": "ref-for-obu_extension_flag"}], "title": "3.2. OBU Header Syntax and Semantics"}, {"refs": [{"id": "ref-for-obu_extension_flag\u2460"}], "title": "3.4. IA Sequence Header OBU Syntax and Semantics"}], "external": false};
-window.dfnpanelData['num_samples_to_trim_at_start'] = {"dfnID": "num_samples_to_trim_at_start", "url": "#num_samples_to_trim_at_start", "dfnText": "num_samples_to_trim_at_start", "refSections": [{"refs": [{"id": "ref-for-num_samples_to_trim_at_start"}, {"id": "ref-for-num_samples_to_trim_at_start\u2460"}, {"id": "ref-for-num_samples_to_trim_at_start\u2461"}, {"id": "ref-for-num_samples_to_trim_at_start\u2462"}], "title": "3.2. OBU Header Syntax and Semantics"}], "external": false};
 window.dfnpanelData['num_samples_to_trim_at_end'] = {"dfnID": "num_samples_to_trim_at_end", "url": "#num_samples_to_trim_at_end", "dfnText": "num_samples_to_trim_at_end", "refSections": [{"refs": [{"id": "ref-for-num_samples_to_trim_at_end"}, {"id": "ref-for-num_samples_to_trim_at_end\u2460"}, {"id": "ref-for-num_samples_to_trim_at_end\u2461"}], "title": "3.2. OBU Header Syntax and Semantics"}], "external": false};
+window.dfnpanelData['num_samples_to_trim_at_start'] = {"dfnID": "num_samples_to_trim_at_start", "url": "#num_samples_to_trim_at_start", "dfnText": "num_samples_to_trim_at_start", "refSections": [{"refs": [{"id": "ref-for-num_samples_to_trim_at_start"}, {"id": "ref-for-num_samples_to_trim_at_start\u2460"}, {"id": "ref-for-num_samples_to_trim_at_start\u2461"}, {"id": "ref-for-num_samples_to_trim_at_start\u2462"}], "title": "3.2. OBU Header Syntax and Semantics"}], "external": false};
 window.dfnpanelData['extension_header_size'] = {"dfnID": "extension_header_size", "url": "#extension_header_size", "dfnText": "extension_header_size", "refSections": [{"refs": [{"id": "ref-for-extension_header_size"}, {"id": "ref-for-extension_header_size\u2460"}, {"id": "ref-for-extension_header_size\u2461"}, {"id": "ref-for-extension_header_size\u2462"}], "title": "3.2. OBU Header Syntax and Semantics"}], "external": false};
 window.dfnpanelData['extension_header_bytes'] = {"dfnID": "extension_header_bytes", "url": "#extension_header_bytes", "dfnText": "extension_header_bytes", "refSections": [{"refs": [{"id": "ref-for-extension_header_bytes"}], "title": "3.2. OBU Header Syntax and Semantics"}], "external": false};
 window.dfnpanelData['primary_profile'] = {"dfnID": "primary_profile", "url": "#primary_profile", "dfnText": "primary_profile", "refSections": [{"refs": [{"id": "ref-for-primary_profile"}, {"id": "ref-for-primary_profile\u2460"}, {"id": "ref-for-primary_profile\u2461"}, {"id": "ref-for-primary_profile\u2462"}], "title": "3.4. IA Sequence Header OBU Syntax and Semantics"}, {"refs": [{"id": "ref-for-primary_profile\u2463"}, {"id": "ref-for-primary_profile\u2464"}], "title": "4.1. IA Simple Profile"}, {"refs": [{"id": "ref-for-primary_profile\u2465"}, {"id": "ref-for-primary_profile\u2466"}], "title": "4.2. IA Base Profile"}, {"refs": [{"id": "ref-for-primary_profile\u2467"}, {"id": "ref-for-primary_profile\u2468"}], "title": "6.3. Codecs Parameter String"}, {"refs": [{"id": "ref-for-primary_profile\u2460\u24ea"}], "title": "8.4.1. Two Audio Elements with One Codec Config"}], "external": false};
