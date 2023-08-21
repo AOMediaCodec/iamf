@@ -889,7 +889,7 @@ class ChannelAudioLayerConfig(i) {
 
 When an [=Audio Element=] is composed of G(r) number of [=Audio Substream=]s, its scalable channel audio representation is layered into [=num_layers=] = r number of [=ChannelGroup=]s.
 
-- The order of the [=ChannelGroup=]s in each [=Temporal Unit=] SHALL be same as the order of channel_audio_layer_config's in [=scalable_channel_layout_config=].
+- The order of the [=Channel Group=]s in each [=Temporal Unit=] SHALL be same as the order of channel_audio_layer_configs in [=scalable_channel_layout_config=].
 - The q-th [=ChannelGroup=] consists of G(q) - G(q-1) number of [=Audio Substream=]s, where q = 1, 2, ..., r and G(0) = 0.
 - Let the term "Audio Frames" mean the set of all [=Audio Frame OBU=]s (for this [=Audio Element=]) that have the same start timestamp. All Audio Frames in an [=IA Sequence=] SHALL have the same number of [=Audio Frame OBU=]s.
 - [=Parameter Block OBU=]s MAY be associated with Audio Frames. 
@@ -909,9 +909,9 @@ Each [=ChannelGroup=] (or scalable audio channel layer) is associated with a dif
 
 - If [=loudspeaker_layout=] is set to Binaural, this field SHALL be set to 1.
 
-<dfn noexport>channel_audio_layer_config</dfn> provides the i-th [=ChannelGroup=]'s configuration, where i is the layer index provided as input argument to this instance of the ChannelAudioLayerConfig class.
+<dfn noexport>channel_audio_layer_config</dfn> provides the i-th [=Channel Group=]'s configuration, where i is the layer index provided as input argument to this instance of the ChannelAudioLayerConfig class.
 
-<dfn noexport>loudspeaker_layout</dfn> indicates the channel layout to be reconstructed from the precedent [=ChannelGroup=]s and current [=ChannelGroup=]. When a reserved value for [=loudspeaker_layout=] is used, parsers compliant with this version of the specification SHOULD skip the [=channel_audio_layer_config=] for that layer and all subsequent ones, if any.
+<dfn noexport>loudspeaker_layout</dfn> indicates the channel layout to be reconstructed from the precedent [=Channel Group=]s and current [=Channel Group=]. When a reserved value for [=loudspeaker_layout=] is used, parsers compliant with this version of the specification SHOULD skip the [=channel_audio_layer_config=] for that layer and all subsequent ones, if any.
 
 In this version of the specification, [=loudspeaker_layout=] indicates one of the 10 channel layouts listed below, where
 
@@ -958,9 +958,9 @@ NOTE: This specification allows down-mixing mechanisms (e.g., as specified in [[
 - 0: No output_gain information fields for the [=ChannelGroup=] are present.
 - 1: output_gain information fields for the [=ChannelGroup=] are present. In this case, [=output_gain_flags=] and [=output_gain=] fields are present.
 
-<dfn noexport>recon_gain_is_present_flag</dfn> indicates if the recon_gain information fields for the [=ChannelGroup=] are present in [=recon_gain_info_parameter_data=].
-- 0: No recon_gain information fields for the [=ChannelGroup=] are present in [=recon_gain_info_parameter_data=].
-- 1: recon_gain information fields for the [=ChannelGroup=] are present in [=recon_gain_info_parameter_data=]. In this case, the [=recon_gain_flags=] and [=recon_gain=] fields are present.
+<dfn noexport>recon_gain_is_present_flag</dfn> indicates if the recon_gain information fields for the [=Channel Group=] are present in [=recon_gain_info_parameter_data=].
+- 0: No recon_gain information fields for the [=Channel Group=] are present in [=recon_gain_info_parameter_data=].
+- 1: recon_gain information fields for the [=Channel Group=] are present in [=recon_gain_info_parameter_data=]. In this case, the [=recon_gain_flags=] and [=recon_gain=] fields are present.
 
 <dfn noexport>substream_count</dfn> specifies the number of [=Audio Substream=]s. The sum of all [=substream_count=]s in this OBU SHALL be the same as [=num_substreams=] in this OBU. It SHALL NOT be set to 0.
 
@@ -2041,7 +2041,7 @@ The figure below shows the decoding and reconstruction flowchart.
 <center><figcaption>Scalable Channel Audio Decoding and Reconstruction Flowchart</figcaption></center>
 
 For a given loudspeaker layout (i.e., CL #i) among the list of [=loudspeaker_layout=] in [=scalable_channel_layout_config=],
-- The OBU Parser SHALL output the [=Audio Substream=]s for [=ChannelGroup=] #1 to [=ChannelGroup=] #i and pass them to the Codec Decoder, along with [=decoder_config=].
+- The OBU Parser SHALL output the [=Audio Substream=]s for [=Channel Group=] #1 to [=Channel Group=] #i and pass them to the Codec Decoder, along with [=decoder_config=].
 - The Codec Decoder SHALL output the decoded PCM channels.
 	- For non-scalable audio (i.e., i = [=num_layers=] = 1), its order SHALL be converted to the loudspeaker location order for CL #1.
 	- For scalable audio (i.e., i > 1), the output channels SHALL have the same order as the originally transmitted order of the coded channels.
