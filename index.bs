@@ -328,17 +328,15 @@ Based on the model, this specification defines the immersive audio model and for
 
 For a given input [=3D audio signal=],
 - A Pre-Processor generates [=Channel Group=](s), [=Descriptors=] and [=Parameter Substream=](s).
-- A Codec Enc generates coded [=Audio Substream=](s).
+- A Codec Encoder generates coded [=Audio Substream=](s).
 - An OBU Packetizer generates an [=IA Sequence=] from the coded [=Audio Substream=](s) and [=Descriptors=] and [=Parameter Substream=](s).
-- A File Packager (ISOBMFF Encapsulation) generates an IAMF File by encapsulating the [=IA Sequence=] into [[!ISOBMFF]] track(s).
-- A File Parser (ISOBMFF Parser) reconstructs the [=IA Sequence=] by decapsulating the IAMF File.
-- An OBU Parser outputs the coded [=Audio Substream=](s) and the [=Parameter Substream=](s).
-- A Codec Dec outputs decoded [=Channel Group=](s) after decoding of the coded [=Audio Substream=](s).
+- An OBU Parser outputs the coded [=Audio Substream=](s) and the [=Parameter Substream=](s) from the [=IA Sequence=].
+- A Codec Decoder outputs decoded [=Channel Group=](s) after decoding the coded [=Audio Substream=](s).
 - A Post-Processor outputs an [=Immersive Audio=] by using the [=Channel Group=](s), the [=Descriptors=] and the [=Parameter Substream=](s).
-- Pre-Processor, [=Channel Group=](s), Codec Enc and OBU Packetizer are defined in [[#iamfgeneration]].
-- [=IA Sequence=] is defined in [[#standalone-ia-sequence]].
-- ISOBMFF Encapsulation, IAMF file (ISOBMFF file), and ISOBMFF Parser are defined in [[#isobmff]].
-- OBU Parser, Codec Dec, and Post-Processor are defined in [[#processing]].
+
+The Pre-Processor, [=Channel Group=](s), Codec Encoder, and OBU Packetizer are defined in [[#iamfgeneration]]. The [=IA Sequence=] is defined in [[#standalone-ia-sequence]]. The OBU Parser, Codec Decoder, and Post-Processor are defined in [[#processing]].
+
+Although not shown in the figure above, the [=IA Sequence=] may be encapsulated by a file packager such as ISOBMFF Encapsulation to output an IAMF file (ISOBMFF file), and a file parser such as ISOBMFF Parser decapsulates it to output the [=IA Sequence=]. The ISOBMFF Encapsulation, IAMF file (ISOBMFF file), and ISOBMFF Parser are defined in [[#isobmff]].
 
 ## Bitstream Structure ## {#bitstream}
 
@@ -524,7 +522,7 @@ NOTE: A future version of the specification may use this flag to specify an exte
 
 ## Reserved OBU Syntax and Semantics ## {#obu-reserved}
 
-Reserved OBUs SHOULD be ignored by parsers compliant with this version of the specification. Future versions of the specification MAY define semantics for these reserved OBUs that would only be supported by parsers compliant with these future versions.
+Reserved OBUs SHOULD be ignored by parsers compliant with this version of the specification. Future versions of the specification MAY define syntax and semantics for these reserved OBUs that would only be supported by parsers compliant with these future versions.
 
 <b>Syntax</b>
 
@@ -542,7 +540,7 @@ This OBU is used to indicate the start of an [=IA Sequence=]. So, the first OBU 
 
 NOTE: When an [=IA Sequence=] is stored in a file, the [=IA Sequence Header OBU=] can be used to identify that the file contains an [=IA Sequence=].
 
-This OBU MAY be placed frequently within one single [=IA Sequence=] for an application such as broadcasting or multicasting. In that case, all [=IA Sequence Header OBU=]s except the first one SHALL be marked as redundant (i.e., [=obu_redundant_copy=] = 1).
+This OBU MAY be placed frequently within one single [=IA Sequence=] for an application such as broadcasting or multicasting. In that case, all [=IA Sequence Header OBU=]s except the first one SHALL be marked as redundant (i.e., [=obu_redundant_copy=] = 1). So, if a decoder encounters a non-redundant [=IA Sequence Header OBU=] (i.e., [=obu_redundant_copy=] = 0), and it has also received the previous [=IA Sequence Header OBU=], the non-redundant [=IA Sequence Header OBU=] indicates the start of a new [=IA Sequence=].
 
 <b>Syntax</b>
 
@@ -558,7 +556,7 @@ class IaSequenceHeaderObu() {
 
 <dfn noexport>ia_code</dfn> is a ‘four-character code’ (4CC), <code>iamf</code>.
 	
-NOTE: When IA OBUs are delivered over a protocol that does not provide explicit [=IA Sequence=] boundaries, a parser may locate the [=IA Sequence=] start by searching for the code <code>iamf</code> preceded by specific OBU header values. For example, by assuming that [=obu_extension_flag=] is set to 0 and because [=obu_trimming_status_flag=] is set to 0 for an [=IA Sequence Header OBU=], the OBU header can be 0xF806 or 0xFC06.
+NOTE: When IA OBUs are delivered over a protocol that does not provide explicit [=IA Sequence=] boundaries, a parser may locate the [=IA Sequence=] start by searching for the code <code>iamf</code> preceded by specific OBU header values. For example, by assuming that [=obu_extension_flag=] is set to 0 and because [=obu_trimming_status_flag=] is set to 0 for an [=IA Sequence Header OBU=], the OBU header can be either 0xF806 or 0xFC06.
 
 <dfn noexport>primary_profile</dfn> indicates the primary profile that this [=IA Sequence=] complies with. Parsers compliant with this version of the specification SHOULD discard the [=IA Sequence=] if they do not support the value indicated here.
 
@@ -596,21 +594,21 @@ class codec_config() {
 <dfn noexport for="codec_config_obu">codec_config_id</dfn> defines an identifier for a codec configuration. Within an [=IA Sequence=], there SHALL be one unique [=codec_config_obu/codec_config_id=] per codec. There SHALL be exactly one [=Codec Config OBU=] with a given identifier in a set of [=Descriptors=]. [=Audio Element=]s use this identifier to indicate that its corresponding [=Audio Substream=]s are coded with this codec configuration.
 
 <dfn noexport>codec_id</dfn> indicates a ‘four-character code’ (4CC) to identify the codec used to generate the coded [=Audio Substream=]s. For this version of the specification, it SHALL be set to one of the four [=codec_id=] values defined below:
-- 'Opus': All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL comply with the [[!RFC6716]] specification and the [=decoder_config()=] structure SHALL comply with the constraints given in [[#opus-specific]].
-- 'mp4a': All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL comply with the [[!AAC]] specification and the [=decoder_config()=] structure SHALL comply with the constraints given in [[#aac-lc-specific]].
-- 'fLaC': All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL comply with the [[!FLAC]] specification and the [=decoder_config()=] structure SHALL comply with the constraints given in [[#flac-specific]].
-- 'ipcm': All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL contain linear PCM (LPCM) audio samples and the [=decoder_config()=] structure SHALL comply with the constraints given in [[#lpcm-specific]].
+- <code>Opus</code>: All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL comply with the [[!RFC6716]] specification and the [=decoder_config()=] structure SHALL comply with the constraints given in [[#opus-specific]].
+- <code>mp4a</code>: All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL comply with the [[!AAC]] specification and the [=decoder_config()=] structure SHALL comply with the constraints given in [[#aac-lc-specific]].
+- <code>fLaC</code>: All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL comply with the [[!FLAC]] specification and the [=decoder_config()=] structure SHALL comply with the constraints given in [[#flac-specific]].
+- <code>ipcm</code>: All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL contain linear PCM (LPCM) audio samples and the [=decoder_config()=] structure SHALL comply with the constraints given in [[#lpcm-specific]].
 
 Parsers compliant with this version of the specification SHOULD ignore [=Codec Config OBU=]s with an unknown [=codec_id=].
 
-NOTE: 'ipcm' should not be confused with <code>lpcm</code>, which is another 4CC to identify codecs in other container formats (e.g., QuickTime).
+NOTE: <code>ipcm</code> should not be confused with <code>lpcm</code>, which is another 4CC to identify codecs in other container formats (e.g., QuickTime).
 
 <dfn noexport>num_samples_per_frame</dfn> indicates the frame length, in samples, of the [=audio_frame()=] provided in the <code>audio_frame_obu</code>. It SHALL NOT be set to zero. If the [=decoder_config()=] structure for a given codec specifies a value for the frame length, the two values SHALL be equal.
 
-<dfn noexport>audio_roll_distance</dfn> indicates how many audio frames prior to the current audio frame need to be decoded (and the decoded samples discarded) to set the encoder in a state that will produce the perfect decoded audio signal. It SHALL always be a negative value or zero. For some audio codecs, even if an audio frame can be decoded independently, the decoded signal after decoding only that frame may not represent a perfect, decoded audio signal, even ignoring compression artifacts. This can be due to overlap transforms. While potentially acceptable when starting to decode an [=Audio Substream=], it may be problematic when automatically switching between similar [=Audio Substream=]s of different quality and/or bitrate. 
-- It SHALL be set to -R when [=codec_id=] is set to 'Opus', where R is <code>ceil(3840 / [=num_samples_per_frame=])</code>.
-- It SHALL be set to -1 when [=codec_id=] is set to 'mp4a'.
-- It SHALL be set to 0 when [=codec_id=] is set to  'fLaC' or 'ipcm'.
+<dfn noexport>audio_roll_distance</dfn> indicates how many audio frames prior to the current audio frame need to be decoded (and the decoded samples discarded) to set the decoder in a state that will produce the perfect decoded audio signal. It SHALL always be a negative value or zero. For some audio codecs, even if an audio frame can be decoded independently, the decoded signal after decoding only that frame may not represent a perfect, decoded audio signal, even ignoring compression artifacts. This can be due to overlap transforms. While potentially acceptable when starting to decode an [=Audio Substream=], it may be problematic when automatically switching between similar [=Audio Substream=]s of different quality and/or bitrate. 
+- It SHALL be set to -R when [=codec_id=] is set to <code>Opus</code>, where R is <code>ceil(3840 / [=num_samples_per_frame=])</code>.
+- It SHALL be set to -1 when [=codec_id=] is set to <code>mp4a</code>.
+- It SHALL be set to 0 when [=codec_id=] is set to  <code>fLaC</code> or <code>ipcm</code>.
 
 <dfn noexport>decoder_config()</dfn> specifies the set of codec parameters required to decode the [=Audio Substream=]. It is byte aligned.
 
@@ -742,7 +740,7 @@ NOTE: For a given [=audio_element_type=], a future version of the specification 
 
 - The type PARAMETER_DEFINITION_MIX_GAIN SHALL NOT be present in [=Audio Element OBU=].
 - The type SHALL NOT be duplicated in one [=Audio Element OBU=].
-- When [=codec_id=] = 'fLaC' or 'ipcm', the type PARAMETER_DEFINITION_RECON_GAIN SHALL NOT be present.
+- When [=codec_id=] = <code>fLaC</code> or <code>ipcm</code>, the type PARAMETER_DEFINITION_RECON_GAIN SHALL NOT be present.
 - When [=num_layers=] > 1, the type PARAMETER_DEFINITION_RECON_GAIN SHALL be present.
 - When the highest [=loudspeaker_layout=] of the (non-)scalable channel audio (i.e., [=num_layers=] = 1) is less than or equal to 3.1.2ch, the type PARAMETER_DEFINITION_DEMIXING SHALL NOT be present.
 - When the highest [=loudspeaker_layout=] of the scalable channel audio (i.e., [=num_layers=] > 1) is greater than 3.1.2ch, both PARAMETER_DEFINITION_DEMIXING and PARAMETER_DEFINITION_RECON_GAIN types SHALL be present.
@@ -1624,7 +1622,7 @@ For legacy codecs, [=decoder_config()=] SHALL have exactly the same information 
 
 ### OPUS Specific ### {#opus-specific}
 
-[=codec_id=] SHALL be 'Opus'.
+[=codec_id=] SHALL be <code>Opus</code>.
 
 [=decoder_config()=] for OPUS conforms to [=ID Header=] with [=ChannelMappingFamily=] = 0 in [[!RFC7845]] with the following constraints:
 - [=Magic Signature=] SHALL NOT be present.
@@ -1639,7 +1637,7 @@ The sample rate used for computing offsets SHALL be 48 kHz.
 
 ### AAC-LC Specific ### {#aac-lc-specific}
 
-[=codec_id=] SHALL be 'mp4a'.
+[=codec_id=] SHALL be <code>mp4a</code>.
 
 [=decoder_config()=] for AAC-LC is the [=DecoderConfigDescriptor()=] from [[!MP4-Systems]], which is a subset of [=ESDBox=] for [[!MP4-Audio]], with the following constraints:
 - [=objectTypeIndication=] = 0x40
@@ -1659,7 +1657,7 @@ The sample rate used for computing offsets SHALL be the rate indicated by the [=
 
 ### FLAC Specific ### {#flac-specific}
 
-[=codec_id=] SHALL be 'fLaC', the FLAC stream marker in ASCII, meaning byte 0 of the stream is 0x66, followed by 0x4C 0x61 0x43.
+[=codec_id=] SHALL be <code>fLaC</code>, the FLAC stream marker in ASCII, meaning byte 0 of the stream is 0x66, followed by 0x4C 0x61 0x43.
 
 [=decoder_config()=] for FLAC is the [=METADATA_BLOCK=]s of [[!FLAC]] for mono or stereo channels. The [=METADATA_BLOCK_STREAMINFO=] has the following constraints:
 - [=minimum block size=] SHALL be set to [=num_samples_per_frame=].
@@ -1679,7 +1677,7 @@ The sample rate used for computing offsets SHALL be the sampling rate indicated 
 
 ### LPCM Specific ### {#lpcm-specific}
 
-[=codec_id=] SHALL be 'ipcm'.
+[=codec_id=] SHALL be <code>ipcm</code>.
 
 [=decoder_config()=] for LPCM is as follows:
 
@@ -1860,7 +1858,7 @@ NOTE: Multiple sample entries may be used in a track, for example when the track
 	- The 'stts' or 'trun' box SHALL indicate the number of audio samples in an [=IA Sample=] (i.e., the duration of an [=IA Sample=]).
 	- The duration of an [=IA Sample=] includes audio samples trimmed at the beginning but excludes audio samples trimmed at the end.
 - Sample Group
-	- When the [=codec_id=] is set to 'Opus' or 'mp4a' in an [=IA Track=], every sample SHALL be associated with a sample group of type 'roll'. The [=roll_distance=] value SHALL equal the value of the [=audio_roll_distance=] field in the [=Codec Config OBU=] stored in the [=configOBUs=] array in the sample entry.
+	- When the [=codec_id=] is set to <code>Opus</code> or <code>mp4a</code> in an [=IA Track=], every sample SHALL be associated with a sample group of type 'roll'. The [=roll_distance=] value SHALL equal the value of the [=audio_roll_distance=] field in the [=Codec Config OBU=] stored in the [=configOBUs=] array in the sample entry.
 - Composition Time Stamp (CTS)
 	- For each [=IA Sample=], CTS = DTS (Decoding Time Stamp), and as a consequence, the 'ctts' box (and similar signaling in movie fragments) SHALL NOT be used.
 
@@ -1927,25 +1925,25 @@ DASH and other applications require defined values for the 'codecs' parameter sp
 - The fourth element and any additional elements, if any, SHALL be the elements of the codecs parameter string if that stream was carried in its own track (i.e., not encapsulated in IAMF).
 
 For example,
-- the codecs parameter string for [=codec_id=] = 'Opus' is
+- the codecs parameter string for [=codec_id=] = <code>Opus</code> is
 
 ```
 	iamf.xxx.yyy.Opus
 ```
 
-- the codecs parameter string for [=codec_id=] = 'mp4a' is
+- the codecs parameter string for [=codec_id=] = <code>mp4a</code> is
 
 ```
 	iamf.xxx.yyy.mp4a.40.2
 ```
 
-- the codecs parameter string for [=codec_id=] = 'fLaC' is
+- the codecs parameter string for [=codec_id=] = <code>fLaC</code> is
 
 ```
 	iamf.xxx.yyy.fLaC
 ```
 
-- the codecs parameter string for [=codec_id=] = 'ipcm' is
+- the codecs parameter string for [=codec_id=] = <code>ipcm</code> is
 
 ```
 	iamf.xxx.yyy.ipcm
@@ -2129,7 +2127,7 @@ For example, consider the case where CL #1 = 2ch, CL #2 = 3.1.2ch, CL #3 = 5.1.2
 
 ### Recon Gain ### {#processing-scalablechannelaudio-recongain}
 
-Recon gain is REQUIRED only for [=num_layers=] > 1 and when [=codec_id=] is set to 'Opus' or 'mp4a'.
+Recon gain is REQUIRED only for [=num_layers=] > 1 and when [=codec_id=] is set to <code>Opus</code> or <code>mp4a</code>.
 
 [=recon_gain=] SHALL only be applied to all audio samples of the de-mixed channels from the De-mixer module.
 - [=recon_gain_info_parameter_data()=] indicates each channel of CL #i to which [=recon_gain=] needs to be applied and provides the [=recon_gain=] value for each frame of the channel.
@@ -2147,8 +2145,8 @@ The figure below shows the smoothing scheme of [=recon_gain=].
 <center><figcaption>Smoothing Scheme of Recon Gain</figcaption></center>
 
 The RECOMMENDED values for specific codecs are as follows:
-- When [=codec_id=] is set to 'Opus': olen = 60.
-- When [=codec_id=] is set to 'mp4a': olen = 64.
+- When [=codec_id=] is set to <code>Opus</code>: olen = 60.
+- When [=codec_id=] is set to <code>mp4a</code>: olen = 64.
 
 ## Mix Presentation ## {#processing-mixpresentation}
 
@@ -2435,7 +2433,7 @@ The IA encoder is composed of the Pre-processor, Codec encoder, and OBU packetiz
 		- For a channel-based [=Audio Element=] with [=num_layers=] = 1, it may output a [=Parameter Substream=] with demixing info.
 		- For a channel-based [=Audio Element=] with [=num_layers=] > 1, it outputs [=Parameter Substream=]s with demixing info and recon gain info.
 		- It may further output [=Parameter Substream=]s with mixing gain.
-- Codec encoder generates one or more [=Audio Substream=]s from each [=Channel Group=] based on [=Codec Config OBU=].
+- Codec Encoder generates one or more [=Audio Substream=]s from each [=Channel Group=] based on [=Codec Config OBU=].
 - OBU packetizer packetizes [=Descriptors=], [=Parameter Substream=]s and [=Audio Substream=]s into OBUs, and outputs an [=IA Sequence=].
 	- Temporal unit generator generates a [=Temporal Unit=] for each frame from [=Audio Frame OBU=]s and [=Parameter Block OBU=]s (if present).
 
@@ -2455,7 +2453,7 @@ For Ambisonics encoding:
 			- [=output_channel_count=] is set to the number of Ambisonics channels, e.g., 4, 9, or 16.
 			- [=channel_mapping=] for [=ambisonics_mode=] = 0 is assigned based on the order of the [=Audio Substream=]s in the [=Channel Group=].
 			- [=demixing_matrix=] for [=ambisonics_mode=] = 1 is assigned based on the order of the [=Audio Substream=]s in the [=Channel Group=].
-- Codec Enc. outputs [=substream_count=] number of [=Audio Substream=]s.
+- Codec Encoder outputs [=substream_count=] number of [=Audio Substream=]s.
 - The i-th [=Temporal Unit=] is composed of the [=Audio Frame OBU=]s for the i-th frame.
 	- It may have an immediately preceding [=Temporal Delimiter OBU=].
 
@@ -2497,10 +2495,10 @@ The figure below shows the IA encoding flowchart for Scalable Channel Audio.
 - For a given input channel audio and a given list of channel layouts for scalability, PCMs for the input channel audio are passed to the CG Generation module.
 - CG Generation module generates the transformed audio according to the CG generation rule based on the list of CLs and the down-mix parameters.
 	- The transformed audio is structured as [=Channel Group=]s.
-- Non-mixed channels of the transformed audio (i.e., the original channels of the input channel audio) are directly input to the Codec encoder, but the mixed channels may be input first to the Attenuation module and then to the Codec encoder.
+- Non-mixed channels of the transformed audio (i.e., the original channels of the input channel audio) are directly input to the Codec Encoder, but the mixed channels may be input first to the Attenuation module and then to the Codec Encoder.
 - The Attenuation module reduces all sample values of the mixed channels in the same [=Channel Group=] at a uniform rate ([=output_gain=]).
 	- A range of 0 dB to -6 dB is recommended for attenuation. (i.e., a range of 0 dB to 6 dB for [=output_gain=])
-- Codec Enc. generates the coded [=Audio Substream=]s from PCMs and passes the coded [=Audio Substream=]s and one single [=decoder_config()=] to OBU Packetizer.
+- Codec Encoder generates the coded [=Audio Substream=]s from PCMs and passes the coded [=Audio Substream=]s and one single [=decoder_config()=] to OBU Packetizer.
 - OBU packetizer generates [=Descriptors=] which consists of one [=IA Sequence Header OBU=], one [=Codec Config OBU=], one [=Audio Element OBU=] and one or more [=Mix Presentation OBU=].
 		- [=Codec Config OBU=] is generated based on [=decoder_config()=].
 - OBU packetizer generates [=Parameter Block OBU=]s for each frame which contains [=demixing_info_parameter_data()=] and [=recon_gain_info_parameter_data()=].
@@ -2787,7 +2785,7 @@ Down-mix paths, which conform to the above rule, SHALL be only allowed for scala
 
 This section RECOMMENDs how to generate [=recon_gain=]. 
 
-NOTE: Recon gain generation is not required when the codec is lossless, i.e., when [=codec_id=] is set to 'ipcm' or 'fLaC'.
+NOTE: Recon gain generation is not required when the codec is lossless, i.e., when [=codec_id=] is set to <code>ipcm</code> or <code>fLaC</code>.
 
 Recon gain needs to be applied to de-mixed channels. For this, the IA encoder needs to deliver it to IA decoders.
 
