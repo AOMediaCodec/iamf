@@ -594,21 +594,21 @@ class codec_config() {
 <dfn noexport for="codec_config_obu">codec_config_id</dfn> defines an identifier for a codec configuration. Within an [=IA Sequence=], there SHALL be one unique [=codec_config_obu/codec_config_id=] per codec. There SHALL be exactly one [=Codec Config OBU=] with a given identifier in a set of [=Descriptors=]. [=Audio Element=]s use this identifier to indicate that its corresponding [=Audio Substream=]s are coded with this codec configuration.
 
 <dfn noexport>codec_id</dfn> indicates a ‘four-character code’ (4CC) to identify the codec used to generate the coded [=Audio Substream=]s. For this version of the specification, it SHALL be set to one of the four [=codec_id=] values defined below:
-- 'Opus': All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL comply with the [[!RFC6716]] specification and the [=decoder_config()=] structure SHALL comply with the constraints given in [[#opus-specific]].
-- 'mp4a': All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL comply with the [[!AAC]] specification and the [=decoder_config()=] structure SHALL comply with the constraints given in [[#aac-lc-specific]].
-- 'fLaC': All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL comply with the [[!FLAC]] specification and the [=decoder_config()=] structure SHALL comply with the constraints given in [[#flac-specific]].
-- 'ipcm': All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL contain linear PCM (LPCM) audio samples and the [=decoder_config()=] structure SHALL comply with the constraints given in [[#lpcm-specific]].
+- <code>Opus</code>: All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL comply with the [[!RFC6716]] specification and the [=decoder_config()=] structure SHALL comply with the constraints given in [[#opus-specific]].
+- <code>mp4a</code>: All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL comply with the [[!AAC]] specification and the [=decoder_config()=] structure SHALL comply with the constraints given in [[#aac-lc-specific]].
+- <code>fLaC</code>: All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL comply with the [[!FLAC]] specification and the [=decoder_config()=] structure SHALL comply with the constraints given in [[#flac-specific]].
+- <code>ipcm</code>: All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL contain linear PCM (LPCM) audio samples and the [=decoder_config()=] structure SHALL comply with the constraints given in [[#lpcm-specific]].
 
 Parsers compliant with this version of the specification SHOULD ignore [=Codec Config OBU=]s with an unknown [=codec_id=].
 
-NOTE: 'ipcm' should not be confused with <code>lpcm</code>, which is another 4CC to identify codecs in other container formats (e.g., QuickTime).
+NOTE: <code>ipcm</code> should not be confused with <code>lpcm</code>, which is another 4CC to identify codecs in other container formats (e.g., QuickTime).
 
 <dfn noexport>num_samples_per_frame</dfn> indicates the frame length, in samples, of the [=audio_frame()=] provided in the <code>audio_frame_obu</code>. It SHALL NOT be set to zero. If the [=decoder_config()=] structure for a given codec specifies a value for the frame length, the two values SHALL be equal.
 
 <dfn noexport>audio_roll_distance</dfn> indicates how many audio frames prior to the current audio frame need to be decoded (and the decoded samples discarded) to set the decoder in a state that will produce the perfect decoded audio signal. It SHALL always be a negative value or zero. For some audio codecs, even if an audio frame can be decoded independently, the decoded signal after decoding only that frame may not represent a perfect, decoded audio signal, even ignoring compression artifacts. This can be due to overlap transforms. While potentially acceptable when starting to decode an [=Audio Substream=], it may be problematic when automatically switching between similar [=Audio Substream=]s of different quality and/or bitrate. 
-- It SHALL be set to -R when [=codec_id=] is set to 'Opus', where R is <code>ceil(3840 / [=num_samples_per_frame=])</code>.
-- It SHALL be set to -1 when [=codec_id=] is set to 'mp4a'.
-- It SHALL be set to 0 when [=codec_id=] is set to  'fLaC' or 'ipcm'.
+- It SHALL be set to -R when [=codec_id=] is set to <code>Opus</code>, where R is <code>ceil(3840 / [=num_samples_per_frame=])</code>.
+- It SHALL be set to -1 when [=codec_id=] is set to <code>mp4a</code>.
+- It SHALL be set to 0 when [=codec_id=] is set to  <code>fLaC</code> or <code>ipcm</code>.
 
 <dfn noexport>decoder_config()</dfn> specifies the set of codec parameters required to decode the [=Audio Substream=]. It is byte aligned.
 
@@ -740,7 +740,7 @@ NOTE: For a given [=audio_element_type=], a future version of the specification 
 
 - The type PARAMETER_DEFINITION_MIX_GAIN SHALL NOT be present in [=Audio Element OBU=].
 - The type SHALL NOT be duplicated in one [=Audio Element OBU=].
-- When [=codec_id=] = 'fLaC' or 'ipcm', the type PARAMETER_DEFINITION_RECON_GAIN SHALL NOT be present.
+- When [=codec_id=] = <code>fLaC</code> or <code>ipcm</code>, the type PARAMETER_DEFINITION_RECON_GAIN SHALL NOT be present.
 - When [=num_layers=] > 1, the type PARAMETER_DEFINITION_RECON_GAIN SHALL be present.
 - When the highest [=loudspeaker_layout=] of the (non-)scalable channel audio (i.e., [=num_layers=] = 1) is less than or equal to 3.1.2ch, the type PARAMETER_DEFINITION_DEMIXING SHALL NOT be present.
 - When the highest [=loudspeaker_layout=] of the scalable channel audio (i.e., [=num_layers=] > 1) is greater than 3.1.2ch, both PARAMETER_DEFINITION_DEMIXING and PARAMETER_DEFINITION_RECON_GAIN types SHALL be present.
@@ -1622,7 +1622,7 @@ For legacy codecs, [=decoder_config()=] SHALL have exactly the same information 
 
 ### OPUS Specific ### {#opus-specific}
 
-[=codec_id=] SHALL be 'Opus'.
+[=codec_id=] SHALL be <code>Opus</code>.
 
 [=decoder_config()=] for OPUS conforms to [=ID Header=] with [=ChannelMappingFamily=] = 0 in [[!RFC7845]] with the following constraints:
 - [=Magic Signature=] SHALL NOT be present.
@@ -1637,7 +1637,7 @@ The sample rate used for computing offsets SHALL be 48 kHz.
 
 ### AAC-LC Specific ### {#aac-lc-specific}
 
-[=codec_id=] SHALL be 'mp4a'.
+[=codec_id=] SHALL be <code>mp4a</code>.
 
 [=decoder_config()=] for AAC-LC is the [=DecoderConfigDescriptor()=] from [[!MP4-Systems]], which is a subset of [=ESDBox=] for [[!MP4-Audio]], with the following constraints:
 - [=objectTypeIndication=] = 0x40
@@ -1657,7 +1657,7 @@ The sample rate used for computing offsets SHALL be the rate indicated by the [=
 
 ### FLAC Specific ### {#flac-specific}
 
-[=codec_id=] SHALL be 'fLaC', the FLAC stream marker in ASCII, meaning byte 0 of the stream is 0x66, followed by 0x4C 0x61 0x43.
+[=codec_id=] SHALL be <code>fLaC</code>, the FLAC stream marker in ASCII, meaning byte 0 of the stream is 0x66, followed by 0x4C 0x61 0x43.
 
 [=decoder_config()=] for FLAC is the [=METADATA_BLOCK=]s of [[!FLAC]] for mono or stereo channels. The [=METADATA_BLOCK_STREAMINFO=] has the following constraints:
 - [=minimum block size=] SHALL be set to [=num_samples_per_frame=].
@@ -1677,7 +1677,7 @@ The sample rate used for computing offsets SHALL be the sampling rate indicated 
 
 ### LPCM Specific ### {#lpcm-specific}
 
-[=codec_id=] SHALL be 'ipcm'.
+[=codec_id=] SHALL be <code>ipcm</code>.
 
 [=decoder_config()=] for LPCM is as follows:
 
@@ -1858,7 +1858,7 @@ NOTE: Multiple sample entries may be used in a track, for example when the track
 	- The 'stts' or 'trun' box SHALL indicate the number of audio samples in an [=IA Sample=] (i.e., the duration of an [=IA Sample=]).
 	- The duration of an [=IA Sample=] includes audio samples trimmed at the beginning but excludes audio samples trimmed at the end.
 - Sample Group
-	- When the [=codec_id=] is set to 'Opus' or 'mp4a' in an [=IA Track=], every sample SHALL be associated with a sample group of type 'roll'. The [=roll_distance=] value SHALL equal the value of the [=audio_roll_distance=] field in the [=Codec Config OBU=] stored in the [=configOBUs=] array in the sample entry.
+	- When the [=codec_id=] is set to <code>Opus</code> or <code>mp4a</code> in an [=IA Track=], every sample SHALL be associated with a sample group of type 'roll'. The [=roll_distance=] value SHALL equal the value of the [=audio_roll_distance=] field in the [=Codec Config OBU=] stored in the [=configOBUs=] array in the sample entry.
 - Composition Time Stamp (CTS)
 	- For each [=IA Sample=], CTS = DTS (Decoding Time Stamp), and as a consequence, the 'ctts' box (and similar signaling in movie fragments) SHALL NOT be used.
 
@@ -1925,25 +1925,25 @@ DASH and other applications require defined values for the 'codecs' parameter sp
 - The fourth element and any additional elements, if any, SHALL be the elements of the codecs parameter string if that stream was carried in its own track (i.e., not encapsulated in IAMF).
 
 For example,
-- the codecs parameter string for [=codec_id=] = 'Opus' is
+- the codecs parameter string for [=codec_id=] = <code>Opus</code> is
 
 ```
 	iamf.xxx.yyy.Opus
 ```
 
-- the codecs parameter string for [=codec_id=] = 'mp4a' is
+- the codecs parameter string for [=codec_id=] = <code>mp4a</code> is
 
 ```
 	iamf.xxx.yyy.mp4a.40.2
 ```
 
-- the codecs parameter string for [=codec_id=] = 'fLaC' is
+- the codecs parameter string for [=codec_id=] = <code>fLaC</code> is
 
 ```
 	iamf.xxx.yyy.fLaC
 ```
 
-- the codecs parameter string for [=codec_id=] = 'ipcm' is
+- the codecs parameter string for [=codec_id=] = <code>ipcm</code> is
 
 ```
 	iamf.xxx.yyy.ipcm
@@ -2127,7 +2127,7 @@ For example, consider the case where CL #1 = 2ch, CL #2 = 3.1.2ch, CL #3 = 5.1.2
 
 ### Recon Gain ### {#processing-scalablechannelaudio-recongain}
 
-Recon gain is REQUIRED only for [=num_layers=] > 1 and when [=codec_id=] is set to 'Opus' or 'mp4a'.
+Recon gain is REQUIRED only for [=num_layers=] > 1 and when [=codec_id=] is set to <code>Opus</code> or <code>mp4a</code>.
 
 [=recon_gain=] SHALL only be applied to all audio samples of the de-mixed channels from the De-mixer module.
 - [=recon_gain_info_parameter_data()=] indicates each channel of CL #i to which [=recon_gain=] needs to be applied and provides the [=recon_gain=] value for each frame of the channel.
@@ -2145,8 +2145,8 @@ The figure below shows the smoothing scheme of [=recon_gain=].
 <center><figcaption>Smoothing Scheme of Recon Gain</figcaption></center>
 
 The RECOMMENDED values for specific codecs are as follows:
-- When [=codec_id=] is set to 'Opus': olen = 60.
-- When [=codec_id=] is set to 'mp4a': olen = 64.
+- When [=codec_id=] is set to <code>Opus</code>: olen = 60.
+- When [=codec_id=] is set to <code>mp4a</code>: olen = 64.
 
 ## Mix Presentation ## {#processing-mixpresentation}
 
@@ -2785,7 +2785,7 @@ Down-mix paths, which conform to the above rule, SHALL be only allowed for scala
 
 This section RECOMMENDs how to generate [=recon_gain=]. 
 
-NOTE: Recon gain generation is not required when the codec is lossless, i.e., when [=codec_id=] is set to 'ipcm' or 'fLaC'.
+NOTE: Recon gain generation is not required when the codec is lossless, i.e., when [=codec_id=] is set to <code>ipcm</code> or <code>fLaC</code>.
 
 Recon gain needs to be applied to de-mixed channels. For this, the IA encoder needs to deliver it to IA decoders.
 
