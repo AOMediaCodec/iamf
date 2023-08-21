@@ -328,27 +328,27 @@ Based on the model, this specification defines the immersive audio model and for
 
 For a given input [=3D audio signal=],
 - A Pre-Processor generates [=Channel Group=](s), [=Descriptors=] and [=Parameter Substream=](s).
-- A Codec Enc generates coded [=Audio Substream=](s).
+- A Codec Encoder generates coded [=Audio Substream=](s).
 - An OBU Packetizer generates an [=IA Sequence=] from the coded [=Audio Substream=](s) and [=Descriptors=] and [=Parameter Substream=](s).
-- A File Packager (ISOBMFF Encapsulation) generates an IAMF File by encapsulating the [=IA Sequence=] into [[!ISOBMFF]] track(s).
-- A File Parser (ISOBMFF Parser) reconstructs the [=IA Sequence=] by decapsulating the IAMF File.
-- An OBU Parser outputs the coded [=Audio Substream=](s) and the [=Parameter Substream=](s).
-- A Codec Dec outputs decoded [=Channel Group=](s) after decoding of the coded [=Audio Substream=](s).
+- An OBU Parser outputs the coded [=Audio Substream=](s) and the [=Parameter Substream=](s) from the [=IA Sequence=].
+- A Codec Decoder outputs decoded [=Channel Group=](s) after decoding the coded [=Audio Substream=](s).
 - A Post-Processor outputs an [=Immersive Audio=] by using the [=Channel Group=](s), the [=Descriptors=] and the [=Parameter Substream=](s).
-- Pre-Processor, [=Channel Group=](s), Codec Enc and OBU Packetizer are defined in [[#iamfgeneration]].
-- [=IA Sequence=] is defined in [[#iasequence]].
-- ISOBMFF Encapsulation, IAMF file (ISOBMFF file), and ISOBMFF Parser are defined in [[#isobmff]].
-- OBU Parser, Codec Dec, and Post-Processor are defined in [[#processing]].
+
+The Pre-Processor, [=Channel Group=](s), Codec Encoder, and OBU Packetizer are defined in [[#iamfgeneration]]. The [=IA Sequence=] is defined in [[#standalone-ia-sequence]]. The OBU Parser, Codec Decoder, and Post-Processor are defined in [[#processing]].
+
+Although not shown in the figure above, the [=IA Sequence=] may be encapsulated by a file packager such as ISOBMFF Encapsulation to output an IAMF file (ISOBMFF file), and a file parser such as ISOBMFF Parser decapsulates it to output the [=IA Sequence=]. The ISOBMFF Encapsulation, IAMF file (ISOBMFF file), and ISOBMFF Parser are defined in [[#isobmff]].
 
 ## Bitstream Structure ## {#bitstream}
 
-### IA Sequence ### {#iasequence}
+### Overview ### {#overview}
 
 An [=IA Sequence=] is a bitstream to represent [=Immersive Audio=] contents and consists of [=Descriptors=] and [=IA Data=].
 
-The metadata in the [=Descriptors=] and [=IA Data=] are packetized into individual Open Bitstream Units (OBU)s. The term Open Bitstream Unit (OBU) is the concrete, physical unit used to represent the components in the model.
+The metadata in the [=Descriptors=] and [=IA Data=] are packetized into individual Open Bitstream Units (OBU)s. The term Open Bitstream Unit (OBU) is the concrete, physical unit used to represent the components in the model. In this version of the specification, the term IA OBU can be used interchangeably with OBU.
 
-### Use of OBU ### {#use-of-obu}
+The normative definitions for an [=IA Sequence=] are defined in [[#standalone-ia-sequence]].
+
+### Categorization and Use of Immersive Audio OBUs ### {#use-of-obu}
 
 #### Descriptors #### {#bitstream-descriptors}
 
@@ -534,7 +534,7 @@ class ReservedOBU() {
 
 ## IA Sequence Header OBU Syntax and Semantics ## {#obu-iasequenceheader}
 
-This section specifies the OBU payload of OBU_IA_Sequence_Header. 
+This section specifies the OBU payload of the IA Sequence Header OBU. 
 
 This OBU is used to indicate the start of an [=IA Sequence=]. So, the first OBU in an [=IA Sequence=] SHALL have [=obu_type=] = OBU_IA_Sequence_Header.
 
@@ -571,7 +571,7 @@ NOTE: If a future version defines a new profile, e.g., HypotheticalProfile, that
 
 ## Codec Config OBU Syntax and Semantics ## {#obu-codecconfig}
 
-This section specifies the OBU payload of OBU_IA_Codec_Config.
+This section specifies the OBU payload of the Codec Config OBU.
 
 <b>Syntax</b>
 
@@ -616,7 +616,7 @@ NOTE: <code>ipcm</code> should not be confused with <code>lpcm</code>, which is 
 
 ## Audio Element OBU Syntax and Semantics ## {#obu-audioelement}
 
-This section specifies the OBU payload of OBU_IA_Audio_Element.
+This section specifies the OBU payload of the Audio Element OBU.
 
 <b>Syntax</b>
 
@@ -1060,7 +1060,7 @@ A scene-based [=Audio Element=] has only one [=Channel Group=], which includes a
 
 ## Mix Presentation OBU Syntax and Semantics ## {#obu-mixpresentation}
 
-This section specifies the OBU payload of OBU_IA_Mix_Presentation.
+This section specifies the OBU payload of the Mix Presentation OBU.
 
 The metadata in mix_presentation_obu specifies how to render, process and mix one or more [=Audio Element=]s, with details provided in [[#processing-mixpresentation]].
 
@@ -1374,7 +1374,7 @@ NOTE: [[!ITU1770-4]] adopts the convention of using the dBov unit for dBFS, wher
 
 ## Parameter Block OBU Syntax and Semantics ## {#obu-parameterblock}
 
-This section specifies the OBU payload of OBU_IA_Parameter_Block.
+This section specifies the OBU payload of the Parameter Block OBU.
 
 The metadata specified in this OBU defines the parameter values for an algorithm for an indicated duration, including any animation of the parameter values over this duration. The metadata is used in conjunction with a corresponding parameter definition and parameter data specification. The parameter definition is specified based on [=ParamDefinition()=]. The parameter data provides the values to apply in each parameter block. These are specified using the AnimatedParameterData() function template if parameter animation is supported.
 
@@ -1569,7 +1569,7 @@ class ReconGainInfoParameterData() {
 
 ## Audio Frame OBU Syntax and Semantics ## {#obu-audioframe}
 
-This section specifies the OBU payloads of OBU_IA_Audio_Frame and OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID17.
+This section specifies the OBU payload of the Audio Frame OBU.
 
 <dfn noexport for="audio_substream">audio_substream_id</dfn> defines an identifier for an [=Audio Substream=] associated with this audio frame. Within an [=IA Sequence=], there SHALL be one unique [=audio_substream/audio_substream_id=] per [=Audio Substream=]. There SHALL be exactly one [=Audio Element OBU=] with a given [=audio_element_obu/audio_substream_id=] in a set of [=Descriptors=].
 
@@ -1601,7 +1601,7 @@ NOTE: The first 18 [=Audio Substream=]s in an [=IA Sequence=] MAY use the OBU ty
 
 ## Temporal Delimiter OBU Syntax and Semantics ## {#obu-temporaldelimiter}
 
-This section specifies the OBU payload of OBU_IA_Temporal_Delimiter.
+This section specifies the OBU payload of the Temporal Delimiter OBU.
 
 <b>Syntax</b>
 
@@ -2436,7 +2436,7 @@ The IA encoder is composed of the Pre-processor, Codec encoder, and OBU packetiz
 		- For a channel-based [=Audio Element=] with [=num_layers=] = 1, it may output a [=Parameter Substream=] with demixing info.
 		- For a channel-based [=Audio Element=] with [=num_layers=] > 1, it outputs [=Parameter Substream=]s with demixing info and recon gain info.
 		- It may further output [=Parameter Substream=]s with mixing gain.
-- Codec encoder generates one or more [=Audio Substream=]s from each [=Channel Group=] based on [=Codec Config OBU=].
+- Codec Encoder generates one or more [=Audio Substream=]s from each [=Channel Group=] based on [=Codec Config OBU=].
 - OBU packetizer packetizes [=Descriptors=], [=Parameter Substream=]s and [=Audio Substream=]s into OBUs, and outputs an [=IA Sequence=].
 	- Temporal unit generator generates a [=Temporal Unit=] for each frame from [=Audio Frame OBU=]s and [=Parameter Block OBU=]s (if present).
 
@@ -2456,7 +2456,7 @@ For Ambisonics encoding:
 			- [=output_channel_count=] is set to the number of Ambisonics channels, e.g., 4, 9, or 16.
 			- [=channel_mapping=] for [=ambisonics_mode=] = 0 is assigned based on the order of the [=Audio Substream=]s in the [=Channel Group=].
 			- [=demixing_matrix=] for [=ambisonics_mode=] = 1 is assigned based on the order of the [=Audio Substream=]s in the [=Channel Group=].
-- Codec Enc. outputs [=substream_count=] number of [=Audio Substream=]s.
+- Codec Encoder outputs [=substream_count=] number of [=Audio Substream=]s.
 - The i-th [=Temporal Unit=] is composed of the [=Audio Frame OBU=]s for the i-th frame.
 	- It may have an immediately preceding [=Temporal Delimiter OBU=].
 
@@ -2498,10 +2498,10 @@ The figure below shows the IA encoding flowchart for Scalable Channel Audio.
 - For a given input channel audio and a given list of channel layouts for scalability, PCMs for the input channel audio are passed to the CG Generation module.
 - CG Generation module generates the transformed audio according to the CG generation rule based on the list of CLs and the down-mix parameters.
 	- The transformed audio is structured as [=Channel Group=]s.
-- Non-mixed channels of the transformed audio (i.e., the original channels of the input channel audio) are directly input to the Codec encoder, but the mixed channels may be input first to the Attenuation module and then to the Codec encoder.
+- Non-mixed channels of the transformed audio (i.e., the original channels of the input channel audio) are directly input to the Codec Encoder, but the mixed channels may be input first to the Attenuation module and then to the Codec Encoder.
 - The Attenuation module reduces all sample values of the mixed channels in the same [=Channel Group=] at a uniform rate ([=output_gain=]).
 	- A range of 0 dB to -6 dB is recommended for attenuation. (i.e., a range of 0 dB to 6 dB for [=output_gain=])
-- Codec Enc. generates the coded [=Audio Substream=]s from PCMs and passes the coded [=Audio Substream=]s and one single [=decoder_config=] to OBU Packetizer.
+- Codec Encder generates the coded [=Audio Substream=]s from PCMs and passes the coded [=Audio Substream=]s and one single [=decoder_config=] to OBU Packetizer.
 - OBU packetizer generates [=Descriptors=] which consists of one [=IA Sequence Header OBU=], one [=Codec Config OBU=], one [=Audio Element OBU=] and one or more [=Mix Presentation OBU=].
 		- [=Codec Config OBU=] is generated based on [=decoder_config=].
 - OBU packetizer generates [=Parameter Block OBU=]s for each frame which contains [=demixing_info_parameter_data=] and [=recon_gain_info_parameter_data=].
