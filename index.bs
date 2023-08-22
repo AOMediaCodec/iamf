@@ -2748,7 +2748,24 @@ All syntax elements conform to the [=Syntactic Description Language=] specified 
 <b>string</b> indicates a null-terminated (i.e., ending at the first byte set to 0x00), UTF-8 encoded as defined in [[!RFC3629]] and whose length SHALL be limited to 128 bytes. 
  
 <b>syntaxName</b> is a human readable label.
- 
+
+### Function templates ### {#convention-function-templates}
+
+When the <b>template</b> keyword is used to decorate the <b>class</b> declaration, it indicates that the code is a template with a placeholder type that can be reused by other classes. Only classes that use the template present in the bitstream; the template itself does not present in the bitstream. Classes that use a function template pass a data type that is specified in either [[!MP4-Systems]] or [[#convention-data-types]].
+
+<b>Example</b>
+
+```
+template <class T>
+class Foo {
+  T t;
+}
+
+class Bar {
+  Foo<int> f;
+}
+```
+
 ## Arithmetic Operators ## {#convention-arithmetic-operators}
 
 <table class="def">
@@ -2771,51 +2788,18 @@ All syntax elements conform to the [=Syntactic Description Language=] specified 
   <td>ceil(x)</td><td>The smallest integer that is greater than or equal to x.</td>
 </tr>
 <tr>
+  <td>round(x)</td><td>The integer value closest to x. It may be implemented as floor(x + 0.5).</td>
+</tr>
+<tr>
   <td>sqrt(x)</td><td>The square root of x.</td>
 </tr>
+<tr>
+  <td>Clip3(x, y, z)</td><td>Conforms to [=Clip3=] specified in [[!AV1-Convention]].</td>
+</tr>
+<tr>
+  <td>pow(x, y)</td><td>The value of x to the power of y.</td>
+</tr>
 </table>
-
-## Function ## {#convention-function}
-
-### Function templates ### {#convention-function-templates}
-
-When the <b>template</b> keyword is used to decorate the <b>class</b> declaration, it indicates that the code is a template with a placeholder type that can be reused by other classes. Only classes that use the template present in the bitstream; the template itself does not present in the bitstream. Classes that use a function template pass a data type that is specified in either [[!MP4-Systems]] or [[#convention-data-types]].
-
-<b>Example</b>
-
-```
-template <class T>
-class Foo {
-  T t;
-}
-
-class Bar {
-  Foo<int> f;
-}
-```
-
-### Mathematical functions ### {#convention-function-mathematical}
- 
-<b>Clip3(x, y, z)</b>
- 
-It conforms to [=Clip3=] specified in [[!AV1-Convention]].
-
-<b>round(x)</b>
-
-The round() function returns the integer value closest to <code>x</code> and may be implemented as
-
-```
-round(x) = floor(x + 0.5).
-```
-
-<b>MOD(Number, Divisor)</b>
-
-The MOD() function returns the remainder after <b>Number</b> is divided by <b>Divisor</b>.
-
-<b>pow(x, y)</b>
-
-The pow() function returns the value of x to the power of y.
-
 
 # Annex # {#annex}
 
