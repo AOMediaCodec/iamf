@@ -1490,7 +1490,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 6edc88947, updated Thu Aug 17 11:18:09 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="c7e631b1a19165711fb4411f80df6af0e78b6d2a" name="document-revision">
+  <meta content="231f0d29495aedb23860a9829b0e87fa67caf79e" name="document-revision">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
     color: var(--a-normal-text);
@@ -2206,14 +2206,9 @@ dfn > a.self-link::before      { content: "#"; }
        <a href="#convention-syntaxstructure"><span class="secno">9.1</span> <span class="content">Syntax Description</span></a>
        <ol class="toc">
         <li><a href="#convention-data-types"><span class="secno">9.1.1</span> <span class="content">Data types</span></a>
+        <li><a href="#convention-function-templates"><span class="secno">9.1.2</span> <span class="content">Function templates</span></a>
        </ol>
       <li><a href="#convention-arithmetic-operators"><span class="secno">9.2</span> <span class="content">Arithmetic Operators</span></a>
-      <li>
-       <a href="#convention-function"><span class="secno">9.3</span> <span class="content">Function</span></a>
-       <ol class="toc">
-        <li><a href="#convention-function-templates"><span class="secno">9.3.1</span> <span class="content">Function templates</span></a>
-        <li><a href="#convention-function-mathematical"><span class="secno">9.3.2</span> <span class="content">Mathematical functions</span></a>
-       </ol>
      </ol>
     <li>
      <a href="#annex"><span class="secno">10</span> <span class="content">Annex</span></a>
@@ -4866,6 +4861,18 @@ gamma = n0 - n.
    <p><b>string</b> <b>syntaxName</b></p>
    <p><b>string</b> indicates a null-terminated (i.e., ending at the first byte set to 0x00), UTF-8 encoded as defined in <a data-link-type="biblio" href="#biblio-rfc3629" title="UTF-8, a transformation format of ISO 10646">[RFC3629]</a> and whose length SHALL be limited to 128 bytes.</p>
    <p><b>syntaxName</b> is a human readable label.</p>
+   <h4 class="heading settled" data-level="9.1.2" id="convention-function-templates"><span class="secno">9.1.2. </span><span class="content">Function templates</span><a class="self-link" href="#convention-function-templates"></a></h4>
+   <p>When the <b>template</b> keyword is used to decorate the <b>class</b> declaration, it indicates that the code is a template with a placeholder type that can be reused by other classes. Only classes that use the template present in the bitstream; the template itself does not present in the bitstream. Classes that use a function template pass a data type that is specified in either <a data-link-type="biblio" href="#biblio-mp4-systems" title="Information technology — Coding of audio-visual objects — Part 1: Systems">[MP4-Systems]</a> or <a href="#convention-data-types">§ 9.1.1 Data types</a>.</p>
+   <p><b>Example</b></p>
+<pre>template &lt;class T>
+class Foo {
+  T t;
+}
+
+class Bar {
+  Foo&lt;int> f;
+}
+</pre>
    <h3 class="heading settled" data-level="9.2" id="convention-arithmetic-operators"><span class="secno">9.2. </span><span class="content">Arithmetic Operators</span><a class="self-link" href="#convention-arithmetic-operators"></a></h3>
    <table class="def">
     <tbody>
@@ -4888,33 +4895,18 @@ gamma = n0 - n.
       <td>ceil(x)
       <td>The smallest integer that is greater than or equal to x.
      <tr>
+      <td>round(x)
+      <td>The integer value closest to x. It may be implemented as floor(x + 0.5).
+     <tr>
       <td>sqrt(x)
       <td>The square root of x.
+     <tr>
+      <td>Clip3(x, y, z)
+      <td>Conforms to <a data-link-type="dfn" href="https://aomedia.org/av1/specification/conventions/" id="ref-for-something⑨⑥">Clip3</a> specified in <a data-link-type="biblio" href="#biblio-av1-convention" title="Conventions">[AV1-Convention]</a>.
+     <tr>
+      <td>pow(x, y)
+      <td>The value of x to the power of y.
    </table>
-   <h3 class="heading settled" data-level="9.3" id="convention-function"><span class="secno">9.3. </span><span class="content">Function</span><a class="self-link" href="#convention-function"></a></h3>
-   <h4 class="heading settled" data-level="9.3.1" id="convention-function-templates"><span class="secno">9.3.1. </span><span class="content">Function templates</span><a class="self-link" href="#convention-function-templates"></a></h4>
-   <p>When the <b>template</b> keyword is used to decorate the <b>class</b> declaration, it indicates that the code is a template with a placeholder type that can be reused by other classes. Only classes that use the template present in the bitstream; the template itself does not present in the bitstream. Classes that use a function template pass a data type that is specified in either <a data-link-type="biblio" href="#biblio-mp4-systems" title="Information technology — Coding of audio-visual objects — Part 1: Systems">[MP4-Systems]</a> or <a href="#convention-data-types">§ 9.1.1 Data types</a>.</p>
-   <p><b>Example</b></p>
-<pre>template &lt;class T>
-class Foo {
-  T t;
-}
-
-class Bar {
-  Foo&lt;int> f;
-}
-</pre>
-   <h4 class="heading settled" data-level="9.3.2" id="convention-function-mathematical"><span class="secno">9.3.2. </span><span class="content">Mathematical functions</span><a class="self-link" href="#convention-function-mathematical"></a></h4>
-   <p><b>Clip3(x, y, z)</b></p>
-   <p>It conforms to <a data-link-type="dfn" href="https://aomedia.org/av1/specification/conventions/" id="ref-for-something⑨⑥">Clip3</a> specified in <a data-link-type="biblio" href="#biblio-av1-convention" title="Conventions">[AV1-Convention]</a>.</p>
-   <p><b>round(x)</b></p>
-   <p>The round() function returns the integer value closest to <code>x</code> and may be implemented as</p>
-<pre>round(x) = floor(x + 0.5).
-</pre>
-   <p><b>MOD(Number, Divisor)</b></p>
-   <p>The MOD() function returns the remainder after <b>Number</b> is divided by <b>Divisor</b>.</p>
-   <p><b>pow(x, y)</b></p>
-   <p>The pow() function returns the value of x to the power of y.</p>
    <h2 class="heading settled" data-level="10" id="annex"><span class="secno">10. </span><span class="content">Annex</span><a class="self-link" href="#annex"></a></h2>
    <h3 class="heading settled" data-level="10.1" id="Annex_A"><span class="secno">10.1. </span><span class="content">Annex A: ID Linking Scheme (Informative)</span><a class="self-link" href="#Annex_A"></a></h3>
    <p>The figure below shows the linking scheme among IDs in the obu_header or OBU payload.</p>
@@ -6125,7 +6117,7 @@ MathJax = {
 <script>/* Boilerplate: script-dfn-panel-json */
 window.dfnpanelData = {};
 window.dfnpanelData['fc10b1cf'] = {"dfnID": "fc10b1cf", "url": "https://www.iso.org/standard/43345.html#", "dfnText": "raw_data_block()", "refSections": [{"refs": [{"id": "ref-for-something\u2463\u2467"}], "title": "3.11.2. AAC-LC Specific"}], "external": true};
-window.dfnpanelData['67d3cf49'] = {"dfnID": "67d3cf49", "url": "https://aomedia.org/av1/specification/conventions/", "dfnText": "clip3", "refSections": [{"refs": [{"id": "ref-for-something\u2468\u2465"}], "title": "9.3.2. Mathematical functions"}], "external": true};
+window.dfnpanelData['67d3cf49'] = {"dfnID": "67d3cf49", "url": "https://aomedia.org/av1/specification/conventions/", "dfnText": "clip3", "refSections": [{"refs": [{"id": "ref-for-something\u2468\u2465"}], "title": "9.2. Arithmetic Operators"}], "external": true};
 window.dfnpanelData['f9821910'] = {"dfnID": "f9821910", "url": "https://xiph.org/flac/format.html", "dfnText": "block size in inter-channel samples", "refSections": [{"refs": [{"id": "ref-for-something\u2464\u2460"}, {"id": "ref-for-something\u2464\u2461"}, {"id": "ref-for-something\u2464\u2462"}, {"id": "ref-for-something\u2464\u2463"}, {"id": "ref-for-something\u2464\u2464"}, {"id": "ref-for-something\u2464\u2465"}, {"id": "ref-for-something\u2464\u2466"}, {"id": "ref-for-something\u2464\u2467"}, {"id": "ref-for-something\u2464\u2468"}, {"id": "ref-for-something\u2465\u24ea"}, {"id": "ref-for-something\u2465\u2460"}, {"id": "ref-for-something\u2465\u2461"}, {"id": "ref-for-something\u2465\u2462"}, {"id": "ref-for-something\u2465\u2463"}, {"id": "ref-for-something\u2465\u2464"}, {"id": "ref-for-something\u2465\u2465"}, {"id": "ref-for-something\u2465\u2466"}, {"id": "ref-for-something\u2465\u2467"}, {"id": "ref-for-something\u2465\u2468"}, {"id": "ref-for-something\u2466\u24ea"}, {"id": "ref-for-something\u2466\u2460"}, {"id": "ref-for-something\u2466\u2461"}, {"id": "ref-for-something\u2466\u2462"}], "title": "3.11.3. FLAC Specific"}], "external": true};
 window.dfnpanelData['275cfbe8'] = {"dfnID": "275cfbe8", "url": "https://xiph.org/flac/format.html", "dfnText": "channel assignment", "refSections": [{"refs": [{"id": "ref-for-something\u2464\u2460"}, {"id": "ref-for-something\u2464\u2461"}, {"id": "ref-for-something\u2464\u2462"}, {"id": "ref-for-something\u2464\u2463"}, {"id": "ref-for-something\u2464\u2464"}, {"id": "ref-for-something\u2464\u2465"}, {"id": "ref-for-something\u2464\u2466"}, {"id": "ref-for-something\u2464\u2467"}, {"id": "ref-for-something\u2464\u2468"}, {"id": "ref-for-something\u2465\u24ea"}, {"id": "ref-for-something\u2465\u2460"}, {"id": "ref-for-something\u2465\u2461"}, {"id": "ref-for-something\u2465\u2462"}, {"id": "ref-for-something\u2465\u2463"}, {"id": "ref-for-something\u2465\u2464"}, {"id": "ref-for-something\u2465\u2465"}, {"id": "ref-for-something\u2465\u2466"}, {"id": "ref-for-something\u2465\u2467"}, {"id": "ref-for-something\u2465\u2468"}, {"id": "ref-for-something\u2466\u24ea"}, {"id": "ref-for-something\u2466\u2460"}, {"id": "ref-for-something\u2466\u2461"}, {"id": "ref-for-something\u2466\u2462"}], "title": "3.11.3. FLAC Specific"}], "external": true};
 window.dfnpanelData['97a7143f'] = {"dfnID": "97a7143f", "url": "https://xiph.org/flac/format.html", "dfnText": "frame", "refSections": [{"refs": [{"id": "ref-for-something\u2464\u2460"}, {"id": "ref-for-something\u2464\u2461"}, {"id": "ref-for-something\u2464\u2462"}, {"id": "ref-for-something\u2464\u2463"}, {"id": "ref-for-something\u2464\u2464"}, {"id": "ref-for-something\u2464\u2465"}, {"id": "ref-for-something\u2464\u2466"}, {"id": "ref-for-something\u2464\u2467"}, {"id": "ref-for-something\u2464\u2468"}, {"id": "ref-for-something\u2465\u24ea"}, {"id": "ref-for-something\u2465\u2460"}, {"id": "ref-for-something\u2465\u2461"}, {"id": "ref-for-something\u2465\u2462"}, {"id": "ref-for-something\u2465\u2463"}, {"id": "ref-for-something\u2465\u2464"}, {"id": "ref-for-something\u2465\u2465"}, {"id": "ref-for-something\u2465\u2466"}, {"id": "ref-for-something\u2465\u2467"}, {"id": "ref-for-something\u2465\u2468"}, {"id": "ref-for-something\u2466\u24ea"}, {"id": "ref-for-something\u2466\u2460"}, {"id": "ref-for-something\u2466\u2461"}, {"id": "ref-for-something\u2466\u2462"}], "title": "3.11.3. FLAC Specific"}], "external": true};
