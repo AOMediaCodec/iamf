@@ -918,38 +918,50 @@ Each [=Channel Group=] (or scalable audio channel layer) is associated with a di
 
 <dfn noexport>loudspeaker_layout</dfn> indicates the channel layout to be reconstructed from the precedent [=Channel Group=]s and current [=Channel Group=]. When a reserved value for [=loudspeaker_layout=] is used, parsers compliant with this version of the specification SHOULD skip the [=channel_audio_layer_config=] for that layer and all subsequent ones, if any.
 
-In this version of the specification, [=loudspeaker_layout=] indicates one of the 10 channel layouts listed below, where
+In this version of the specification, [=loudspeaker_layout=] indicates one of the 10 channel layouts listed below.
 
-- <dfn noexport>Stereo</dfn> is the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System A (0+2+0)=] of [[!ITU2051-3]].
-- <dfn noexport>5.1ch</dfn> is the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System B (0+5+0)=] of [[!ITU2051-3]].
-- <dfn noexport>5.1.2ch</dfn> is the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System C (2+5+0)=] of [[!ITU2051-3]].
-- <dfn noexport>5.1.4ch</dfn> is the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System D (4+5+0)=] of [[!ITU2051-3]].
-- <dfn noexport>7.1ch</dfn> is the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System I (0+7+0)=] of [[!ITU2051-3]].
-- <dfn noexport>7.1.2ch</dfn> is the combination of the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System I (0+7+0)=] of [[!ITU2051-3]] and the left and right top front pair of the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System J (4+7+0)=] of [[!ITU2051-3]].
-- <dfn noexport>7.1.4ch</dfn> is the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System J (4+7+0)=] of [[!ITU2051-3]].
-- <dfn noexport>3.1.2ch</dfn> is the front subset (L/C/R/Ltf/Rtf/LFE) of [=7.1.4ch=].
+<table class="def">
+<tr>
+  <th><code>loudspeaker_layout</code></th><th>Channel Layout</th><th>Loudspeaker Location Ordering</th><th>Reference</th>
+</tr>
+<tr>
+  <td>0000</td><td>Mono</td><td>C</td><td></td>
+</tr>
+<tr>
+  <td>0001</td><td>Stereo</td><td>L/R</td><td>[=Loudspeaker configuration for Sound System A (0+2+0)=] of [[!ITU2051-3]]</td>
+</tr>
+<tr>
+  <td>0010</td><td>5.1ch</td><td>L/C/R/Ls/Rs/LFE</t><td>[=Loudspeaker configuration for Sound System B (0+5+0)=] of [[!ITU2051-3]]</td>
+</tr>
+<tr>
+  <td>0011</td><td>5.1.2ch</td><td>L/C/R/Ls/Rs/Ltf/Rtf/LFE</td><td>[=Loudspeaker configuration for Sound System C (2+5+0)=] of [[!ITU2051-3]]</td>
+</tr>
+<tr>
+  <td>0100</td><td>5.1.4ch</td><td>L/C/R/Ls/Rs/Ltf/Rtf/Ltr/Rtr/LFE</td><td>[=Loudspeaker configuration for Sound System D (4+5+0)=] of [[!ITU2051-3]]</td>
+</tr>
+<tr>
+  <td>0101</td><td><dfn noexport>7.1ch</dfn></td><td>L/C/R/Lss/Rss/Lrs/Rrs/LFE</td><td>[=Loudspeaker configuration for Sound System I (0+7+0)=] of [[!ITU2051-3]]</td>
+</tr>
+<tr>
+  <td>0110</td><td>7.1.2ch</td><td>L/C/R/Lss/Rss/Lrs/Rrs/Ltf/Rtf/LFE</td><td>The combination of [=7.1ch=] and the Left and Right top front pair of [=7.1.4ch=]</td>
+</tr>
+<tr>
+  <td>0111</td><td><dfn noexport>7.1.4ch</dfn></td><td>L/C/R/Lss/Rss/Lrs/Rrs/Ltf/Rtf/Ltb/Rtb/LFE</td><td>[=Loudspeaker configuration for Sound System J (4+7+0)=] of [[!ITU2051-3]]</td>
+</tr>
+<tr>
+  <td>1000</td><td>3.1.2ch</th><th>L/C/R/Ltf/Rtf/LFE</td><td>The front subset (L/C/R/Ltf/Rtf/LFE) of [=7.1.4ch=]</td>
+</tr>
+<tr>
+  <td>1001</td><td>Binaural</td><td>L/R</td><td></td>
+</tr>
+<tr>
+  <td>others</td><td>Reserved</td><td></td><td></td>
+</tr>
+</table>
 
-<pre class = "def">
-Loudspeaker Layout (4 bits) :  Channel Layout  : Loudspeaker Location Ordering
-             0000           :       Mono       : C
-             0001           :      Stereo      : L/R
-             0010           :      5.1ch       : L/C/R/Ls/Rs/LFE
-             0011           :     5.1.2ch      : L/C/R/Ls/Rs/Ltf/Rtf/LFE
-             0100           :     5.1.4ch      : L/C/R/Ls/Rs/Ltf/Rtf/Ltr/Rtr/LFE
-             0101           :      7.1ch       : L/C/R/Lss/Rss/Lrs/Rrs/LFE
-             0110           :     7.1.2ch      : L/C/R/Lss/Rss/Lrs/Rrs/Ltf/Rtf/LFE
-             0111           :     7.1.4ch      : L/C/R/Lss/Rss/Lrs/Rrs/Ltf/Rtf/Ltb/Rtb/LFE
-             1000           :     3.1.2ch      : L/C/R/Ltf/Rtf/LFE
-             1001           :     Binaural     : L/R
-            others          :     reserved     :
-</pre>
 
-```
-Where C: Center, L: Left, R: Right, Ls: Left Surround, Lss: Left Side Surround, 
-Rs: Right Surround, Rss: Right Side Surround, Lrs: Left Rear Surround, Rrs: Right Rear Surround
-Ltf: Left Top Front, Rtf: Right Top Front, Ltr: Left Top Rear, Rtr: Right Top Rear, 
-Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
-```
+Where C: Center, L: Left, R: Right, Ls: Left Surround, Lss: Left Side Surround, Rs: Right Surround, Rss: Right Side Surround, Lrs: Left Rear Surround, Rrs: Right Rear Surround, Ltf: Left Top Front, Rtf: Right Top Front, Ltr: Left Top Rear, Rtr: Right Top Rear, Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
+
 
 NOTE: The Ltr and Rtr of 5.1.4ch down-mixed from 7.1.4ch is within the range of Ltb and Rtb of 7.1.4ch, in terms of their positions according to [[!ITU2051-3]].
 
