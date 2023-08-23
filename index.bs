@@ -8,7 +8,7 @@ Repository: AOMediaCodec/iamf
 Shortname: iamf
 URL: https://aomediacodec.github.io/iamf/
 Date: 2023-07-17
-Abstract: This document specifies an immersive audio (IA) model, a standalone IA sequence format and an [[!ISOBMFF]]-based IA container format.
+Abstract: This document specifies the Immersive Audio (IA) model, the standalone IA Sequence format, and the [[!ISOBMFF]]-based IA container format.
 Local Boilerplate: footer yes
 </pre>
 
@@ -260,7 +260,7 @@ url: https://www.iso.org/standard/77752.html#; spec: MP4-PCM; type: property;
 
 # Introduction # {#introduction}
 
-This specification defines an immersive audio model and formats (IAMF) to provide an [=Immersive Audio=] experience to end-users.
+This specification defines the Immersive Audio Model and Formats (IAMF) to provide an [=Immersive Audio=] experience to end-users.
 
 IAMF is used to provide [=Immersive Audio=] content for presentation on a wide range of devices in both streaming and offline applications. These applications include internet audio streaming, multicasting/broadcasting services, file download, gaming, communication, virtual and augmented reality, and others. In these applications, audio may be played back on a wide range of devices, e.g., headphones, mobile phones, tablets, TVs, sound bars, home theater systems, and big screens.
 
@@ -270,19 +270,19 @@ Here are some typical IAMF use cases and examples of how to instantiate the mode
 - UC3: Two [=Audio Element=]s (e.g., FOA and Non-diegetic Stereo) are delivered to a mobile device through a unicast network. FOA is rendered to Binaural (or Stereo) and Non-diegetic is rendered to Stereo. After mixing them, it is processed with loudness normalization and is played back on headphones through the mobile device.
 
 Example 1: UC1 with [=3D audio signal=] = 3.1.2ch.
-- Audio Substream: The left (L) and right (R) channels are coded as one audio stream, the left top front (Ltf) and right top front (Rtf) channels as one audio stream, the Center channel as one audio stream, and the low-frequency effects (LFE) channel as one audio stream.
+- Audio Substream: The Left (L) and Right (R) channels are coded as one audio stream, the Left top front (Ltf) and Right top front (Rtf) channels as one audio stream, the Center channel as one audio stream, and the Low-Frequency Effects (LFE) channel as one audio stream.
 - Audio Element (3.1.2ch): Consists of 4 Audio Substreams which are grouped into one [=Channel Group=].
 - Mix Presentation: Provides rendering algorithms for rendering the Audio Element to popular loudspeaker layouts and headphones, and the loudness information of the [=3D audio signal=].
 
 Example 2: UC2 with two [=3D audio signal=]s = 5.1.2ch and Stereo.
-- Audio Substream: The L and R channels are coded as one audio stream, the left surround (Ls) and right surround (Rs) channels as one audio stream, the Ltf and Rtf channels as one audio stream, the Center channel as one audio stream, and the LFE channel as one audio stream.
+- Audio Substream: The L and R channels are coded as one audio stream, the Left surround (Ls) and Right surround (Rs) channels as one audio stream, the Ltf and Rtf channels as one audio stream, the Center channel as one audio stream, and the LFE channel as one audio stream.
 - Audio Element 1 (5.1.2ch): Consists of 5 Audio Substreams which are grouped into one [=Channel Group=].
 - Audio Element 2 (Stereo): Consists of 1 Audio Substream which is grouped into one [=Channel Group=].
 - Parameter Substream 1-1: Contains mixing parameter values that are applied to Audio Element 1 by considering the home environment.
 - Parameter Substream 1-2: Contains mixing parameter values that are applied to Audio Element 2 by considering the home environment.
 - Mix Presentation: Provides rendering algorithms for rendering Audio Elements 1 & 2 to popular loudspeaker layouts, mixing information based on Parameter Substreams 1-1 & 1-2, and loudness information of the [=Rendered Mix Presentation=].
 
-Example 3: UC3 with two [=3D audio signal=]s = first order Ambisonics (FOA) and Non-diegetic Stereo.
+Example 3: UC3 with two [=3D audio signal=]s = First Order Ambisonics (FOA) and Non-diegetic Stereo.
 - Audio Substream: The L and R channels are coded as one audio stream and each channel of the FOA signal as one audio stream.
 - Audio Element 1 (FOA): Consists of 4 Audio Substreams which are grouped into one [=Channel Group=].
 - Audio Element 2 (Non-diegetic Stereo): Consists of 1 Audio Substream which is grouped into one [=Channel Group=].
@@ -322,7 +322,7 @@ The term <dfn noexport>Rendered Mix Presentation</dfn> means a [=3D audio signal
 
 ## Architecture ## {#architecture}
 
-Based on the model, this specification defines the immersive audio model and format (<dfn noexport>IAMF</dfn>) architecture as depicted in the figure below.
+Based on the model, this specification defines the Immersive Audio Model and Formats (<dfn noexport>IAMF</dfn>) architecture as depicted in the figure below.
 
 <center><img src="images/Hypothetical IAMF Architecture.png" style="width:100%; height:auto;"></center>
 <center><figcaption>IAMF Architecture</figcaption></center>
@@ -933,38 +933,48 @@ Each [=Channel Group=] (or scalable audio channel layer) is associated with a di
 
 <dfn noexport>loudspeaker_layout</dfn> indicates the channel layout to be reconstructed from the precedent [=Channel Group=]s and current [=Channel Group=]. When a reserved value for [=loudspeaker_layout=] is used, parsers compliant with this version of the specification SHOULD skip the [=channel_audio_layer_config=] for that layer and all subsequent ones, if any.
 
-In this version of the specification, [=loudspeaker_layout=] indicates one of the 10 channel layouts listed below, where
+In this version of the specification, [=loudspeaker_layout=] indicates one of the 10 channel layouts listed below.
 
-- <dfn noexport>Stereo</dfn> is the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System A (0+2+0)=] of [[!ITU2051-3]].
-- <dfn noexport>5.1ch</dfn> is the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System B (0+5+0)=] of [[!ITU2051-3]].
-- <dfn noexport>5.1.2ch</dfn> is the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System C (2+5+0)=] of [[!ITU2051-3]].
-- <dfn noexport>5.1.4ch</dfn> is the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System D (4+5+0)=] of [[!ITU2051-3]].
-- <dfn noexport>7.1ch</dfn> is the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System I (0+7+0)=] of [[!ITU2051-3]].
-- <dfn noexport>7.1.2ch</dfn> is the combination of the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System I (0+7+0)=] of [[!ITU2051-3]] and the left and right top front pair of the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System J (4+7+0)=] of [[!ITU2051-3]].
-- <dfn noexport>7.1.4ch</dfn> is the loudspeaker configuration as depicted in [=Loudspeaker configuration for Sound System J (4+7+0)=] of [[!ITU2051-3]].
-- <dfn noexport>3.1.2ch</dfn> is the front subset (L/C/R/Ltf/Rtf/LFE) of [=7.1.4ch=].
+<table class="def">
+<tr>
+  <th><code>loudspeaker_layout</code></th><th>Channel Layout</th><th>Loudspeaker Location Ordering</th><th>Reference</th>
+</tr>
+<tr>
+  <td>0000</td><td>Mono</td><td>C</td><td></td>
+</tr>
+<tr>
+  <td>0001</td><td>Stereo</td><td>L/R</td><td>[=Loudspeaker configuration for Sound System A (0+2+0)=] of [[!ITU2051-3]]</td>
+</tr>
+<tr>
+  <td>0010</td><td>5.1ch</td><td>L/C/R/Ls/Rs/LFE</t><td>[=Loudspeaker configuration for Sound System B (0+5+0)=] of [[!ITU2051-3]]</td>
+</tr>
+<tr>
+  <td>0011</td><td>5.1.2ch</td><td>L/C/R/Ls/Rs/Ltf/Rtf/LFE</td><td>[=Loudspeaker configuration for Sound System C (2+5+0)=] of [[!ITU2051-3]]</td>
+</tr>
+<tr>
+  <td>0100</td><td>5.1.4ch</td><td>L/C/R/Ls/Rs/Ltf/Rtf/Ltr/Rtr/LFE</td><td>[=Loudspeaker configuration for Sound System D (4+5+0)=] of [[!ITU2051-3]]</td>
+</tr>
+<tr>
+  <td>0101</td><td><dfn noexport>7.1ch</dfn></td><td>L/C/R/Lss/Rss/Lrs/Rrs/LFE</td><td>[=Loudspeaker configuration for Sound System I (0+7+0)=] of [[!ITU2051-3]]</td>
+</tr>
+<tr>
+  <td>0110</td><td>7.1.2ch</td><td>L/C/R/Lss/Rss/Lrs/Rrs/Ltf/Rtf/LFE</td><td>The combination of [=7.1ch=] and the Left and Right top front pair of [=7.1.4ch=]</td>
+</tr>
+<tr>
+  <td>0111</td><td><dfn noexport>7.1.4ch</dfn></td><td>L/C/R/Lss/Rss/Lrs/Rrs/Ltf/Rtf/Ltb/Rtb/LFE</td><td>[=Loudspeaker configuration for Sound System J (4+7+0)=] of [[!ITU2051-3]]</td>
+</tr>
+<tr>
+  <td>1000</td><td>3.1.2ch</th><th>L/C/R/Ltf/Rtf/LFE</td><td>The front subset (L/C/R/Ltf/Rtf/LFE) of [=7.1.4ch=]</td>
+</tr>
+<tr>
+  <td>1001</td><td>Binaural</td><td>L/R</td><td></td>
+</tr>
+<tr>
+  <td>others</td><td>Reserved</td><td></td><td></td>
+</tr>
+</table>
 
-<pre class = "def">
-Loudspeaker Layout (4 bits) :  Channel Layout  : Loudspeaker Location Ordering
-             0000           :       Mono       : C
-             0001           :      Stereo      : L/R
-             0010           :      5.1ch       : L/C/R/Ls/Rs/LFE
-             0011           :     5.1.2ch      : L/C/R/Ls/Rs/Ltf/Rtf/LFE
-             0100           :     5.1.4ch      : L/C/R/Ls/Rs/Ltf/Rtf/Ltr/Rtr/LFE
-             0101           :      7.1ch       : L/C/R/Lss/Rss/Lrs/Rrs/LFE
-             0110           :     7.1.2ch      : L/C/R/Lss/Rss/Lrs/Rrs/Ltf/Rtf/LFE
-             0111           :     7.1.4ch      : L/C/R/Lss/Rss/Lrs/Rrs/Ltf/Rtf/Ltb/Rtb/LFE
-             1000           :     3.1.2ch      : L/C/R/Ltf/Rtf/LFE
-             1001           :     Binaural     : L/R
-            others          :     reserved     :
-</pre>
-
-```
-Where C: Center, L: Left, R: Right, Ls: Left Surround, Lss: Left Side Surround, 
-Rs: Right Surround, Rss: Right Side Surround, Lrs: Left Rear Surround, Rrs: Right Rear Surround
-Ltf: Left Top Front, Rtf: Right Top Front, Ltr: Left Top Rear, Rtr: Right Top Rear, 
-Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
-```
+Where C: Center, L: Left, R: Right, Ls: Left Surround, Lss: Left Side Surround, Rs: Right Surround, Rss: Right Side Surround, Lrs: Left Rear Surround, Rrs: Right Rear Surround, Ltf: Left Top Front, Rtf: Right Top Front, Ltr: Left Top Rear, Rtr: Right Top Rear, Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
 
 NOTE: The Ltr and Rtr of 5.1.4ch down-mixed from 7.1.4ch is within the range of Ltb and Rtb of 7.1.4ch, in terms of their positions according to [[!ITU2051-3]].
 
@@ -1005,10 +1015,10 @@ The order of the [=Audio Substream=]s in each [=Channel Group=] SHALL be as foll
 Bit position : Channel Name
     b5(MSB)  : Left channel (L1, L2, L3)
       b4     : Right channel (R2, R3)
-      b3     : Left Surround channel (Ls5)
-      b2     : Right Surround channel (Rs5)
-      b1     : Left Top Front channel (Ltf)
-      b0     : Right Top Front channel (Rtf)
+      b3     : Left surround channel (Ls5)
+      b2     : Right surround channel (Rs5)
+      b1     : Left top front channel (Ltf)
+      b0     : Right top front channel (Rtf)
 
 </pre>
 
@@ -1718,7 +1728,7 @@ class DecoderConfig(ipcm) {
 <dfn noexport>sample_rate</dfn> indicates the sample rate of the input [=3D audio signal=] in Hz. It SHALL take a value from the set {44.1k, 16k, 32k, 48k, 96k}.
 
 The format of [=audio_frame()=] is only one single mono or stereo PCM audio frame.
-	- If [=audio_frame()=] contains a stereo PCM audio frame, the i-th audio sample of the left channel is followed by the i-th audio sample of the right channel, and then the (i+1)-th audio sample of the left channel is followed by the (i+1)-th audio sample of the right channel, where i = 1, 2, ..., [=num_samples_per_frame=] - 1.
+	- If [=audio_frame()=] contains a stereo PCM audio frame, the i-th audio sample of the Left channel is followed by the i-th audio sample of the Right channel, and then the (i+1)-th audio sample of the Left channel is followed by the (i+1)-th audio sample of the Right channel, where i = 1, 2, ..., [=num_samples_per_frame=] - 1.
 	- When more than one byte is used to represent a PCM sample, the byte order (i.e., its endianness) is indicated in [=sample_format_flags=].
 
 The sample rate used for computing offsets SHALL be [=sample_rate=].
@@ -2617,7 +2627,7 @@ For Ambisonics encoding:
 
 For Scalable Channel Audio encoding:
 
-- The Pre-processor outputs N [=Channel Group=]s ([=num_layers=] = N), [=Descriptors=] and [=Parameter Substream=]s. It is composed of a Down-mix parameter generator, Down-mixer, Loudness, Channel Group generator, Attenuation, and Meta generator.
+- The Pre-processor outputs N [=Channel Group=]s ([=num_layers=] = N), [=Descriptors=] and [=Parameter Substream=]s. It is composed of a down-mix parameter generator, down-mixer, Loudness, Channel Group generator, Attenuation, and Meta generator.
 	- For non-scalable channel audio (i.e., [=num_layers=] = 1):
 		- [=Parameter Substream=] for recon gain is not generated. 
 		- [=Parameter Substream=] for demixing info may be generated by implementers who assume it to be recommended for dynamic downmixing on the decoder side.
@@ -2756,7 +2766,7 @@ This section provides a way to generate [=LoudnessInfo()=], given a [=Mix Presen
 
 ## Syntax Description ## {#convention-syntaxstructure}
 
-All syntax elements conform to the [=Syntactic Description Language=] specified in [[!MP4-Systems]] unless it is explicitly described in the specification.
+All syntax elements conform to the [=Syntactic Description Language=] specified in [[!MP4-Systems]] and the additional [=Syntactic Description Language=] defined in this section.
 
 ### Data types ### {#convention-data-types}
 
@@ -2879,7 +2889,7 @@ For a given channel-based input [=3D audio signal=] (e.g., 7.1.4ch) and a given 
 	- The Height Energy Quantification module generates a surround-to-height mixing parameter ([=w(k)|\(w(k)\)=]) which is decided according to the relative energy difference between the top and surround channels of the input [=3D audio signal=].
 		- If the energy of top channels is bigger than that of surround ones, then [=w_idx_offset=](k) is set to 1. Otherwise, it is set to -1. And, [=w(k)|\(w(k)\)=] is calculated based on [=w_idx_offset=](k) and conforms to [[#processing-scalablechannelaudio]].
 - Down-mixer generates [=down-mixed audio=] from the input [=3D audio signal=] according to the list of channel layouts and the down-mix parameters, and outputs [=down-mixed audio=] for each channel layout to the Loudness module.
-	- It is not depicted in the figure but Down-mixer further generates [=dmixp_mode=] and [=recon_gain=] for each frame to be passed to the OBU packetizer.
+	- It is not depicted in the figure but down-mixer further generates [=dmixp_mode=] and [=recon_gain=] for each frame to be passed to the OBU packetizer.
 - Loudness module measures the loudness level ([=LKFS=]) of each [=down-mixed audio=] based on [[ITU1770-4]], and passes them to OBU packetizer.
 
 ### Annex B-2: Down-mix Mechanism ### {#iamfgeneration-scalablechannelaudio-downmixmechanism}
@@ -2904,7 +2914,7 @@ Therefore, a down-mixer based on the down-mix mechanism is a combination of the 
 	- <dfn noexport>S2to1 enc.</dfn>:
 		\[\text{Mono} = 0.5 \times (\text{L2} + \text{R2})\]
 
-- Top Down-mixers
+- Top down-mixers
 	- <dfn noexport>T4to2 enc.</dfn>:
 		\[\text{Ltf2} = \text{Ltf4} + \gamma(k) \times \text{Ltb4}\]
 		\[\text{Rtf2} = \text{Rtf4} + \gamma(k) \times \text{Rtb4}\]
