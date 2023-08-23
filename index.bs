@@ -1724,7 +1724,8 @@ IA decoders SHALL be able to parse all OBUs explicitly listed for this version o
 
 NOTE: In this section and subsections, the meaning of a unique OBU is that it is still unique if it only varies by the [=obu_redundant_copy=] flag.
 
-Common restrictions on the [=IA Sequence=] for all profiles specified in this version of the specification:
+Common restrictions on the [=IA Sequence=] for all profiles specified in this version of the specification: \(\left( 1 + n \right)^2\), for \(n = 0, 1, 2, \ldots, 14\)
+- The maximum size of an OBU (an obu_header followed by the OBU payload) SHALL be limited to \(2\text{MB}\) (i.e., \(2^21 \text{bytes}\)). It implies that the maximum value of the [=obu_size=] field SHALL be limited to \(2^21 - 4\). 
 - There SHALL be only one unique set of [=Descriptors=] in an [=IA Sequence=]. If the [=Descriptors=] are repeated in the middle of the [=IA Sequence=], all the OBUs in that set of [=Descriptors=] SHALL be marked as redundant (i.e., [=obu_redundant_copy=] = 1).
 	- When a set of [=Descriptors=] is placed in the middle of the [=IA Sequence=], it SHALL NOT be placed in the middle of a [=Temporal Unit=]. In other words, if [=Descriptors=] are placed mid-sequence, they SHALL be present only after the last OBU of a [=Temporal Unit=] and before the first OBU of the next [=Temporal Unit=].
 - There SHALL be only one unique [=Codec Config OBU=].
