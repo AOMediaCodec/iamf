@@ -701,9 +701,9 @@ audio_element_type: The type of audio representation.
 
 <dfn noexport for="audio_element_obu">audio_substream_id</dfn> indicates the identifier for an [=Audio Substream=] which this [=Audio Element=] refers to.
 
-Let a particular [=Channel Group=]'s [=Audio Substream=]s be indexed as [<dfn noexport>c</dfn>, <dfn noexport>n_c</dfn>], where the [=Channel Group=] format is described in [[#iamfgeneration-scalablechannelaudio-channelgroupformat]] and
-- [=c=] = [1, ..., C] is the [=Channel Group=] index and C is the number of [=Channel Group=]s.
-- [=n_c=] = [1, ..., N_c] is the [=Audio Substream=] index in the c-th [=Channel Group=] and N_c is the number of [=Audio Substream=]s in the c-th [=Channel Group=].
+Let a particular [=Channel Group=]'s [=Audio Substream=]s be indexed as \(\left[c, n_c\right]\), where a [=Channel Group=] format is described in [[#iamfgeneration-scalablechannelaudio-channelgroupformat]] and
+- \(c = \left[1, \ldots, C\right]\) is the [=Channel Group=] index and \(C\) is the number of [=Channel Group=]s.
+- \(n_c = \left[1, \ldots, N_c\right]\) is the [=Audio Substream=] index in the \(c\)-th [=Channel Group=] and \(N_c\) is the number of [=Audio Substream=]s in the \(c\)-th [=Channel Group=].
 
 Then, the i-th [=audio_element_obu/audio_substream_id=] maps to a [=Channel Group=]'s [=Audio Substream=]s as follows, where i is the index of the array:
 
@@ -2235,7 +2235,9 @@ This section defines the renderer to use, given a channel-based [=Audio Element=
     - If the playback layout complies with the loudspeaker layouts supported by [[!ITU2051-3]], the EAR Direct Speakers renderer ([[!ITU2127-0]]) can be used, for example.
     - Else, an implementation-specific renderer can be used, for example.
 - Else if the playback layout is 7.1.2ch,
-    - The EAR Direct Speakers renderer ([[!ITU2127-0]]) can be used, for example, to first render the input audio to 7.1.4ch, followed by down-mixing from 7.1.4ch to 7.1.2ch. The height channels of 7.1.4ch are down-mixed to the height channels of 7.1.2ch as follows: Ltf2 = Ltf4 + 0.707 * Ltb and Rtf2 = Rtf4 + 0.707 * Rtb.
+    - The EAR Direct Speakers renderer ([[!ITU2127-0]]) can be used, for example, to first render the input audio to 7.1.4ch, followed by down-mixing from 7.1.4ch to 7.1.2ch. The height channels of 7.1.4ch are down-mixed to the height channels of 7.1.2ch as follows:
+		\[ \text{Ltf2} = \text{Ltf4} + 0.707 \times \text{Ltb} \]
+		\[ \text{Rtf2} = \text{Rtf4} + 0.707 \times \text{Rtb} \]
 - Else if the playback layout is 3.1.2ch,
     - If the input layout has height channels, the static down-mix matrices specified in [[#processing-downmixmatrix-static]] are used.
     - Else if the surround channels (x) of the input layout > 3, the static down-mix matrices specified in [[#processing-downmixmatrix-static]] after inserting empty height channels into the input audio are used.
@@ -2268,7 +2270,7 @@ If the EAR HOA renderer is used, the following metadata is provided to the rende
 2. Ambisonics degree
 3. Ambisonics normalization method
 
-The [[!AmbiX]] format uses SN3D normalization and ACN channel ordering. Accordingly, the Ambisonics order and degree can be computed from the channel index <code>k</code> as follows:
+The [[!AmbiX]] format uses SN3D normalization and ACN channel ordering. Accordingly, the Ambisonics order and degree can be computed from the channel index \(k\) as follows:
 
 ```
 order   n = floor(sqrt(k)),
@@ -2865,7 +2867,7 @@ The figure below shows a block diagram for the down-mix parameter and loudness m
 <center><figcaption>IA Down-mix Parameter and Loudness</figcaption></center>
 
 For a given channel-based input [=3D audio signal=] (e.g., 7.1.4ch) and a given list of channel layouts based on the input [=3D audio signal=],
-- Down-mix parameter generator generates 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k), where k is the frame index) by analyzing the input [=3D audio signal=] and referring to [[AI-CAD-Mixing]].
+- Down-mix parameter generator generates 5 down-mix parameters (\(\alpha(k)\), \(\beta(k)\), \(\gamma(k)\), \(\delta(k)\) and [=w(k)|\(w(k)\)=], where \(k\) is the frame index) by analyzing the input [=3D audio signal=] and referring to [[AI-CAD-Mixing]].
 	- It is composed of an Audio Scene Classification module and a Height Energy Quantification module as depicted in Figure 11-2.
 	- Audio Scene Classification module generates 4 parameters (α(k), β(k), γ(k), δ(k)) by classifying audio scenes of the input [=3D audio signal=] in three modes.
 		- Default scene: Neither Dialog nor Effect
@@ -2930,9 +2932,9 @@ Let's define the followings:
 - Level Mk is the signal power for the frame #k of the relevant mixed channel of the [=down-mixed audio=] for CL #i-1.
 - Level Dk is the signal power for the frame #k of the de-mixed channel for CL #i (after demixing in the decoder side).
 
-If 10*log10(level Ok / maxL^2) is less than the first threshold value (-80dB is preferred), Recon_Gain (k, i)  = 0. Where, maxL = 32767 for 16bits.
+If \(10 \times \log_{10}(\frac{O_k}{L_{\text{max}}^2})\) is less than the first threshold value (-80dB is preferred), Recon_Gain(k, i) = 0. Where, \(L_{\text{max}} = 32767\) for 16 bits.
 
-If 10*log10(level Ok / level Mk ) is less than the second threshold value (-6dB is preferred), Recon_Gain (k, i) is set to the value which makes level Ok = Recon_Gain (k, i)^2 * level Dk. Otherwise, Recon_Gain (k, i) = 1. Actual value (i.e., [=recon_gain=]) to be delivered is floor(255*Recon_Gain).
+If \(10 \times \log_{10}(\frac{O_k}{M_k})\) is less than the second threshold value (-6dB is preferred), Recon_Gain(k, i) is set to the value which makes \(O_k = (\text{Recon_Gain}(k, 1))^2 \times D_k\). Otherwise, Recon_Gain(k, i) = 1. The actual value (i.e., [=recon_gain=]) to be delivered is \( \left\lfloor{255 \times \text{Recon_Gain}}\right\rfloor \).
 
 For example, if we assume CL #i = 7.1.4ch and CL #i-1 = 5.1.2ch, then de-mixed channels are D_Lrs7, D_Rrs7, D_Ltb4 and D_Rtb4.
 - D_Lrs7 and D_Rrs7 are de-mixed from Ls5 and Rs5 in the (i-1)th [=Channel Group=] by using Lss7 and Rss7 in the ith [=Channel Group=] and its relevant demixing parameters (i.e., α(k) and β(k)) , respectively.
@@ -3062,12 +3064,12 @@ The [=Channel Group=] format SHALL conform to the following rules:
 - It consists of C number of channels and is structured to n number of [=Channel Group=]s, where C is the number of channels for the input [=3D audio signal=].
 - [=Channel Group=] #1 (as called BCG): This [=Channel Group=] is the [=down-mixed audio=] itself for CL #1 generated from the input [=3D audio signal=]. It contains a C1 number of channels.
 - [=Channel Group=] #i (as called DCG, i = 2, 3, …, n): This [=Channel Group=] contains (Ci – Ci-1) number of channels. (Ci – Ci-1) channel(s) consists of as follows:
-	- (Si – Si-1) surround channel(s) if Si > Si-1 . When S_set = { x | Si-1 < x ≤ Si and x is an integer},
-		- If 2 is an element of S_set, the L2 channel is contained in this CG #i.
-		- If 3 is an element of S_set, the Center channel is contained in this CG #i.
-		- If 5 is an element of S_set, the L5 and R5 channels are contained in this CG #i.
-		- If 7 is an element of S_set, the Lss7 and Rss7 channels are contained in this CG #i.
+	- (Si – Si-1) surround channel(s) if Si > Si-1 . When \(S_{\text{set}} = \{x  \mid \text{Si}-1 < x \le \text{Si}\} \) and \(x\) is an integer,
+		- If 2 is an element of \(S_{\text{set}}\), the L2 channel is contained in this CG #i.
+		- If 3 is an element of \(S_{\text{set}}\), the Center channel is contained in this CG #i.
+		- If 5 is an element of \(S_{\text{set}}\), the L5 and R5 channels are contained in this CG #i.
+		- If 7 is an element of \(S_{\text{set}}\), the Lss7 and Rss7 channels are contained in this CG #i.
 	- The LFE channel if Wi > Wi-1.
-	- (Ti – Ti-1) top channels if Ti > Ti-1 .
+	- (Ti - Ti-1) top channels if Ti > Ti-1.
 		- If Ti-1 = 0, the top channels of the [=down-mixed audio=] for CL #i are contained in this [=Channel Group=] #i.
 		- If Ti-1 = 2, the Ltf and Rtf channels of the [=down-mixed audio=] for CL #i are contained in this [=Channel Group=] #i.
