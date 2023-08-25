@@ -386,7 +386,7 @@ Within a [=Mix Presentation=], the presentation start time of all [=Audio Elemen
 
 Within an [=IA Sequence=], all [=Mix Presentation=]s have the same duration, defining the duration of the [=IA Sequence=], and have the same presentation start time defining the presentation start time of the [=IA Sequence=].
 
-The term <dfn noexport>Temporal Unit</dfn> means a set of all [=Audio Frame OBU=]s with the same decode start time and the same duration from all coded [=Audio Substream=]s and all non-redundant [=Parameter Block OBU=]s with the decode start time within the duration.
+The term <dfn noexport>Temporal Unit</dfn> conceptually means a set of all [=Audio Frame OBU=]s with the same decode start time and the same duration from all coded [=Audio Substream=]s and all non-redundant [=Parameter Block OBU=]s with the decode start time within the duration.
 
 The figure below shows an example of the Timing Model in terms of the decode start times and durations of the coded [=Audio Substream=] and [=Parameter Substream=].
 
@@ -1415,7 +1415,10 @@ The metadata specified in this OBU defines the parameter values for an algorithm
 class ParameterBlockOBU() {
   leb128() parameter_id;
   
-  (param_definition_type, param_definition_mode, duration, num_subblocks, constant_subblock_duration, subblock_duration) = get_param_definition(parameter_id);
+  (param_definition_type, param_definition_mode, 
+   duration, num_subblocks, constant_subblock_duration, 
+   subblock_duration) 
+      = get_param_definition(parameter_id);
   
   if (param_definition_mode) {
     leb128() duration;
