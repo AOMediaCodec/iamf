@@ -391,7 +391,7 @@ The term <dfn noexport>Temporal Unit</dfn> means a set of all [=Audio Frame OBU=
 The figure below shows an example of the Timing Model in terms of the decode start times and durations of the coded [=Audio Substream=] and [=Parameter Substream=].
 
 <center><img src="images/IAMF Timing Model.png" style="width:100%; height:auto;"></center>
-<center><figcaption>An example of the IAMF Timing Model. AFO: Audio Frame OBU, PBO: Parameter Block OBU, PT<code>x</code>: time <code>x</code> (ms) on the presentation layer's timeline, DT<code>y</code>: time <code>y</code> (ms) on the decoding layer's timeline.</figcaption></center>
+<center><figcaption>An example of the IAMF Timing Model. AFO: Audio Frame OBU, PBO: Parameter Block OBU, \(\text{PT}x\): time \(x\) (ms) on the presentation layer's timeline, \(\text{DT}y\): time \(y\) (ms) on the decoding layer's timeline.</figcaption></center>
 
 NOTE: For a given decoded [=Audio Substream=] (before trimming) and its associated [=Parameter Substream=](s), a decoder MAY apply trimming in 1 of 2 ways:
 <br/>
@@ -461,7 +461,7 @@ class OBUHeader() {
   }
   if (obu_extension_flag == 1) {
     leb128() extension_header_size;
-    unsigned int (8*extension_header_size) extension_header_bytes;
+    unsigned int (8 x extension_header_size) extension_header_bytes;
   }
 }
 ```
@@ -611,7 +611,8 @@ NOTE: <code>ipcm</code> should not be confused with <code>lpcm</code>, which is 
 <dfn noexport>num_samples_per_frame</dfn> indicates the frame length, in samples, of the [=audio_frame()=] provided in the audio_frame_obu. It SHALL NOT be set to zero. If the [=decoder_config=] structure for a given codec specifies a value for the frame length, the two values SHALL be equal.
 
 <dfn noexport>audio_roll_distance</dfn> indicates how many audio frames prior to the current audio frame need to be decoded (and the decoded samples discarded) to set the decoder in a state that will produce the perfect decoded audio signal. It SHALL always be a negative value or zero. For some audio codecs, even if an audio frame can be decoded independently, the decoded signal after decoding only that frame may not represent a perfect, decoded audio signal, even ignoring compression artifacts. This can be due to overlap transforms. While potentially acceptable when starting to decode an [=Audio Substream=], it may be problematic when automatically switching between similar [=Audio Substream=]s of different quality and/or bitrate. 
-- It SHALL be set to -R when [=codec_id=] is set to <code>Opus</code>, where R is <code>ceil(3840 / [=num_samples_per_frame=])</code>.
+- It SHALL be set to \(-R\) when [=codec_id=] is set to <code>Opus</code>, where
+	\[R = \left\lceil{\frac{3840}{\text{num_samples_per_frame}}}\right\rceil.\]
 - It SHALL be set to -1 when [=codec_id=] is set to <code>mp4a</code>.
 - It SHALL be set to 0 when [=codec_id=] is set to  <code>fLaC</code> or <code>ipcm</code>.
 
@@ -648,7 +649,7 @@ class AudioElementOBU() {
     }
     else if (param_definition_type > 2) {
         leb128() param_definition_size;
-        unsigned int (8*param_definition_size) param_definition_bytes;
+        unsigned int (8 x param_definition_size) param_definition_bytes;
     }
   }
 
@@ -658,7 +659,7 @@ class AudioElementOBU() {
     AmbisonicsConfig ambisonics_config;
   } else {
     leb128() audio_element_config_size;
-    unsigned int (8*audio_element_config_size) audio_element_config_bytes;
+    unsigned int (8 x audio_element_config_size) audio_element_config_bytes;
   }
 }
 ```
@@ -707,16 +708,25 @@ Let a particular [=Channel Group=]'s [=Audio Substream=]s be indexed as \(\left[
 
 Then, the i-th [=audio_element_obu/audio_substream_id=] maps to a [=Channel Group=]'s [=Audio Substream=]s as follows, where i is the index of the array:
 
-```
-[
-  [1, 1], [1, 2], ..., [1, N_1],
-  [2, 1], [2, 2], ..., [2, N_2], 
-  ..., 
-  [C, 1], [C, 2], ..., [C, N_c]
-]
-```
+\[
+\left[
+\left[ 1, 1 \right],
+\left[ 1, 2 \right],
+\cdots,
+\left[ 1, N_1 \right],
+\left[ 2, 1 \right],
+\left[ 2, 2 \right],
+\cdots,
+\left[ 2, N_2 \right],
+\cdots,
+\left[ C, 1 \right],
+\left[ C, 2 \right],
+\cdots,
+\left[ C, N_c \right]
+\right]
+\]
 
-The order of the [=Audio Substream=]s in each [=Channel Group=] (i.e., the semantics of n_c) is specified in [[#syntax-scalable-channel-layout-config]].
+The order of the [=Audio Substream=]s in each [=Channel Group=] (i.e., the semantics of \(n_c\)) is specified in [[#syntax-scalable-channel-layout-config]].
 
 
 <dfn noexport>num_parameters</dfn> specifies the number of [=Parameter Substream=]s that are used by the algorithms specified in this [=Audio Element=].
@@ -788,11 +798,11 @@ In this parameter definition,
 
 <dfn noexport>default_demixing_info_parameter_data</dfn> provides the default demixing parameter data to apply to all audio samples when there are no [=Parameter Block OBU=]s (with the same [=ParamDefinition/parameter_id=] defined in this DemixingParamDefinition()) provided.
 - In this class, [=w_idx_offset=] in [=demixing_info_parameter_data=] SHALL be ignored.
-- Instead, [=default_w=] directly indicates the weight value [=w(k)=].
+- Instead, [=default_w=] directly indicates the weight value [=w(k)|\(w(k)\)=].
 
-<dfn noexport>default_w</dfn> indicates the weight value [=w(k)=] for the [=TF2toT2 de-mixer=] specified in [[#processing-scalablechannelaudio-demixer]].
+<dfn noexport>default_w</dfn> indicates the weight value [=w(k)|\(w(k)\)=] for the [=TF2toT2 de-mixer=] specified in [[#processing-scalablechannelaudio-demixer]].
 
-The mapping of [=default_w=] to [=w(k)=] SHOULD be as follows:
+The mapping of [=default_w=] to [=w(k)|\(w(k)\)=] SHOULD be as follows:
 <pre class = "def">
  default_w :   w(k)
     0      :    0
@@ -828,7 +838,7 @@ abstract class ParamDefinition() {
     leb128() constant_subblock_duration;
     if (constant_subblock_duration == 0) {
       leb128() num_subblocks;
-      for (i=0; i< num_subblocks; i++) {
+      for (i = 0; i< num_subblocks; i++) {
         leb128() subblock_duration;
       }
     }
@@ -841,7 +851,9 @@ abstract class ParamDefinition() {
 <dfn noexport for="ParamDefinition">parameter_id</dfn> indicates the identifier for the [=Parameter Substream=] which this parameter definition refers to. There SHALL be one unique [=ParamDefinition/parameter_id=] per [=Parameter Substream=].
 
 <dfn noexport>parameter_rate</dfn> specifies the rate used by this [=Parameter Substream=], expressed as ticks per second. Time-related fields associated with this [=Parameter Substream=], such as durations, SHALL be expressed in the number of ticks.
-- The rate SHALL be a value such that (the rate * [=num_samples_per_frame=]) / (the sample rate of [=Audio Element=]) is a non-zero integer.
+- The parameter rate SHALL be a value such that the number of ticks per frame, computed as
+	\[\frac{\text{parameter_rate} \times \text{num_samples_per_frame}}{\text{Audio Element sample rate}},\]
+	is a non-zero integer.
 
 <dfn noexport>param_definition_mode</dfn> indicates whether this parameter definition specifies the [=ParamDefinition/duration=], [=ParamDefinition/num_subblocks=], [=ParamDefinition/constant_subblock_duration=] and [=ParamDefinition/subblock_duration=] fields for the parameter blocks with the same [=parameter_block_obu/parameter_id=].
 
@@ -853,10 +865,13 @@ abstract class ParamDefinition() {
 
 <dfn noexport for="ParamDefinition">constant_subblock_duration</dfn> specifies the duration of each subblock, in the case where all subblocks except the last subblock have equal durations. If all subblocks except the last subblock do not have equal durations, the value of [=ParamDefinition/constant_subblock_duration=] SHALL be set to 0.
 
-Let <dfn noexport>D</dfn> = the value of [=ParamDefinition/duration=], <dfn noexport>NS</dfn> = the value of [=ParamDefinition/num_subblocks=], <dfn noexport>CSD</dfn> = the value of [=ParamDefinition/constant_subblock_duration=] and <dfn noexport>SD</dfn> = the value of [=ParamDefinition/subblock_duration=].
-- When [=CSD=] != 0, [=ParamDefinition/num_subblocks=] is implicitly calculated as [=NS=] = ceil([=D=] / [=CSD=]).
-	- If [=NS=] * [=CSD=] > [=D=], the actual duration of the last subblock SHALL be [=D=] - ([=NS=] - 1) * [=CSD=].
-- When [=CSD=] = 0, the summation of all [=SD=]s in this parameter block SHALL be equal to [=D=].
+When [=ParamDefinition/constant_subblock_duration=] is not equal to 0,
+- [=ParamDefinition/num_subblocks=] is implicitly calculated as
+	\[ \text{num_subblocks} = \left\lceil{ \frac{\text{duration}}{\text{constant_subblock_duration}}}\right\rceil. \]
+- If \(\textrm{num_subblocks} \times \text{constant_subblock_duration} > \text{duration}\), the actual duration of the last subblock SHALL be
+			\[ \text{duration} - \left( \text{num_subblocks} - 1 \right) \times \text{constant_subblock_duration}. \]
+
+When [=ParamDefinition/constant_subblock_duration=] is equal to 0, the summation of all [=ParamDefinition/subblock_duration=] in this parameter block SHALL be equal to [=ParamDefinition/duration=].
 
 <dfn noexport for="ParamDefinition">num_subblocks</dfn> specifies the number of different sets of parameter values specified in each parameter block with the same [=parameter_block_obu/parameter_id=], where each set describes a different subblock of the timeline, contiguously.
 
@@ -894,11 +909,11 @@ class ChannelAudioLayerConfig(i) {
 }
 ```
 
-When an [=Audio Element=] is composed of G(r) number of [=Audio Substream=]s, its scalable channel audio representation is layered into [=num_layers=] = r number of [=Channel Group=]s.
+When an [=Audio Element=] is composed of \(G(r)\) number of [=Audio Substream=]s, its scalable channel audio representation is layered into \(r\) [=num_layers=] of [=Channel Group=]s.
 
 
 - The order of the [=Channel Group=]s in each [=Temporal Unit=] SHALL be same as the order of the [=channel_audio_layer_config=]s in [=scalable_channel_layout_config=].
-- The q-th [=Channel Group=] consists of G(q) - G(q-1) number of [=Audio Substream=]s, where q = 1, 2, ..., r and G(0) = 0.
+- The \(q\)-th [=Channel Group=] consists of \(G(q) - G(q - 1)\) number of [=Audio Substream=]s, where \(q = 1, 2, \ldots, r\) and \(G(0) = 0\).
 - Let the term "Audio Frames" mean the set of all [=Audio Frame OBU=]s (for this [=Audio Element=]) that have the same start timestamp. All Audio Frames in an [=IA Sequence=] SHALL have the same number of [=Audio Frame OBU=]s.
 - [=Parameter Block OBU=]s MAY be associated with Audio Frames. 
 
@@ -1010,7 +1025,7 @@ Bit position : Channel Name
 
 </pre>
 
-<dfn noexport>output_gain</dfn> indicates the gain value to be applied to the mixed channels which are indicated by [=output_gain_flags=], where each mixed channel is generated by downmixing two or more input channels. It is 20*log10 of the factor by which to scale the mixed channels. It is stored in a 16-bit, signed, two’s complement fixed-point value with 8 fractional bits (i.e., Q7.8 in [[!Q-Format]]).
+<dfn noexport>output_gain</dfn> indicates the gain value to be applied to the mixed channels which are indicated by [=output_gain_flags=], where each mixed channel is generated by downmixing two or more input channels. It is computed as \(20 \times \log_{10}(f)\), where \(f\) is the factor by which to scale the mixed channels. It is stored in a 16-bit, signed, two’s complement fixed-point value with 8 fractional bits (i.e., Q7.8 in [[!Q-Format]]).
 
 
 ### Ambisonics Config Syntax and Semantics ### {#syntax-ambisonics-config}
@@ -1032,14 +1047,14 @@ class AmbisonicsConfig() {
 class AmbisonicsMonoConfig() {
   unsigned int (8) output_channel_count;  // C
   unsigned int (8) substream_count;  // N
-  unsigned int (8 * C) channel_mapping;
+  unsigned int (8 x C) channel_mapping;
 }
 
 class AmbisonicsProjectionConfig() {
   unsigned int (8) output_channel_count;  // C
   unsigned int (8) substream_count;  // N
   unsigned int (8) coupled_substream_count;  // M
-  signed int (16 * (N + M) * C) demixing_matrix;
+  signed int (16 x (N + M) x C) demixing_matrix;
 }
 ```
 
@@ -1058,14 +1073,14 @@ If ambisonics_mode is equal to MONO, this indicates that the Ambisonics channels
 If ambisonics_mode is equal to PROJECTION, this indicates that the Ambisonics channels are first linearly projected onto another subspace before coding as a mix of coupled stereo and mono [=Audio Substream=]s.
 
 <dfn noexport>output_channel_count</dfn> complies with [=channel count=] in [[!RFC8486]] with the following restrictions:
-- The allowed numbers of [=output_channel_count=] are pow(1 + n, 2), where n = 0, 1, 2, ..., 14. 
+- The allowed numbers of [=output_channel_count=] are \(\left( 1 + n \right)^2\), for \(n = 0, 1, 2, \ldots, 14\).
 - In other words, the scene-based [=Audio Element=] SHALL NOT include non-diegetic channels.
 
 [=substream_count=] specifies the number of [=Audio Substream=]s. It SHALL be the same as [=num_substreams=] in this OBU.
 
 <dfn noexport>channel_mapping</dfn> complies with the "Channel Mapping" field for [=ChannelMappingFamily=] = 2 in [[!RFC8486]].
 
-[=coupled_substream_count=] specifies the number of referenced [=Audio Substream=]s that are coded as coupled stereo channels, where M <= N.
+[=coupled_substream_count=] specifies the number of referenced [=Audio Substream=]s that are coded as coupled stereo channels, where \(\text{M} \le \text{N}\).
 
 <dfn noexport>demixing_matrix</dfn> complies with the "Demixing Matrix" field for [=ChannelMappingFamily=] = 3 in [[!RFC8486]] except that the byte order of each of the matrix coefficients is converted to big-endian.
 
@@ -1151,7 +1166,9 @@ The layout specified in [=loudness_layout=] SHOULD NOT be higher than the highes
 - [=loudness_layout=] for zero-order Ambisonics or Mono SHOULD NOT be higher than Stereo. Zero-order Ambisonics or Mono MAY be rendered to Stereo.
 
 Each sub-mix SHALL include [=loudness=] for Stereo (i.e., [=loudness_layout=] = [=Loudspeaker configuration for Sound System A (0+2+0)=]).
-- If a sub-mix's [=Rendered Mix Presentation=] is Mono, its [=loudness=] for [=loudness_layout=] = Stereo SHOULD be measured on the Stereo signal generated using the equations, L = 0.707 * Mono and R = 0.707 * Mono. 
+- If a sub-mix's [=Rendered Mix Presentation=] is Mono, its [=loudness=] for [=loudness_layout=] = Stereo SHOULD be measured on the Stereo signal generated using the equations:
+	\[\text{L} = 0.707 \times \text{Mono}\]
+	\[\text{R} = 0.707 \times \text{Mono}\]
 
 If one sub-mix of [=Mix Presentation OBU=] includes only one single scalable channel audio, then it SHALL comply with the following.
 - [=num_layouts=] SHALL be greater than or equal to [=num_layers=] specified in its [=scalable_channel_layout_config=], except in the following cases:
@@ -1197,7 +1214,7 @@ class RenderingConfig() {
   unsigned int (2) headphones_rendering_mode;
   unsigned int (6) reserved;
   leb128() rendering_config_extension_size;
-  unsigned int (8*rendering_config_extension_size) rendering_config_extension_bytes;
+  unsigned int (8 x rendering_config_extension_size) rendering_config_extension_bytes;
 }
 ```
 
@@ -1342,7 +1359,7 @@ class LoudnessInfo() {
   }
   if (info_type & 0b11111100 > 0) {
       leb128() info_type_size;
-      unsigned int (8*info_type_size) info_type_bytes;
+      unsigned int (8 x info_type_size) info_type_bytes;
     }
   }
 }
@@ -1405,8 +1422,6 @@ class ParameterBlockOBU() {
     leb128() constant_subblock_duration;
     if (constant_subblock_duration == 0) {
       leb128() num_subblocks;
-    } else {
-      // num_subblocks = ceil(duration / constant_subblock_duration)
     }
   }
 
@@ -1428,7 +1443,7 @@ class ParameterBlockOBU() {
     }
     else {
       leb128 parameter_data_size;
-      unsigned int (8*parameter_data_size) parameter_data_bytes;
+      unsigned int (8 x parameter_data_size) parameter_data_bytes;
     }
   }
 }
@@ -1448,7 +1463,11 @@ When it gets an unknown [=param_definition_type=], parsers compliant with this v
 
 <dfn noexport for="parameter_block_obu">constant_subblock_duration</dfn> specifies the duration of each subblock, in the case where all subblocks except the last subblock have equal durations. If all subblocks except the last subblock do not have equal durations, the value of [=parameter_block_obu/constant_subblock_duration=] SHALL be set to 0.
 
-<dfn noexport for="parameter_block_obu">num_subblocks</dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different subblock of the timeline, contiguously. When [=parameter_block_obu/constant_subblock_duration=] != 0, [=parameter_block_obu/num_subblocks=] is implicitly calculated as [=parameter_block_obu/num_subblocks=] = ceil([=parameter_block_obu/duration=] / [=parameter_block_obu/constant_subblock_duration=]).
+<dfn noexport for="parameter_block_obu">num_subblocks</dfn> specifies the number of different sets of parameter values specified in this parameter block, where each set describes a different subblock of the timeline, contiguously. When [=parameter_block_obu/constant_subblock_duration=] not equal to 0, [=parameter_block_obu/num_subblocks=] is implicitly calculated as
+
+\[
+\text{num_subblocks} = \left\lceil{\frac{\text{duration}}{\text{constant_subblock_duration}}}\right\rceil.
+\]
 
 <dfn noexport for="parameter_block_obu">subblock_duration</dfn> specifies the duration for the given subblock. It SHALL NOT be set to 0.
 
@@ -1530,16 +1549,16 @@ class DemixingInfoParameterData() {
 
 <dfn noexport>dmixp_mode</dfn> indicates one of the pre-defined combinations of five demixing parameters.
 
-- 0: mode1, (alpha, beta, gamma, delta, w_idx_offset) = (1, 1, 0.707, 0.707, -1)
-- 1: mode2, (alpha, beta, gamma, delta, w_idx_offset) = (0.707, 0.707, 0.707, 0.707, -1)
-- 2: mode3, (alpha, beta, gamma, delta, w_idx_offset) = (1, 0.866, 0.866, 0.866, -1)
+- 0: mode1, \(\left( \alpha, \beta, \gamma, \delta, \text{w_idx_offset} \right) = \left(1, 1, 0.707, 0.707, -1\right) \)
+- 1: mode2, \(\left( \alpha, \beta, \gamma, \delta, \text{w_idx_offset} \right) = \left(0.707, 0.707, 0.707, 0.707, -1\right) \)
+- 2: mode3, \(\left( \alpha, \beta, \gamma, \delta, \text{w_idx_offset} \right) = \left(1, 0.866, 0.866, 0.866, -1\right) \)
 - 3: reserved
-- 4: mode1, (alpha, beta, gamma, delta, w_idx_offset) = (1, 1, 0.707, 0.707, 1)
-- 5: mode2, (alpha, beta, gamma, delta, w_idx_offset) = (0.707, 0.707, 0.707, 0.707, 1)
-- 6: mode3, (alpha, beta, gamma, delta, w_idx_offset) = (1, 0.866, 0.866, 0.866, 1)
+- 4: mode1, \(\left( \alpha, \beta, \gamma, \delta, \text{w_idx_offset} \right) = \left(1, 1, 0.707, 0.707, 1\right) \)
+- 5: mode2, \(\left( \alpha, \beta, \gamma, \delta, \text{w_idx_offset} \right) = \left(0.707, 0.707, 0.707, 0.707, 1\right) \)
+- 6: mode3, \(\left( \alpha, \beta, \gamma, \delta, \text{w_idx_offset} \right) = \left(1, 0.866, 0.866, 0.866, 1\right) \)
 - 7: reserved
 
-<dfn noexport>alpha</dfn> and <dfn noexport>beta</dfn> are gain values used for the [=S7to5 enc.=], <dfn noexport>gamma</dfn> for the [=T4to2 enc.=], <dfn noexport>delta</dfn> for the [=S5to3 enc.=] and <dfn noexport>w_idx_offset</dfn> is the offset used to generate a gain value <dfn noexport>w</dfn> used for [=T2toTF2 enc.=].
+\(\alpha\) and \(\beta\) are gain values used for the [=S7to5 enc.=], \(\gamma\) for the [=T4to2 enc.=], \(\delta\) for the [=S5to3 enc.=] and <dfn noexport>w_idx_offset</dfn> is the offset used to generate a gain value [=w(k)|\(w(k)\)=] used for [=T2toTF2 enc.=].
 
 <center><img src="images/Down-mix Mechanism.png" style="width:100%; height:auto;"></center>
 <center><figcaption></b>IA Down-mix Mechanism</figcaption></center>
@@ -1594,7 +1613,7 @@ class AudioFrameOBU(audio_substream_id_in_bitstream) {
   if (audio_substream_id_in_bitstream) {
      leb128() explicit_audio_substream_id;
   }
-  unsigned int (8*coded_frame_size) audio_frame();
+  unsigned int (8 x coded_frame_size) audio_frame();
 }
 ```
 
@@ -1707,12 +1726,12 @@ class DecoderConfig(ipcm) {
 ```
 <dfn noexport>sample_format_flags</dfn> complies with [=format_flags=] specified in [[!MP4-PCM]]. In other words, 0x01 indicates little-endian PCM sample format and 0x00 indicates big-endian PCM sample format.
 
-<dfn noexport>sample_size</dfn> complies with [=PCM_sample_size=] specified in [[!MP4-PCM]]. In other words, it SHALL take a value from the set {16, 24, 32}. 
+<dfn noexport>sample_size</dfn> complies with [=PCM_sample_size=] specified in [[!MP4-PCM]]. In other words, it SHALL take a value from the set {16, 24, 32}.
 
 <dfn noexport>sample_rate</dfn> indicates the sample rate of the input [=3D audio signal=] in Hz. It SHALL take a value from the set {44.1k, 16k, 32k, 48k, 96k}.
 
 The format of [=audio_frame()=] is only one single mono or stereo PCM audio frame.
-	- If [=audio_frame()=] contains a stereo PCM audio frame, the ith audio sample of the Left channel is followed by the ith audio sample of the Right channel, and then the (i+1)th audio sample of the Left channel is followed by the (i+1)th audio sample of the Right channel, where i = 1, 2, ..., [=num_samples_per_frame=] - 1.
+	- If [=audio_frame()=] contains a stereo PCM audio frame, the i-th audio sample of the Left channel is followed by the i-th audio sample of the Right channel, and then the (i+1)-th audio sample of the Left channel is followed by the (i+1)-th audio sample of the Right channel, where i = 1, 2, ..., [=num_samples_per_frame=] - 1.
 	- When more than one byte is used to represent a PCM sample, the byte order (i.e., its endianness) is indicated in [=sample_format_flags=].
 
 The sample rate used for computing offsets SHALL be [=sample_rate=].
@@ -1976,7 +1995,7 @@ This section provides a guideline for IAMF parsers reconstructing an [=IA Sequen
 
 1. The [=configOBUs=] from the [=IASampleEntry=] are placed at the beginning of the [=IA Sequence=]. These are the [=Descriptors=]. 
 
-2. Next, place the OBUs from the <code>j = 1, 2, ..., m</code>-th [=IA Sample=]s associated with the [=IASampleEntry=] in the [=IA Sequence=], in order. These form the <code>j = 1, 2, ..., m</code>-th [=Temporal Unit=]s.
+2. Next, place the OBUs from the j = 1, 2, ..., m-th [=IA Sample=]s associated with the [=IASampleEntry=] in the [=IA Sequence=], in order. These form the j = 1, 2, ..., m-th [=Temporal Unit=]s.
 
     - If it is desirable to have [=Temporal Delimiter OBU=]s in the [=IA Sequence=], insert a [=Temporal Delimiter OBU=] in front of every [=Temporal Unit=].
     - Otherwise, do not insert any [=Temporal Delimiter OBU=]s in the [=IA Sequence=].
@@ -2079,11 +2098,11 @@ The Gain module is the mirror process of the Attenuation module (described in [[
 
 To apply the gain, an implementation SHALL use the following:
 
-```
-	sample = sample * pow(10, output_gain(i) / (20.0*256))
-```
+\[
+\text{sample} =	\text{sample} \times 10^{\frac{\text{output_gain}(i)}{20.0 \times 256}}, \quad i = 1, 2, \ldots, n
+\]
 
-where n = [=num_layers=] and i = 1, 2, ..., n. [=output_gain=](i) is the raw 16-bit value for the ith layer which is specified in [=channel_audio_layer_config=].
+where \(n\) is [=num_layers=]. [=output_gain=](i) is the raw 16-bit value for the i-th layer which is specified in [=channel_audio_layer_config=].
 
 ### De-mixer ### {#processing-scalablechannelaudio-demixer}
 
@@ -2093,19 +2112,33 @@ The De-mixer module reconstructs the rest of the [=down-mixed audio=] for CL #i 
 
 De-mixing for [=down-mixed audio=] for CL #i SHALL comply with the result by the combination of the following surround and top de-mixers:
 - Surround de-mixers
-	- <dfn noexport>S1to2 de-mixer</dfn>: R2 = 2 * Mono – L2
-	- <dfn noexport>S2to3 de-mixer</dfn>: L3 = L2 – 0.707 * C and R3 = R2 – 0.707 * C
-	- <dfn noexport>S3to5 de-mixer</dfn>: Ls = 1/δ(k) * (L3 – L5) and Rs = 1/δ(k) * (R3 – R5)
-	- <dfn noexport>S5to7 de-mixer</dfn>: Lrs = 1/β(k) * (Ls – α(k) * Lss) and Rrs = 1/β(k) * (Rs – α(k) * Rss)
+	- <dfn noexport>S1to2 de-mixer</dfn>:
+		\[\text{R2} = 2 \times \text{Mono} - \text{L2}\]
+	- <dfn noexport>S2to3 de-mixer</dfn>:
+		\[\text{L3} = \text{L2} - 0.707 \times \text{C}\]
+		\[\text{R3} = \text{R2} - 0.707 \times \text{C}\]
+	- <dfn noexport>S3to5 de-mixer</dfn>:
+		\[\text{Ls} = \frac{1}{\delta(k)} \times \left( \text{L3} - \text{L5} \right) \]
+		\[\text{Rs} = \frac{1}{\delta(k)} \times \left( \text{R3} - \text{R5} \right) \]
+	- <dfn noexport>S5to7 de-mixer</dfn>:
+		\[ \text{Lrs} = \frac{1}{\beta(k)} \times \left( \text{Ls} - \alpha(k) \times \text{Lss} \right) \]
+		\[ \text{Rrs} = \frac{1}{\beta(k)} \times \left( \text{Rs} - \alpha(k) \times \text{Rss} \right) \]
 - Top de-mixers
-	- <dfn noexport>TF2toT2 de-mixer</dfn>: Ltf2 = Ltf3 – w(k) * (L3 – L5) and Rtf2 = Rtf3 – w(k) * (R3 – R5)
-	- <dfn noexport>T2to4 de-mixer</dfn>: Ltb = 1/γ(k) * (Ltf2 – Ltf4) and Rtb = 1/γ(k) * (Rtf2 – Rtf4)
-- Where, Ltf2 and Rtf2 are the top channels of x.1.2ch, Ltf3 and Rtf3 are the top channels of 3.1.2ch, and Ltf4 and Rtf4 are the top channels of x.1.4ch (x = 5 or 7) and [=w(k)=] is determined from the value of wIdx(k).
+	- <dfn noexport>TF2toT2 de-mixer</dfn>:
+		\[ \text{Ltf2} = \text{Ltf3} - w(k) \times \left( \text{L3} - \text{L5} \right) \]
+		\[ \text{Rtf2} = \text{Rtf3} - w(k) \times \left( \text{R3} -  \text{R5} \right) \]
+	- <dfn noexport>T2to4 de-mixer</dfn>:
+		\[ \text{Ltb} = \frac{1}{\gamma(k)} \times \left( \text{Ltf2} - \text{Ltf4} \right) \]
+		\[ \text{Rtb} = \frac{1}{\gamma(k)} \times \left( \text{Rtf2} - \text{Rtf4} \right) \]
+		
+- Where, Ltf2 and Rtf2 are the top channels of x.1.2ch, Ltf3 and Rtf3 are the top channels of 3.1.2ch, and Ltf4 and Rtf4 are the top channels of x.1.4ch (x = 5 or 7) and [=w(k)|\(w(k)\)=] is determined from the value of [=wIdx(k)|\(\text{wIdx}(k)\)=].
 
-Initially, wIdx(0) = 0 and the value of wIdx(k) SHALL be derived as follows:
-- <dfn noexport>wIdx(k)</dfn> = Clip3(0, 10, wIdx(k-1) + w_idx_offset(k))
+Initially, \(\text{wIdx}(0) = 0\) and the value of <dfn noexport>wIdx(k)</dfn> SHALL be derived as follows:
+\[
+\text{wIdx}(k) = \text{Clip3}\left( 0, 10, \text{wIdx}(k - 1) + \text{w_idx_offset}(k) \right)
+\]
 
-The mapping of wIdx(k) to <dfn noexport>w(k)</dfn> SHOULD be as follows:
+The mapping of [=wIdx(k)|\(\text{wIdx}(k)\)=] <dfn noexport>w(k)</dfn> SHOULD be as follows:
 <pre class = "def">
  wIdx(k) :   w(k)
     0    :    0
@@ -2121,28 +2154,28 @@ The mapping of wIdx(k) to <dfn noexport>w(k)</dfn> SHOULD be as follows:
     10    : 0.5
 </pre>
 
-When D_set = { x | S1 < x ≤ Si} where x is an integer,
-- If 2 is an element of D_set, the combination SHALL include [=S1to2 de-mixer=].
-- If 3 is an element of D_set, the combination SHALL include [=S2to3 de-mixer=].
-- If 5 is an element of D_set, the combination SHALL include [=S3to5 de-mixer=].
-- If 7 is an element of D_set, the combination SHALL include [=S5to7 de-mixer=].
+When \(D_{\text{set}} = \{x \mid \text{S1} < x \le \text{Si}\} \) where \(x\) is an integer,
+
+- If 2 is an element of \(D_{\text{set}}\), the combination SHALL include [=S1to2 de-mixer=].
+- If 3 is an element of \(D_{\text{set}}\), the combination SHALL include [=S2to3 de-mixer=].
+- If 5 is an element of \(D_{\text{set}}\), the combination SHALL include [=S3to5 de-mixer=].
+- If 7 is an element of \(D_{\text{set}}\), the combination SHALL include [=S5to7 de-mixer=].
 
 When Ti = 2,
-- If Sj = 3 (j=1,2,…, i-1), the combination SHALL include [=TF2toT2 de-mixer=].
+- If Sj = 3 (j = 1, 2, …, i - 1), the combination SHALL include [=TF2toT2 de-mixer=].
 
 When Ti = 4,
-- If Sj = 3 (j=1,2,…, i-1), the combination SHALL include [=TF2toT2 de-mixer=] and [=T2to4 de-mixer=].
-- Else if Tj = 2 (j=1,2,…, i-1), the combination SHALL include [=T2to4 de-mixer=].
+- If Sj = 3 (j = 1, 2, …, i - 1), the combination SHALL include [=TF2toT2 de-mixer=] and [=T2to4 de-mixer=].
+- Else if Tj = 2 (j = 1, 2, …, i - 1), the combination SHALL include [=T2to4 de-mixer=].
 
 For example, consider the case where CL #1 = 2ch, CL #2 = 3.1.2ch, CL #3 = 5.1.2ch and CL #4 = 7.1.4ch. To reconstruct the rest (i.e., Ls5/Rs5/Ltf/Rtf) of the [=down-mixed audio=] 5.1.2ch,
 - The combination includes [=S2to3 de-mixer=], [=S3to5 de-mixer=] and [=TF2toT2 de-mixer=].
 - Ls5 and Rs5 are recovered by [=S2to3 de-mixer=] and [=S3to5 de-mixer=].
+	\[ \text{Ls5} = \frac{1}{\delta(k)} \times \left( \text{L2} - 0.707 \times \text{C} - \text{L5} \right) \]
+	\[ \text{Rs5} = \frac{1}{\delta(k)} \times \left( \text{R2} - 0.707 \times \text{C} - \text{R5} \right) \]
 - Ltf and Rtf are recovered by [=S2to3 de-mixer=] and [=TF2toT2 de-mixer=].
-
-```
-	Ls5 = 1/δ(k) * (L2 - 0.707 * C - L5) and Rs5 = 1/δ(k) * (R2 - 0.707 * C - R5).
-	Ltf = Ltf3 - w(k) * (L2 - 0.707 * C - L5) and Rtf = Rtf3 - w(k) * (R2 - 0.707 * C - R5).
-```
+	\[ \text{Ltf} = \text{Ltf3} - w(k) \times \left( \text{L2} - 0.707 \times \text{C} - \text{L5} \right) \]
+	\[ \text{Rtf} = \text{Rtf3} - w(k) \times \left( \text{R2} - 0.707 \times \text{C} - \text{R5} \right) \]
 
 ### Recon Gain ### {#processing-scalablechannelaudio-recongain}
 
@@ -2150,13 +2183,13 @@ Recon gain is REQUIRED only for [=num_layers=] > 1 and when [=codec_id=] is set 
 
 [=recon_gain=] SHALL only be applied to all audio samples of the de-mixed channels from the De-mixer module.
 - [=recon_gain_info_parameter_data=] indicates each channel of CL #i to which [=recon_gain=] needs to be applied and provides the [=recon_gain=] value for each frame of the channel.
-	- Sample (k,i) = Sample (k, i) * Smoothed_Recon_Gain (k,i), where k is the frame index and i is the sample index of the frame.
-	- Smoothed_Recon_Gain (k) = MA_gain (k-1) * e_window + MA_gain (k) * s_window
-	- MA_gain (k) = 2 / (N+1) * [=recon_gain=] (k) / 255 + (1 – 2/(N+1)) * MA_gain (k-1), where MA_gain (0) = 1.
-	- e_window[0: olen] = hanning[olen:], e_window[olen:flen] = 0.
-	- s_window[0: olen] = hanning[:olen], s_window[olen:flen] = 1.
-	- Where hanning = np.hanning (2*olen), flen is the frame size and olen is the overlap size.
-	- The value N = 7 is RECOMMENDED.
+	- \(\text{sample}(k, i) = \text{sample}(k, i) \times \text{smoothed_recon_gain}(k, i)\), where \(k\) is the frame index and \(i\) is the sample index of the frame.
+	- \(\text{smoothed_recon_gain}(k) = \text{MA_gain}(k - 1) \times \text{e_window} + \text{MA_gain} \times \text{s_window}\).
+	- \(\text{MA_gain}(k) = \frac{2}{N + 1} \times \frac{\text{recon_gain}(k)}{255} + \left( 1 - \frac{2}{N + 1} \right) \times \text{MA_gain}(k - 1)\), where \(\text{MA_gain}(0) = 1\).
+	- \(\text{e_window}[0:\text{olen}] = \text{hanning}[\text{olen}:]\), \(\text{e_window}[\text{olen}:\text{flen}] = 0\).
+	- \(\text{s_window}[0:\text{olen}] = \text{hanning}[:\text{olen}]\), \(\text{s_window}[\text{olen}:\text{flen}] = 1\).
+	- Where \(\text{hanning} = \text{np.hanning}(2 \times \text{olen})\), \(\text{flen}\) is the frame size and \(\text{olen}\) is the overlap size.
+	- The value \(N = 7\) is RECOMMENDED.
 
 The figure below shows the smoothing scheme of [=recon_gain=].
 
@@ -2164,8 +2197,8 @@ The figure below shows the smoothing scheme of [=recon_gain=].
 <center><figcaption>Smoothing Scheme of Recon Gain</figcaption></center>
 
 The RECOMMENDED values for specific codecs are as follows:
-- When [=codec_id=] is set to <code>Opus</code>: olen = 60.
-- When [=codec_id=] is set to <code>mp4a</code>: olen = 64.
+- When [=codec_id=] is set to <code>Opus</code>: \(\text{olen} = 60\).
+- When [=codec_id=] is set to <code>mp4a</code>: \(\text{olen} = 64\).
 
 ## Mix Presentation ## {#processing-mixpresentation}
 
@@ -2272,10 +2305,12 @@ If the EAR HOA renderer is used, the following metadata is provided to the rende
 
 The [[!AmbiX]] format uses SN3D normalization and ACN channel ordering. Accordingly, the Ambisonics order and degree can be computed from the channel index \(k\) as follows:
 
-```
-order   n = floor(sqrt(k)),
-degree  m = k - n * (n + 1).
-```
+\[
+\begin{aligned}[c]
+\text{order} \qquad & n = \left\lfloor{\sqrt{k}}\right\rfloor\\
+\text{degree} \qquad & m = k - n \times (n + 1)
+\end{aligned}
+\]
 
 #### Rendering a Channel-Based Audio Element to Headphones (Informative) #### {#processing-mixpresentation-rendering-m2b}
 
@@ -2304,87 +2339,72 @@ Finally, the output mix gain SHALL be applied using the value specified in [=out
 
 ## Animated Parameters ## {#processing-animated-params}
 
-This section describes how a set of parameter values is animated over a subblock in a parameter_block_obu and applied to the corresponding audio samples, using the information provided in AnimatedParameterData().
+This section describes how a set of parameter values is animated over a subblock in a [=Parameter Block OBU=] and applied to the corresponding audio samples, using the information provided in AnimatedParameterData().
 
 If [=animation_type=] is equal to STEP, the parameter value provided by [=start_point_value=] SHOULD be applied to all time steps in the subblock.
 
-If [=animation_type=] is equal to LINEAR or BEZIER, the information provided in AnimatedParameterData() describes how the set of parameter values is animated as a Bezier curve. Let <code>T</code> be the [=parameter_block_obu/subblock_duration=] defined in the parameter_block_obu and <code>P0</code>, <code>P1</code> and <code>P2</code> be 2D coordinates defined as
+If [=animation_type=] is equal to LINEAR or BEZIER, the information provided in AnimatedParameterData() combined with the timing information provided in [=ParamDefinition()=] and the [=Parameter Block OBU=] describe how the set of parameter values is animated as a Bezier curve. Let \(P_0\), \(P_1\), and \(P_2\) be 2D coordinates defined as
 
-```
-P0 = (t0, start_point_value),
-P1 = (t1, control_point_value),
-P2 = (t2, end_point_value),
-```
+\[P_0 = (t_0, \text{start_point_value)},\]
+\[P_1 = (t_1, \text{control_point_value)},\]
+\[P_2 = (t_2, \text{end_point_value)},\]
 
-where <code>t0 = 0</code> is the subblock start time, <code>t2 = D</code> is the subblock end time and <code>t1</code> is the control point time given by
+where \(t_0 = 0\) is the subblock start time, \(t_2\) is the subblock end time and \(t_1\) is the control point time given by
 
-```
-t1 = round(D * control_point_relative_time).
-```
+\[t_1 = \text{round}(t_2 \times \text{control_point_relative_time}).\]
 
-The values of <code>t0</code>, <code>t1</code> and <code>t2</code> are expressed as ticks at the [=parameter_rate=] given in the associated parameter definition.
+The values of \(t_0\), \(t_1\) and \(t_2\) are expressed as ticks at the [=parameter_rate=] given in the associated parameter definition.
 
 If [=animation_type=] is equal to LINEAR, the set of parameter values is linearly interpolated between [=start_point_value=] and [=end_point_value=] at a given point in time as:
 
-```
-B_linear(a) = (1 - a) * P0 + a * P2,
-0 <= a <= 1,
-```
+\[
+B_{\text{linear}}(a) = (1 - a) \times P_0 + a \times P_2, \qquad 0 \le a \le 1,
+\]
 
-where <code>B_linear(a) = (t, y)</code> is a 2D coordinate with the parameter value <code>y</code> at time <code>t</code>.
+where \(B_{\text{linear}}(a) = (t, y)\) is a 2D coordinate with the parameter value \(y\) at time \(t\).
 
 If [=animation_type=] is equal to BEZIER, the set of parameter values is interpolated following a quadratic Bezier curve between [=start_point_value=] and [=end_point_value=] at a given point in time as:
 
-```
-B_quad(a) = (1 - a)^2 * P0 + 2 * (1 - a) * a * P1 + a^2 * P2,
-0 <= a <= 1.
-```
+\[
+B_{\text{quad}}(a) = (1 - a)^2 \times P_0 + 2 \times (1 - a) \times a \times P_1 + a^2 \times P_2, \qquad 0 \le a \le 1,
+\]
 
-where <code>B_quad(a) = (t, y)</code> is a 2D coordinate with parameter value <code>y</code> at time <code>t</code>.
+where \(B_{\text{quad}}(a) = (t, y)\) is a 2D coordinate with the parameter value \(y\) at time \(t\).
 
 To apply the parameter values to the audio samples in the subblock without interpolation, the [=parameter_rate=] SHOULD be first resampled to the audio sample rate to give:
 
-```
-n0 = floor(t0 * (audio_sample_rate / parameter_rate)),
-n1 = floor(t1 * (audio_sample_rate / parameter_rate)),
-n2 = floor(t2 * (audio_sample_rate / parameter_rate)).
-```
+\[n_0 = \left\lfloor\frac{t_0 \times \text{audio_sample_rate}}{\text{parameter_rate}}\right\rfloor,\]
+\[n_1 = \left\lfloor\frac{t_1 \times \text{audio_sample_rate}}{\text{parameter_rate}}\right\rfloor,\]
+\[n_2 = \left\lfloor\frac{t_2 \times \text{audio_sample_rate}}{\text{parameter_rate}}\right\rfloor,\]
 
-Then, <code>P0</code>, <code>P1</code>, <code>P2</code> can be rewritten as:
+Then, \(P_0\), \(P_1\), \(P_2\) can be rewritten as:
 
-```
-P0 = (n0, start_point_value),
-P1 = (n1, control_point_value),
-P2 = (n2, end_point_value).
-```
+\[P_0 = (n_0, \text{start_point_value)},\]
+\[P_1 = (n_1, \text{control_point_value)},\]
+\[P_2 = (n_2, \text{end_point_value)},\]
 
-Next, the parameter value <code>y</code> is computed for each time <code>t</code> that corresponds to an integer audio sample index, <code>t = n = [0, 1, 2, ..., n2]</code>. This is done by computing the equivalent value of <code>a</code> for every <code>n</code>, and then applying the Bezier equations <code>B_linear(a)</code> and <code>B_quad(a)</code> to find the parameter value <code>y</code>.
 
-In the case of <code>B_linear(a)</code>, the mapping between <code>n</code> and <code>a</code> is given by:
+Next, the parameter value \(y\) is computed for each time \(t\) that corresponds to an integer audio sample index, \(t = n = [0, 1, 2, \ldots, n_2]\). This is done by computing the equivalent value of \(a\) for every \(n\), and then applying the Bezier equations \(B_{\text{linear}}(a)\) and \(B_{\text{quad}}(a)\) to find the parameter value \(y\).
 
-```
-a = n / n2.
-```
+In the case of \(B_{\text{linear}}(a)\), the mapping between \(n\) and \(a\) is given by:
 
-In the case of <code>B_quad(a)</code>, the mapping between <code>n</code> and <code>a</code> is given as follows. Let
+\[a = \frac{n}{n_2}.\]
 
-```
-alpha = n0 - 2 * n1 + n2,
-beta = 2 * (n1 - n0),
-gamma = n0 - n.
-```
+In the case of \(B_{\text{quad}}(a)\), the mapping between \(n\) and \(a\) is given as follows. Let
 
-If <code>alpha</code> is equal to 0, then
+\[\alpha = n_0 - 2 \times n_1 + n_2,\]
+\[\beta = 2 \times (n_1 - n_0),\]
+\[\gamma = n_0 - n.\]
 
-```
-a = -gamma / beta,
-```
+Then,
 
-else,
-
-```
-a = (-beta + sqrt(beta^2 - 4 * alpha * gamma)) / (2 * alpha).
-```
+\[
+a =
+\begin{cases}
+-\frac{\gamma}{\beta}, & \text{if }~\alpha =  0,\\
+\frac{-\beta + \sqrt{\beta^2 - 4 \times \alpha \times \gamma}}{2 \times \alpha} & \text{otherwise}.
+\end{cases}
+\]
 
 
 ## Post Processing (Informative) ## {#processing-post}
@@ -2435,7 +2455,7 @@ The 3.1.2ch down-mix matrix for 5.1.2ch is given below, where \(p = 0.707\).
 	0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
 	0 & 0 & 0 & 0 & 0 & 0 & 0 & 1
 \end{bmatrix}
-\ast
+\times
 \begin{bmatrix}
 	\text{L5} \\
 	\text{C} \\
@@ -2468,7 +2488,7 @@ The 3.1.2ch down-mix matrix for 5.1.4ch is given below, where \(p = 0.707\).
 	0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & p & 0 \\
 	0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1
 \end{bmatrix}
-\ast
+\times
 \begin{bmatrix}
 	\text{L5} \\
 	\text{C} \\
@@ -2495,8 +2515,8 @@ The 3.1.2ch down-mix matrix for 7.1.2ch is given below, where \(p = 0.707\).
 	\text{LFE}
 \end{bmatrix}
 =
-\frac{2}{1 + 2 \ast p}
-\ast
+\frac{2}{1 + 2 \times p}
+\times
 \begin{bmatrix}
 	1 & 0 & 0 & p & 0 & p & 0 & 0 & 0 & 0 \\
 	0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
@@ -2505,7 +2525,7 @@ The 3.1.2ch down-mix matrix for 7.1.2ch is given below, where \(p = 0.707\).
 	0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
 	0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1
 \end{bmatrix}
-\ast
+\times
 \begin{bmatrix}
 	\text{L7} \\
 	\text{C} \\
@@ -2532,8 +2552,8 @@ The 3.1.2ch down-mix matrix for 7.1.4ch is given below, where \(p = 0.707\).
 	\text{LFE}
 \end{bmatrix}
 =
-\frac{2}{1 + 2 \ast p}
-\ast
+\frac{2}{1 + 2 \times p}
+\times
 \begin{bmatrix}
 	1 & 0 & 0 & p & 0 & p & 0 & 0 & 0 & 0 & 0 & 0 \\
 	0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
@@ -2542,7 +2562,7 @@ The 3.1.2ch down-mix matrix for 7.1.4ch is given below, where \(p = 0.707\).
 	0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & p & 0 \\
 	0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1
 \end{bmatrix}
-\ast
+\times
 \begin{bmatrix}
 	\text{L7} \\
 	\text{C} \\
@@ -2619,7 +2639,7 @@ For Scalable Channel Audio encoding:
 		- [=Parameter Substream=] for recon gain is not generated. 
 		- [=Parameter Substream=] for demixing info may be generated by implementers who assume it to be recommended for dynamic downmixing on the decoder side.
 		- Down-mixer, Channel Group generator, and Attenuation modules are not needed.
-	- Down-mix parameter generator generates 5 down-mix parameters (α(k), β(k), γ(k), δ(k) and w(k)) by analyzing the input channel audio.
+	- Down-mix parameter generator generates 5 down-mix parameters (\(\alpha(k)\), \(\beta(k)\), \(\gamma(k)\), \(\delta(k)\) and [=w(k)|\(w(k)\)=]) by analyzing the input channel audio.
 	- Down-mixer generates [=down-mixed audio=]s according to the list of channel layouts and the down-mix parameters.
 	- Loudness module outputs the loudness level ([=LKFS=]) of each [=down-mixed audio=] based on [[ITU1770-4]].
 	- Channel Group generator transforms the input channel audio to N [=Channel Group=]s for scalable channel audio with [=num_layers=] = N by using the down-mix parameters and the list of channel layouts.
@@ -2628,19 +2648,19 @@ For Scalable Channel Audio encoding:
 		- [=Descriptors=] are set as follows:
 			- [=num_layers=] is set to N (i.e., the number of channel layouts).
 			- [=channel_audio_layer_config=] is set as follows:
-				- [=loudspeaker_layout=] is set to the ith list of channel layouts for the ith [=Channel Group=].
-				- [=output_gain_is_present_flag=] is set to 1 for the ith [=Channel Group=] if attenuation is applied to the mixed channels of the ith [=Channel Group=]. Otherwise, it is set to 0 for the ith [=Channel Group=].
-				- [=recon_gain_is_present_flag=] is set to 1 for the ith [=Channel Group=] if the preceding [=Channel Group=]s has one or more mixed channels from the [=down-mixed audio=] for the ith channel layout. Otherwise, it is set to 0 for the ith [=Channel Group=]. Especially, when [=num_layers=] = 1, this flag is set to 0.
+				- [=loudspeaker_layout=] is set to the i-th list of channel layouts for the i-th [=Channel Group=].
+				- [=output_gain_is_present_flag=] is set to 1 for the i-th [=Channel Group=] if attenuation is applied to the mixed channels of the i-th [=Channel Group=]. Otherwise, it is set to 0 for the i-th [=Channel Group=].
+				- [=recon_gain_is_present_flag=] is set to 1 for the i-th [=Channel Group=] if the preceding [=Channel Group=]s has one or more mixed channels from the [=down-mixed audio=] for the i-th channel layout. Otherwise, it is set to 0 for the i-th [=Channel Group=]. Especially, when [=num_layers=] = 1, this flag is set to 0.
 					- This flag is set to 0 for lossless codecs including LPCM.
-				- [=substream_count=] is set to the number of [=Audio Substream=]s in the ith [=Channel Group=].
-				- [=coupled_substream_count=] is set to the number of coupled substreams among the [=Audio Substream=]s that make up the ith [=Channel Group=].
-				- Each bit of [=output_gain_flags=] is set to 1 for the ith [=Channel Group=] if attenuation is applied to the relevant channel of the ith [=Channel Group=]. Otherwise, it is set to 0 for the ith [=Channel Group=].
+				- [=substream_count=] is set to the number of [=Audio Substream=]s in the i-th [=Channel Group=].
+				- [=coupled_substream_count=] is set to the number of coupled substreams among the [=Audio Substream=]s that make up the i-th [=Channel Group=].
+				- Each bit of [=output_gain_flags=] is set to 1 for the i-th [=Channel Group=] if attenuation is applied to the relevant channel of the i-th [=Channel Group=]. Otherwise, it is set to 0 for the i-th [=Channel Group=].
 				- [=output_gain=] is set to the gain (i.e., the inverse of attenuation gain) which is applied to the channels which are indicated by [=output_gain_flags=].
 		- [=Parameter Substream=]s can be composed of one for demixing info and the other for recon gain. When [=recon_gain_is_present_flag=] = 0 for all [=Channel Group=]s, no [=Parameter Block OBU=]s for recon gain info are present in [=IA Sequence=].
-			- [=dmixp_mode=] of [=demixing_info_parameter_data=] for the kth frame is set to indicate (α(k), β(k), γ(k), δ(k)) and w_idx_offset(k), where w_idx_offset(k) = 1 or -1.
-			- [=recon_gain_flags=] of [=recon_gain_info_parameter_data=] is set to indicate the de-mixed channels which need to apply [=recon_gain=] among the output channels after demixing for the ith channel layout.
-			- [=recon_gain=] is set to the gain value to be applied to the channel which is indicated by [=recon_gain_flags=] for the ith [=Channel Group=].
-- [=Temporal Unit=] for the kth frame is composed of zero or more [=Parameter Block OBU=]s and followed by the [=Audio Frame OBU=]s for the kth frames.
+			- [=dmixp_mode=] of [=demixing_info_parameter_data=] for the k-th frame is set to indicate (\(\alpha(k)\), \(\beta(k)\), \(\gamma(k)\), \(\delta(k)\)) and [=w_idx_offset=](k), where [=w_idx_offset=](k) = 1 or -1.
+			- [=recon_gain_flags=] of [=recon_gain_info_parameter_data=] is set to indicate the de-mixed channels which need to apply [=recon_gain=] among the output channels after demixing for the i-th channel layout.
+			- [=recon_gain=] is set to the gain value to be applied to the channel which is indicated by [=recon_gain_flags=] for the i-th [=Channel Group=].
+- [=Temporal Unit=] for the k-th frame is composed of zero or more [=Parameter Block OBU=]s and followed by the [=Audio Frame OBU=]s for the kth frames.
 	- It may have the immediately preceding [=Temporal Delimiter OBU=].
 	- [=Channel Group=]s in a [=Temporal Unit=] are placed in order. In other words, the [=Channel Group=] for the first channel layout comes first, followed by the [=Channel Group=] for the second channel layout, followed by the [=Channel Group=] for the third channel layout, and so on.
 
@@ -2672,7 +2692,7 @@ The [=Mix Presentation OBU=] for one single channel-based [=Audio Element=] is s
 - [=element_mix_config=]: No [=Parameter Block OBU=]s for [=element_mix_config=] and [=default_mix_gain=] = 0 dB.
 - [=output_mix_config=]: No [=Parameter Block OBU=]s for [=output_mix_config=] and [=default_mix_gain=] = 0 dB.
 - [=num_layouts=]: set to N, where N is the number of input channel layouts.
-- [=loudness_layout=]: set to L(1), L(2), ..., L(N), where L(i) is the measured layout for the ith layer and i = 1, 2, ..., N.
+- [=loudness_layout=]: set to L(1), L(2), ..., L(N), where L(i) is the measured layout for the i-th layer and i = 1, 2, ..., N.
 	- [=LoudnessInfo()=] for L(1), [=LoudnessInfo()=] for L(2), ..., [=LoudnessInfo()=] for L(N): loudness information of the audio rendered to to the measured layout L(i).
 
 NOTE: If the input channel layouts do not include Stereo, then [=num_layers=] is set to N + 1 and the [=loudness_layout=]s includes Stereo.
@@ -2684,7 +2704,7 @@ The [=Mix Presentation OBU=] for one single scene-based [=Audio Element=] is set
 - [=element_mix_config=]: set to [=mix_gain=]
 - [=output_mix_config=]: set to [=output_mix_gain=]
 - [=num_layouts=]: set to M1, the number of loudness informations which are provided.
-- [=loudness_layout=]: set to L(1), L(2), ..., L(M1), where L(i) is the measured layout for the ith loudness information and i = 1, 2, ..., M1.
+- [=loudness_layout=]: set to L(1), L(2), ..., L(M1), where L(i) is the measured layout for the i-th loudness information and i = 1, 2, ..., M1.
 	- One of them is Stereo.
 - [=LoudnessInfo()=] on L(1), [=LoudnessInfo()=] on L(2), ..., [=LoudnessInfo()=] on L(M1): loudness information of the audio rendered to the measured layout L(i).
 - This [=Mix Presentation=] is authored using the highest [=loudness_layout=].
@@ -2695,7 +2715,7 @@ The [=Mix Presentation OBU=] for 2 [=Audio Element=]s is set as follows:
 - [=element_mix_config=] for each [=Audio Element=]: set to [=mix_gain=]
 - [=output_mix_config=]: set to [=output_mix_gain=]
 - [=num_layouts=]: set to M2, the number of loudness informations which are provided.
-- [=loudness_layout=]: set to L(1), L(2), ..., L(M2), where L(i) is the measured layout for the ith loudness information and i = 1, 2, ..., M2.
+- [=loudness_layout=]: set to L(1), L(2), ..., L(M2), where L(i) is the measured layout for the i-th loudness information and i = 1, 2, ..., M2.
 	- One of them is Stereo.
 - [=LoudnessInfo()=] on L(1), [=LoudnessInfo()=] on L(2), ..., [=LoudnessInfo()=] on L(M2): loudness information of the audio rendered to the measured layout L(i).
 - This [=Mix Presentation=] is authored using the highest [=loudness_layout=].
@@ -2726,8 +2746,8 @@ Step 1: [=Descriptors=] are generated as follows:
 	- [=mix_presentation_obu/audio_element_id=]s in each [=Mix Presentation OBU=] are set to indicate the [=audio_element_obu/audio_element_id=]s of the referred [=Audio Element OBU=]s.
 	- [=ParamDefinition/parameter_id=]s in [=ParamDefinition()=]s carried in each [=Mix Presentation OBU=] are set to refer their associated [=Parameter Substream=]s.
 
-Step 2: The ith [=Temporal Unit=] is generated as follows:
-- Place all [=Parameter Block OBU=]s for the ith frame, followed by the [=Audio Frame OBU=]s ith frame (grouped by [=Audio Element=]s). Make the following modifications:
+Step 2: The i-th [=Temporal Unit=] is generated as follows:
+- Place all [=Parameter Block OBU=]s for the i-th frame, followed by the [=Audio Frame OBU=]s i-th frame (grouped by [=Audio Element=]s). Make the following modifications:
 	- The [=obu_type=]s of the [=Audio Frame OBU=]s are updated to be aligned with the [=audio_element_obu/audio_substream_id=]s specified in the [=Audio Element OBU=]s.
 	- [=parameter_block_obu/parameter_id=]s in [=Parameter Block OBU=]s are updated to identify their associated [=Parameter Substream=]s based on the [=ParamDefinition/parameter_id=]s carried in the [=Descriptors=].
 - It may have the immediately preceding [=Temporal Delimiter OBU=].
@@ -2790,34 +2810,34 @@ class Bar {
 
 <table class="def">
 <tr>
-  <td>+</td><td>Addition.</td>
+  <td>\(+\)</td><td>Addition.</td>
 </tr>
 <tr>
-  <td>-</td><td>Subtraction.</td>
+  <td>\(-\)</td><td>Subtraction.</td>
 </tr>
 <tr>
-  <td>*</td><td>Multiplication.</td>
+  <td>\(\times\)</td><td>Multiplication.</td>
 </tr>
 <tr>
-  <td>/</td><td>Floating point (arithmetic) division.</td>
+  <td>\(\frac{\cdot}{\cdot}\)</td><td>Floating point (arithmetic) division.</td>
 </tr>
 <tr>
-  <td>floor(x)</td><td>The largest integer that is smaller than or equal to x.</td>
+  <td>\(\left\lfloor{x}\right\rfloor \)</td><td>The largest integer that is smaller than or equal to \(x\).</td>
 </tr>
 <tr>
-  <td>ceil(x)</td><td>The smallest integer that is greater than or equal to x.</td>
+  <td>\(\left\lceil{x}\right\rceil \)</td><td>The smallest integer that is greater than or equal to \(x\).</td>
 </tr>
 <tr>
-  <td>round(x)</td><td>The integer value closest to x. It may be implemented as floor(x + 0.5).</td>
+  <td>\(\text{round}(x)\)</td><td>The integer value closest to \(x\). It may be implemented as \(\left\lfloor{x + 0.5}\right\rfloor \).</td>
 </tr>
 <tr>
-  <td>sqrt(x)</td><td>The square root of x.</td>
+  <td>\(\sqrt{x}\)</td><td>The square root of \(x\).</td>
 </tr>
 <tr>
-  <td>Clip3(x, y, z)</td><td>Conforms to [=Clip3=] specified in [[!AV1-Convention]].</td>
+  <td>\(\text{Clip3}(x, y, z)\)</td><td>Conforms to [=Clip3=] specified in [[!AV1-Convention]].</td>
 </tr>
 <tr>
-  <td>pow(x, y)</td><td>The value of x to the power of y.</td>
+  <td>\(x^y\)</td><td>The value of \(x\) to the power of \(y\).</td>
 </tr>
 </table>
 
@@ -2869,12 +2889,12 @@ The figure below shows a block diagram for the down-mix parameter and loudness m
 For a given channel-based input [=3D audio signal=] (e.g., 7.1.4ch) and a given list of channel layouts based on the input [=3D audio signal=],
 - Down-mix parameter generator generates 5 down-mix parameters (\(\alpha(k)\), \(\beta(k)\), \(\gamma(k)\), \(\delta(k)\) and [=w(k)|\(w(k)\)=], where \(k\) is the frame index) by analyzing the input [=3D audio signal=] and referring to [[AI-CAD-Mixing]].
 	- It is composed of an Audio Scene Classification module and a Height Energy Quantification module as depicted in Figure 11-2.
-	- Audio Scene Classification module generates 4 parameters (α(k), β(k), γ(k), δ(k)) by classifying audio scenes of the input [=3D audio signal=] in three modes.
+	- Audio Scene Classification module generates 4 parameters (\(\alpha(k)\), \(\beta(k)\), \(\gamma(k)\), \(\delta(k)\)) by classifying audio scenes of the input [=3D audio signal=] in three modes.
 		- Default scene: Neither Dialog nor Effect
 		- Dialog scene: Center-channel oriented and clear dialog/voice sounds
 		- Effect scene: Directional and spatially moving sounds.
-	- The Height Energy Quantification module generates a surround-to-height mixing parameter (w(k)) which is decided according to the relative energy difference between the top and surround channels of the input [=3D audio signal=].
-		- If the energy of top channels is bigger than that of surround ones, then w_idx_offset(k) is set to 1. Otherwise, it is set to -1. And, w(k) is calculated based on w_idx_offset(k) and conforms to [[#processing-scalablechannelaudio]].
+	- The Height Energy Quantification module generates a surround-to-height mixing parameter ([=w(k)|\(w(k)\)=]) which is decided according to the relative energy difference between the top and surround channels of the input [=3D audio signal=].
+		- If the energy of top channels is bigger than that of surround ones, then [=w_idx_offset=](k) is set to 1. Otherwise, it is set to -1. And, [=w(k)|\(w(k)\)=] is calculated based on [=w_idx_offset=](k) and conforms to [[#processing-scalablechannelaudio]].
 - Down-mixer generates [=down-mixed audio=] from the input [=3D audio signal=] according to the list of channel layouts and the down-mix parameters, and outputs [=down-mixed audio=] for each channel layout to the Loudness module.
 	- It is not depicted in the figure but down-mixer further generates [=dmixp_mode=] and [=recon_gain=] for each frame to be passed to the OBU packetizer.
 - Loudness module measures the loudness level ([=LKFS=]) of each [=down-mixed audio=] based on [[ITU1770-4]], and passes them to OBU packetizer.
@@ -2889,14 +2909,25 @@ Implementers can use another method to get the [=down-mixed audio=] from the giv
 
 Therefore, a down-mixer based on the down-mix mechanism is a combination of the following surround down-mixer(s) and top down-mixer(s) as depicted in the figure below.
 - Surround down-mixers 
-	- <dfn noexport>S7to5 enc.</dfn>: Ls5 = α(k) * Lss7 + β(k) * Lrs7 and Rs5 = α(k) * Rss7 + β(k) * Rrs7.
-	- <dfn noexport>S5to3 enc.</dfn>: L3 = L5 + δ(k) * Ls5 and R3 = R5 + δ(k) * Rs5
-	- <dfn noexport>S3to2 enc.</dfn>: L2 = L3 + 0.707 * C and R2 = R3 + 0.707 * C
-	- <dfn noexport>S2to1 enc.</dfn>: Mono = 0.5 * (L2 + R2)
+	- <dfn noexport>S7to5 enc.</dfn>:
+		\[\text{Ls5} = \alpha(k) \times \text{Lss7} + \beta(k) \times \text{Lrs7}\]
+		\[\text{Rs5} = \alpha(k) \times \text{Rss7} + \beta(k) \times \text{Rrs7}\]
+	- <dfn noexport>S5to3 enc.</dfn>:
+		\[\text{L3} = \text{L5} + \delta(k) \times \text{Ls5}\]
+		\[\text{R3} = \text{R5} + \delta(k) \times \text{Rs5}\]
+	- <dfn noexport>S3to2 enc.</dfn>:
+		\[\text{L2} = \text{L3} + 0.707 \times \text{C}\]
+		\[\text{R2} = \text{R3} + 0.707 \times \text{C}\]
+	- <dfn noexport>S2to1 enc.</dfn>:
+		\[\text{Mono} = 0.5 \times (\text{L2} + \text{R2})\]
 
 - Top down-mixers
-	- <dfn noexport>T4to2 enc.</dfn>: Ltf2 = Ltf4 + γ(k) * Ltb4  and Rtf2 = Rtf4 + γ(k) * Rtb4.
-	- <dfn noexport>T2toTF2 enc.</dfn>: Ltf3 = Ltf2 + w(k) * δ(k) * Ls5 and Rtf3 = Rtf2 + w(k) * δ(k) * Rs5.
+	- <dfn noexport>T4to2 enc.</dfn>:
+		\[\text{Ltf2} = \text{Ltf4} + \gamma(k) \times \text{Ltb4}\]
+		\[\text{Rtf2} = \text{Rtf4} + \gamma(k) \times \text{Rtb4}\]
+	- <dfn noexport>T2toTF2 enc.</dfn>:
+		\[\text{Ltf3} = \text{Ltf2} + w(k) \times \delta(k) \times \text{Ls5}\]
+		\[\text{Rtf3} = \text{Rtf2} + w(k) \times \delta(k) \times \text{Rs5}\]
 
 <center><img src="images/Down-mix Mechanism.png" style="width:100%; height:auto;"></center>
 <center><figcaption>IA Down-mix Mechanism</figcaption></center>
@@ -2911,7 +2942,7 @@ For example, to get [=down-mixed audio=] 3.1.2ch from 7.1.4ch:
 This section describes the generation rule for channel layouts for scalable channel audio.
 
 For a given channel layout (CL #n) of channel-based input [=3D audio signal=], any list of CLs ({CL #i: i = 1, 2, ..., n}) for scalable channel audio SHALL conform with the following rules:
-- Si ≤ Si+1 and Wi ≤ Wi+1 and Ti ≤ Ti+1 except Si = Si+1, Wi = Wi+1 and Ti = Ti+1 for i = n-1, n-2, …, 1. Where the ith channel layout CL #i = Si.Wi.Ti.
+- Si ≤ Si+1 and Wi ≤ Wi+1 and Ti ≤ Ti+1 except Si = Si+1, Wi = Wi+1 and Ti = Ti+1 for i = n-1, n-2, …, 1. Where the i-th channel layout CL #i = Si.Wi.Ti.
 - CL #i is one of [=loudspeaker_layout=]s supported in this version of the specification.
 
 Down-mix paths, which conform to the above rule, are only allowed for scalable channel audio with [=num_layers=] > 1 as depicted in the below figure.
@@ -2927,38 +2958,38 @@ NOTE: Recon gain generation is not required when the codec is lossless, i.e., wh
 
 Recon gain needs to be applied to de-mixed channels. For this, the IA encoder needs to deliver it to IA decoders.
 
-Let's define the followings:
-- Level Ok is the signal power for the frame #k of a channel of the [=down-mixed audio=] for CL #i.
-- Level Mk is the signal power for the frame #k of the relevant mixed channel of the [=down-mixed audio=] for CL #i-1.
-- Level Dk is the signal power for the frame #k of the de-mixed channel for CL #i (after demixing in the decoder side).
+Let's define the following:
+- \(O_k\) is the signal power for the frame \(k\) of a channel of the [=down-mixed audio=] for CL #i.
+- \(M_k\) is the signal power for the frame \(k\) of the relevant mixed channel of the [=down-mixed audio=] for CL #i-1.
+- \(D_k\) is the signal power for the frame \(k\) of the de-mixed channel for CL #i (after demixing in the decoder side).
 
 If \(10 \times \log_{10}(\frac{O_k}{L_{\text{max}}^2})\) is less than the first threshold value (-80dB is preferred), Recon_Gain(k, i) = 0. Where, \(L_{\text{max}} = 32767\) for 16 bits.
 
 If \(10 \times \log_{10}(\frac{O_k}{M_k})\) is less than the second threshold value (-6dB is preferred), Recon_Gain(k, i) is set to the value which makes \(O_k = (\text{Recon_Gain}(k, 1))^2 \times D_k\). Otherwise, Recon_Gain(k, i) = 1. The actual value (i.e., [=recon_gain=]) to be delivered is \( \left\lfloor{255 \times \text{Recon_Gain}}\right\rfloor \).
 
 For example, if we assume CL #i = 7.1.4ch and CL #i-1 = 5.1.2ch, then de-mixed channels are D_Lrs7, D_Rrs7, D_Ltb4 and D_Rtb4.
-- D_Lrs7 and D_Rrs7 are de-mixed from Ls5 and Rs5 in the (i-1)th [=Channel Group=] by using Lss7 and Rss7 in the ith [=Channel Group=] and its relevant demixing parameters (i.e., α(k) and β(k)) , respectively.
-- D_Ltb4 and D_Rtb4 are de-mixed from Ltf2 and Rtf2 in the (i-1)th [=Channel Group=] by using Ltf4 and Rtf4 in the ith [=Channel Group=] and its relevant demixing parameter (i.e., γ(k)), respectively.
+- D_Lrs7 and D_Rrs7 are de-mixed from Ls5 and Rs5 in the (i-1)-th [=Channel Group=] by using Lss7 and Rss7 in the i-th [=Channel Group=] and its relevant demixing parameters (i.e., \(\alpha(k)\) and \(\beta(k)\)) , respectively.
+- D_Ltb4 and D_Rtb4 are de-mixed from Ltf2 and Rtf2 in the (i-1)-th [=Channel Group=] by using Ltf4 and Rtf4 in the i-th [=Channel Group=] and its relevant demixing parameter (i.e., \(\gamma(k)\)), respectively.
 
 Recon_Gain for D_Lrs7:
-- Level Ok is the signal power for the frame #k of Lrs7 in the ith [=Channel Group=].
-- Level Mk is the signal power for the frame #k of Ls5 in the (i-1)th [=Channel Group=].
-- Level Dk is the signal power for the frame #k of D_Lrs7.
+- \(O_k\) is the signal power for the frame \(k\) of Lrs7 in the i-th [=Channel Group=].
+- \(M_k\) is the signal power for the frame \(k\) of Ls5 in the (i-1)-th [=Channel Group=].
+- \(D_k\) is the signal power for the frame \(k\) of D_Lrs7.
 
 Recon_Gain for D_Rrs7:
-- Level Ok is the signal power for the frame #k of Rrs7 in the ith [=Channel Group=].
-- Level Mk is the signal power for the frame #k of Rs5 in the (i-1)th [=Channel Group=].
-- Level Dk is the signal power for the frame #k of D_Rrs7.
+- \(O_k\) is the signal power for the frame \(k\) of Rrs7 in the i-th [=Channel Group=].
+- \(M_k\) is the signal power for the frame \(k\) of Rs5 in the (i-1)-th [=Channel Group=].
+- \(D_k\) is the signal power for the frame \(k\) of D_Rrs7.
 
 Recon_Gain for D_Ltb4:
-- Level Ok is the signal power for the frame #k of Ltf4 in the ith [=Channel Group=].
-- Level Mk is the signal power for the frame #k of Ltf2 in the (i-1)th [=Channel Group=].
-- Level Dk is the signal power for the frame #k of D_Ltb4.
+- \(O_k\) is the signal power for the frame \(k\) of Ltf4 in the i-th [=Channel Group=].
+- \(M_k\) is the signal power for the frame \(k\) of Ltf2 in the (i-1)-th [=Channel Group=].
+- \(D_k\) is the signal power for the frame \(k\) of D_Ltb4.
 
 Recon_Gain for D_Rtb4:
-- Level Ok is the signal power for the frame #k of Rtf4 in the ith [=Channel Group=].
-- Level Mk is the signal power for the frame #k of Rtf2 in the (i-1)th [=Channel Group=].
-- Level Dk is the signal power for the frame #k of D_Rtb4.
+- \(O_k\) is the signal power for the frame \(k\) of Rtf4 in the i-th [=Channel Group=].
+- \(M_k\) is the signal power for the frame \(k\) of Rtf2 in the (i-1)-th [=Channel Group=].
+- \(D_k\) is the signal power for the frame \(k\) of D_Rtb4.
 
 
 ### Annex B-5: Channel Group Generation Rule (Informative) ### {#iamfgeneration-scalablechannelaudio-channelgroupgenerationrule}
@@ -3028,11 +3059,11 @@ An example of a transformation matrix with 4 CGs (2ch/3.1.2ch/5.1.2ch/7.1.4ch) i
 	\end{bmatrix}
 	=
 	\begin{bmatrix}
-		1 & p & 0 & \delta(k) \ast \alpha(k) & 0 & \delta(k) \ast \beta(k) & 0 & 0 & 0 & 0 & 0 & 0 \\
-		0 & p & 1 & 0 & \delta(k) \ast \alpha(k) & 0 & \delta(k) \ast \beta(k) & 0 & 0 & 0 & 0 & 0 \\
+		1 & p & 0 & \delta(k) \times \alpha(k) & 0 & \delta(k) \times \beta(k) & 0 & 0 & 0 & 0 & 0 & 0 \\
+		0 & p & 1 & 0 & \delta(k) \times \alpha(k) & 0 & \delta(k) \times \beta(k) & 0 & 0 & 0 & 0 & 0 \\
 		0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-		0 & 0 & 0 & w(k) \ast \delta(k) \ast \alpha(k) & 0 & w(k) \ast \delta(k) \ast \beta(k) & 0 & 1 & 0 & \gamma(k) & 0 & 0 \\
-		0 & 0 & 0 & 0 & w(k) \ast \delta(k) \ast \alpha(k) & 0 & w(k) \ast \delta(k) \ast \beta(k) & 0 & 1 & 0 & \gamma(k) & 0 \\
+		0 & 0 & 0 & w(k) \times \delta(k) \times \alpha(k) & 0 & w(k) \times \delta(k) \times \beta(k) & 0 & 1 & 0 & \gamma(k) & 0 & 0 \\
+		0 & 0 & 0 & 0 & w(k) \times \delta(k) \times \alpha(k) & 0 & w(k) \times \delta(k) \times \beta(k) & 0 & 1 & 0 & \gamma(k) & 0 \\
 		0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\
 		1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
 		0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
@@ -3041,7 +3072,7 @@ An example of a transformation matrix with 4 CGs (2ch/3.1.2ch/5.1.2ch/7.1.4ch) i
 		0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
 		0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0
 	\end{bmatrix}
-	\ast
+	\times
 	\begin{bmatrix}
 		\text{L} \\
 		\text{C} \\
