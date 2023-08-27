@@ -1154,14 +1154,14 @@ class MixPresentationOBU() {
 
 <dfn noexport>num_layouts</dfn> specifies the number of layouts for this sub-mix on which the [=loudness=] information was measured.
 
-<dfn noexport>loudness_layout</dfn> identifies the layout that was used to measure the [=loudness=] information provided in this sub-mix.
+<dfn noexport>loudness_layout</dfn> provides information about the [[#syntax-layout|layout]] that was used to measure the [=loudness=] information provided in this sub-mix.
 
 <dfn noexport>loudness</dfn> provides the loudness information which was measured on [=loudness_layout=] for the [=Rendered Mix Presentation=] by this sub-mix.
 
 The layout specified in [=loudness_layout=] SHOULD NOT be higher than the highest layout among the layouts provided by the [=Audio Element=]s. In other words, rendering from an [=Audio Element=] with the highest layout to the [=loudness_layout=] SHOULD NOT require an up-mix. The exception is when the [=Audio Element=] is a zero-order Ambisonics or Mono channel; they MAY be rendered to Stereo. In this exception case, the [=loudness_layout=] for a zero-order Ambisonics or Mono channel [=Audio Element=] SHOULD NOT be higher than Stereo.
 
-Each sub-mix SHALL include [=loudness=] for Stereo (i.e., [=loudness_layout=] = [=Loudspeaker configuration for Sound System A (0+2+0)=]).
-- If a sub-mix's [=Rendered Mix Presentation=] is Mono, its [=loudness=] for [=loudness_layout=] = Stereo SHOULD be measured on the Stereo signal generated using the equations:
+Each sub-mix SHALL include [=loudness=] for Stereo (i.e., a [=loudness_layout=] with the [=sound_system=] field = [=Loudspeaker configuration for Sound System A (0+2+0)=]).
+- If a sub-mix's [=Rendered Mix Presentation=] is Mono, its [=loudness=] for Stereo SHOULD be measured on the Stereo signal generated using the equations:
 	\[\text{L} = 0.707 \times \text{Mono}\]
 	\[\text{R} = 0.707 \times \text{Mono}\]
 
@@ -1325,7 +1325,7 @@ layout_type : Layout type
  - 12: It indicates Mono
  - 13 ~ 15: Reserved
 
-When a value for [=layout_type=] or [=sound_system=] is not supported, parsers compliant with this version of the specification SHOULD ignore this Layout() and the following [=LoudnessInfo()=].
+When a value for [=layout_type=] or [=sound_system=] is not supported, parsers compliant with this version of the specification SHOULD ignore this Layout() and any associated [=LoudnessInfo()=].
 
 ### Loudness Info Syntax and Semantics ### {#obu-mixpresentation-loudness}
 
@@ -1740,6 +1740,7 @@ IA decoders SHALL be able to parse all OBUs explicitly listed for this version o
 NOTE: In this section and subsections, the meaning of a unique OBU is that it is still unique if it only varies by the [=obu_redundant_copy=] flag.
 
 Common restrictions on the [=IA Sequence=] for all profiles specified in this version of the specification:
+- The maximum size of an OBU (an obu_header followed by the OBU payload) SHALL be limited to \(2\text{MB}\) (i.e., \(2^{21}\) bytes). It implies that the maximum value of the [=obu_size=] field SHALL be limited to \(2^{21} - 4\). 
 - There SHALL be only one unique set of [=Descriptors=] in an [=IA Sequence=]. If the [=Descriptors=] are repeated in the middle of the [=IA Sequence=], all the OBUs in that set of [=Descriptors=] SHALL be marked as redundant (i.e., [=obu_redundant_copy=] = 1).
 	- When a set of [=Descriptors=] is placed in the middle of the [=IA Sequence=], it SHALL NOT be placed in the middle of a [=Temporal Unit=]. In other words, if [=Descriptors=] are placed mid-sequence, they SHALL be present only after the last OBU of a [=Temporal Unit=] and before the first OBU of the next [=Temporal Unit=].
 - There SHALL be only one unique [=Codec Config OBU=].
@@ -2207,7 +2208,7 @@ When an [=IA Sequence=] contains multiple [=Mix Presentation=]s, the IA parser S
 2. If there is more than one valid mix remaining, the IA parser SHOULD select an appropriate mix for rendering, in the following order.
 	1. If the playback device is headphones:
 		1. Select the mix with [=mix_presentation_obu/audio_element_id=] whose [=loudspeaker_layout=] is BINAURAL.
-		2. If there is no such mix, select the mix with [=loudness_layout=] = BINAURAL.
+		2. If there is no such mix, select the mix with the [=layout_type=] field in [=loudness_layout=] = BINAURAL.
 		3. If there is no such mix, select the mix with the highest available [=loudness_layout=].
 	2. If the playback layout is loudspeakers:
 		1. If there is a mix with a [=loudness_layout=] that matches the playback loudspeaker layout, it SHOULD be selected. If there is more than one matching mix, the first one SHOULD be selected.
