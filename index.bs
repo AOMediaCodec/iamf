@@ -332,10 +332,13 @@ For a given input [=3D audio signal=],
 - A Codec Encoder generates the coded [=Audio Substream=](s).
 - An OBU Packetizer generates an [=IA Sequence=] from the coded [=Audio Substream=](s), [=Descriptors=] and [=Parameter Substream=](s).
 - An OBU Parser outputs the coded [=Audio Substream=](s) and the [=Parameter Substream=](s) from the [=IA Sequence=].
-- A Codec Decoder outputs the decoded [=Channel Group=](s) after decoding the coded [=Audio Substream=](s).
-- A Post-Processor outputs an [=Immersive Audio=] by using the [=Channel Group=](s), [=Descriptors=] and [=Parameter Substream=](s).
+- A Codec Decoder outputs decoded [=Channel Group=](s) after decoding the coded [=Audio Substream=](s).
+- An Element Reconstructor re-assembles the [=Audio Element=]s by combining the [=Channel Group=](s) guided by [=Descriptors=] and [=Parameter Substream=](s).
+- A Renderer can be used to render the [=Audio Element=]s to a multi-channel or binaural format based on [=Descriptors=].
+- A Mixer sums the rendered [=Audio Element=]s and applies further mixing parameters guided by the [=Descriptors=] and the [=Parameter Substream=](s).
+- A Post-Processor outputs an [=Immersive Audio=] by using the [=Channel Group=](s), the [=Descriptors=], and the [=Parameter Substream=](s).
 
-The Pre-Processor, [=Channel Group=](s), Codec Encoder, and OBU Packetizer are defined in [[#iamfgeneration]]. The [=IA Sequence=] is defined in [[#standalone-ia-sequence]]. The OBU Parser, Codec Decoder, and Post-Processor are defined in [[#processing]].
+An IAMF generation processing including the Pre-Processor, the [=Channel Group=](s), the Codec Encoder, and the OBU Packetizer are defined in [[#iamfgeneration]]. The [=IA Sequence=] is defined in [[#standalone-ia-sequence]]. An IAMF processing including the OBU Parser, the Codec Decoder, the Element Reconstructor, the Renderer, the Mixer, and the Post-Processor are defined in [[#processing]].
 
 Although not shown in the figure above, the [=IA Sequence=] may be encapsulated by a file packager, such as the ISOBMFF Encapsulation, to output an IAMF file (ISOBMFF file). Then, a file parser, such as the ISOBMFF Parser, decapsulates it to output the [=IA Sequence=]. The ISOBMFF Encapsulation, IAMF file (ISOBMFF file), and ISOBMFF Parser are defined in [[#isobmff]].
 
@@ -699,7 +702,7 @@ audio_element_type: The type of audio representation.
 
 <dfn noexport for="audio_element_obu">audio_substream_id</dfn> indicates the identifier for an [=Audio Substream=] which this [=Audio Element=] refers to.
 
-Let a particular [=Channel Group=]'s [=Audio Substream=]s be indexed as \(\left[c, n_c\right]\), where a [=Channel Group=] generation rule is described in [[#iamfgeneration-scalablechannelaudio-channelgroupgenerationrule]] and
+Let a particular [=Channel Group=]'s [=Audio Substream=]s be indexed as \(\left[c, n_c\right]\), where a [=Channel Group=] format is described in [[#iamfgeneration-scalablechannelaudio-channelgroupformat]] and
 - \(c = \left[1, \ldots, C\right]\) is the [=Channel Group=] index and \(C\) is the number of [=Channel Group=]s.
 - \(n_c = \left[1, \ldots, N_c\right]\) is the [=Audio Substream=] index in the \(c\)-th [=Channel Group=] and \(N_c\) is the number of [=Audio Substream=]s in the \(c\)-th [=Channel Group=].
 
@@ -1773,7 +1776,7 @@ Restrictions on the [=IA Sequence=]:
 
 Capabilities of the IA parser, decoder, and processor:
 - They SHALL be able to parse an [=IA Sequence=] with [=primary_profile=] = 0.
-- They SHALL be able to decode and process up to 16 channels.	
+- They SHALL be able to handle up to 16 channels.	
 - They SHALL be able to reconstruct one [=Audio Element=].
 - They MAY use (default_)demixing_info_parameter_data to do down-mixing.
 
@@ -1798,7 +1801,7 @@ Restrictions on the [=IA Sequence=]:
 Capabilities of the IA parser, decoder, and processor:
 - They SHALL be able to parse an [=IA Sequence=] with [=primary_profile=] = 0 or 1.
 - They SHALL be able to support the capabilities of the Simple Profile.
-- They SHALL be able to decode and process up to 18 channels.
+- They SHALL be able to handle up to 18 channels.
 	- The 18 channels limit applies to the sum of channels across all [=Audio Element=]s in a [=Mix Presentation=] before mixing.
 	- One example is a mix with 3rd-order Ambisonics (16 channels) + non-diegetic stereo (2 channels).
 - They SHALL be able to reconstruct two [=Audio Element=]s.
@@ -2013,6 +2016,8 @@ As depicted in the figure above,
 
 # IAMF Processing # {#processing}
 
+This section is normative unless noted otherwise.
+
 An [=IA Sequence=] SHALL be decoded and processed to output an [=Immersive Audio=] according to a given playback layout. It SHALL include the following steps but an IA decoder MAY process the steps in a different order to produce the same result:
 
 1. Parsing OBUs to obtain the [=Descriptors=] and [=IA Data=].
@@ -2200,6 +2205,8 @@ An [=IA Sequence=] MAY contain more than one [=Mix Presentation=]. [[#processing
 
 A [=Mix Presentation=] specifies how to render, process and mix one or more [=Audio Element=]s. Each [=Audio Element=] SHALL first be individually rendered and processed before mixing. Then, any additional processing specified by [=output_mix_config=] SHALL be applied to the mixed audio signal in order to generate the final output audio for playback. [[#processing-mixpresentation-rendering]] details how each [=Audio Element=] SHOULD be rendered, while [[#processing-mixpresentation-mixing]] details how the [=Audio Element=]s SHALL be processed and mixed.
 
+As stated in [[#architecture]], specific renderers are out of scope. The examples provided are informative.
+
 ### Selecting a Mix Presentation ### {#processing-mixpresentation-selection}
 
 When an [=IA Sequence=] contains multiple [=Mix Presentation=]s, the IA parser SHOULD select the appropriate [=Mix Presentation=] in the following order.
@@ -2252,50 +2259,50 @@ This section defines the renderer to use, given a channel-based [=Audio Element=
     - Else, if the playback layout matches a [=loudspeaker_layout=] which can be generated from the highest loudspeaker layout of the [=Audio Element=] according to [[#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule]],
             - If the playback layout has height channels, use [=demixing_info_parameter_data=] or [=default_demixing_info_parameter_data=].
             - Else, if the input layout does not have height channels, use [=demixing_info_parameter_data=] or [=default_demixing_info_parameter_data=].
-            - Else, use the EAR Direct Speakers renderer ([[!ITU2127-0]]).
+            - Else, the EAR Direct Speakers renderer ([[!ITU2127-0]]) can be used.
     - Else, render according to [[#processing-mixpresentation-rendering-m2l-withoutdemixinfo]].
 
 ##### Rendering Without Demixing Info ##### {#processing-mixpresentation-rendering-m2l-withoutdemixinfo}
 - If the playback layout is neither 3.1.2ch nor 7.1.2ch,
-    - If the playback layout complies with the loudspeaker layouts supported by [[!ITU2051-3]], use the EAR Direct Speakers renderer ([[!ITU2127-0]]).
-    - Else, use an implementation-specific renderer.
+    - If the playback layout complies with the loudspeaker layouts supported by [[!ITU2051-3]], the EAR Direct Speakers renderer ([[!ITU2127-0]]) can be used, for example.
+    - Else, an implementation-specific renderer can be used, for example.
 - Else if the playback layout is 7.1.2ch,
-    - Use the EAR Direct Speakers renderer ([[!ITU2127-0]]) to first render the input audio to 7.1.4ch, followed by down-mixing from 7.1.4ch to 7.1.2ch. The height channels of 7.1.4ch are down-mixed to the height channels of 7.1.2ch as follows:
+    - The EAR Direct Speakers renderer ([[!ITU2127-0]]) can be used, for example, to first render the input audio to 7.1.4ch, followed by down-mixing from 7.1.4ch to 7.1.2ch. The height channels of 7.1.4ch are down-mixed to the height channels of 7.1.2ch as follows:
 		\[ \text{Ltf2} = \text{Ltf4} + 0.707 \times \text{Ltb} \]
 		\[ \text{Rtf2} = \text{Rtf4} + 0.707 \times \text{Rtb} \]
 - Else if the playback layout is 3.1.2ch,
-    - If the input layout has height channels, use the static down-mix matrices specified in [[#processing-downmixmatrix-static]].
-    - Else if the surround channels (x) of the input layout > 3, use the static down-mix matrices specified in [[#processing-downmixmatrix-static]] after inserting empty height channels into the input audio.
-    - Else, pad empty channels to the input audio relevant to the input layout to make 3.1.2ch. In that case, Mono is regarded as a center channel.
+    - If the input layout has height channels, the static down-mix matrices specified in [[#processing-downmixmatrix-static]] are used.
+    - Else if the surround channels (x) of the input layout > 3, the static down-mix matrices specified in [[#processing-downmixmatrix-static]] after inserting empty height channels into the input audio are used.
+    - Else, empty channels are padded to the input audio relevant to the input layout to make 3.1.2ch. In that case, Mono is regarded as a center channel.
 
 
-##### Configuring the EAR Direct Speakers Renderer ##### {#processing-mixpresentation-rendering-m2l-configureear}
+##### Configuring the EAR Direct Speakers Renderer (Informative) ##### {#processing-mixpresentation-rendering-m2l-configureear}
 
-If the EAR Direct Speakers renderer is used, the following SHOULD be provided for each audio channel of the [=Audio Element=]:
+If the EAR Direct Speakers renderer is used, the following is provided for each audio channel of the [=Audio Element=]:
 
 - speaker label: the label of the speaker position, using the same convention as "SP Label" in [[!ITU2051-3]]. This is defined for each audio channel of the [=Audio Element=] based on the information from [=loudspeaker_layouts=].
 
-In [[!ITU2051-3]], an LFE audio channel MAY be identified either by an explicit label or its frequency content. In this specification, the LFE channel is identified based on the explicit label only, given by [=loudspeaker_layout=].
+In [[!ITU2051-3]], an LFE audio channel can be identified either by an explicit label or its frequency content. In this specification, the LFE channel is identified based on the explicit label only, given by [=loudspeaker_layout=].
 
 
-#### Rendering a Scene-Based Audio Element to Loudspeakers #### {#processing-mixpresentation-rendering-a2l}
+#### Rendering a Scene-Based Audio Element to Loudspeakers (Informative) #### {#processing-mixpresentation-rendering-a2l}
 
-This section defines the renderer to use, given a scene-based [=Audio Element=] and a loudspeaker playback layout.
+This section provides guidelines about the renderer to use, given a scene-based [=Audio Element=] and a loudspeaker playback layout.
 
 - The input layout of the IA renderer is set to Ambisonics.
 - The output layout of the IA renderer is set to the playback layout.
-- The IA renderer used is selected according to the following rules:
-    - If the playback layout complies with the loudspeaker layouts supported by [[!ITU2051-3]], use the EAR HOA renderer ([[!ITU2127-0]]).
+- The IA renderer used can be selected according to the following rules:
+    - If the playback layout complies with the loudspeaker layouts supported by [[!ITU2051-3]], the EAR HOA renderer ([[!ITU2127-0]]) can be used.
     - Else, if there is an implementation-specific renderer, use it.
-    - Else, use the EAR HOA renderer to render to the next highest [[!ITU2051-3]] layout compared to the playback layout, and then down-mix using an implementation-specific renderer or use the static down-mix matrices specified in [[#processing-downmixmatrix-static]] if available.
+    - Else, the EAR HOA renderer can be used to render to the next highest [[!ITU2051-3]] layout compared to the playback layout, and then down-mix using an implementation-specific renderer or use the static down-mix matrices specified in [[#processing-downmixmatrix-static]] if available.
 
-If the EAR HOA renderer is used, the following metadata SHOULD be provided to the renderer for each audio channel:
+If the EAR HOA renderer is used, the following metadata is provided to the renderer for each audio channel:
 
 1. Ambisonics order
 2. Ambisonics degree
 3. Ambisonics normalization method
 
-In this specification, the [[!AmbiX]] format is adopted, which uses SN3D normalization and ACN channel ordering. Accordingly, the Ambisonics order and degree can be computed from the channel index \(k\) as follows:
+The [[!AmbiX]] format uses SN3D normalization and ACN channel ordering. Accordingly, the Ambisonics order and degree can be computed from the channel index \(k\) as follows:
 
 \[
 \begin{aligned}[c]
@@ -2304,13 +2311,13 @@ In this specification, the [[!AmbiX]] format is adopted, which uses SN3D normali
 \end{aligned}
 \]
 
-#### Rendering a Channel-Based Audio Element to Headphones #### {#processing-mixpresentation-rendering-m2b}
+#### Rendering a Channel-Based Audio Element to Headphones (Informative) #### {#processing-mixpresentation-rendering-m2b}
 
-Given a channel-based [=Audio Element=] and headphones playback, the Binaural EBU ADM Direct Speaker renderer [[!EBU-Tech-3396]] SHOULD be used. The highest layout provided in [=scalable_channel_layout_config=] SHOULD be used as the input to the renderer.
+Given a channel-based [=Audio Element=] and headphones playback, the Binaural EBU ADM Direct Speaker renderer [[!EBU-Tech-3396]] can be used. The highest layout provided in [=scalable_channel_layout_config=] can be used as the input to the renderer.
 
-#### Rendering a Scene-Based Audio Element to Headphones #### {#processing-mixpresentation-rendering-a2b}
+#### Rendering a Scene-Based Audio Element to Headphones (Informative) #### {#processing-mixpresentation-rendering-a2b}
 
-Given a scene-based [=Audio Element=] and headphones playback, the Resonance Audio renderer [[!Resonance-Audio]] SHOULD be used.
+Given a scene-based [=Audio Element=] and headphones playback, the Resonance Audio renderer [[!Resonance-Audio]] can be used.
 
 
 ### Mixing Audio Elements ### {#processing-mixpresentation-mixing}
@@ -2399,33 +2406,33 @@ a =
 \]
 
 
-## Post Processing ## {#processing-post}
+## Post Processing (Informative) ## {#processing-post}
 
 ### Loudness Normalization ### {#processing-post-loudness}
 
-Loudness normalization SHOULD be done by adjusting the loudness level to a target output level using the information provided in [[#obu-mixpresentation-loudness]].  A control MAY be provided to set unique target output levels for each anchored loudness and/or the integrated loudness.  If loudness normalization increases the output level, a peak limiter to prevent saturation and/or clipping MAY be necessary; [=true_peak=] or [=digital_peak=] MAY be used to determine if peak limiting is needed.  Alternatively, the total amount of normalization MAY be limited.
+Loudness normalization can be done by adjusting the loudness level to a target output level using the information provided in [[#obu-mixpresentation-loudness]].  A control can be provided to set unique target output levels for each anchored loudness and/or the integrated loudness.  If loudness normalization increases the output level, a peak limiter to prevent saturation and/or clipping can be necessary; [=true_peak=] or [=digital_peak=] can be used to determine if peak limiting is needed.  Alternatively, the total amount of normalization can be limited.
 
 The rendered layouts that were used to measure the loudness information of a sub-mix are provided by [=loudness_layout=]s.
 
-If one of them matches the playback layout, the loudness information SHOULD be used directly for normalization. If there is a mismatch between [=loudness_layout=] and the playback layout, the implementation MAY choose to use the provided loudness information of the highest [=loudness_layout=] as-is.
+If one of them matches the playback layout, the loudness information can be used directly for normalization. If there is a mismatch between [=loudness_layout=] and the playback layout, the implementation can choose to use the provided loudness information of the highest [=loudness_layout=] as-is.
 
 ### Limiter ### {#processing-post-limiter}
 
-The limiter SHOULD limit the true peak of an audio signal at -1 dBTP, where the true peak is defined in [[!ITU1770-4]]. The limiter SHOULD apply to multichannel signals in a linked manner and further support auto-release.
+The limiter can be used to limit the true peak of an audio signal at -1 dBTP, where the true peak is defined in [[!ITU1770-4]]. The limiter can be applied to multichannel signals in a linked manner and further support auto-release.
 
 
-## Down-mix Matrix ## {#processing-downmixmatrix}
+## Down-mix Matrix (Informative) ## {#processing-downmixmatrix}
 
 
 ### Dynamic Down-mix Matrix ### {#processing-downmixmatrix-dynamic}
 
-This specification RECOMMENDs dynamic down-mixing matrices generated by the down-mixing mechanism which is specified in [[#iamfgeneration-scalablechannelaudio-downmixmechanism]].
+This specification includes preferred dynamic down-mixing matrices generated by the down-mixing mechanism which is specified in [[#iamfgeneration-scalablechannelaudio-downmixmechanism]].
 
 ### Static Down-mix Matrix ### {#processing-downmixmatrix-static}
 
-This section provides RECOMMENDED static down-mix matrices to render to 3.1.2ch from 5.1.2ch, 5.1.4ch, 7.1.2ch, and 7.1.4ch.
+This section provides includes preferred static down-mix matrices to render to 3.1.2ch from 5.1.2ch, 5.1.4ch, 7.1.2ch, and 7.1.4ch.
 
-Implementations MAY use a limiter defined in [[#processing-post-limiter]] to preserve the energy of audio signals instead of using normalization factors.
+Implementations can use a limiter defined in [[#processing-post-limiter]] to preserve the energy of audio signals instead of using normalization factors.
 
 The 3.1.2ch down-mix matrix for 5.1.2ch is given below, where \(p = 0.707\).
 
@@ -2574,12 +2581,12 @@ The 3.1.2ch down-mix matrix for 7.1.4ch is given below, where \(p = 0.707\).
 
 This section provides a guideline for encoding an [=IA Sequence=] that conforms to the [[#obu-syntax]], given a set of input [=3D audio signal=] and user inputs.
 
-The RECOMMENDED input audio formats for IA encoding are as follows:
+The preferred input audio formats for IA encoding are as follows:
 - Ambisonics audio: a full-order Ambisonics signal with ACN channel ordering and SN3D normalization
 - Channel-based audio: one of the [=loudspeaker_layout=]s specified in [=channel_audio_layer_config=]
 - Sampling rate: 48000 Hz
 - Bit depth: 16 bits or 24 bits
-	- 16 bits is recommended for Opus
+	- 16 bits is preferred for Opus
 - File format: .wav file (Linear PCM, simply called PCM)
 
 Example user inputs include:
@@ -2866,13 +2873,13 @@ In the figure above,
 - The [=Parameter Block OBU=] with [=parameter_block_obu/parameter_id=] = 33 is providing [=mix_gain_parameter_data=] to be applied to the rendered [=Audio Element=] after rendering according to [=rendering_config=] of the [=Audio Element=] with [=audio_element_obu/audio_element_id=] = 12.
 - The [=Parameter Block OBU=] with [=parameter_block_obu/parameter_id=] = 34 is providing [=mix_gain_parameter_data=] to be applied to the [=Rendered Mix Presentation=] of the two rendered [=Audio Element=]s.
 
-## Annex B: Rules for Scalable Channel Audio (Normative) ## {#Annex_B}
+## Annex B: Rules for Scalable Channel Audio ## {#Annex_B}
 
 This Annex specifies normative rules for scalable channel audio with [=num_layers=] > 1.
 
-### Annex B-1: Down-mix parameter and Loudness ### {#iamfgeneration-scalablechannelaudio-downmixparameter}
+### Annex B-1: Down-mix parameter and Loudness (Informative) ### {#iamfgeneration-scalablechannelaudio-downmixparameter}
 
-This section describes how to generate RECOMMENDED down-mix parameters and loudness levels for a given channel audio and a given list of channel layouts for scalability (i.e., [=num_layers=] > 1).
+This section describes how down-mix parameters and loudness levels can be generated for a given channel audio and a given list of channel layouts for scalability (i.e., [=num_layers=] > 1).
 
 The figure below shows a block diagram for the Down-Mix Parameter Generator and Loudness Module, including the Down-Mixer.
 
@@ -2880,7 +2887,7 @@ The figure below shows a block diagram for the Down-Mix Parameter Generator and 
 <center><figcaption>IA Down-Mix Parameter and Loudness</figcaption></center>
 
 For a given channel-based input [=3D audio signal=] (e.g., 7.1.4ch) and a given list of channel layouts based on the input [=3D audio signal=],
-- The Down-Mix Parameter Generator SHALL generate 5 down-mix parameters (\(\alpha(k)\), \(\beta(k)\), \(\gamma(k)\), \(\delta(k)\) and [=w(k)|\(w(k)\)=], where \(k\) is the frame index) by analyzing the input [=3D audio signal=] and referring to [[AI-CAD-Mixing]].
+- The Down-mix parameter generator generates 5 down-mix parameters (\(\alpha(k)\), \(\beta(k)\), \(\gamma(k)\), \(\delta(k)\) and [=w(k)|\(w(k)\)=], where \(k\) is the frame index) by analyzing the input [=3D audio signal=] and referring to [[AI-CAD-Mixing]].
 	- It is composed of an Audio Scene Classification module and a Height Energy Quantification module as depicted in Figure 11-2.
 	- The Audio Scene Classification module generates 4 parameters (\(\alpha(k)\), \(\beta(k)\), \(\gamma(k)\), \(\delta(k)\)) by classifying audio scenes in the input [=3D audio signal=] into one of three modes.
 		1. Default scene: Neither Dialog nor Effect
@@ -2892,13 +2899,13 @@ For a given channel-based input [=3D audio signal=] (e.g., 7.1.4ch) and a given 
 	- It is not depicted in the figure but the Down-Mixer further generates [=dmixp_mode=] and [=recon_gain=] for each frame to be passed to the OBU Packetizer.
 - The Loudness module measures the loudness level ([=LKFS=]) of each [=down-mixed audio=] based on [[ITU1770-4]], and passes them to the OBU Packetizer.
 
-### Annex B-2: Down-mix Mechanism ### {#iamfgeneration-scalablechannelaudio-downmixmechanism}
+### Annex B-2: Down-mix Mechanism (Informative) ### {#iamfgeneration-scalablechannelaudio-downmixmechanism}
 
-This section specifies the down-mixing mechanism to generate <dfn noexport>down-mixed audio</dfn> for scalable channel audio.
+This section specifies the down-mixing mechanism to generate <dfn noexport>down-mixed audio</dfn> for scalable channel audio encoding.
 
 For a given channel-based input [=3D audio signal=] that conforms to the [=loudspeaker_layout=], the surround and top channels (if any) are separately down-mixed and especially step by step until to get the target channels.
 
-Implementers MAY use another method to get the [=down-mixed audio=] from the given input [=3D audio signal=], but the [=down-mixed audio=] SHALL comply with that by this section.
+Implementers can use another method to get the [=down-mixed audio=] from the given input [=3D audio signal=], as long as the [=down-mixed audio=] signal is the same as the result of what is described in this section.
 
 A Down-Mixer based on the down-mix mechanism is a combination of the following surround Down-Mixer(s) and top Down-Mixer(s) as depicted in the figure below.
 - Surround Down-Mixers 
@@ -2930,7 +2937,7 @@ For example, to get the 3.1.2ch [=down-mixed audio=] from 7.1.4ch:
 - TF2 of 3.1.2ch is generated by using [=T4to2 enc.=] and [=T2toTF2 enc.=].
 
 
-### Annex B-3: Channel Layout Generation Rule ### {#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule}
+### Annex B-3: Channel Layout Generation Rule (Normative) ### {#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule}
 
 This section describes the generation rule for channel layouts for scalable channel audio.
 
@@ -2943,9 +2950,9 @@ Scalable channel audio with [=num_layers=] > 1 SHALL only allow down-mix paths w
 <center><img src="images/Down-mix Path.png" style="width:90%; height:auto;"></center>
 <center><figcaption>IA Down-mix Path for scalable channel audio</figcaption></center>
 
-### Annex B-4: Recon Gain Generation ### {#iamfgeneration-scalablechannelaudio-recongaingeneration}
+### Annex B-4: Recon Gain Generation (Informative) ### {#iamfgeneration-scalablechannelaudio-recongaingeneration}
 
-This section RECOMMENDs a method for generating [=recon_gain=].
+This section provides guidelines about how to generate [=recon_gain=]. 
 
 NOTE: Recon gain generation is not required when the codec is lossless, i.e., when [=codec_id=] is set to <code>ipcm</code> or <code>fLaC</code>.
 
@@ -2956,9 +2963,9 @@ Let's define the following:
 - \(M_k\) is the signal power for frame \(k\) of the relevant mixed channel of the [=down-mixed audio=] for CL #i-1.
 - \(D_k\) is the signal power for frame \(k\) of the de-mixed channel for CL #i (after demixing in the decoder side).
 
-If \(10 \times \log_{10}(\frac{O_k}{L_{\text{max}}^2})\) is less than the first threshold value (-80dB is RECOMMENDED), Recon_Gain(k, i) = 0, where \(L_{\text{max}} = 32767\) for 16 bits.
+If \(10 \times \log_{10}(\frac{O_k}{L_{\text{max}}^2})\) is less than the first threshold value (-80dB is preferred), Recon_Gain(k, i) = 0. Where, \(L_{\text{max}} = 32767\) for 16 bits.
 
-If \(10 \times \log_{10}(\frac{O_k}{M_k})\) is less than the second threshold value (-6dB is RECOMMENDED), Recon_Gain(k, i) is set to the value which makes \(O_k = (\text{Recon_Gain}(k, 1))^2 \times D_k\). Otherwise, Recon_Gain(k, i) = 1. The actual value (i.e., [=recon_gain=]) to be delivered is \( \left\lfloor{255 \times \text{Recon_Gain}}\right\rfloor \).
+If \(10 \times \log_{10}(\frac{O_k}{M_k})\) is less than the second threshold value (-6dB is preferred), Recon_Gain(k, i) is set to the value which makes \(O_k = (\text{Recon_Gain}(k, 1))^2 \times D_k\). Otherwise, Recon_Gain(k, i) = 1. The actual value (i.e., [=recon_gain=]) to be delivered is \( \left\lfloor{255 \times \text{Recon_Gain}}\right\rfloor \).
 
 For example, if we assume that CL #i = 7.1.4ch and CL #i-1 = 5.1.2ch, then the de-mixed channels are D_Lrs7, D_Rrs7, D_Ltb4 and D_Rtb4.
 - D_Lrs7 and D_Rrs7 are de-mixed from Ls5 and Rs5 in the (i-1)-th [=Channel Group=] by using Lss7 and Rss7 in the i-th [=Channel Group=] and its relevant demixing parameters (i.e., \(\alpha(k)\) and \(\beta(k)\)) , respectively.
@@ -2985,23 +2992,11 @@ Recon_Gain for D_Rtb4:
 - \(D_k\) is the signal power for frame \(k\) of D_Rtb4.
 
 
-### Annex B-5: Channel Group Generation Rule ### {#iamfgeneration-scalablechannelaudio-channelgroupgenerationrule}
+### Annex B-5: Channel Group Generation Rule (Informative) ### {#iamfgeneration-scalablechannelaudio-channelgroupgenerationrule}
 
 This section describes the generation rule for a [=Channel Group=] (CG).
 
-For a given channel-based input audio and the list of CLs ({CL #i: i = 1, 2, ..., n}), the CG Generation module outputs the transformed audio (i.e., [=Channel Group=]s) which SHALL conform to the following rules:
-- It consists of C number of channels and is structured to n number of [=Channel Group=]s, where C is the number of channels for the input [=3D audio signal=].
-- [=Channel Group=] #1 (referred to as BCG): This [=Channel Group=] is the [=down-mixed audio=] itself for CL #1 generated from the input [=3D audio signal=]. It contains C1 number of channels.
-- [=Channel Group=] #i (referred to as DCG i, for i = 2, 3, ..., n): This [=Channel Group=] contains (Ci – Ci-1) number of channels. (Ci – Ci-1) channel(s) consists of the following:
-	- The (Si – Si-1) surround channel(s) if Si > Si-1 . When \(S_{\text{set}} = \{x  \mid \text{Si}-1 < x \le \text{Si}\} \) and \(x\) is an integer,
-		- If 2 is an element of \(S_{\text{set}}\), the L2 channel is contained in this CG #i.
-		- If 3 is an element of \(S_{\text{set}}\), the Center channel is contained in this CG #i.
-		- If 5 is an element of \(S_{\text{set}}\), the L5 and R5 channels are contained in this CG #i.
-		- If 7 is an element of \(S_{\text{set}}\), the Lss7 and Rss7 channels are contained in this CG #i.
-	- The LFE channel if Wi > Wi-1.
-	- The (Ti – Ti-1) top channels if Ti > Ti-1 .
-		- If Ti-1 = 0, the top channels of the [=down-mixed audio=] for CL #i are contained in this [=Channel Group=] #i.
-		- If Ti-1 = 2, the Ltf and Rtf channels of the [=down-mixed audio=] for CL #i are contained in this [=Channel Group=] #i.
+For a given channel-based input audio and the list of CLs ({CL #i: i = 1, 2, ..., n}), the CG Generation module outputs the transformed audio (i.e., [=Channel Group=]s) which adheres to [[#iamfgeneration-scalablechannelaudio-channelgroupformat]].
 
 An example of a transformation matrix with 4 CGs (2ch/3.1.2ch/5.1.2ch/7.1.4ch) is given below, where \(p = 0.707\).
 
@@ -3093,3 +3088,19 @@ An example of a transformation matrix with 4 CGs (2ch/3.1.2ch/5.1.2ch/7.1.4ch) i
 		\text{LFE}
 	\end{bmatrix}
 \]
+
+### Annex B-6: Channel Group Format (Normative) ### {#iamfgeneration-scalablechannelaudio-channelgroupformat}
+
+The [=Channel Group=] format SHALL conform to the following rules:
+- It consists of C number of channels and is structured to n number of [=Channel Group=]s, where C is the number of channels for the input [=3D audio signal=].
+- [=Channel Group=] #1 (as called BCG): This [=Channel Group=] is the [=down-mixed audio=] itself for CL #1 generated from the input [=3D audio signal=]. It contains a C1 number of channels.
+- [=Channel Group=] #i (as called DCG, i = 2, 3, …, n): This [=Channel Group=] contains (Ci – Ci-1) number of channels. (Ci – Ci-1) channel(s) consists of as follows:
+	- (Si – Si-1) surround channel(s) if Si > Si-1 . When \(S_{\text{set}} = \{x  \mid \text{Si}-1 < x \le \text{Si}\} \) and \(x\) is an integer,
+		- If 2 is an element of \(S_{\text{set}}\), the L2 channel is contained in this CG #i.
+		- If 3 is an element of \(S_{\text{set}}\), the Center channel is contained in this CG #i.
+		- If 5 is an element of \(S_{\text{set}}\), the L5 and R5 channels are contained in this CG #i.
+		- If 7 is an element of \(S_{\text{set}}\), the Lss7 and Rss7 channels are contained in this CG #i.
+	- The LFE channel if Wi > Wi-1.
+	- (Ti - Ti-1) top channels if Ti > Ti-1.
+		- If Ti-1 = 0, the top channels of the [=down-mixed audio=] for CL #i are contained in this [=Channel Group=] #i.
+		- If Ti-1 = 2, the Ltf and Rtf channels of the [=down-mixed audio=] for CL #i are contained in this [=Channel Group=] #i.
