@@ -1490,7 +1490,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 6edc88947, updated Thu Aug 17 11:18:09 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="92797d43a89d7834859b1c55843c296c3e03e0a6" name="document-revision">
+  <meta content="c08162031cebe98d37f8ed26eb3c3a300e032456" name="document-revision">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
     color: var(--a-normal-text);
@@ -4048,12 +4048,9 @@ Parsers SHALL ignore these two fields.</p>
    <p>The Gain module is the mirror process of the Attenuation module (described in <a href="#iamfgeneration-scalablechannelaudio">§ 8.2 Scalable Channel Audio Encoding</a>). It recovers the reduced sample values using <a data-link-type="dfn" href="#output_gain" id="ref-for-output_gain⑤">output_gain</a>(i) when its <a data-link-type="dfn" href="#output_gain_is_present_flag" id="ref-for-output_gain_is_present_flag①">output_gain_is_present_flag</a>(i) for <a data-link-type="dfn" href="#channel-group" id="ref-for-channel-group④④">Channel Group</a> #i is set to 1. When its <a data-link-type="dfn" href="#output_gain_is_present_flag" id="ref-for-output_gain_is_present_flag②">output_gain_is_present_flag</a>(i) is set to 0, then this module SHALL be bypassed for <a data-link-type="dfn" href="#channel-group" id="ref-for-channel-group④⑤">Channel Group</a> #i. The value of <a data-link-type="dfn" href="#output_gain" id="ref-for-output_gain⑥">output_gain</a>(i) for <a data-link-type="dfn" href="#channel-group" id="ref-for-channel-group④⑥">Channel Group</a> #i SHALL be applied to all samples of the mixed channels in <a data-link-type="dfn" href="#channel-group" id="ref-for-channel-group④⑦">Channel Group</a> #i, where a mixed channel means the channel created by mixing multiple channels of an input channel audio when generating <a data-link-type="dfn" href="#down-mixed-audio" id="ref-for-down-mixed-audio">down-mixed audio</a> from the input channel audio (i.e., the channel audio for CL #n).</p>
    <p>To apply the gain, an implementation SHALL use the following:</p>
    <p>\[
-\text{sample} =	\text{sample} \times 10^{g}
-\]
-\[
-g = \frac{\text{output_gain}(i)}{20.0 \times 256}
-\]
-where i = 1, 2, ..., n and \(n\) is <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⑦">num_layers</a>. <a data-link-type="dfn" href="#output_gain" id="ref-for-output_gain⑦">output_gain</a>(i) is the raw 16-bit value for the i-th layer which is specified in <a data-link-type="dfn" href="#channel_audio_layer_config" id="ref-for-channel_audio_layer_config②">channel_audio_layer_config</a>.</p>
+\text{sample} =	\text{sample} \times 10^{\frac{\text{output_gain}(i)}{20.0 \times 256}}, \quad i = 1, 2, \ldots, n
+\]</p>
+   <p>where \(n\) is <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⑦">num_layers</a>. <a data-link-type="dfn" href="#output_gain" id="ref-for-output_gain⑦">output_gain</a>(i) is the raw 16-bit value for the i-th layer which is specified in <a data-link-type="dfn" href="#channel_audio_layer_config" id="ref-for-channel_audio_layer_config②">channel_audio_layer_config</a>.</p>
    <h4 class="heading settled" data-level="7.2.2" id="processing-scalablechannelaudio-demixer"><span class="secno">7.2.2. </span><span class="content">De-mixer</span><a class="self-link" href="#processing-scalablechannelaudio-demixer"></a></h4>
    <p>For scalable channel audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers①⑧">num_layers</a> > 1, some channels of <a data-link-type="dfn" href="#down-mixed-audio" id="ref-for-down-mixed-audio①">down-mixed audio</a> for CL #i are delivered as-is but the rest are mixed with other channels for CL #i-1.</p>
    <p>The De-mixer module reconstructs the rest of the <a data-link-type="dfn" href="#down-mixed-audio" id="ref-for-down-mixed-audio②">down-mixed audio</a> for CL #i from the mixed channels, which is passed by the Gain module, and its relevant non-mixed channels using its relevant demixing parameters.</p>
@@ -5186,7 +5183,7 @@ class Bar {
    <h4 class="heading settled" data-level="10.2.5" id="iamfgeneration-scalablechannelaudio-channelgroupgenerationrule"><span class="secno">10.2.5. </span><span class="content">Annex B-5: Channel Group Generation Rule (Informative)</span><a class="self-link" href="#iamfgeneration-scalablechannelaudio-channelgroupgenerationrule"></a></h4>
    <p>This section describes the generation rule for a <a data-link-type="dfn" href="#channel-group" id="ref-for-channel-group⑨⓪">Channel Group</a> (CG).</p>
    <p>For a given channel-based input audio and the list of CLs ({CL #i: i = 1, 2, ..., n}), the CG Generation module outputs the transformed audio (i.e., <a data-link-type="dfn" href="#channel-group" id="ref-for-channel-group⑨①">Channel Group</a>s) which adheres to <a href="#iamfgeneration-scalablechannelaudio-channelgroupformat">§ 10.2.6 Annex B-6: Channel Group Format (Normative)</a>.</p>
-   <p>An example of a transformation matrix with 4 CGs (2ch/3.1.2ch/5.1.2ch/7.1.4ch) is given below,</p>
+   <p>An example of a transformation matrix with 4 CGs (2ch/3.1.2ch/5.1.2ch/7.1.4ch) is given below, where \(p = 0.707\).</p>
    <p>\[
 	\begin{array}{c}
 	\text{BCG} \enspace \left\{ \vphantom{
@@ -5196,7 +5193,7 @@ class Bar {
 	    \end{bmatrix}
 	} \right. \\
 	\vphantom{
-	    \rule{1cm}{0.4pt} \\
+	    \rule{1.5cm}{0.4pt} \\
 	} \\
 	\text{DCG 1} \enspace \left\{ \vphantom{
 	  \begin{bmatrix}
@@ -5207,7 +5204,7 @@ class Bar {
 	  \end{bmatrix}
 	} \right. \\
 	\vphantom{
-	    \rule{1cm}{0.4pt} \\
+	    \rule{1.5cm}{0.4pt} \\
 	} \\
 	\text{DCG 2} \enspace \left\{ \vphantom{
 	  \begin{bmatrix}
@@ -5216,7 +5213,7 @@ class Bar {
 	  \end{bmatrix}
 	} \right. \\
 	\vphantom{
-	    \rule{1cm}{0.4pt} \\
+	    \rule{1.5cm}{0.4pt} \\
 	} \\
 	\text{DCG 3} \enspace \left\{ \vphantom{
 		\begin{bmatrix}
@@ -5230,15 +5227,15 @@ class Bar {
 	\begin{bmatrix}
 		\text{L2} \\
 		\text{R2} \\
-		\rule{1cm}{0.4pt} \\
+		\rule{1.5cm}{0.4pt} \\
 		\text{C} \\
 		\text{Ltf3} \\
 		\text{Rtf3} \\
 		\text{LFE} \\
-		\rule{1cm}{0.4pt} \\
+		\rule{1.5cm}{0.4pt} \\
 		\text{L5} \\
 		\text{R5} \\
-		\rule{1cm}{0.4pt} \\
+		\rule{1.5cm}{0.4pt} \\
 		\text{Lss7} \\
 		\text{Rss7} \\
 		\text{Ltf} \\
@@ -5246,11 +5243,11 @@ class Bar {
 	\end{bmatrix}
 	=
 	\begin{bmatrix}
-		1 &amp; p &amp; 0 &amp; a(k) &amp; 0 &amp; b(k)&amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
-		0 &amp; p &amp; 1 &amp; 0 &amp; a(k)&amp; 0 &amp; b(k) &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
+		1 &amp; p &amp; 0 &amp; \delta(k) \times \alpha(k) &amp; 0 &amp; \delta(k) \times \beta(k) &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
+		0 &amp; p &amp; 1 &amp; 0 &amp; \delta(k) \times \alpha(k) &amp; 0 &amp; \delta(k) \times \beta(k) &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
 		0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
-		0 &amp; 0 &amp; 0 &amp; c(k) &amp; 0 &amp; d(k) &amp; 0 &amp; 1 &amp; 0 &amp; \gamma(k) &amp; 0 &amp; 0 \\
-		0 &amp; 0 &amp; 0 &amp; 0 &amp; c(k) &amp; 0 &amp; d(k) &amp; 0 &amp; 1 &amp; 0 &amp; \gamma(k) &amp; 0 \\
+		0 &amp; 0 &amp; 0 &amp; w(k) \times \delta(k) \times \alpha(k) &amp; 0 &amp; w(k) \times \delta(k) \times \beta(k) &amp; 0 &amp; 1 &amp; 0 &amp; \gamma(k) &amp; 0 &amp; 0 \\
+		0 &amp; 0 &amp; 0 &amp; 0 &amp; w(k) \times \delta(k) \times \alpha(k) &amp; 0 &amp; w(k) \times \delta(k) \times \beta(k) &amp; 0 &amp; 1 &amp; 0 &amp; \gamma(k) &amp; 0 \\
 		0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 \\
 		1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
 		0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
@@ -5274,13 +5271,7 @@ class Bar {
 		\text{Rtb} \\
 		\text{LFE}
 	\end{bmatrix}
-\]
-where
-\[p = 0.707,\]
-\[a(k) = \delta(k) \times \alpha(k),\]
-\[b(k) = \delta(k) \times \beta(k),\]
-\[c(k) = w(k) \times \delta(k) \times \alpha(k),\]
-\[d(k) = w(k) \times \delta(k) \times \beta(k).\]</p>
+\]</p>
    <h4 class="heading settled" data-level="10.2.6" id="iamfgeneration-scalablechannelaudio-channelgroupformat"><span class="secno">10.2.6. </span><span class="content">Annex B-6: Channel Group Format (Normative)</span><a class="self-link" href="#iamfgeneration-scalablechannelaudio-channelgroupformat"></a></h4>
    <p>The <a data-link-type="dfn" href="#channel-group" id="ref-for-channel-group⑨②">Channel Group</a> format SHALL conform to the following rules:</p>
    <ul>
@@ -5470,9 +5461,6 @@ MathJax = {
     packages: {'[+]': ['tagFormat']},
     tags: "all"
   },
-  chtml: {
-    scale: 0.9,
-  ,
 };
 </script>
 <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
