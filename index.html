@@ -1490,7 +1490,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 6edc88947, updated Thu Aug 17 11:18:09 2023 -0700" name="generator">
   <link href="https://aomediacodec.github.io/iamf/" rel="canonical">
-  <meta content="1488641eaf8a5774f0de012cb4b007adec118071" name="document-revision">
+  <meta content="b44349e04fd243df809bf4618ef1266a0971b430" name="document-revision">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
     color: var(--a-normal-text);
@@ -2382,7 +2382,7 @@ dfn > a.self-link::before      { content: "#"; }
    </ul>
    <p>Within a <a data-link-type="dfn" href="#mix-presentation" id="ref-for-mix-presentation⑥">Mix Presentation</a>, the presentation start time of all <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element②③">Audio Element</a>s coincide and all <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element②④">Audio Element</a>s have the same duration defining the duration of the <a data-link-type="dfn" href="#mix-presentation" id="ref-for-mix-presentation⑦">Mix Presentation</a>.</p>
    <p>Within an <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence①①">IA Sequence</a>, all <a data-link-type="dfn" href="#mix-presentation" id="ref-for-mix-presentation⑧">Mix Presentation</a>s have the same duration, defining the duration of the <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence①②">IA Sequence</a>, and have the same presentation start time defining the presentation start time of the <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence①③">IA Sequence</a>.</p>
-   <p>The term <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="temporal-unit">Temporal Unit</dfn> means a set of all <a data-link-type="dfn" href="#audio-frame-obu" id="ref-for-audio-frame-obu①⓪">Audio Frame OBU</a>s with the same decode start time and the same duration from all coded <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream②⑤">Audio Substream</a>s and all non-redundant <a data-link-type="dfn" href="#parameter-block-obu" id="ref-for-parameter-block-obu⑨">Parameter Block OBU</a>s with the decode start time within the duration.</p>
+   <p>The term <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="temporal-unit">Temporal Unit</dfn> conceptually means a set of all <a data-link-type="dfn" href="#audio-frame-obu" id="ref-for-audio-frame-obu①⓪">Audio Frame OBU</a>s with the same decode start time and the same duration from all coded <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream②⑤">Audio Substream</a>s and all non-redundant <a data-link-type="dfn" href="#parameter-block-obu" id="ref-for-parameter-block-obu⑨">Parameter Block OBU</a>s with the decode start time within the duration.</p>
    <p>The figure below shows an example of the Timing Model in terms of the decode start times and durations of the coded <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream②⑥">Audio Substream</a> and <a data-link-type="dfn" href="#parameter-substream" id="ref-for-parameter-substream①⑥">Parameter Substream</a>.</p>
    <center><img height="1029" src="images/IAMF Timing Model.png" style="width:100%; height:auto;" width="1946"></center>
    <center>
@@ -3297,7 +3297,10 @@ class AmbisonicsProjectionConfig() {
 <pre>class ParameterBlockOBU() {
   leb128() parameter_id;
   
-  (param_definition_type, param_definition_mode, duration, num_subblocks, constant_subblock_duration, subblock_duration) = get_param_definition(parameter_id);
+  (param_definition_type, param_definition_mode, 
+   duration, num_subblocks, constant_subblock_duration, 
+   subblock_duration) 
+      = get_param_definition(parameter_id);
   
   if (param_definition_mode) {
     leb128() duration;
@@ -4943,18 +4946,6 @@ class Bar {
    <h3 class="heading settled" data-level="9.2" id="convention-arithmetic-operators"><span class="secno">9.2. </span><span class="content">Arithmetic Operators</span><a class="self-link" href="#convention-arithmetic-operators"></a></h3>
    <table class="def">
     <tbody>
-     <tr>
-      <td>\(+\)
-      <td>Addition.
-     <tr>
-      <td>\(-\)
-      <td>Subtraction.
-     <tr>
-      <td>\(\times\)
-      <td>Multiplication.
-     <tr>
-      <td>\(\frac{\cdot}{\cdot}\)
-      <td>Floating point (arithmetic) division.
      <tr>
       <td>\(\left\lfloor{x}\right\rfloor \)
       <td>The largest integer that is smaller than or equal to \(x\).
