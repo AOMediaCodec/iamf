@@ -1551,7 +1551,7 @@ class DemixingInfoParameterData() {
 - 6: mode3, \(\left( \alpha, \beta, \gamma, \delta, \text{w_idx_offset} \right) = \left(1, 0.866, 0.866, 0.866, 1\right) \)
 - 7: reserved
 
-\(\alpha\) and \(\beta\) are gain values used for the [=S7to5 enc.=], \(\gamma\) for the [=T4to2 enc.=], \(\delta\) for the [=S5to3 enc.=] and <dfn noexport>w_idx_offset</dfn> is the offset used to generate a gain value [=w(k)|\(w(k)\)=] used for the [=T2toTF2 enc.=].
+\(\alpha\) and \(\beta\) are gain values used for the [=S7to5 encoder=], \(\gamma\) for the [=T4to2 encoder=], \(\delta\) for the [=S5to3 encoder=] and <dfn noexport>w_idx_offset</dfn> is the offset used to generate a gain value [=w(k)|\(w(k)\)=] used for [=T2toTF2 encoder=].
 
 <center><img src="images/Down-mix Mechanism.png" style="width:100%; height:auto;"></center>
 <center><figcaption></b>IA Down-mix Mechanism</figcaption></center>
@@ -1580,15 +1580,29 @@ class ReconGainInfoParameterData() {
 
 <b>Semantics</b>
 
-<dfn noexport>recon_gain_flags</dfn> is a bitmask that indicates which channels [=recon_gain=] is applied to, as depicted in the figure below.
+<dfn noexport>recon_gain_flags</dfn> is a bitmask that indicates which channels [=recon_gain=] is applied to, as shown in the table below.
 
-<left><img src="images/Recon_Gain_Flags.png" style="width:100%; height:auto;"></left>
-<center><figcaption>Table for Recon Gain Flags</figcaption></center>
+<pre class = "def">
+Byte postion : Bit position : Assigned Channel Name
+             :   b0 (LSB)   : Left channel
+             :      b1      : Center channel
+ LSB 7 bits  :      b2      : Right channel
+     of      :      b3      : Left surround channel (or Lss)
+the 1st byte :      b4      : Right surround channel (or Rss)
+             :      b5      : Left top front channel 
+             :      b6      : Right top front channel
+----------------------------------------------------------             
+ LSB 5 bits  :      b7      : Left rear surround channel
+ of the 2nd  :      b8      : Right rear surround channel
+  byte when  :      b9      : Left top back channel
+ MSB of the  :      b10     : Right top back channel
+1st byte = 1 :  b11 (MSB)   : Low-Frequency Effect channel
+</pre>
 
  - 0: Indicates that no [=recon_gain=] is present for the channel.
  - 1: Indicates that [=recon_gain=] is present for the channel.
 
-<dfn noexport>n(i)</dfn> indicates the number of bits for [=recon_gain_flags=](i), where i = 0, 1, ..., [=num_layers=] - 1. It SHALL be 7 or 12 as depicted in the figure above. 
+<dfn noexport>n(i)</dfn> indicates the number of bits for [=recon_gain_flags=](i), where i = 0, 1, ..., [=num_layers=] - 1. It SHALL be 7 or 12 as shown in the table above. 
 
 <dfn noexport>recon_gain</dfn> indicates the gain value to be applied to the channels identified by [=recon_gain_flags=], after decoding the associated audio frames and carrying out the demixing operation. Details on how this value is used are specified in [[#processing-scalablechannelaudio-recongain]].
 
@@ -2025,7 +2039,7 @@ An [=IA Sequence=] SHALL be decoded and processed to output an [=Immersive Audio
     - Details are provided in [[#processing-mixpresentation-rendering]].
 5. Applying mixing parameters to the rendered [=Audio Element=].
     - Details are provided in [[#processing-mixpresentation-mixing]].
-6. Synchronizing and then summing all rendered and individually processed [=Audio Elements=].
+6. Synchronizing and then summing all rendered and individually processed [=Audio Element=]s.
     - Details are provided in [[#processing-mixpresentation-mixing]].
 7. Applying further mixing parameters to the mixed [=Audio Element=]s.
     - Details are provided in [[#processing-mixpresentation-mixing]].
@@ -2037,13 +2051,14 @@ NOTE: The IA decoder MAY choose to lazily parse OBUs to avoid unnecessarily pars
 The figure below depicts an example IA decoder architecture with modules that perform the steps above.
 
 <center><img src="images/IA Decoder Configuration.png" style="width:100%; height:auto;"></center>
-<center><figcaption>IA Decoder Configuration. AE: Audio Element, Codec Dec: Codec Decoder.</figcaption></center>
+<center><figcaption>IA Decoder Configuration. AE: Audio Element, AS: Audio Substream.</figcaption></center>
 
 - The OBU parser depacketizes the [=IA Sequence=] to output the [=Descriptor=]s, [=Audio Substream=]s and [=Parameter Substream=]s.
 - The Codec Decoder for each [=Audio Substream=] outputs the decoded channels.
 - The Audio Element Renderer reconstructs the [=3D audio signal=] from decoded channels of Codec Decoders according to [=Audio Element=] type (specified [=Audio Element OBU=]), and renders the audio channels to the playback layout.
-- The Post-Processor outputs the [=Immersive Audio=] for playback after processing and mixing the [=Audio Elements=], and then post-processing to perform loudness normalization and peak-limiting.
-
+- The Synchronizer synchronizes all rendered and individually processed [=Audio Element=]s.
+- The Mixer sums the synchronized [=Audio Element=]s and applies further mixing parameters.
+- Then, Post-Processor outputs the [=Immersive Audio=] for playback after performs loudness normalization and peak-limiting.
 
 ## Ambisonics Decoding and Reconstruction ## {#processing-ambisonics}
 
@@ -2663,7 +2678,7 @@ For Scalable Channel Audio encoding:
 The figure below shows the IA encoding flowchart for Scalable Channel Audio.
 
 <center><img src="images/IA Encoding Flowchart for Channel Audio Format.png" style="width:80%; height:auto;"></center>
-<center><figcaption>IA Encoding Flowchart for Scalable Channel Audio.</figcaption></center>
+<center><figcaption>IA Encoding Flowchart for Scalable Channel Audio. CH: channel </figcaption></center>
 
 - For a given input channel audio and a given list of channel layouts for scalability, PCM samples for the input channel audio are passed to the CG Generation module.
 - The CG Generation module generates the transformed audio according to the CG generation rule based on the list of CLs and the down-mix parameters.
@@ -2900,23 +2915,23 @@ Implementers can use another method to get the [=down-mixed audio=] from the giv
 
 A Down-Mixer based on the down-mix mechanism is a combination of the following surround Down-Mixer(s) and top Down-Mixer(s) as depicted in the figure below.
 - Surround Down-Mixers 
-	- <dfn noexport>S7to5 enc.</dfn>:
+	- <dfn noexport>S7to5 encoder</dfn>:
 		\[\text{Ls5} = \alpha(k) \times \text{Lss7} + \beta(k) \times \text{Lrs7}\]
 		\[\text{Rs5} = \alpha(k) \times \text{Rss7} + \beta(k) \times \text{Rrs7}\]
-	- <dfn noexport>S5to3 enc.</dfn>:
+	- <dfn noexport>S5to3 encoder</dfn>:
 		\[\text{L3} = \text{L5} + \delta(k) \times \text{Ls5}\]
 		\[\text{R3} = \text{R5} + \delta(k) \times \text{Rs5}\]
-	- <dfn noexport>S3to2 enc.</dfn>:
+	- <dfn noexport>S3to2 encoder</dfn>:
 		\[\text{L2} = \text{L3} + 0.707 \times \text{C}\]
 		\[\text{R2} = \text{R3} + 0.707 \times \text{C}\]
-	- <dfn noexport>S2to1 enc.</dfn>:
+	- <dfn noexport>S2to1 encoder</dfn>:
 		\[\text{Mono} = 0.5 \times (\text{L2} + \text{R2})\]
 
 - Top Down-Mixers
-	- <dfn noexport>T4to2 enc.</dfn>:
+	- <dfn noexport>T4to2 encoder</dfn>:
 		\[\text{Ltf2} = \text{Ltf4} + \gamma(k) \times \text{Ltb4}\]
 		\[\text{Rtf2} = \text{Rtf4} + \gamma(k) \times \text{Rtb4}\]
-	- <dfn noexport>T2toTF2 enc.</dfn>:
+	- <dfn noexport>T2toTF2 encoder</dfn>:
 		\[\text{Ltf3} = \text{Ltf2} + w(k) \times \delta(k) \times \text{Ls5}\]
 		\[\text{Rtf3} = \text{Rtf2} + w(k) \times \delta(k) \times \text{Rs5}\]
 
@@ -2924,8 +2939,8 @@ A Down-Mixer based on the down-mix mechanism is a combination of the following s
 <center><figcaption>IA Down-mix Mechanism</figcaption></center>
 
 For example, to get the 3.1.2ch [=down-mixed audio=] from 7.1.4ch:
-- S3 of 3.1.2ch is generated by using [=S7to5 enc.=] and [=S5to3 enc.=].
-- TF2 of 3.1.2ch is generated by using [=T4to2 enc.=] and [=T2toTF2 enc.=].
+- S3 of 3.1.2ch is generated by using [=S7to5 encoder=] and [=S5to3 encoder=].
+- TF2 of 3.1.2ch is generated by using [=T4to2 encoder=] and [=T2toTF2 encoder=].
 
 
 ### Annex B-3: Channel Layout Generation Rule (Normative) ### {#iamfgeneration-scalablechannelaudio-channellayoutgenerationrule}
