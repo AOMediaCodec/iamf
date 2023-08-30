@@ -2165,19 +2165,21 @@ The mapping of [=wIdx(k)|\(\text{wIdx}(k)\)=] <dfn noexport>w(k)</dfn> SHOULD be
     10    : 0.5
 </pre>
 
-When \(D_{\text{set}} = \{x \mid \text{S1} < x \le \text{Si}\} \) where \(x\) is an integer,
+When \(S_{\text{set}} = \{x \mid \text{X1} < x \le \text{Xi}\} \) where \(x\) is an integer,
 
-- If 2 is an element of \(D_{\text{set}}\), the combination SHALL include the [=S1to2 de-mixer=].
-- If 3 is an element of \(D_{\text{set}}\), the combination SHALL include the [=S2to3 de-mixer=].
-- If 5 is an element of \(D_{\text{set}}\), the combination SHALL include the [=S3to5 de-mixer=].
-- If 7 is an element of \(D_{\text{set}}\), the combination SHALL include the [=S5to7 de-mixer=].
+- If 2 is an element of \(S_{\text{set}}\), the combination SHALL include the [=S1to2 de-mixer=].
+- If 3 is an element of \(S_{\text{set}}\), the combination SHALL include the [=S2to3 de-mixer=].
+- If 5 is an element of \(S_{\text{set}}\), the combination SHALL include the [=S3to5 de-mixer=].
+- If 7 is an element of \(S_{\text{set}}\), the combination SHALL include the [=S5to7 de-mixer=].
 
-When Ti = 2,
-- If Sj = 3 (j = 1, 2, ..., i- 1), the combination SHALL include the [=TF2toT2 de-mixer=].
+When Zi = 2,
+- If Xj = 3 (j = 1, 2, ..., i- 1), the combination SHALL include the [=TF2toT2 de-mixer=].
 
-When Ti = 4,
-- If Sj = 3 (j = 1, 2, ..., i - 1), the combination SHALL include the [=TF2toT2 de-mixer=] and [=T2to4 de-mixer=].
-- Else if Tj = 2 (j = 1, 2, ..., i - 1), the combination SHALL include the [=T2to4 de-mixer=].
+When Zi = 4,
+- If Xj = 3 (j = 1, 2, ..., i - 1), the combination SHALL include the [=TF2toT2 de-mixer=] and [=T2to4 de-mixer=].
+- Else if Zj = 2 (j = 1, 2, ..., i - 1), the combination SHALL include the [=T2to4 de-mixer=].
+
+Where Xi.Yi.Zi denotes the channel layout in CL #i, where Xi is the number of surround channels, Yi is the number of LFE channels, and Zi is the number of height channels.
 
 For example, consider the case where CL #1 = 2ch, CL #2 = 3.1.2ch, CL #3 = 5.1.2ch and CL #4 = 7.1.4ch. To reconstruct the rest (i.e., Ls5/Rs5/Ltf/Rtf) of the [=down-mixed audio=] 5.1.2ch,
 - The combination includes [=S2to3 de-mixer=], [=S3to5 de-mixer=] and [=TF2toT2 de-mixer=].
@@ -2950,10 +2952,10 @@ For example, to get the 3.1.2ch [=down-mixed audio=] from 7.1.4ch:
 This section describes the generation rule for channel layouts for scalable channel audio.
 
 For a given channel layout (CL #n) of a channel-based input [=3D audio signal=], any list of CLs ({CL #i: i = 1, 2, ..., n}) for scalable channel audio SHALL conform with the following rules:
-- Si ≤ Si+1 and Wi ≤ Wi+1 and Ti ≤ Ti+1 except Si = Si+1, Wi = Wi+1 and Ti = Ti+1 for i = n-1, n-2, ..., 1, where the i-th channel layout CL #i = Si.Wi.Ti.
+- Xi ≤ Xi+1 and Yi ≤ Yi+1 and Zi ≤ Zi+1 except Xi = Xi+1, Yi = Yi+1 and Zi = Zi+1 for i = n-1, n-2, ..., 1, where the i-th channel layout CL #i = Xi.Yi.Zi, Xi is the number of surround channels, Yi is the number of LFE channels, and Zi is the number of height channels.
 - CL #i is one of the [=loudspeaker_layout=]s supported in this version of the specification.
 
-Scalable channel audio with [=num_layers=] > 1 SHALL only allow down-mix paths which conform to the rules above, as depicted in the figure below.
+Scalable channel audio with [=num_layers=] > 1 SHALL only allow down-mix paths that conform to the rules above, as depicted in the figure below.
 
 <center><img src="images/Down-mix Path.png" style="width:90%; height:auto;"></center>
 <center><figcaption>IA Down-mix Path for scalable channel audio</figcaption></center>
@@ -3109,12 +3111,13 @@ The [=Channel Group=] format SHALL conform to the following rules:
 - It consists of C number of channels and is structured to n number of [=Channel Group=]s, where C is the number of channels for the input [=3D audio signal=].
 - [=Channel Group=] #1 (as called BCG): This [=Channel Group=] is the [=down-mixed audio=] itself for CL #1 generated from the input [=3D audio signal=]. It contains a C1 number of channels.
 - [=Channel Group=] #i (as called DCG, i = 2, 3, …, n): This [=Channel Group=] contains (Ci – Ci-1) number of channels. (Ci – Ci-1) channel(s) consists of as follows:
-	- (Si – Si-1) surround channel(s) if Si > Si-1 . When \(S_{\text{set}} = \{x  \mid \text{Si}-1 < x \le \text{Si}\} \) and \(x\) is an integer,
+	- (Xi – Xi-1) surround channel(s) if Xi > Xi-1 . When \(S_{\text{set}} = \{x  \mid \text{Xi}-1 < x \le \text{Xi}\} \) and \(x\) is an integer,
 		- If 2 is an element of \(S_{\text{set}}\), the L2 channel is contained in this CG #i.
 		- If 3 is an element of \(S_{\text{set}}\), the Center channel is contained in this CG #i.
 		- If 5 is an element of \(S_{\text{set}}\), the L5 and R5 channels are contained in this CG #i.
 		- If 7 is an element of \(S_{\text{set}}\), the Lss7 and Rss7 channels are contained in this CG #i.
-	- The LFE channel if Wi > Wi-1.
-	- (Ti - Ti-1) top channels if Ti > Ti-1.
-		- If Ti-1 = 0, the top channels of the [=down-mixed audio=] for CL #i are contained in this [=Channel Group=] #i.
-		- If Ti-1 = 2, the Ltf and Rtf channels of the [=down-mixed audio=] for CL #i are contained in this [=Channel Group=] #i.
+	- The LFE channel if Yi > Yi-1.
+	- (Zi - Zi-1) top channels if Zi > Zi-1.
+		- If Zi-1 = 0, the top channels of the [=down-mixed audio=] for CL #i are contained in this [=Channel Group=] #i.
+		- If Zi-1 = 2, the Ltf and Rtf channels of the [=down-mixed audio=] for CL #i are contained in this [=Channel Group=] #i.
+	- Where Xi.Yi.Zi denotes the channel layout in CL #i, where Xi is the number of surround channels, Yi is the number of LFE channels and Zi is the number of height channels.
