@@ -596,7 +596,7 @@ class CodecConfig() {
 
 <dfn noexport>codec_config</dfn> is an instance of the [=CodecConfig()=] class, which provides codec-specific information for seting up the decoder.
 
-<dfn noexport>codec_id</dfn> indicates a ‘four-character code’ (4CC) to identify the codec used to generate the coded [=Audio Substream=]s. For this version of the specification, it SHALL be set to one of the four [=codec_id=] values defined below:
+<dfn noexport>codec_id</dfn> indicates a ‘four-character code’ (4CC) to identify the codec used to generate the coded [=Audio Substream=]s. This version of the specification defines support for the four [=codec_id=] values defined below:
 
 - <code>Opus</code>: All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL comply with the [[!RFC-6716]] specification and the [=decoder_config=] structure SHALL comply with the constraints given in [[#opus-specific]].
 - <code>mp4a</code>: All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL comply with the [[!AAC]] specification and the [=decoder_config=] structure SHALL comply with the constraints given in [[#aac-lc-specific]].
@@ -604,6 +604,8 @@ class CodecConfig() {
 - <code>ipcm</code>: All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL contain linear PCM (LPCM) audio samples and the [=decoder_config=] structure SHALL comply with the constraints given in [[#lpcm-specific]].
 
 Parsers compliant with this version of the specification SHOULD ignore [=Codec Config OBU=]s with an unknown [=codec_id=].
+
+NOTE: Derived specifications or future versions of this specification may define support for additional codecs.
 
 NOTE: <code>ipcm</code> should not be confused with <code>lpcm</code>, which is another 4CC to identify codecs in other container formats (e.g., QuickTime).
 
@@ -1809,6 +1811,8 @@ The format of [=audio_frame=] is only one single mono or stereo PCM audio frame.
 The sample rate used for computing offsets SHALL be [=sample_rate=].
 
 # Profiles # {#profiles}
+
+NOTE: In this version of the specification, profiles impose constraints on how many codecs can be used in an [=IA Sequence=] but do not impose constraints on the actual codec used. In particular, this means that if a future version of the specification (or if a derived specification) defines how to use a new codec, the profiles defined in this specification could be used. Derived specifications may constrain the actual codec. The codecs parameter may also be used in content negotiation phases to ensure that an [=IA Sequence=] is supported by a device.
 
 The IA Profiles define a set of capabilities that are REQUIRED to parse, decode and process the corresponding [=IA Sequence=].
 
