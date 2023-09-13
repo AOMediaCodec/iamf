@@ -341,7 +341,7 @@ Although not shown in the figure above, the [=IA Sequence=] may be encapsulated 
 
 An [=IA Sequence=] is a bitstream to represent [=Immersive Audio=] contents and consists of [=Descriptors=] and [=IA Data=].
 
-The metadata in the [=Descriptors=] and [=IA Data=] are packetized into individual Open Bitstream Units (OBU)s. The term Open Bitstream Unit (OBU) is the concrete, physical unit used to represent the components in the model. In this version of the specification, the term IA OBU can be used interchangeably with OBU.
+The metadata in the [=Descriptors=] and [=IA Data=] are packetized into individual Open Bitstream Units (OBU)s. The term Open Bitstream Unit (OBU) is the concrete, physical unit used to represent the components in the model. In this specification, the term IA OBU can be used interchangeably with OBU.
 
 The normative definitions for an [=IA Sequence=] are defined in [[#standalone-ia-sequence]].
 
@@ -505,11 +505,9 @@ NOTE: This means that if one of the values is set to the number of samples in th
 
 <dfn noexport>obu_extension_flag</dfn> indicates whether the [=extension_header_size=] field is present. If it is set to 0, the [=extension_header_size=] field SHALL NOT be present. Otherwise, the [=extension_header_size=] field SHALL be present.
 
-This flag SHALL be set to 0 for this version of the specification. An OBU parser that is conformant with this version of the specification SHOULD ignore the [=extension_header_bytes=].
-
 NOTE: A future version of the specification may use this flag to specify an extension header field by setting [=obu_extension_flag=] = 1 and setting the size of the extended header to [=extension_header_size=].
 
-<dfn noexport>obu_size</dfn> indicates the size in bytes of the OBU immediately following the [=obu_size=] field. If the [=obu_trimming_status_flag=] and/or [=obu_extension_flag=] fields are set to 1, [=obu_size=] SHALL include the sizes of the additional fields. The [=obu_size=] MAY be greater than the size needed to represent the OBU syntax defined in this version of the specification, for example, to represent new syntax defined in a future version of the specification. Parsers compliant with this version of the specification SHOULD ignore these bytes.
+<dfn noexport>obu_size</dfn> indicates the size in bytes of the OBU immediately following the [=obu_size=] field. If the [=obu_trimming_status_flag=] and/or [=obu_extension_flag=] fields are set to 1, [=obu_size=] SHALL include the sizes of the additional fields. The [=obu_size=] MAY be greater than the size needed to represent the OBU syntax. Parsers SHOULD ignore bytes past the OBU syntax that they recognize.
 	
 <dfn noexport>num_samples_to_trim_at_end</dfn> indicates the number of samples that need to be trimmed from the end of the samples in this [=Audio Frame OBU=].
 
@@ -517,19 +515,13 @@ NOTE: A future version of the specification may use this flag to specify an exte
 
 <dfn noexport>extension_header_size</dfn> indicates the size in bytes of the extension header immediately following this field.
 
-<dfn noexport>extension_header_bytes</dfn> indicates the byte representations of the syntaxes of the extension header. Parsers compliant with this version of the specification SHOULD ignore these bytes.
+<dfn noexport>extension_header_bytes</dfn> indicates the byte representations of the syntaxes of the extension header. Parsers that don't understand these bytes SHOULD ignore them.
 
 ## Reserved OBU Syntax and Semantics ## {#obu-reserved}
 
-<dfn noexport>Reserved OBU</dfn>s SHOULD be ignored by parsers compliant with this version of the specification. Future versions of the specification MAY define syntax and semantics for these [=Reserved OBU=]s that would only be supported by parsers compliant with these future versions.
+Paresers SHOULD ignore <dfn noexport>Reserved OBU</dfn>s.
 
-<b>Syntax</b>
-
-```
-class ReservedOBU() {
-}
-```
-
+NOTE: Future versions of the specification MAY define syntax and semantics for an [=obu_type=] value, making it no longer a [=Reserved OBU=] for those parsers compliant with these future versions.
 
 ## IA Sequence Header OBU Syntax and Semantics ## {#obu-iasequenceheader}
 
@@ -555,7 +547,7 @@ class IASequenceHeaderOBU() {
 	
 NOTE: When IA OBUs are delivered over a protocol that does not provide explicit [=IA Sequence=] boundaries, a parser may locate the [=IA Sequence=] start by searching for the code <code>iamf</code> preceded by specific [=OBU Header=] values. For example, by assuming that [=obu_extension_flag=] is set to 0 and because [=obu_trimming_status_flag=] is set to 0 for an [=IA Sequence Header OBU=], the [=OBU Header=] can be either 0xF806 or 0xFC06.
 
-<dfn noexport>primary_profile</dfn> indicates the primary profile that this [=IA Sequence=] complies with. Parsers compliant with this version of the specification SHOULD discard the [=IA Sequence=] if they do not support the value indicated here.
+<dfn noexport>primary_profile</dfn> indicates the primary profile that this [=IA Sequence=] complies with. Parsers SHOULD discard the [=IA Sequence=] if they do not support the value indicated here.
 
 The mappings below are applied for both [=primary_profile=] and [=additional_profile=].
 - 0: Simple Profile
@@ -596,14 +588,16 @@ class CodecConfig() {
 
 <dfn noexport>codec_config</dfn> is an instance of the [=CodecConfig()=] class, which provides codec-specific information for seting up the decoder.
 
-<dfn noexport>codec_id</dfn> indicates a ‘four-character code’ (4CC) to identify the codec used to generate the coded [=Audio Substream=]s. For this version of the specification, it SHALL be set to one of the four [=codec_id=] values defined below:
+<dfn noexport>codec_id</dfn> indicates a ‘four-character code’ (4CC) to identify the codec used to generate the coded [=Audio Substream=]s. This specification supports the following four [=codec_id=] values defined below:
 
 - <code>Opus</code>: All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL comply with the [[!RFC-6716]] specification and the [=decoder_config=] structure SHALL comply with the constraints given in [[#opus-specific]].
 - <code>mp4a</code>: All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL comply with the [[!AAC]] specification and the [=decoder_config=] structure SHALL comply with the constraints given in [[#aac-lc-specific]].
 - <code>fLaC</code>: All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL comply with the [[!FLAC]] specification and the [=decoder_config=] structure SHALL comply with the constraints given in [[#flac-specific]].
 - <code>ipcm</code>: All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL contain linear PCM (LPCM) audio samples and the [=decoder_config=] structure SHALL comply with the constraints given in [[#lpcm-specific]].
 
-Parsers compliant with this version of the specification SHOULD ignore [=Codec Config OBU=]s with an unknown [=codec_id=].
+Parsers SHOULD ignore [=Codec Config OBU=]s with a [=codec_id=] that they don't support.
+
+NOTE: Derived specifications or future versions of this specification may support additional codecs.
 
 NOTE: <code>ipcm</code> should not be confused with <code>lpcm</code>, which is another 4CC to identify codecs in other container formats (e.g., QuickTime).
 
@@ -690,7 +684,7 @@ class ReconGainParamDefinition() extends ParamDefinition() {
 
 <dfn noexport for="audio_element_obu">audio_element_id</dfn> defines an identifier for an [=Audio Element=]. Within an [=IA Sequence=], there SHALL be one unique [=audio_element_obu/audio_element_id=] per [=Audio Element=]. There SHALL be exactly one [=Audio Element OBU=] with a given identifier in a set of [=Descriptors=]. [=Mix Presentation=]s refer to a particular [=Audio Element=] using this identifier.
 
-<dfn noexport>audio_element_type</dfn> specifies the audio representation of this [=Audio Element=], which is constructed from one or more [=Audio Substream=]s. Parsers compliant with this version of the specification SHOULD ignore [=Audio Element OBU=]s with a reserved [=audio_element_type=].
+<dfn noexport>audio_element_type</dfn> specifies the audio representation of this [=Audio Element=], which is constructed from one or more [=Audio Substream=]s. Parsers SHOULD ignore [=Audio Element OBU=]s with an [=audio_element_type=] that they do not recognize.
 
 <pre class = "def">
 audio_element_type: The type of audio representation.
@@ -699,7 +693,7 @@ audio_element_type: The type of audio representation.
   2~7   : Reserved
 </pre>
 
-<dfn noexport for="audio_element_obu">codec_config_id</dfn> indicates the identifier for the codec configuration which this [=Audio Element=] refers to. Parsers compliant with this version of the specification SHOULD ignore [=Audio Element OBU=]s with a [=audio_element_obu/codec_config_id=] identifying an unknown [=codec_id=].
+<dfn noexport for="audio_element_obu">codec_config_id</dfn> indicates the identifier for the codec configuration which this [=Audio Element=] refers to. Parsers SHOULD ignore [=Audio Element OBU=]s with a [=audio_element_obu/codec_config_id=] identifying a [=codec_id=] that they don't support.
 
 <dfn noexport>num_substreams</dfn> specifies the number of [=Audio Substream=]s that are used to reconstruct this [=Audio Element=]. It SHALL NOT be set to 0.
 
@@ -733,13 +727,13 @@ The order of the [=Audio Substream=]s in each [=Channel Group=] (i.e., the seman
 
 
 <dfn noexport>num_parameters</dfn> specifies the number of [=Parameter Substream=]s that are used by the algorithms specified in this [=Audio Element=].
-- When [=audio_element_type=] = 0, this field SHALL be set to 0, 1, or 2 for this version of the specification.
-- When [=audio_element_type=] = 1, this field SHALL be set to 0 for this version of the specification.
-- Parsers compliant with this version of the specification SHALL be able to parse any value of [=num_parameters=].
+- When [=audio_element_type=] = 0, this field SHALL be set to 0, 1, or 2.
+- When [=audio_element_type=] = 1, this field SHALL be set to 0.
+- Parsers SHALL support any value of [=num_parameters=].
 
 NOTE: For a given [=audio_element_type=], a future version of the specification may define a new [=Parameter Substream=] which may be ignored by IA decoders compliant with this version of the specification. In that case, a new [=param_definition_type=] will be defined in a future version of [=Audio Element OBU=].
 
-<dfn noexport>param_definition_type</dfn> specifies the type of the parameter definition. All parameter definition types described in this version of the specification are listed in the table below, along with their associated parameter definitions.
+<dfn noexport>param_definition_type</dfn> specifies the type of the parameter definition. The parameter definition types are listed in the table below, along with their associated parameter definitions.
 
 <table class = "def">
 <tr>
@@ -763,7 +757,7 @@ NOTE: For a given [=audio_element_type=], a future version of the specification 
 - When the highest [=loudspeaker_layout=] of the (non-)scalable channel audio (i.e., [=num_layers=] = 1) is less than or equal to 3.1.2ch, the type PARAMETER_DEFINITION_DEMIXING SHALL NOT be present.
 - When the highest [=loudspeaker_layout=] of the scalable channel audio (i.e., [=num_layers=] > 1) is greater than 3.1.2ch, both PARAMETER_DEFINITION_DEMIXING and PARAMETER_DEFINITION_RECON_GAIN types SHALL be present.
 - When [=num_layers=] = 1 and [=loudspeaker_layout=] is greater than 3.1.2ch, the type PARAMETER_DEFINITION_DEMIXING MAY be present.
-- An OBU parser that is conformant with this version of the specification SHALL be able to parse [=param_definition_type=] = P (where P > 2) and [=param_definition_size=]. The OBU Parser SHOULD ignore the bytes indicated by [=param_definition_size=].
+- An OBU parser SHALL be able to parse [=param_definition_type=] = P (where P > 2) and [=param_definition_size=]. The OBU parser SHOULD ignore the bytes indicated by [=param_definition_size=] that it does not recognize.
 
 <dfn noexport>demixing_info</dfn> is an instance of the [=DemixingParamDefinition()=] class, which provides the parameter definition for the demixing information, which is used to reconstruct a scalable channel audio representation. The corresponding parameter data to be provided in [=Parameter Block OBU=]s with the same [=parameter_block_obu/parameter_id=] is specified in the [=DemixingInfoParameterData()=] class.
 
@@ -787,7 +781,7 @@ In this parameter definition,
 
 <dfn noexport>param_definition_size</dfn> indicates the size in bytes of [=param_definition_bytes=].
 
-<dfn noexport>param_definition_bytes</dfn> represents reserved bytes for future use when new [=param_definition_type=] values are defined. Parsers compliant with this version of the specification SHOULD ignore these bytes.
+<dfn noexport>param_definition_bytes</dfn> represents reserved bytes for future use when new [=param_definition_type=] values are defined. Parsers SHOULD ignore these bytes when they don't understand the parameter definition.
 
 
 <dfn noexport>scalable_channel_layout_config</dfn> is an instance of the [=ScalableChannelLayoutConfig()=] class, which provides the metadata required for combining the [=Audio Substream=]s referred to here in order to reconstruct a scalable channel layout.
@@ -796,7 +790,7 @@ In this parameter definition,
 
 <dfn noexport>audio_element_config_size</dfn> indicates the size in bytes of [=audio_element_config_bytes=].
 
-<dfn noexport>audio_element_config_bytes</dfn> represents reserved bytes for future use when new [=audio_element_type=] values are defined. Parsers compliant with this version of the specification SHOULD ignore these bytes.
+<dfn noexport>audio_element_config_bytes</dfn> represents reserved bytes for future use when new [=audio_element_type=] values are defined. Parsers SHOULD ignore these bytes when they don't recognize a particular configuration.
 
 
 <dfn noexport>default_demixing_info_parameter_data</dfn> is an instance of the [=DefaultDemixingInfoParameterData()=] class, which provides the default demixing parameter data to apply to all audio samples when there are no [=Parameter Block OBU=]s (with the same [=ParamDefinition/parameter_id=] defined in this [=DemixingParamDefinition()=]) provided.
@@ -943,7 +937,7 @@ The relationship among all [=Channel Group=]s for the given scalable channel aud
 
 <dfn noexport>channel_audio_layer_config</dfn> is an instance of the [=ChannelAudioLayerConfig()=] class, which provides the i-th [=Channel Group=]'s configuration, where i is the layer index provided as input argument to this instance of the [=ChannelAudioLayerConfig()=] class.
 
-<dfn noexport>loudspeaker_layout</dfn> indicates the channel layout to be reconstructed from the precedent [=Channel Group=]s and current [=Channel Group=]. When a reserved value for [=loudspeaker_layout=] is used, parsers compliant with this version of the specification SHOULD skip the [=channel_audio_layer_config=] for that layer and all subsequent ones, if any.
+<dfn noexport>loudspeaker_layout</dfn> indicates the channel layout to be reconstructed from the precedent [=Channel Group=]s and current [=Channel Group=]. If parsers do not recognize a [=loudspeaker_layout=] for a particular layer, they SHOULD skip the [=channel_audio_layer_config=] for that layer and all subsequent layers.
 
 In this version of the specification, [=loudspeaker_layout=] indicates one of the 10 channel layouts listed below.
 
@@ -1275,7 +1269,7 @@ Parsers encountering a reserved value of [=headphones_rendering_mode=] SHALL ign
 
 <dfn noexport>rendering_config_extension_size</dfn> indicates the size in bytes of [=rendering_config_extension_bytes=].
 
-<dfn noexport>rendering_config_extension_bytes</dfn> represents reserved bytes for future use. Parsers compliant with this version of the specification SHOULD ignore these bytes.
+<dfn noexport>rendering_config_extension_bytes</dfn> represents reserved bytes for future use. Parsers that don't understand these bytes SHOULD ignore them.
 
 
 ### Element Mix Config Syntax and Semantics ### {#syntax-element-mix-config}
@@ -1377,7 +1371,7 @@ layout_type : Layout type
  - 12: It indicates Mono
  - 13 ~ 15: Reserved
 
-When a value for [=layout_type=] or [=sound_system=] is not supported, parsers compliant with this version of the specification SHOULD ignore this [=Layout()=] and any associated [=LoudnessInfo()=].
+When a value for [=layout_type=] or [=sound_system=] is not supported, parsers SHOULD ignore this [=Layout()=] and any associated [=LoudnessInfo()=].
 
 ### Loudness Info Syntax and Semantics ### {#obu-mixpresentation-loudness}
 
@@ -1423,7 +1417,7 @@ class LoudnessInfo() {
  2~7 (MSB) : Reserved
 </pre>
 
-When a bitmask for the reserved value of [=info_type=] is set, parsers compliant with this version of the specification SHOULD ignore all bytes from the first byte of the syntaxes defined by the bitmask to the last byte of the OBU.
+When a bitmask for an unsupported value of [=info_type=] is set, parsers SHOULD ignore all bytes from the first byte of the syntaxes defined by the bitmask to the last byte of the OBU.
 
 <dfn noexport>integrated_loudness</dfn> provides the program integrated loudness information, specified in [=LKFS=] as defined in [[!ITU-1770-4]], and measured according to [[!ITU-1770-4]].
 
@@ -1440,7 +1434,7 @@ When a bitmask for the reserved value of [=info_type=] is set, parsers compliant
  3~255 : Reserved
 </pre>
 
-There SHALL be no duplicate values of [=anchor_element=] within one [=LoudnessInfo()=]. When a reserved value of [=anchor_element=] is set, parsers compliant with this version of the specification MAY treat it as Unknown.
+There SHALL be no duplicate values of [=anchor_element=] within one [=LoudnessInfo()=]. When an unsupported value of [=anchor_element=] is set, parsers MAY treat it as Unknown.
 
 <dfn noexport>anchored_loudness</dfn> specifies the loudness information according to the anchor element, specified in [=LKFS=] as defined in [[!ITU-1770-4]].
 
@@ -1448,7 +1442,7 @@ NOTE: [[!ITU-1770-4]] adopts the convention of using the dBov unit for dBFS, whe
 
 <dfn noexport>info_type_size</dfn> indicates the size in bytes of [=info_type_bytes=].
 
-<dfn noexport>info_type_bytes</dfn> represents reserved bytes for future use when new marks of [=info_type=] are defined. Parsers compliant with this version of the specification SHOULD ignore these bytes.
+<dfn noexport>info_type_bytes</dfn> represents reserved bytes for future use when new marks of [=info_type=] are defined. Parsers that don't understand these bytes SHOULD ignore them.
 
 ## Parameter Block OBU Syntax and Semantics ## {#obu-parameterblock}
 
@@ -1501,13 +1495,13 @@ class ParameterBlockOBU() {
 
 <b>Semantics</b>
 
-<dfn noexport for="parameter_block_obu">parameter_id</dfn> indicates the identifier for a [=Parameter Substream=] which this [=Parameter Block OBU=] refers to.  If no [=Audio Element OBU=]s or [=Mix Presentation OBU=]s refer to this [=parameter_block_obu/parameter_id=], parsers compliant with this version of the specification SHOULD ignore [=Parameter Block OBU=]s with this identifier.
+<dfn noexport for="parameter_block_obu">parameter_id</dfn> indicates the identifier for a [=Parameter Substream=] which this [=Parameter Block OBU=] refers to. If no [=Audio Element OBU=]s or [=Mix Presentation OBU=]s refer to this [=parameter_block_obu/parameter_id=], parsers SHOULD ignore [=Parameter Block OBU=]s with this identifier.
 
 <dfn noexport>get_param_definition()</dfn> is a run-time function to get the [=param_definition_type=] and [=param_definition_mode=] from the [=Audio Element OBU=] or [=Mix Presentation OBU=] that references this [=parameter_block_obu/parameter_id=].
 
 If [=param_definition_mode=] = 0, this function additionally gets the following fields from the same [=Audio Element OBU=] or [=Mix Presentation OBU=]: [=ParamDefinition/duration=], [=ParamDefinition/num_subblocks=], [=ParamDefinition/constant_subblock_duration=], and [=ParamDefinition/subblock_duration=].
 
-When it gets an unknown [=param_definition_type=], parsers compliant with this version of the specification SHOULD ignore the [=Parameter Block OBU=]. 
+Parsers SHOULD ignore the [=Parameter Block OBU=] with a [=param_definition_type=] that they don't recognize. 
 
 <dfn noexport for="parameter_block_obu">duration</dfn> specifies the duration for which this parameter block is valid and applicable. It SHALL NOT be set to 0.
 
@@ -1531,7 +1525,7 @@ The values of [=parameter_block_obu/duration=], [=parameter_block_obu/constant_s
 
 <dfn noexport>parameter_data_size</dfn> indicates the size in bytes of [=parameter_data_bytes=].
 
-<dfn noexport>parameter_data_bytes</dfn> represents reserved bytes for future use when new syntaxes are defined. Parsers compliant with this version of the specification SHOULD ignore these bytes.
+<dfn noexport>parameter_data_bytes</dfn> represents reserved bytes for future use when new syntaxes are defined. Parsers that don't understand these bytes SHOULD ignore them.
 
 ### Mix Gain Parameter Data Syntax and Semantics ### {#syntax-mix-gain-param}
 
@@ -1548,7 +1542,7 @@ class MixGainParameterData() {
 
 <b>Semantics</b>
 
-<dfn noexport>animation_type</dfn> specifies the type of animation applied to the parameter values. When an unknown value of [=animation_type=] is used, parsers compliant with this version of the specification SHOULD ignore the [=Parameter Block OBU=] that contains this [=mix_gain_parameter_data=].
+<dfn noexport>animation_type</dfn> specifies the type of animation applied to the parameter values. When an unknown value of [=animation_type=] is used, parsers SHOULD ignore the [=Parameter Block OBU=] that contains this [=mix_gain_parameter_data=].
 
 <pre class = "def">
 animation_type : Animation Type
