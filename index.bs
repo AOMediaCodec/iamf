@@ -956,16 +956,11 @@ NOTE: This specification allows down-mixing mechanisms (e.g., as specified in [[
 
 <dfn noexport>coupled_substream_count</dfn> specifies the number of referenced [=Audio Substream=]s, each of which is coded as coupled stereo channels.
 
-Each pair of [=Coupled stereo channels|coupled stereo channels=] in the same [=Channel Group=] SHALL be coded in stereo mode to generate one single coded [=Audio Substream=], also referred to as a coupled substream. Each [=Non-coupled channels|non-coupled channel=] in the same [=Channel Group=] SHALL be coded in mono mode to generate one single coded [=Audio Substream=], also known as a non-coupled substream.
+Each pair of [=Coupled stereo channels|coupled stereo channels=] in the same [=Channel Group=] SHALL be coded in stereo mode to generate one single coded [=Audio Substream=], also referred to as a <dfn noexport>coupled substream</dfn>. Each [=Non-coupled channels|non-coupled channel=] in the same [=Channel Group=] SHALL be coded in mono mode to generate one single coded [=Audio Substream=], also known as a <dfn noexport>non-coupled substream</dfn>.
 - <dfn noexport>Coupled stereo channels</dfn>: L/R, Ls/Rs, Lss/Rss, Lrs/Rrs, Ltf/Rtf, Ltb/Rtb
 - <dfn noexport>Non-coupled channels</dfn>: C, LFE, L
 
-The order of the [=Audio Substream=]s in each [=Channel Group=] SHALL be as follows:
-- Coupled substreams come first and are followed by non-coupled substreams.
-- The coupled substreams for the surround channels come first and are followed by the coupled substreams for the top channels.
-- The coupled substreams for the front channels come first and are followed by the coupled substreams for the side, rear and back channels.
-- The coupled substreams for the side channels come first and are followed by the coupled substreams for the rear channels.
-- The Center channel comes first and is followed by the LFE channel, and then the L channel.
+The order of the [=Audio Substream=]s in each [=Channel Group=] is specified in [[#scalablechannelaudio-orderingofaudiosubstreamidentifiers]].
 
 <dfn noexport>output_gain_flags</dfn> indicates the channels which [=output_gain=] is applied to. If a bit is set to 1, [=output_gain=] SHALL be applied to the channel. Otherwise, [=output_gain=] SHALL NOT be applied to the channel.
 
@@ -1058,8 +1053,12 @@ Then, the i-th [=audio_element_obu/audio_substream_id=] maps to a [=Channel Grou
 \right]
 \]
 
-The order of the [=Audio Substream=]s in each [=Channel Group=] (i.e., the semantics of \(n_c\)) is specified in [[#syntax-scalable-channel-layout-config]].
-
+The order of the [=Audio Substream=]s in each [=Channel Group=] (i.e., the semantics of \(n_c\)) SHALL be as follows:
+- [=Coupled substream=]s come first and are followed by [=non-coupled substream=]s.
+- The [=coupled substream=]s for the surround channels come first and are followed by the [=coupled substream=]s for the top channels.
+- The [=coupled substream=]s for the front channels come first and are followed by the [=coupled substream=]s for the side, rear and back channels.
+- The [=coupled substream=]s for the side channels come first and are followed by the [=coupled substream=]s for the rear channels.
+- The Center channel comes first and is followed by the LFE channel, and then the L channel.
 
 ### Ambisonics Config Syntax and Semantics ### {#syntax-ambisonics-config}
 
