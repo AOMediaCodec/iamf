@@ -1982,7 +1982,7 @@ NOTE: Multiple sample entries may be used in a track, for example when the track
 
 ```
 class IASampleEntry extends AudioSampleEntry('iamf') {
-  unsigned int (8) configOBUs[];
+    IAConfigurationBox config;
 }
 ```
 
@@ -1990,13 +1990,44 @@ The [=channelcount=] field of [=AudioSampleEntry=] SHALL be set to 0.
 The [=samplerate=] field of [=AudioSampleEntry=] SHALL be set to 0. There SHALL be no [=SamplingRateBox=].
 Parsers SHALL ignore these two fields.
 
+### IA Configuration Box ### {#iaconfigurationbox-section}
+
+<pre class="def">
+	Sample Entry Type: <dfn export for="IAConfigurationBox">iacb</dfn>
+	Container:         Ia Sample Entry ('iamf')
+	Mandatory:         Yes
+	Quantity:          One or more.
+</pre>
+
+<b>Syntax</b>
+
+```
+class IAConfigurationBox extends Box('iacb') {
+  IAConfigurationRecord IAMFConfig;
+}
+```
+
+```
+aligned(8) class IAConfigurationRecord {
+    unsigned int (8) configurationVersion = 1;
+    leb128() configOBUs_size;
+    unsigned int (8) configOBUs[];
+}
+```
+
 <b>Semantics</b>
+
+<dfn noexport>configurationVersion</dfn> indicates the version of the IAConfigurationRecord. The value SHALL be set to 1.
+
+<dfn noexport>configOBUs_size</dfn> SHALL be set to the size of [=configOBUs=] in bytes.
 
 <dfn noexport>configOBUs</dfn> SHALL contain the following OBUs in order.
 - [=IA Sequence Header OBU=]
 - [=Codec Config OBU=]
 - One or more [=Audio Element OBU=]s
 - One or more [=Mix Presentation OBU=]s
+
+NOTE: `IAConfigurationRecord` may contain extra data after the signaled end of [=configOBUs=]. Any extra data can be safely ignored.
 
 ### IA Sample Format ### {#iasampleformat}
 
