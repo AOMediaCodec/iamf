@@ -1811,7 +1811,13 @@ The IA Profiles define a set of capabilities that are REQUIRED to parse, decode 
 
 NOTE: In this version of the specification, profiles impose constraints on how many codecs can be used in an [=IA Sequence=] but do not impose constraints on the actual codec used. In particular, this means that if a future version of the specification (or if a derived specification) defines how to use a new codec, the profiles defined in this specification could be used. Derived specifications may constrain the actual codec. The [[#codecsparameter|codecs parameter]] may also be used in content negotiation phases to ensure that an [=IA Sequence=] is supported by a device.
 
-IA decoders SHALL be able to parse all OBUs explicitly listed for this version of the specification. They can still encounter [=Reserved OBU=]s that they SHOULD skip. This allows future versions of the specification to define new profiles that can be backward compatible with old profiles.
+IA decoders SHALL be able to parse all OBUs explicitly listed for this version of the specification. They can still encounter [=Reserved OBU=]s that they SHOULD skip. This allows future versions of the specification to define new profiles that can be backward compatible with old profiles. 
+
+In this context, for a given an [=IA Sequence=] with [=primary_profile=] or [=additional_profile=] is set to [[#profiles-simple|Simple Profile]] or [[#profiles-base|Base Profile]], a [=Reserved OBU=] SHALL be regarded as either a part of a set of [=Descriptors=] or a part of a [=Temporal Unit=] with the following restrictions:
+- The [=Reserved OBU=] SHALL not be present between [=Mix Presentation OBU=]s.
+- A [=Mix Presentation OBU=] SHALL be the final OBU of [=Descriptors=].
+
+NOTE: When [=Temporal Delimiter OBU=]s are present, the meaning of a [=Reserved OBU=] being a part of a [=Temporal Unit=] does not imply that the [=Reserved OBU=] can be the first OBU of the [=Temporal Unit=] because the [=Temporal Delimiter OBU=] is always the first OBU of the [=Temporal Unit=].
 
 NOTE: In this section and subsections, the meaning of a unique OBU is that it is still unique if it only varies by the [=obu_redundant_copy=] flag.
 
@@ -1833,6 +1839,7 @@ Common restrictions on the [=IA Sequence=] for all profiles specified in this ve
 NOTE: This behavior is to allow future versions of this specification to define new profiles that support a number of audio elements and/or a number of sub-mixes greater than those recommended in this profile, while still permitting streams compliant with these new profiles to be processed by parsers compliant with the profiles defined in this version of the specification.
 
 - When [=num_layers=] = 1, [=DemixingParamDefinition()=] for demixing MAY be present in the [=Audio Element OBU=] and IA decoders MAY use [=demixing_info_parameter_data=] or [=default_demixing_info_parameter_data=] for (dynamic) down-mixing.
+- There MAY be [=Temporal Delimiter OBU=]s present. If present, the first OBU of every [=Temporal Unit=] SHALL be the [=Temporal Delimiter OBU=].
 
 
 ## IA Simple Profile ## {#profiles-simple}
@@ -1840,11 +1847,7 @@ NOTE: This behavior is to allow future versions of this specification to define 
 This section specifies the conformance points of the simple profile.
 
 When the [=primary_profile=] field is set to 0, the following constraints apply to the [=IA Sequence=]:
-
 - There SHALL be only one unique [=Audio Element OBU=].
-- There SHALL NOT be any [=Temporal Delimiter OBU=]s present.
-
-
 
 Capabilities of the IA parser, decoder, and processor:
 - They SHALL be able to parse an [=IA Sequence=] with [=primary_profile=] = 0.
@@ -1865,8 +1868,6 @@ When the [=primary_profile=] field is set to 1, the following constraints apply 
 		- Channel-based [=Audio Element=] having [=num_layers=] = 1 + Channel-based [=Audio Element=] having [=num_layers=] > 1.
 		- Scene-based [=Audio Element=] + Channel-based [=Audio Element=] having [=num_layers=] = 1.
 		- Scene-based [=Audio Element=] + Channel-based [=Audio Element=] having [=num_layers=] > 1.
-- There MAY be [=Temporal Delimiter OBU=]s present. If present, the first OBU of every [=Temporal Unit=] SHALL be the [=Temporal Delimiter OBU=].
-
 
 Capabilities of the IA parser, decoder, and processor:
 - They SHALL be able to support the capabilities of the [[#profiles-simple|Simple Profile]].
@@ -1992,7 +1993,7 @@ Parsers SHALL ignore these two fields.
 
 <b>Semantics</b>
 
-<dfn noexport>configOBUs</dfn> SHALL contain the following OBUs in order.
+<dfn noexport>configOBUs</dfn> SHALL contain the following OBUs in order and it MAY contain one or more [=Reserved OBU=]s after [=IA Sequence Header OBU=] and before all [=Mix Presentation OBU=]s.
 - [=IA Sequence Header OBU=]
 - [=Codec Config OBU=]
 - One or more [=Audio Element OBU=]s
