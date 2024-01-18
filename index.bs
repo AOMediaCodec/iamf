@@ -34,6 +34,7 @@ url: https://www.iso.org/standard/68960.html#; spec: ISO-BMFF; type: property;
 	text: trun
 	text: ctts
 	text: stss
+	text: btrt
 
 url: https://aomediacodec.github.io/av1-spec/av1-spec.pdf#; spec: AV1-Spec; type: dfn;
 	text: Clip3
@@ -1983,7 +1984,7 @@ NOTE: Multiple sample entries may be used in a track, for example when the track
 
 ```
 class IASampleEntry extends AudioSampleEntry('iamf') {
-  unsigned int (8) configOBUs[];
+    IAConfigurationBox ia_configuration_box;
 }
 ```
 
@@ -1993,11 +1994,42 @@ Parsers SHALL ignore these two fields.
 
 <b>Semantics</b>
 
+<dfn noexport>ia_configuration_box</dfn> is an instance of the IAConfigurationBox() class, which provides the configuration of the [=IA Sequence=]. The position of the instance SHALL comply with the rule specified in [[!ISO-BMFF]] for [=AudioSampleEntry=]. In other words, the instance SHALL be present after the [=samplerate=] field of [=AudioSampleEntry=]. When the instance is present with another optional box such as the BitRateBox() ('btrt'), their exact ordering is not defined.
+
+### IA Configuration Box ### {#iaconfigurationbox-section}
+
+<pre class="def">
+	Sample Entry Type: <dfn export for="IAConfigurationBox">iacb</dfn>
+	Container:         IA Sample Entry ('iamf')
+	Mandatory:         Yes
+	Quantity:          One.
+</pre>
+
+<b>Syntax</b>
+
+```
+class IAConfigurationBox extends Box('iacb') {
+    unsigned int (8) configurationVersion = 1;
+    leb128() configOBUs_size;
+    unsigned int (8 x configOBUs_size) configOBUs;
+}
+```
+
+<b>Semantics</b>
+
+<dfn noexport>configurationVersion</dfn> indicates the version of the IAConfigurationBox. The value SHALL be set to 1 for this version of the specification. The box with which [=configurationVersion=] is not set to 1 SHALL be ignored by parsers compliant with this version of the specification.
+
+<dfn noexport>configOBUs_size</dfn> SHALL be set to the size of [=configOBUs=] in bytes.
+
 <dfn noexport>configOBUs</dfn> SHALL contain the following OBUs in order and it MAY contain one or more [=Reserved OBU=]s. The locations of [=Reserved OBU=]s SHALL comply with those specified in [[#profiles]].
 - [=IA Sequence Header OBU=]
 - [=Codec Config OBU=]
 - One or more [=Audio Element OBU=]s
 - One or more [=Mix Presentation OBU=]s
+
+NOTE: In practice, [=configOBUs=] is identical to [=Descriptors=].
+
+NOTE: Future versions of the specification may define fields after the signaled end of [=configOBUs=]. Parsers compliant with this version of the specification can safely ignore them.
 
 ### IA Sample Format ### {#iasampleformat}
 
