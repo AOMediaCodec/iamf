@@ -2,16 +2,79 @@ name: Auto-Publish
 on:
   push:
     branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
 jobs:
   main:
-    name: Deploy to GitHub pages
+    name: Compile and deploy
     runs-on: ubuntu-20.04
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: w3c/spec-prod@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          GH_PAGES_BRANCH: gh-pages
-          TOOLCHAIN: bikeshed
-          SOURCE: index.bs
-          DESTINATION: index.html
-          VALIDATE_MARKUP: false
+          python-version: 3.11
+          cache: 'pip'
+      - run: pip install bikeshed
+
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v3
+
+      - name: Setup a local virtual environment
+        run: |
+          poetry config virtualenvs.create true --local
+          poetry config virtualenvs.in-project true --local
+      - uses: actions/cache@v3
+        name: Define a cache for the virtual environment based on the dependencies lock file
+        with:
+          path: ./.venv
+          key: venv-${{ hashFiles('poetry.lock') }}
+
+      - name: Install Poetry dependencies
+        run: |
+          cd conformance
+          poetry install
+
+      - name: Generate conformance report
+        run: |
+          cd conformance
+          poetry run generate-report
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build conformance page
+        run: |
+          cd conformance/conformance_page
+          npm ci
+          npm run build
+
+      - name: Run bikeshed
+        run: |
+          bikeshed spec
+          mkdir dist
+          cp *.html dist
+          cp -r v?.?.?_files dist
+          cp -r images dist
+          mkdir dist/conformance
+          cp -r conformance/conformance_page/dist/* dist/conformance
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: ./dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
