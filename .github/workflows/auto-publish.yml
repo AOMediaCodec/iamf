@@ -38,26 +38,10 @@ jobs:
           path: ./.venv
           key: venv-${{ hashFiles('poetry.lock') }}
 
-      - name: Install Poetry dependencies
-        run: |
-          cd conformance
-          poetry install
-
-      - name: Generate conformance report
-        run: |
-          cd conformance
-          poetry run generate-report
-
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Build conformance page
-        run: |
-          cd conformance/conformance_page
-          npm ci
-          npm run build
 
       - name: Run bikeshed
         run: |
@@ -67,8 +51,6 @@ jobs:
           cp -r v?.?.?_images dist
           cp -r v?.?.?-errata_images dist
           cp -r images dist
-          mkdir dist/conformance
-          cp -r conformance/conformance_page/dist/* dist/conformance
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
