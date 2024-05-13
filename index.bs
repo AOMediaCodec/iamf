@@ -705,34 +705,7 @@ audio_element_type: The type of audio representation.
 
 <dfn noexport>num_substreams</dfn> specifies the number of [=Audio Substream=]s that are used to reconstruct this [=Audio Element=]. It SHALL NOT be set to 0.
 
-<dfn noexport for="audio_element_obu">audio_substream_id</dfn> indicates the identifier for an [=Audio Substream=] which this [=Audio Element=] refers to.
-
-Let a particular [=Channel Group=]'s [=Audio Substream=]s be indexed as \(\left[c, n_c\right]\), where a [=Channel Group=] format is described in [[#scalablechannelaudio-channelgroupformat]] and
-- \(c = \left[1, \ldots, C\right]\) is the [=Channel Group=] index and \(C\) is the number of [=Channel Group=]s.
-- \(n_c = \left[1, \ldots, N_c\right]\) is the [=Audio Substream=] index in the \(c\)-th [=Channel Group=] and \(N_c\) is the number of [=Audio Substream=]s in the \(c\)-th [=Channel Group=].
-
-Then, the i-th [=audio_element_obu/audio_substream_id=] maps to a [=Channel Group=]'s [=Audio Substream=]s as follows, where i is the index of the array:
-
-\[
-\left[
-\left[ 1, 1 \right],
-\left[ 1, 2 \right],
-\cdots,
-\left[ 1, N_1 \right],
-\left[ 2, 1 \right],
-\left[ 2, 2 \right],
-\cdots,
-\left[ 2, N_2 \right],
-\cdots,
-\left[ C, 1 \right],
-\left[ C, 2 \right],
-\cdots,
-\left[ C, N_c \right]
-\right]
-\]
-
-The order of the [=Audio Substream=]s in each [=Channel Group=] (i.e., the semantics of \(n_c\)) is specified in [[#syntax-scalable-channel-layout-config]].
-
+<dfn noexport for="audio_element_obu">audio_substream_id</dfn> indicates the identifier for an [=Audio Substream=] which this [=Audio Element=] refers to. When [=audio_element_type=] is CHANNEL_BASED, the ordering of [=audio_element_obu/audio_substream_id=]s within this loop SHALL comply with [[#scalablechannelaudio-orderingofaudiosubstreamidentifiers]].
 
 <dfn noexport>num_parameters</dfn> specifies the number of [=Parameter Substream=]s that are used by the algorithms specified in this [=Audio Element=].
 - When [=audio_element_type=] = 0, this field SHALL be set to 0, 1, or 2.
@@ -918,25 +891,6 @@ class ChannelAudioLayerConfig(i) {
 }
 ```
 
-When an [=Audio Element=] is composed of \(G(r)\) number of [=Audio Substream=]s, its scalable channel audio representation is layered into \(r\) [=num_layers=] of [=Channel Group=]s.
-
-
-- The order of the [=Channel Group=]s in each [=Temporal Unit=] SHALL be same as the order of the [=channel_audio_layer_config=]s in [=ScalableChannelLayoutConfig()=].
-- The \(q\)-th [=Channel Group=] consists of \(G(q) - G(q - 1)\) number of [=Audio Substream=]s, where \(q = 1, 2, \ldots, r\) and \(G(0) = 0\).
-- Let the term "Audio Frames" mean the set of all [=Audio Frame OBU=]s (for this [=Audio Element=]) that have the same start timestamp. All Audio Frames in an [=IA Sequence=] SHALL have the same number of [=Audio Frame OBU=]s.
-- [=Parameter Block OBU=]s MAY be associated with Audio Frames. 
-
-<center><img src="images/Immersive Audio Sequence with scalable channel audio (before OBU packing).png" style="width:100%; height:auto;"></center>
-<center><figcaption>Immersive Audio Sequence with scalable channel audio (before OBU packing). See [[#standalone]] for related details on OBU ordering within an IA Sequence.</figcaption></center>
-
-
-Each [=Channel Group=] (or scalable channel audio layer) is associated with a different [=loudspeaker_layout=]. The IA decoder SHALL select one of the layers according to the following rules, in order:
-
-- The IA decoder SHOULD first attempt to select the layer with a [=loudspeaker_layout=] that matches the physical playback layout.
-- If there is no match, the IA decoder SHOULD select the layer with the closest [=loudspeaker_layout=] to the physical layout and then apply up- or down-mixing appropriately, after decoding and reconstruction of the channel audio. Sections [[#iamfgeneration-scalablechannelaudio-downmixmechanism]] and [[#processing-downmixmatrix]] provide examples of dynamic and static down-mixing matrices for some common layouts that MAY be used.
-
-The relationship among all [=Channel Group=]s for the given scalable channel audio representation SHALL comply with [[#scalablechannelaudio-channelgroupformat]] and the relationship among all channel layouts indicated by [=loudspeaker_layout=]s specified in an [=Audio Element OBU=] SHALL comply with [[#scalablechannelaudio-channellayoutgenerationrule]].
-
 <b>Semantics</b>
 
 <dfn noexport>num_layers</dfn> indicates the number of [=Channel Group=]s for scalable channel audio. It SHALL NOT be set to zero and its maximum value SHALL be 6.
@@ -1010,16 +964,11 @@ NOTE: This specification allows down-mixing mechanisms (e.g., as specified in [[
 
 <dfn noexport>coupled_substream_count</dfn> specifies the number of referenced [=Audio Substream=]s, each of which is coded as coupled stereo channels.
 
-Each pair of [=Coupled stereo channels|coupled stereo channels=] in the same [=Channel Group=] SHALL be coded in stereo mode to generate one single coded [=Audio Substream=], also referred to as a coupled substream. Each [=Non-coupled channels|non-coupled channel=] in the same [=Channel Group=] SHALL be coded in mono mode to generate one single coded [=Audio Substream=], also known as a non-coupled substream.
+Each pair of [=Coupled stereo channels|coupled stereo channels=] in the same [=Channel Group=] SHALL be coded in stereo mode to generate one single coded [=Audio Substream=], also referred to as a <dfn noexport>coupled substream</dfn>. Each [=Non-coupled channels|non-coupled channel=] in the same [=Channel Group=] SHALL be coded in mono mode to generate one single coded [=Audio Substream=], also known as a <dfn noexport>non-coupled substream</dfn>.
 - <dfn noexport>Coupled stereo channels</dfn>: L/R, Ls/Rs, Lss/Rss, Lrs/Rrs, Ltf/Rtf, Ltb/Rtb
 - <dfn noexport>Non-coupled channels</dfn>: C, LFE, L
 
-The order of the [=Audio Substream=]s in each [=Channel Group=] SHALL be as follows:
-- Coupled substreams come first and are followed by non-coupled substreams.
-- The coupled substreams for the surround channels come first and are followed by the coupled substreams for the top channels.
-- The coupled substreams for the front channels come first and are followed by the coupled substreams for the side, rear and back channels.
-- The coupled substreams for the side channels come first and are followed by the coupled substreams for the rear channels.
-- The Center channel comes first and is followed by the LFE channel, and then the L channel.
+The order of the [=Audio Substream=]s in each [=Channel Group=] is specified in [[#scalablechannelaudio-orderingofaudiosubstreamidentifiers]].
 
 <dfn noexport>output_gain_flags</dfn> indicates the channels which [=output_gain=] is applied to. If a bit is set to 1, [=output_gain=] SHALL be applied to the channel. Otherwise, [=output_gain=] SHALL NOT be applied to the channel.
 
@@ -1037,15 +986,34 @@ Bit position : Channel Name
 
 <dfn noexport>output_gain</dfn> indicates the gain value to be applied to the mixed channels which are indicated by [=output_gain_flags=], where each mixed channel is generated by down-mixing two or more input channels. It is computed as \(20 \times \log_{10}(f)\), where \(f\) is the factor by which to scale the mixed channels. It is stored as a 16-bit, signed, two’s complement fixed-point value with 8 fractional bits (i.e., Q7.8)([[Q-Format]]).
 
+### Scalable Channel Group and Layout ### {#scalalechannelaudio-channelgroupandlayout}
+
+When an [=Audio Element=] is composed of \(G(r)\) number of [=Audio Substream=]s, its scalable channel audio representation is layered into \(r\) [=num_layers=] of [=Channel Group=]s.
+- The order of the [=Channel Group=]s in each [=Temporal Unit=] SHALL be same as the order of the [=channel_audio_layer_config=]s in [=ScalableChannelLayoutConfig()=].
+- The \(q\)-th [=Channel Group=] consists of \(G(q) - G(q - 1)\) number of [=Audio Substream=]s, where \(q = 1, 2, \ldots, r\) and \(G(0) = 0\).
+- Let the term "Audio Frames" mean the set of all [=Audio Frame OBU=]s (for this [=Audio Element=]) that have the same start timestamp. All Audio Frames in an [=IA Sequence=] SHALL have the same number of [=Audio Frame OBU=]s.
+- [=Parameter Block OBU=]s MAY be associated with Audio Frames. 
+
+<center><img src="images/Immersive Audio Sequence with scalable channel audio (before OBU packing).png" style="width:100%; height:auto;"></center>
+<center><figcaption>Immersive Audio Sequence with scalable channel audio (before OBU packing). See [[#standalone]] for related details on OBU ordering within an IA Sequence.</figcaption></center>
+
+
+Each [=Channel Group=] (or scalable channel audio layer) is associated with a different [=loudspeaker_layout=]. The IA decoder SHALL select one of the layers according to the following rules, in order:
+
+- The IA decoder SHOULD first attempt to select the layer with a [=loudspeaker_layout=] that matches the physical playback layout.
+- If there is no match, the IA decoder SHOULD select the layer with the closest [=loudspeaker_layout=] to the physical layout and then apply up- or down-mixing appropriately, after decoding and reconstruction of the channel audio. Sections [[#iamfgeneration-scalablechannelaudio-downmixmechanism]] and [[#processing-downmixmatrix]] provide examples of dynamic and static down-mixing matrices for some common layouts that MAY be used.
+
+The relationship among all [=Channel Group=]s for the given scalable channel audio representation SHALL comply with [[#scalablechannelaudio-channelgroupformat]] and the relationship among all channel layouts indicated by [=loudspeaker_layout=]s specified in an [=Audio Element OBU=] SHALL comply with [[#scalablechannelaudio-channellayoutgenerationrule]].
+
 #### Channel Layout Generation Rule #### {#scalablechannelaudio-channellayoutgenerationrule}
 
 This section describes the generation rule for channel layouts for scalable channel audio.
 
-For a given channel layout (CL #n) of a channel-based input [=3D audio signal=], any list of CLs ({CL #i: i = 1, 2, ..., n}) for scalable channel audio SHALL conform with the following rules:
-- Xi ≤ Xi+1 and Yi ≤ Yi+1 and Zi ≤ Zi+1 except Xi = Xi+1, Yi = Yi+1 and Zi = Zi+1 for i = n-1, n-2, ..., 1, where the i-th channel layout CL #i = Xi.Yi.Zi, Xi is the number of surround channels, Yi is the number of LFE channels, and Zi is the number of height channels.
-- CL #i is one of the [=loudspeaker_layout=]s supported in this version of the specification.
+For a given channel layout (\(CL \text{#}n\)) of a channel-based input [=3D audio signal=], any list of CLs (\({CL \text{#}i: i = 1, 2, \ldots, n}\)) for scalable channel audio SHALL conform with the following rules:
+- \(\text{Xi} \le \text{Xi+1}\) and \(\text{Yi} \le \text{Yi+1}\) and \(\text{Zi} \le \text{Zi+1}\) except \(\text{Xi} = \text{Xi+1}\), \(\text{Yi} = \text{Yi+1}\) and \(\text{Zi} = \text{Zi+1}\) for \(i = n-1, n-2, \ldots, 1\), where the \(i\)-th channel layout \(CL \text{#}i = \text{Xi}.\text{Yi}.\text{Zi}\), \(\text{Xi}\) is the number of surround channels, \(\text{Yi}\) is the number of LFE channels, and \(\text{Zi}\) is the number of height channels.
+- \(CL \text{#}i\) is one of the [=loudspeaker_layout=]s supported in this version of the specification.
 
-Scalable channel audio with [=num_layers=] > 1 SHALL only allow down-mix paths that conform to the rules above, as depicted in the figure below.
+Scalable channel audio with [=num_layers=] \(> 1\) SHALL only allow down-mix paths that conform to the rules above, as depicted in the figure below.
 
 <center><img src="images/Down-mix Path.png" style="width:90%; height:auto;"></center>
 <center><figcaption>IA Down-mix Path for scalable channel audio</figcaption></center>
@@ -1053,20 +1021,52 @@ Scalable channel audio with [=num_layers=] > 1 SHALL only allow down-mix paths t
 #### Channel Group Format #### {#scalablechannelaudio-channelgroupformat}
 
 The [=Channel Group=] format SHALL conform to the following rules:
-- It consists of C number of channels and is structured to n number of [=Channel Group=]s, where C is the number of channels for the input [=3D audio signal=].
-- [=Channel Group=] #1 (as called BCG): This [=Channel Group=] is the [=down-mixed audio=] itself for CL #1 generated from the input [=3D audio signal=]. It contains a C1 number of channels.
-- [=Channel Group=] #i (as called DCG, i = 2, 3, …, n): This [=Channel Group=] contains (Ci – Ci-1) number of channels. (Ci – Ci-1) channel(s) consists of as follows:
-	- (Xi – Xi-1) surround channel(s) if Xi > Xi-1 . When \(S_{\text{set}} = \{x  \mid \text{Xi}-1 < x \le \text{Xi}\} \) and \(x\) is an integer,
-		- If 2 is an element of \(S_{\text{set}}\), the L2 channel is contained in this CG #i.
-		- If 3 is an element of \(S_{\text{set}}\), the Center channel is contained in this CG #i.
-		- If 5 is an element of \(S_{\text{set}}\), the L5 and R5 channels are contained in this CG #i.
-		- If 7 is an element of \(S_{\text{set}}\), the Lss7 and Rss7 channels are contained in this CG #i.
-	- The LFE channel if Yi > Yi-1.
-	- (Zi - Zi-1) top channels if Zi > Zi-1.
-		- If Zi-1 = 0, the top channels of the [=down-mixed audio=] for CL #i are contained in this [=Channel Group=] #i.
-		- If Zi-1 = 2, the Ltf and Rtf channels of the [=down-mixed audio=] for CL #i are contained in this [=Channel Group=] #i.
-	- Where Xi.Yi.Zi denotes the channel layout in CL #i, where Xi is the number of surround channels, Yi is the number of LFE channels and Zi is the number of height channels.
+- It consists of C number of channels and is structured to \(r\) number of [=Channel Group=]s, where \(C\) is the number of channels for the input [=3D audio signal=].
+- [=Channel Group=] \(\text{#}1\) (as called BCG): This [=Channel Group=] is the [=down-mixed audio=] itself for \(CL \text{#}1\) generated from the input [=3D audio signal=]. It contains a \(C1\) number of channels.
+- [=Channel Group=] \(\text{#}i\) (as called DCG, \(i = 2, 3, \ldots, n)\): This [=Channel Group=] contains (\(\text{Ci} – \text{Ci}-1)\) number of channels. \((\text{Ci} – \text{Ci}-1)\) channel(s) consists of as follows:
+	- \((\text{Xi} – \text{Xi-1})\) surround channel(s) if \(\text{Xi} > \text{Xi-1}\) . When \(S_{\text{set}} = \{x  \mid \text{Xi-1} < x \le \text{Xi}\} \) and \(x\) is an integer,
+		- If 2 is an element of \(S_{\text{set}}\), the L2 channel is contained in this \(CG \text{#}i\).
+		- If 3 is an element of \(S_{\text{set}}\), the Center channel is contained in this \(CG \text{#}i\).
+		- If 5 is an element of \(S_{\text{set}}\), the L5 and R5 channels are contained in this \(CG \text{#}i\).
+		- If 7 is an element of \(S_{\text{set}}\), the Lss7 and Rss7 channels are contained in this \(CG \text{#}i\).
+	- The LFE channel if \(\text{Yi} > \text{Yi-1}\).
+	- \((\text{Zi} - \text{Zi-1})\) top channels if \(\text{Zi} > \text{Zi-1}\).
+		- If \(\text{Zi-1} = 0\), the top channels of the [=down-mixed audio=] for \(CL \text{#}i\) are contained in this [=Channel Group=] \(\text{#}i\).
+		- If \(\text{Zi-1} = 2\), the Ltf and Rtf channels of the [=down-mixed audio=] for \(CL \text{#}i\) are contained in this [=Channel Group=] \(\text{#}i\).
+	- Where \(\text{Xi}.\text{Yi}.\text{Zi}\) denotes the channel layout in \(CL \text{#}i\), where \(\text{Xi}\) is the number of surround channels, \(\text{Yi}\) is the number of LFE channels and \(\text{Zi}\) is the number of height channels.
 
+#### Ordering of Audio Substream Identifers #### {#scalablechannelaudio-orderingofaudiosubstreamidentifiers}
+
+Let a particular [=Channel Group=]'s [=Audio Substream=]s be indexed as \(\left[c, n_c\right]\), where a [=Channel Group=] format is described in [[#scalablechannelaudio-channelgroupformat]] and
+- \(c\) is the [=Channel Group=] index, where \(c = 1, 2, \ldots, C\) and \(C\) is the number of [=Channel Group=]s.
+- \(n_c\) is the [=Audio Substream=] index in the \(c\)-th [=Channel Group=], where \(n_c = 1, 2, \ldots, N_c\) and \(N_c\) is the number of [=Audio Substream=]s in the \(c\)-th [=Channel Group=].
+
+Then, the i-th [=audio_element_obu/audio_substream_id=] maps to a [=Channel Group=]'s [=Audio Substream=]s as follows, where i is the index of the array:
+
+\[
+\left[
+\left[ 1, 1 \right],
+\left[ 1, 2 \right],
+\cdots,
+\left[ 1, N_1 \right],
+\left[ 2, 1 \right],
+\left[ 2, 2 \right],
+\cdots,
+\left[ 2, N_2 \right],
+\cdots,
+\left[ C, 1 \right],
+\left[ C, 2 \right],
+\cdots,
+\left[ C, N_c \right]
+\right]
+\]
+
+The order of the [=Audio Substream=]s in each [=Channel Group=] (i.e., the semantics of \(n_c\)) SHALL be as follows:
+- [=Coupled substream=]s come first and are followed by [=non-coupled substream=]s.
+- The [=coupled substream=]s for the surround channels come first and are followed by the [=coupled substream=]s for the top channels.
+- The [=coupled substream=]s for the front channels come first and are followed by the [=coupled substream=]s for the side, rear and back channels.
+- The [=coupled substream=]s for the side channels come first and are followed by the [=coupled substream=]s for the rear channels.
+- The Center channel comes first and is followed by the LFE channel, and then the L channel.
 
 ### Ambisonics Config Syntax and Semantics ### {#syntax-ambisonics-config}
 
