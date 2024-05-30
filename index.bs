@@ -901,7 +901,7 @@ class ChannelAudioLayerConfig(i) {
 
 <dfn noexport>loudspeaker_layout</dfn> indicates the channel layout to be reconstructed from the precedent [=Channel Group=]s and current [=Channel Group=]. If parsers do not recognize a [=loudspeaker_layout=] for a particular layer, they SHOULD skip the [=channel_audio_layer_config=] for that layer and all subsequent layers.
 
-In this version of the specification, [=loudspeaker_layout=] indicates one of the 10 channel layouts listed below.
+In this version of the specification, [=loudspeaker_layout=] indicates one of the channel layouts listed below.
 
 <table class="def">
 <tr>
@@ -938,7 +938,22 @@ In this version of the specification, [=loudspeaker_layout=] indicates one of th
   <td>1001</td><td>Binaural</td><td>L/R</td><td></td>
 </tr>
 <tr>
-  <td>others</td><td>Reserved</td><td></td><td></td>
+  <td>1010</td><td>LFE</td><td>LFE</td><td>The low-frequency effects subset (LFE) of 7.1.4ch</td>
+</tr>
+<tr>
+  <td>1011</td><td>Stereo-SS</td><td>Lss/Rss</td><td>The side surround subset (Lss/Rss) of 7.1.4ch</td>
+</tr>
+<tr>
+  <td>1100</td><td>Stereo-RS</td><td>Lrs/Rrs</td><td>The rear surround subset (Lrs/Rrs) of 7.1.4ch</td>
+</tr>
+<tr>
+  <td>1101</td><td>Stereo-TF</td><td>Ltf/Rtf</td><td>The top front subset (Ltf/Rtf) of 7.1.4ch</td>
+</tr>
+<tr>
+  <td>1110</td><td>Stereo-TB</td><td>Ltb/Rtb</td><td>The top back subset (Ltb/Rtb) of 7.1.4ch</td>
+</tr>
+<tr>
+  <td>1111</td><td>Reserved</td><td></td><td></td>
 </tr>
 </table>
 
@@ -951,6 +966,8 @@ For a given input [=3D audio signal=] with [=audio_element_type=] = CHANNEL_BASE
 - Examples for NOT RECOMMENDED list of channel layouts: 2ch/3.1.2ch/5.1.2ch, 2ch/3.1.2ch/5.1.2ch/7.1.4ch, 2ch/5.1.2ch/7.1.4ch, 2ch/7.1.4ch, etc.
 
 NOTE: This specification allows down-mixing mechanisms (e.g., as specified in [[#iamfgeneration-scalablechannelaudio-downmixmechanism]]) to drop the height channel if the output layout has no height channels. An example is down-mixing from 7.1.4ch to Mono, Stereo, 5.1ch or 7.1ch. Therefore, given an input [=3D audio signal=] with height channels, an encoder may generate a set of scalable audio channel groups with layouts that do not have height channels.
+
+For a given input [=3D audio signal=] with a channel layout = LFE, Stereo-SS, Stereo-RS, Stereo-TF, or Stereo-TB, [=num_layers=] SHALL be set to 1 (i.e., it is non-scalable channel audio). If parsers encounter a [=loudspeaker_layout=] = 1010, 1011, 1100, 1101, or 1110 for a particular layer other than the first layer, they SHOULD skip the [=channel_audio_layer_config=] for that layer and all subsequent layers.
 
 <dfn noexport>output_gain_is_present_flag</dfn> indicates if the output_gain information fields for the [=Channel Group=] are present.
 - 0: No output_gain information fields for the [=Channel Group=] are present.
@@ -2363,7 +2380,9 @@ In this section, for a given x.y.z layout, the next highest layout x'.y'.z' mean
 This section defines the renderer to use, given a channel-based [=Audio Element=] and a loudspeaker playback layout.
 
 - The input layout (x.y.z) of the IA renderer is set as follows:
-    - If [=num_layers=] = 1, use the [=loudspeaker_layout=] of the [=Audio Element=].
+    - If [=num_layers=] = 1, 
+        - If [=loudspeaker_layout=] < 1010, use the [=loudspeaker_layout=] of the [=Audio Element=].
+        - Else, use 7.1.4ch. In other words, an [=Audio Element=] with a channel layout = LFE, Stereo-SS, Stereo-RS, Stereo-TF, or Stereo-TB is regarded as 7.1.4ch with empty channels everywhere other than the corresponding loudspeaker location.
     - Else, if there is an [=Audio Element=] with a [=loudspeaker_layout=] that matches the playback layout, use it.
     - Else, use the next highest available layout from all available [=loudspeaker_layout=]s.
 - The output layout of the IA renderer is set to the playback layout (X.Y.Z).
