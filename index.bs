@@ -560,11 +560,12 @@ NOTE: When IA OBUs are delivered over a protocol that does not provide explicit 
 The mappings below are applied for both [=primary_profile=] and [=additional_profile=].
 - 0: Simple Profile
 - 1: Base Profile
-- 2~255: Reserved
+- 2: Base-Enhanced Profile
+- 3~255: Reserved
 
 <dfn noexport>additional_profile</dfn> indicates an additional profile that this [=IA Sequence=] complies with. If an [=IA Sequence=] only complies with the [=primary_profile=], this field SHALL be set to the same value as [=primary_profile=].
 
-NOTE: If a future version defines a new profile, e.g., HypotheticalProfile, that is backward compatible with the [[#profiles-base|Base Profile]], for example by defining new OBUs that would be ignored by the Base-compatible parser, an IA writer can decide to set the [=primary_profile=] to "Base Profile" while setting the [=additional_profile=] to "HypotheticalProfile". This way an old processor will know it can parse and produce an acceptable rendering, while a new processor still knows it can produce a better result because it will not ignore the additional features.
+NOTE: If a future version defines a new profile, e.g., HypotheticalProfile, that is backward compatible with the [[#profiles-base-enhanced|Base-Enhanced Profile]], for example by defining new OBUs that would be ignored by the Base-Enhanced-compatible parser, an IA writer can decide to set the [=primary_profile=] to "Base-Enhanced Profile" while setting the [=additional_profile=] to "HypotheticalProfile". This way an old processor will know it can parse and produce an acceptable rendering, while a new processor still knows it can produce a better result because it will not ignore the additional features.
 
 ## Codec Config OBU Syntax and Semantics ## {#obu-codecconfig}
 
@@ -1186,7 +1187,7 @@ class MixPresentationOBU() {
 
 <dfn noexport>num_audio_elements</dfn> specifies the number of [=Audio Element=]s that are used in each sub-mix of this [=Mix Presentation=] to generate the final output audio signal for playback. It SHALL NOT be set to 0. There SHALL be no duplicate values of [=audio_element_obu/audio_element_id=] within one [=Mix Presentation=].
 
-<dfn noexport for="mix_presentation_obu">audio_element_id</dfn> indicates the identifier for an [=Audio Element=] which this [=Mix Presentation=] refers to.
+<dfn noexport for="mix_presentation_obu">audio_element_id</dfn> indicates the identifier for an [=Audio Element=] which this [=Mix Presentation=] refers to. Parsers SHOULD ignore the [=Mix Presentation OBU=] with an [=Audio Element=] that they don't recognize.
 
 <dfn noexport>mix_presentation_element_annotations</dfn> is an instance of the [=MixPresentationElementAnnotations()=] class, which provides informational metadata that the playback system MAY use to display information to the user. It is not used in the rendering or mixing process to generate the final output audio signal.
 
@@ -1818,11 +1819,11 @@ NOTE: In this version of the specification, profiles impose constraints on how m
 
 IA decoders SHALL be able to parse all OBUs explicitly listed for this version of the specification. They can still encounter [=Reserved OBU=]s that they SHOULD skip. This allows future versions of the specification to define new profiles that can be backward compatible with old profiles.
 
-In this context, for a given [=IA Sequence=] with [=primary_profile=] or [=additional_profile=] set to [[#profiles-simple|Simple Profile]] or [[#profiles-base|Base Profile]], a [=Reserved OBU=] SHALL be regarded as either a part of a set of [=Descriptors=] or a part of a [=Temporal Unit=] with the following restrictions:
+In this context, for a given [=IA Sequence=] with [=primary_profile=] or [=additional_profile=] set to [[#profiles-simple|Simple Profile]], [[#profiles-base|Base Profile]], or [[#profiles-base-enhanced|Base-Enhanced Profile]], a [=Reserved OBU=] SHALL be regarded as either a part of a set of [=Descriptors=] or a part of a [=Temporal Unit=] with the following restrictions:
 - The [=Reserved OBU=] SHALL not be present between [=Mix Presentation OBU=]s.
 - A [=Mix Presentation OBU=] SHALL be the final OBU of [=Descriptors=].
 
-NOTE: [[#profiles-simple|Simple Profile]] or [[#profiles-base|Base Profile]] requires a [=Temporal Delimiter OBU=] to be the first OBU of a [=Temporal Unit=] if the OBU is present. This restriction can be used to identify which [=Temporal Unit=] a [=Reserved OBU=] is a part of.
+NOTE: All profiles require a [=Temporal Delimiter OBU=] to be the first OBU of a [=Temporal Unit=] if the OBU is present. This restriction can be used to identify which [=Temporal Unit=] a [=Reserved OBU=] is a part of.
 
 NOTE: In this section and subsections, the meaning of a unique OBU is that it is still unique if it only varies by the [=obu_redundant_copy=] flag.
 
@@ -1839,50 +1840,45 @@ Common restrictions on the [=IA Sequence=] for all profiles specified in this ve
 	- There SHALL be no redundant [=Parameter Block OBU=]s.
 	- [=Parameter Block OBU=]s SHALL come first and SHALL be followed by [=Audio Frame OBU=]s.
 - [=num_sub_mixes=] SHOULD be set to 1. [=Mix Presentation OBU=]s with [=num_sub_mixes=] > 1 SHOULD be ignored.
-- [=num_audio_elements=] SHOULD be set to 1 or 2. [=Mix Presentation OBU=]s with [=num_audio_elements=] > 2 SHOULD be ignored.
+- [=num_audio_elements=] SHOULD be set to at most 28. [=Mix Presentation OBU=]s with [=num_audio_elements=] > 28 SHOULD be ignored.
 
 NOTE: This behavior is to allow future versions of this specification to define new profiles that support a number of audio elements and/or a number of sub-mixes greater than those recommended in this profile, while still permitting streams compliant with these new profiles to be processed by parsers compliant with the profiles defined in this version of the specification.
 
 - When [=num_layers=] = 1, [=DemixingParamDefinition()=] for demixing MAY be present in the [=Audio Element OBU=] and IA decoders MAY use [=demixing_info_parameter_data=] or [=default_demixing_info_parameter_data=] for (dynamic) down-mixing.
 - The limit on the number of channels, which profiles MAY define, applies to the sum of channels across all [=Audio Element=]s in a [=Mix Presentation=] before mixing.
 - There MAY be [=Temporal Delimiter OBU=]s present. If present, the first OBU of every [=Temporal Unit=] SHALL be the [=Temporal Delimiter OBU=].
+- There SHALL be at least one [=Mix Presentation OBU=] that complies with the conformance points of the [=primary_profile=] set in the [=IA Sequence=].
 
 
 ## IA Simple Profile ## {#profiles-simple}
 
 This section specifies the conformance points of the simple profile.
 
-When the [=primary_profile=] field is set to 0, the following constraints apply to the [=IA Sequence=]:
-- There SHALL be only one unique [=Audio Element OBU=].
+The simple profile complies with that of <a href="https://aomediacodec.github.io/iamf/v1.0.0-errata.html">IAMF specification v1.0.0-errata</a>.
 
-Capabilities of the IA parser, decoder, and processor:
-- They SHALL be able to parse an [=IA Sequence=] with [=primary_profile=] = 0.
-- They SHALL be able to handle up to 16 channels.	
-- They SHALL be able to reconstruct one [=Audio Element=].
-- They MAY use [=demixing_info_parameter_data=] or [=default_demixing_info_parameter_data=] to do down-mixing.
 
 ## IA Base Profile ## {#profiles-base}
 
 This section specifies the conformance points of the base profile.
 
-When the [=primary_profile=] field is set to 1, the following constraints apply to the [=IA Sequence=]:
-- There SHALL be at most two unique [=Audio Element OBU=]s.
-	- There SHALL be at most one Channel-based [=Audio Element=] having [=num_layers=] > 1 at any one time.
-	- There SHALL be at most one Scene-based [=Audio Element=] at any one time.
-	- In other words, only the following combinations of two [=Audio Element=]s are allowed.
-		- Channel-based [=Audio Element=] having [=num_layers=] = 1 + Channel-based [=Audio Element=] having [=num_layers=] = 1.
-		- Channel-based [=Audio Element=] having [=num_layers=] = 1 + Channel-based [=Audio Element=] having [=num_layers=] > 1.
-		- Scene-based [=Audio Element=] + Channel-based [=Audio Element=] having [=num_layers=] = 1.
-		- Scene-based [=Audio Element=] + Channel-based [=Audio Element=] having [=num_layers=] > 1.
+The base profile complies with that of <a href="https://aomediacodec.github.io/iamf/v1.0.0-errata.html">IAMF specification v1.0.0-errata</a>.
+
+
+## IA Base-Enhanced Profile ## {#profiles-base-enhanced}
+
+This section specifies the conformance points of the base-enhanced profile.
+
+When the [=primary_profile=] field is set to 2, the following constraints apply to the [=IA Sequence=]:
+- There SHALL be at least one [=Mix Presentation OBU=] for at most 28 [=Audio Element=]s that parsers, which comply with the base-enhanced profile, recognize.
 
 Capabilities of the IA parser, decoder, and processor:
-- They SHALL be able to support the capabilities of the [[#profiles-simple|Simple Profile]].
-- They SHALL be able to parse an [=IA Sequence=] with [=primary_profile=] = 1.
-- They SHALL be able to handle up to 18 channels.
-	- One example is a mix with 3rd-order Ambisonics (16 channels) + non-diegetic stereo (2 channels).
-- They SHALL be able to reconstruct two [=Audio Element=]s.
-- They SHALL be able to mix two [=Audio Element=]s.
-
+- They SHALL be able to support the capabilities of the [[#profiles-base|Base Profile]].
+- They SHALL be able to parse an [=IA Sequence=] with [=primary_profile=] = 2.
+- They SHALL be able to handle up to 28 channels.
+	- The 28 channels limit applies to the sum of channels across all [=Audio Element=]s in a [=Mix Presentation=] before mixing.
+	- One example is a mix with 3rd-order Ambisonics (16 channels) + 7.1.4ch (12 channels).
+- They SHALL be able to reconstruct 28 [=Audio Element=]s.
+- They SHALL be able to mix 28 [=Audio Element=]s.
 
 # Standalone IAMF Representation # {#standalone}
 
