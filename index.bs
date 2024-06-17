@@ -118,6 +118,9 @@ url: https://www.iso.org/standard/77752.html#; spec: MP4-PCM; type: dfn;
 	text: format_flags
 	text: PCM_sample_size
 	
+url: https://www.iso.org/standard/84637.html#; spec: CENC; type: dfn;
+	text: cenc
+	text: cbcs
 </pre>
 
 <pre class='biblio'>
@@ -253,6 +256,12 @@ url: https://www.iso.org/standard/77752.html#; spec: MP4-PCM; type: dfn;
 		"status": "Standard",
 		"publisher": "IETF",
 		"href": "https://tools.ietf.org/html/rfc8486"
+	},
+	"CENC": {
+		"title": "Information technology — MPEG systems technologies - Part 7: Common encryption in ISO base media file format files",
+		"status" : "Standard",
+		"publisher" : "ISO/IEC",
+		"href" : "https://www.iso.org/standard/68042.html"
 	}
 }
 </pre>
@@ -1979,7 +1988,7 @@ NOTE: In a typical case, the OBUs in the first [=Descriptors=] of an [=IA Sequen
 A file conformant to this specification satisfies the following:
 - It SHALL conform to the normative requirements of [[!ISO-BMFF]].
 - It SHALL have the <dfn export for="ISO-BMFF Brand">iamf</dfn> brand among the compatible brands array of the FileTypeBox.
-- It SHALL contain at least one track using an [=IASampleEntry=].
+- It SHALL contain at least one track using an [=IASampleEntry=], possibly transformed by encryption as specified in [[#commonencryption]].
 - It SHOULD indicate a structural ISOBMFF brand among the compatible brands' array of the FileTypeBox, such as 'iso6'.
 - It MAY indicate other brands not specified in this specification provided that the associated requirements do not conflict with those given in this specification.
 
@@ -2098,6 +2107,12 @@ For tracks using the [=IASampleEntry=], an <dfn noexport>IA Sample</dfn> has the
 NOTE: Per the restriction of the profiles carried in an [=IA Track=], all [=Audio Frame OBU=]s in an [=IA Sample=] have the same duration and have the same trimming information. If [=Audio Frame OBU=]s in the [=IA Sample=] contain trimming information, the corresponding audio samples are removed from the presentation using edit list information.
 
 NOTE: In typical cases, when a track contains a single [=IA Sequence=], trimming can only happen at the beginning or the end of the [=IA Sequence=]. Therefore, the edit list can describe the start and end trimming with a single edit entry. A track storing consecutive [=IA Sequence=]s may need multiple edits in the edit list.
+
+## Common Encryption ## {#commonencryption}
+
+[=IA Track=]s MAY be protected. If protected, they SHALL conform to [[!CENC]] and SHALL be protected using the [=cenc=] or [=cbcs=] protection schemes.
+
+When the protection scheme [=cenc=] is used, an [=IA Track=] SHALL be protected using full sample encryption. When the protection scheme [=cbcs=] is used, an [=IA Track=] SHALL be protected using whole-block full sample encryption.
 
 ## Codecs Parameter String ## {#codecsparameter}
 
