@@ -1470,20 +1470,17 @@ The <dfn noexport>MixPresentationTags()</dfn> class provides informational metad
 <b>Syntax</b>
 ```
 class MixPresentationTags() {
-  unsigned int (8) num_name_value_tags;
-  for (int i = 0; i < num_name_value_tags; i++) {
+  unsigned int (8) num_tags;
+  for (int i = 0; i < num_tags; i++) {
     string tag_name;
     string tag_value;
   }
-
-  leb128() mix_presentation_tags_extension_size;
-  unsigned int (8 * mix_presentation_tags_extension_size) mix_presentation_tags_extension_bytes;
 }
 ```
 
 <b>Semantics</b>
 
-<dfn noexport>num_name_value_tags</dfn> indicates the number of name-value pairs present in this [=Mix Presentation=], where each pair represents a single tag.
+<dfn noexport>num_tags</dfn> indicates the number of name-value pairs present in this [=Mix Presentation=], where each pair represents a single tag.
 
 <dfn noexport>tag_name</dfn> is the label describing a [=Mix Presentation=] tag. Parsers that don't understand a [=tag_name=] SHOULD ignore it and its corresponding [=tag_value=].
 
@@ -1504,11 +1501,6 @@ content_language    : Language of the audio content in this Mix Presentation.
 	- If a [=Mix Presentation=] contains [=Audio Element=]s with different language content, its corresponding [=tag_value=] SHOULD use one of the following [[!ISO-639-2-Codes]] language codes: <code>und</code> or <code>mul</code>.
 
 NOTE: The language indicated by [=tag_name=] = "content_language" is different from [=language_label=]. The former indicates the language of the audio content in the associated [=Audio Element=]s, while the latter indicates the language of the [=Mix Presentation=] annotations.
-
-<dfn noexport>mix_presentation_tags_extension_size</dfn> indicates the size in bytes of [=mix_presentation_tags_extension_bytes=].
-
-<dfn noexport>mix_presentation_tags_extension_bytes</dfn> represents reserved bytes for future use. Parsers that don't understand these bytes SHOULD ignore them.
-
 
 ## Parameter Block OBU Syntax and Semantics ## {#obu-parameterblock}
 
