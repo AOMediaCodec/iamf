@@ -276,6 +276,7 @@ Here are some typical IAMF use cases and examples of how to instantiate the mode
 - UC1: One [=Audio Element=] (e.g., 3.1.2ch or First Order Ambisonics (FOA)) is delivered to a big-screen TV (in a home) or a mobile device through a unicast network. It is rendered to a loudspeaker layout (e.g., 3.1.2ch) or headphones with loudness normalization, and is played back on loudspeakers built into the big-screen TV or headphones connected to the mobile device, respectively.
 - UC2: Two [=Audio Element=]s (e.g., 5.1.2ch and Stereo) are delivered to a big-screen TV through a unicast network. Both are rendered to the same loudspeaker layout built into the big-screen TV and are mixed. After applying loudness normalization appropriate to the home environment, the [=Rendered Mix Presentation=] is played back on the loudspeakers.
 - UC3: Two [=Audio Element=]s (e.g., FOA and Non-diegetic Stereo) are delivered to a mobile device through a unicast network. FOA is rendered to Binaural (or Stereo) and Non-diegetic is rendered to Stereo. After mixing them, it is processed with loudness normalization and is played back on headphones through the mobile device.
+- UC4: Four [=Audio Element=]s for multi-language service (e.g., 5.1.2ch and 3 different Stereo dialogues, one for English, the second for Spanish, and the third for Korean) are delivered to an end-user device through a unicast network. The end-user (or the device) selects his preferred language so that 5.1.2ch and the Stereo dialogue associated with the language are rendered to the same loudspeaker layout and are mixed. After applying loudness normalization appropriate to its environment, the [=Rendered Mix Presentation=] is played back on the loudspeakers.
 
 Example 1: UC1 with [=3D audio signal=] = 3.1.2ch.
 - Audio Substream: The Left (L) and Right (R) channels are coded as one audio stream, the Left top front (Ltf) and Right top front (Rtf) channels as one audio stream, the Center channel as one audio stream, and the Low-Frequency Effects (LFE) channel as one audio stream.
@@ -298,6 +299,17 @@ Example 3: UC3 with two [=3D audio signal=]s = First Order Ambisonics (FOA) and 
 - Parameter Substream 1-2: Contains mixing parameter values that are applied to Audio Element 2 by considering the mobile environment.
 - Mix Presentation: Provides rendering algorithms for rendering Audio Elements 1 & 2 to popular loudspeaker layouts and headphones, mixing information based on Parameter Substreams 1-1 & 1-2, and loudness information of the [=Rendered Mix Presentation=].
 
+Example 4: UC4 with four [=3D audio signal=]s = 5.1.2ch and 3 Stereo dialogues for English/Spanish/Korean.
+- Audio Substream: The L and R channels are coded as one audio stream, the Left surround (Ls) and Right surround (Rs) channels as one audio stream, the Ltf and Rtf channels as one audio stream, the Center channel as one audio stream, and the LFE channel as one audio stream.
+- Audio Element 1 (5.1.2ch): Consists of 5 Audio Substreams which are grouped into one [=Channel Group=].
+- Audio Element 2 (Stereo dialogue for English): Consists of 1 Audio Substream which is grouped into one [=Channel Group=].
+- Audio Element 3 (Stereo dialogue for Spanish): Consists of 1 Audio Substream which is grouped into one [=Channel Group=].
+- Audio Element 4 (Stereo dialogue for Korean): Consists of 1 Audio Substream which is grouped into one [=Channel Group=].
+- Parameter Substream 1-1: Contains mixing parameter values that are applied to Audio Element 1 by considering to be mixed with Audio Element 2, 3, or 4.
+- Parameter Substream 1-2: Contains mixing parameter values that are applied to Audio Element 2, 3, or 4 by considering to be mixed with Audio Element 1.
+- Mix Presentation 1: Provides rendering algorithms for rendering Audio Elements 1 & 2 to popular loudspeaker layouts and headphones, mixing information based on Parameter Substreams 1-1 & 1-2, content language information (English) for Audio Element 2, and loudness information of the [=Rendered Mix Presentation=].
+- Mix Presentation 2: Provides rendering algorithms for rendering Audio Elements 1 & 3 to popular loudspeaker layouts and headphones, mixing information based on Parameter Substreams 1-1 & 1-2, content language information (Spanish) for Audio Element 3, and loudness information of the [=Rendered Mix Presentation=].
+- Mix Presentation 3: Provides rendering algorithms for rendering Audio Elements 1 & 4 to popular loudspeaker layouts and headphones, mixing information based on Parameter Substreams 1-1 & 1-2, content language information (Korean) for Audio Element 4, and loudness information of the [=Rendered Mix Presentation=].
 
 # Immersive Audio Model # {#iamodel}
 
