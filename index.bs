@@ -2472,7 +2472,9 @@ This section defines the renderer to use, given a channel-based [=Audio Element=
 		\[ \text{Ltf2} = \text{Ltf4} + 0.707 \times \text{Ltb} \]
 		\[ \text{Rtf2} = \text{Rtf4} + 0.707 \times \text{Rtb} \]
 - Else if the playback layout is 3.1.2ch,
-    - If the input layout has height channels, the static down-mix matrices specified in [[#processing-downmixmatrix-static]] are used.
+    - If the input layout has height channels, 
+    	- If the input layout is [=22.2ch=], the EAR Direct Speakers renderer ([[ITU-2127-0]]) can be used, for example, to first render the input audio to 7.1.4ch, followed by down-mixing from 7.1.4ch to 3.1.2ch by using the down-mix matrix specified in [[#processing-downmixmatrix-static]].
+    	- Else, the static down-mix matrices specified in [[#processing-downmixmatrix-static]] are used.
     - Else if the surround channels (x) of the input layout > 3, the static down-mix matrices specified in [[#processing-downmixmatrix-static]] after inserting empty height channels into the input audio are used.
     - Else, empty channels are padded to the input audio relevant to the input layout to make 3.1.2ch. In that case, Mono is regarded as a center channel.
 
