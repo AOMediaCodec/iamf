@@ -118,6 +118,9 @@ url: https://www.iso.org/standard/77752.html#; spec: MP4-PCM; type: dfn;
 	text: format_flags
 	text: PCM_sample_size
 	
+url: https://www.iso.org/standard/84637.html#; spec: CENC; type: dfn;
+	text: cenc
+	text: cbcs
 </pre>
 
 <pre class='biblio'>
@@ -181,6 +184,12 @@ url: https://www.iso.org/standard/77752.html#; spec: MP4-PCM; type: dfn;
 		"status": "Best Practice",
 		"publisher": "IETF",
 		"href": "https://www.rfc-editor.org/info/bcp47"
+	},
+	"ISO-639-2-Codes": {
+		"title": "ISO 639-2 Codes for the Representation of Names of Languages",
+		"status": "Standard",
+		"publisher": "ISO",
+		"href": "https://www.loc.gov/standards/iso639-2/php/code_list.php"
 	},
 	"FLAC": {
 		"title": "Free Lossless Audio Codec",
@@ -253,6 +262,12 @@ url: https://www.iso.org/standard/77752.html#; spec: MP4-PCM; type: dfn;
 		"status": "Standard",
 		"publisher": "IETF",
 		"href": "https://tools.ietf.org/html/rfc8486"
+	},
+	"CENC": {
+		"title": "Information technology — MPEG systems technologies - Part 7: Common encryption in ISO base media file format files",
+		"status" : "Standard",
+		"publisher" : "ISO/IEC",
+		"href" : "https://www.iso.org/standard/68042.html"
 	}
 }
 </pre>
@@ -267,6 +282,7 @@ Here are some typical IAMF use cases and examples of how to instantiate the mode
 - UC1: One [=Audio Element=] (e.g., 3.1.2ch or First Order Ambisonics (FOA)) is delivered to a big-screen TV (in a home) or a mobile device through a unicast network. It is rendered to a loudspeaker layout (e.g., 3.1.2ch) or headphones with loudness normalization, and is played back on loudspeakers built into the big-screen TV or headphones connected to the mobile device, respectively.
 - UC2: Two [=Audio Element=]s (e.g., 5.1.2ch and Stereo) are delivered to a big-screen TV through a unicast network. Both are rendered to the same loudspeaker layout built into the big-screen TV and are mixed. After applying loudness normalization appropriate to the home environment, the [=Rendered Mix Presentation=] is played back on the loudspeakers.
 - UC3: Two [=Audio Element=]s (e.g., FOA and Non-diegetic Stereo) are delivered to a mobile device through a unicast network. FOA is rendered to Binaural (or Stereo) and Non-diegetic is rendered to Stereo. After mixing them, it is processed with loudness normalization and is played back on headphones through the mobile device.
+- UC4: Four [=Audio Element=]s for multi-language service (e.g., 5.1.2ch and 3 different Stereo dialogues, one for English, the second for Spanish, and the third for Korean) are delivered to an end-user device through a unicast network. The end-user (or the device) selects his preferred language so that 5.1.2ch and the Stereo dialogue associated with the language are rendered to the same loudspeaker layout and are mixed. After applying loudness normalization appropriate to its environment, the [=Rendered Mix Presentation=] is played back on the loudspeakers.
 
 Example 1: UC1 with [=3D audio signal=] = 3.1.2ch.
 - Audio Substream: The Left (L) and Right (R) channels are coded as one audio stream, the Left top front (Ltf) and Right top front (Rtf) channels as one audio stream, the Center channel as one audio stream, and the Low-Frequency Effects (LFE) channel as one audio stream.
@@ -289,6 +305,17 @@ Example 3: UC3 with two [=3D audio signal=]s = First Order Ambisonics (FOA) and 
 - Parameter Substream 1-2: Contains mixing parameter values that are applied to Audio Element 2 by considering the mobile environment.
 - Mix Presentation: Provides rendering algorithms for rendering Audio Elements 1 & 2 to popular loudspeaker layouts and headphones, mixing information based on Parameter Substreams 1-1 & 1-2, and loudness information of the [=Rendered Mix Presentation=].
 
+Example 4: UC4 with four [=3D audio signal=]s = 5.1.2ch and 3 Stereo dialogues for English/Spanish/Korean.
+- Audio Substream: The L and R channels are coded as one audio stream, the Left surround (Ls) and Right surround (Rs) channels as one audio stream, the Ltf and Rtf channels as one audio stream, the Center channel as one audio stream, and the LFE channel as one audio stream.
+- Audio Element 1 (5.1.2ch): Consists of 5 Audio Substreams which are grouped into one [=Channel Group=].
+- Audio Element 2 (Stereo dialogue for English): Consists of 1 Audio Substream which is grouped into one [=Channel Group=].
+- Audio Element 3 (Stereo dialogue for Spanish): Consists of 1 Audio Substream which is grouped into one [=Channel Group=].
+- Audio Element 4 (Stereo dialogue for Korean): Consists of 1 Audio Substream which is grouped into one [=Channel Group=].
+- Parameter Substream 1-1: Contains mixing parameter values that are applied to Audio Element 1 by considering to be mixed with Audio Element 2, 3, or 4.
+- Parameter Substream 1-2: Contains mixing parameter values that are applied to Audio Element 2, 3, or 4 by considering to be mixed with Audio Element 1.
+- Mix Presentation 1: Provides rendering algorithms for rendering Audio Elements 1 & 2 to popular loudspeaker layouts and headphones, mixing information based on Parameter Substreams 1-1 & 1-2, content language information (English) for Audio Element 2, and loudness information of the [=Rendered Mix Presentation=].
+- Mix Presentation 2: Provides rendering algorithms for rendering Audio Elements 1 & 3 to popular loudspeaker layouts and headphones, mixing information based on Parameter Substreams 1-1 & 1-2, content language information (Spanish) for Audio Element 3, and loudness information of the [=Rendered Mix Presentation=].
+- Mix Presentation 3: Provides rendering algorithms for rendering Audio Elements 1 & 4 to popular loudspeaker layouts and headphones, mixing information based on Parameter Substreams 1-1 & 1-2, content language information (Korean) for Audio Element 4, and loudness information of the [=Rendered Mix Presentation=].
 
 # Immersive Audio Model # {#iamodel}
 
@@ -889,6 +916,8 @@ class ChannelAudioLayerConfig(i) {
     unsigned int (2) reserved;
     signed int (16) output_gain(i);
   }
+  if (i == 1 && [=loudspeaker_layout=] == 15)
+    unsigned int (8) expanded_loudspeaker_layout;
 }
 ```
 
@@ -902,11 +931,11 @@ class ChannelAudioLayerConfig(i) {
 
 <dfn noexport>loudspeaker_layout</dfn> indicates the channel layout to be reconstructed from the precedent [=Channel Group=]s and current [=Channel Group=]. If parsers do not recognize a [=loudspeaker_layout=] for a particular layer, they SHOULD skip the [=channel_audio_layer_config=] for that layer and all subsequent layers.
 
-In this version of the specification, [=loudspeaker_layout=] indicates one of the 10 channel layouts listed below.
+In this version of the specification, [=loudspeaker_layout=] indicates one of the channel layouts listed below.
 
 <table class="def">
 <tr>
-  <th><code>loudspeaker_layout</code></th><th>Channel Layout</th><th>Loudspeaker Location Ordering</th><th>Reference</th>
+  <th>loudspeaker_layout</th><th>Channel Layout</th><th>Loudspeaker Location Ordering</th><th>Reference</th>
 </tr>
 <tr>
   <td>0000</td><td>Mono</td><td>C</td><td></td>
@@ -921,7 +950,7 @@ In this version of the specification, [=loudspeaker_layout=] indicates one of th
   <td>0011</td><td>5.1.2ch</td><td>L/C/R/Ls/Rs/Ltf/Rtf/LFE</td><td>[=Loudspeaker configuration for Sound System C (2+5+0)=] of [[!ITU-2051-3]]</td>
 </tr>
 <tr>
-  <td>0100</td><td>5.1.4ch</td><td>L/C/R/Ls/Rs/Ltf/Rtf/Ltr/Rtr/LFE</td><td>[=Loudspeaker configuration for Sound System D (4+5+0)=] of [[!ITU-2051-3]]</td>
+  <td>0100</td><td><dfn noexport>5.1.4ch</dfn></td><td>L/C/R/Ls/Rs/Ltf/Rtf/Ltr/Rtr/LFE</td><td>[=Loudspeaker configuration for Sound System D (4+5+0)=] of [[!ITU-2051-3]]</td>
 </tr>
 <tr>
   <td>0101</td><td><dfn noexport>7.1ch</dfn></td><td>L/C/R/Lss/Rss/Lrs/Rrs/LFE</td><td>[=Loudspeaker configuration for Sound System I (0+7+0)=] of [[!ITU-2051-3]]</td>
@@ -939,8 +968,12 @@ In this version of the specification, [=loudspeaker_layout=] indicates one of th
   <td>1001</td><td>Binaural</td><td>L/R</td><td></td>
 </tr>
 <tr>
-  <td>others</td><td>Reserved</td><td></td><td></td>
+  <td>1010 ~ 1110</td><td>Reserved</td><td></td><td></td>
 </tr>
+<tr>
+  <td>1111</td><td>Expanded channel layouts</td><td></td><td>Loudspeaker configurations defined in the [=expanded_loudspeaker_layout=] field</td>
+</tr>
+
 </table>
 
 Where C: Center, L: Left, R: Right, Ls: Left Surround, Lss: Left Side Surround, Rs: Right Surround, Rss: Right Side Surround, Lrs: Left Rear Surround, Rrs: Right Rear Surround, Ltf: Left Top Front, Rtf: Right Top Front, Ltr: Left Top Rear, Rtr: Right Top Rear, Ltb: Left Top Back, Rtb: Right Top Back, LFE: Low-Frequency Effects
@@ -966,13 +999,12 @@ NOTE: This specification allows down-mixing mechanisms (e.g., as specified in [[
 <dfn noexport>coupled_substream_count</dfn> specifies the number of referenced [=Audio Substream=]s, each of which is coded as coupled stereo channels.
 
 Each pair of [=Coupled stereo channels|coupled stereo channels=] in the same [=Channel Group=] SHALL be coded in stereo mode to generate one single coded [=Audio Substream=], also referred to as a <dfn noexport>coupled substream</dfn>. Each [=Non-coupled channels|non-coupled channel=] in the same [=Channel Group=] SHALL be coded in mono mode to generate one single coded [=Audio Substream=], also known as a <dfn noexport>non-coupled substream</dfn>.
-- <dfn noexport>Coupled stereo channels</dfn>: L/R, Ls/Rs, Lss/Rss, Lrs/Rrs, Ltf/Rtf, Ltb/Rtb
-- <dfn noexport>Non-coupled channels</dfn>: C, LFE, L
+- <dfn noexport>Coupled stereo channels</dfn>: L/R, Ls/Rs, Lss/Rss, Lrs/Rrs, Ltf/Rtf, Ltb/Rtb, FLc/FRc, FL/FR, SiL/SiR, BL/BR, TpFL/TpFR, TpSiL/TpSiR, TpBL/TpBR 
+- <dfn noexport>Non-coupled channels</dfn>: C, LFE, L, FC, LFE1
 
 The order of the [=Audio Substream=]s in each [=Channel Group=] is specified in [[#scalablechannelaudio-orderingofaudiosubstreamidentifiers]].
 
 <dfn noexport>output_gain_flags</dfn> indicates the channels which [=output_gain=] is applied to. If a bit is set to 1, [=output_gain=] SHALL be applied to the channel. Otherwise, [=output_gain=] SHALL NOT be applied to the channel.
-
 
 <pre class = "def">
 Bit position : Channel Name
@@ -986,6 +1018,67 @@ Bit position : Channel Name
 </pre>
 
 <dfn noexport>output_gain</dfn> indicates the gain value to be applied to the mixed channels which are indicated by [=output_gain_flags=], where each mixed channel is generated by down-mixing two or more input channels. It is computed as \(20 \times \log_{10}(f)\), where \(f\) is the factor by which to scale the mixed channels. It is stored as a 16-bit, signed, two’s complement fixed-point value with 8 fractional bits (i.e., Q7.8)([[Q-Format]]).
+
+<dfn noexport>expanded_loudspeaker_layout</dfn> indicates the expanded channel layout to be reconstructed from the [=Channel Group=]. This field SHALL only be present when [=num_layers=] = 1 and [=loudspeaker_layout=] is set to 15. Parsers SHOULD ignore [=Audio Element OBU=]s with an [=expanded_loudspeaker_layout=] that they do not recognize.
+
+In this version of the specification, [=expanded_loudspeaker_layout=] indicates one of the expanded channel layouts listed below.
+
+<table class="def">
+<tr>
+  <th>expanded_loudspeaker_layout</th><th>Expanded Channel Layout</th><th>Loudspeaker Location Ordering</th><th>Reference</th>
+</tr>
+<tr>
+  <td>0</td><td>LFE</td><td>LFE</td><td>The low-frequency effects subset (LFE) of [=7.1.4ch=]</td>
+</tr>
+<tr>
+  <td>1</td><td>Stereo-S</td><td>Ls/Rs</td><td>The surround subset (Ls/Rs) of [=5.1.4ch=]</td>
+</tr>
+<tr>
+  <td>2</td><td>Stereo-SS</td><td>Lss/Rss</td><td>The side surround subset (Lss/Rss) of [=7.1.4ch=]</td>
+</tr>
+<tr>
+  <td>3</td><td>Stereo-RS</td><td>Lrs/Rrs</td><td>The rear surround subset (Lrs/Rrs) of [=7.1.4ch=]</td>
+</tr>
+<tr>
+  <td>4</td><td>Stereo-TF</td><td>Ltf/Rtf</td><td>The top front subset (Ltf/Rtf) of [=7.1.4ch=]</td>
+</tr>
+<tr>
+  <td>5</td><td>Stereo-TB</td><td>Ltb/Rtb</td><td>The top back subset (Ltb/Rtb) of [=7.1.4ch=]</td>
+</tr>
+<tr>
+  <td>6</td><td>Top-4ch</td><td>Ltf/Rtf/Ltb/Rtb</td><td>The top 4 channels (Ltf/Rtf/Ltb/Rtb) of [=7.1.4ch=]</td>
+</tr>
+<tr>
+  <td>7</td><td>3.0ch</td><td>L/C/R</td><td>The front 3 channels (L/C/R) of [=7.1.4ch=]</td>
+</tr>
+<tr>
+  <td>8</td><td><dfn noexport>9.1.6ch</dfn></td><td>[=Loudspeaker location ordering of 9.1.6ch=]</td><td>The subset of [=Loudspeaker configuration for Sound System H (9+10+3)=] of [[!ITU-2051-3]]</td>
+</tr>
+<tr>
+  <td>9</td><td>Stereo-F</td><td>FL/FR</td><td>The front subset (FL/FR) of [=9.1.6ch=]</td>
+</tr>
+<tr>
+  <td>10</td><td>Stereo-Si</td><td>SiL/SiR</td><td>The side subset (SiL/SiR) of [=9.1.6ch=]</td>
+</tr>
+<tr>
+  <td>11</td><td>Stereo-TpSi</td><td>TpSiL/TpSiR</td><td>The top side subset (TpSiL/TpSiR) of [=9.1.6ch=]</td>
+</tr>
+<tr>
+  <td>12</td><td>Top-6ch</td><td>TpFL/TpFR/TpSiL/TpSiR/TpBL/TpBR</td><td>The top 6 channels (TpFL/TpFR/TpSiL/TpSiR/TpBL/TpBR) of [=9.1.6ch=]</td>
+</tr>
+<tr>
+  <td>13 ~ 255</td><td>Reserved</td><td></td><td></td>
+</tr>
+
+</table>
+
+<dfn noexport>Loudspeaker location ordering of 9.1.6ch</dfn>: FLc/FC/FRc/FL/FR/SiL/SiR/BL/BR/TpFL/TpFR/TpSiL/TpSiR/TpBL/TpBR/LFE1
+
+Where FLc: Front Left Centre, FC: Front Centre, FRc: Front Right Centre, FL: Front Left, FR: Front Right, SiL: Side Left, SiR: Side Right, BL: Back Left, BR: Back Right, TpFL: Top Front Left, TpFR: Top Front Right, TpSiL: Top Side Left, TpSiR: Top Side Right, TpBL: Top Back Left, TpBR: Top Back Right, LFE1: Low-Frequency Effects-1
+
+For a given input [=3D audio signal=] with an expanded channel layout defined in [=expanded_loudspeaker_layout=], [=num_layers=] SHALL be set to 1 (i.e., it is a non-scalable channel audio element). Except [=9.1.6ch=] [=Audio Element=], it is RECOMMENDED to use such an [=Audio Element=] as an auxiliary [=Audio Element=] to be mixed with a primary [=Audio Element=] (e.g., TOA or 7.1.4ch) within a [=Mix Presentation=]. If parsers encounter a [=loudspeaker_layout=] = 15 for any layer other than the first layer, they SHOULD skip the [=channel_audio_layer_config=] for that layer and all subsequent layers.
+
+The following channel layouts may be indicated using an existing [=loudspeaker_layout=] or [=expanded_loudspeaker_layout=].  The stereo pair FLc/FRc is indicated using Stereo (L/R), the stereo pair BL/BR is indicated using Stereo-RS (Lrs/Rrs), the stereo pair TpFL/TpFR is indicated using Stereo-TF (Ltf/Rtf), the stereo pair TpBL/TpBR is indicated using Stereo-TB (Ltb/Rtb), and FLc/FC/FRc is indicated using 3.0ch (L/C/R).
 
 ### Scalable Channel Group and Layout ### {#scalalechannelaudio-channelgroupandlayout}
 
@@ -1067,7 +1160,7 @@ The order of the [=Audio Substream=]s in each [=Channel Group=] (i.e., the seman
 - The [=coupled substream=]s for the surround channels come first and are followed by the [=coupled substream=]s for the top channels.
 - The [=coupled substream=]s for the front channels come first and are followed by the [=coupled substream=]s for the side, rear and back channels.
 - The [=coupled substream=]s for the side channels come first and are followed by the [=coupled substream=]s for the rear channels.
-- The Center channel comes first and is followed by the LFE channel, and then the L channel.
+- The Center (or Front Centre) channel comes first and is followed by the LFE (or LFE1) channel, and then the L channel.
 
 ### Ambisonics Config Syntax and Semantics ### {#syntax-ambisonics-config}
 
@@ -1162,14 +1255,16 @@ class MixPresentationOBU() {
       ElementMixConfig element_mix_config;
     }
     OutputMixConfig output_mix_config;
-    
+
     leb128() num_layouts;
     for (j = 0; j < num_layouts; j++) {
       Layout loudness_layout;
       LoudnessInfo loudness; 
     }
   }
-}  
+
+  MixPresentationTags mix_presentation_tags;
+}
 ```
 
 <b>Semantics</b>
@@ -1203,7 +1298,7 @@ class MixPresentationOBU() {
 
 <dfn noexport>loudness</dfn> is an instance of the [=LoudnessInfo()=] class, which provides the loudness information for this sub-mix's [=Rendered Mix Presentation=], measured on the layout provided by [=loudness_layout=].
 
-The layout specified in [=loudness_layout=] SHOULD NOT be higher than the highest layout among the layouts provided by the [=Audio Element=]s. In other words, rendering from an [=Audio Element=] with the highest layout to the [=loudness_layout=] SHOULD NOT require an up-mix. The exception is when the [=Audio Element=] is a zero-order Ambisonics or Mono channel; they MAY be rendered to Stereo. In this exception case, the [=loudness_layout=] for a zero-order Ambisonics or Mono channel [=Audio Element=] SHOULD NOT be higher than Stereo.
+The layout specified in [=loudness_layout=] SHOULD NOT be higher than the highest layout among the layouts provided by the [=Audio Element=]s. In other words, rendering from an [=Audio Element=] with the highest layout to the [=loudness_layout=] SHOULD NOT require an up-mix. In the case of a CHANNEL_BASED [=Audio Element=] with an expanded channel layout (i.e., [=loudspeaker_layout=] = 15), the [=Audio Element=] is considered to be providing the reference layout that it is a subset of. The exception is when the [=Audio Element=] is a zero-order Ambisonics or Mono channel; they MAY be rendered to Stereo. In this exception case, the [=loudness_layout=] for a zero-order Ambisonics or Mono channel [=Audio Element=] SHOULD NOT be higher than Stereo.
 
 Each sub-mix SHALL include [=loudness=] for Stereo (i.e., a [=loudness_layout=] with the [=sound_system=] field = [=Loudspeaker configuration for Sound System A (0+2+0)=]).
 - If a sub-mix's [=Rendered Mix Presentation=] is Mono, its [=loudness=] for Stereo SHOULD be measured on the Stereo signal generated using the equations:
@@ -1215,6 +1310,10 @@ If a sub-mix in a [=Mix Presentation OBU=] includes only one single scalable cha
 
 	- The highest [=loudness_layout=] specified in one sub-mix is the layout that was used for authoring the sub-mix. The exception is when the [=Audio Element=] is a zero-order Ambisonics or Mono channel.
 	- The highest [=loudness_layout=] for a zero-order Ambisonics or Mono channel [=Audio Element=] is Stereo.
+
+<dfn noexport>mix_presentation_tags</dfn> is an instance of the [=MixPresentationTags()=] class, which provides informational metadata about a Mix Presentation, in addition to [=mix_presentation_annotations=].
+
+The [=MixPresentationTags()=] class MAY or MAY NOT be present in a [=Mix Presentation OBU=]. If the [=obu_size=] of a [=Mix Presentation OBU=] is greater than the size up to the end of [=num_sub_mixes=] loop, the [=MixPresentationTags()=] SHALL be present in the [=Mix Presentation OBU=]. For a given [=IA Sequence=] with multiple [=Mix Presentation OBU=]s, the [=MixPresentationTags()=] MAY be present in some [=Mix Presentation OBU=]s and MAY NOT be present in the other [=Mix Presentation OBU=]s. 
  
 ### Mix Presentation Annotations Syntax and Semantics ### {#obu-mixpresentation-annotation}
 
@@ -1363,7 +1462,7 @@ layout_type : Layout type
 - A value of 3 indicates that the layout is binaural.
 
 
-<dfn noexport>sound_system</dfn> specifies one of the sound systems A to J as specified in [[!ITU-2051-3]], 7.1.2ch or 3.1.2ch.
+<dfn noexport>sound_system</dfn> specifies one of the sound systems A to J as specified in [[!ITU-2051-3]], 7.1.2ch, 3.1.2ch, Mono, or 9.1.6ch.
 
  - 0: It indicates [=Loudspeaker configuration for Sound System A (0+2+0)=]
  - 1: It indicates [=Loudspeaker configuration for Sound System B (0+5+0)=]
@@ -1378,7 +1477,8 @@ layout_type : Layout type
  - 10: It indicates the same loudspeaker configuration as [=loudspeaker_layout=] = 0110 (i.e., 7.1.2ch)
  - 11: It indicates the same loudspeaker configuration as [=loudspeaker_layout=] = 1000 (i.e., 3.1.2ch)
  - 12: It indicates Mono
- - 13 ~ 15: Reserved
+ - 13: It indicates the same loudspeaker configuration as [=expanded_loudspeaker_layout=] = 8 (i.e., 9.1.6ch)
+ - 14 ~ 15: Reserved
 
 When a value for [=layout_type=] or [=sound_system=] is not supported, parsers SHOULD ignore this [=Layout()=] and any associated [=LoudnessInfo()=].
 
@@ -1452,6 +1552,45 @@ NOTE: [[!ITU-1770-4]] adopts the convention of using the dBov unit for dBFS, whe
 <dfn noexport>info_type_size</dfn> indicates the size in bytes of [=info_type_bytes=].
 
 <dfn noexport>info_type_bytes</dfn> represents reserved bytes for future use when new marks of [=info_type=] are defined. Parsers that don't understand these bytes SHOULD ignore them.
+
+### Mix Presentation Tags Syntax and Semantics ### {#obu-mixpresentation-tags}
+
+The <dfn noexport>MixPresentationTags()</dfn> class provides informational metadata about a [=Mix Presentation=]. This section specifies the syntax structure of the [=MixPresentationTags()=] class.
+
+<b>Syntax</b>
+```
+class MixPresentationTags() {
+  unsigned int (8) num_tags;
+  for (int i = 0; i < num_tags; i++) {
+    string tag_name;
+    string tag_value;
+  }
+}
+```
+
+<b>Semantics</b>
+
+<dfn noexport>num_tags</dfn> indicates the number of name-value pairs present in this [=Mix Presentation=], where each pair represents a single tag.
+
+<dfn noexport>tag_name</dfn> is the label describing a [=Mix Presentation=] tag. Parsers that don't understand a [=tag_name=] SHOULD ignore it and its corresponding [=tag_value=].
+
+This specification supports the following [=tag_name=]s:
+
+<pre class = "def">
+tag_name            : Description
+content_language    : Language of the audio content in this Mix Presentation.
+</pre>
+
+- There SHALL be at most one instance of [=tag_name=] = "content_language" within one [=Mix Presentation=]. If there are two or more instances of [=tag_name=] = "content_language", parsers SHOULD use the [=tag_value=] corresponding to the first instance, and MAY ignore the remaining instances.
+
+<dfn noexport>tag_value</dfn> is the value of a [=Mix Presentation=] tag.
+
+- If the corresponding [=tag_name=] = "content_language", the following applies to this [=tag_value=].
+	- It indicates the language of the audio content in the associated [=Audio Element=]s within this [=Mix Presentation=].
+	- It SHALL conform to [[!ISO-639-2-Codes]].
+	- If a [=Mix Presentation=] contains [=Audio Element=]s with different language content, its corresponding [=tag_value=] SHOULD use one of the following [[!ISO-639-2-Codes]] language codes: <code>und</code> or <code>mul</code>.
+
+NOTE: The language indicated by [=tag_name=] = "content_language" is different from [=language_label=]. The former indicates the language of the audio content in the associated [=Audio Element=]s, while the latter indicates the language of the [=Mix Presentation=] annotations.
 
 ## Parameter Block OBU Syntax and Semantics ## {#obu-parameterblock}
 
@@ -1828,7 +1967,7 @@ NOTE: All profiles require a [=Temporal Delimiter OBU=] to be the first OBU of a
 NOTE: In this section and subsections, the meaning of a unique OBU is that it is still unique if it only varies by the [=obu_redundant_copy=] flag.
 
 Common restrictions on the [=IA Sequence=] for all profiles specified in this version of the specification:
-- The maximum size of an OBU (an [=OBU Header=] followed by the OBU payload) SHALL be limited to \(2\text{MB}\) (i.e., \(2^{21}\) bytes). It implies that the maximum value of the [=obu_size=] field SHALL be limited to \(2^{21} - 4\).
+- The maximum size of an OBU (an [=OBU Header=] followed by the OBU payload) SHALL be limited to \(2\text{MB}\) (i.e., \(2^{21}\) bytes). It implies that the maximum value of the [=obu_size=] field SHALL be limited to \(2^{21} - 4\), in the case where [=obu_size=] is encoded using the most compressed leb128() representation.
 - There SHALL be only one unique set of [=Descriptors=] in an [=IA Sequence=]. If the [=Descriptors=] are repeated in the middle of the [=IA Sequence=], all the OBUs in that set of [=Descriptors=] SHALL be marked as redundant (i.e., [=obu_redundant_copy=] = 1).
 	- When a set of [=Descriptors=] is placed in the middle of the [=IA Sequence=], it SHALL NOT be placed in the middle of a [=Temporal Unit=]. In other words, if [=Descriptors=] are placed mid-sequence, they SHALL be present only after the last OBU of a [=Temporal Unit=] and before the first OBU of the next [=Temporal Unit=].
 - There SHALL be only one unique [=Codec Config OBU=].
@@ -1935,7 +2074,7 @@ NOTE: In a typical case, the OBUs in the first [=Descriptors=] of an [=IA Sequen
 A file conformant to this specification satisfies the following:
 - It SHALL conform to the normative requirements of [[!ISO-BMFF]].
 - It SHALL have the <dfn export for="ISO-BMFF Brand">iamf</dfn> brand among the compatible brands array of the FileTypeBox.
-- It SHALL contain at least one track using an [=IASampleEntry=].
+- It SHALL contain at least one track using an [=IASampleEntry=], possibly transformed by encryption as specified in [[#commonencryption]].
 - It SHOULD indicate a structural ISOBMFF brand among the compatible brands' array of the FileTypeBox, such as 'iso6'.
 - It MAY indicate other brands not specified in this specification provided that the associated requirements do not conflict with those given in this specification.
 
@@ -2054,6 +2193,12 @@ For tracks using the [=IASampleEntry=], an <dfn noexport>IA Sample</dfn> has the
 NOTE: Per the restriction of the profiles carried in an [=IA Track=], all [=Audio Frame OBU=]s in an [=IA Sample=] have the same duration and have the same trimming information. If [=Audio Frame OBU=]s in the [=IA Sample=] contain trimming information, the corresponding audio samples are removed from the presentation using edit list information.
 
 NOTE: In typical cases, when a track contains a single [=IA Sequence=], trimming can only happen at the beginning or the end of the [=IA Sequence=]. Therefore, the edit list can describe the start and end trimming with a single edit entry. A track storing consecutive [=IA Sequence=]s may need multiple edits in the edit list.
+
+## Common Encryption ## {#commonencryption}
+
+[=IA Track=]s MAY be protected. If protected, they SHALL conform to [[!CENC]] and SHALL be protected using the [=cenc=] or [=cbcs=] protection schemes.
+
+When the protection scheme [=cenc=] is used, an [=IA Track=] SHALL be protected using full sample encryption. When the protection scheme [=cbcs=] is used, an [=IA Track=] SHALL be protected using whole-block full sample encryption.
 
 ## Codecs Parameter String ## {#codecsparameter}
 
@@ -2359,9 +2504,16 @@ In this section, for a given x.y.z layout, the next highest layout x'.y'.z' mean
 
 This section defines the renderer to use, given a channel-based [=Audio Element=] and a loudspeaker playback layout.
 
+<dfn noexport>22.2ch</dfn> represents the [=Loudspeaker configuration for Sound System H (9+10+3)=].
+
 - The input layout (x.y.z) of the IA renderer is set as follows:
-    - If [=num_layers=] = 1, use the [=loudspeaker_layout=] of the [=Audio Element=].
-    - Else, if there is an [=Audio Element=] with a [=loudspeaker_layout=] that matches the playback layout, use it.
+    - If [=num_layers=] = 1, 
+        - If [=loudspeaker_layout=] < 10, use the [=loudspeaker_layout=] of the [=Audio Element=].
+        - Else if [=loudspeaker_layout=] = 15, 
+            - If [=expanded_loudspeaker_layout=] = 1, use 5.1.4ch with empty channels everywhere other than the corresponding loudspeaker locations.
+            - Else if [=expanded_loudspeaker_layout=] < 8, use 7.1.4ch with empty channels everywhere other than the corresponding loudspeaker locations.
+            - Else, use [=22.2ch=] with empty channels everywhere other than the corresponding loudspeaker locations except LFE2. LFE2 of [=22.2ch=] is copied from LFE1.
+    - Else, if the [=Audio Element=] has a [=loudspeaker_layout=] that matches the playback layout, use that matching [=loudspeaker_layout=].
     - Else, use the next highest available layout from all available [=loudspeaker_layout=]s.
 - The output layout of the IA renderer is set to the playback layout (X.Y.Z).
 - The IA renderer is selected according to the following rules:
@@ -2375,13 +2527,18 @@ This section defines the renderer to use, given a channel-based [=Audio Element=
 ##### Rendering Without Demixing Info ##### {#processing-mixpresentation-rendering-m2l-withoutdemixinfo}
 - If the playback layout is neither 3.1.2ch nor 7.1.2ch,
     - If the playback layout complies with the loudspeaker layouts supported by [[!ITU-2051-3]], the EAR Direct Speakers renderer ([[ITU-2127-0]]) can be used, for example.
+    - Else if the playback layout is 9.1.6ch, 
+    	- If the input layout is [=22.2ch=], the down-mix matrix specified in [[#processing-downmixmatrix-static]] can be used, for example.
+    	- Else, the EAR Direct Speakers renderer ([[ITU-2127-0]]) can be used, for example, to first render the input audio to [=22.2ch=], followed by copying LFE1 to LFE2 and followed by down-mixing from [=22.2ch=] to [=9.1.6ch=] by using the down-mix matrix specified in [[#processing-downmixmatrix-static]].
     - Else, an implementation-specific renderer can be used, for example.
 - Else if the playback layout is 7.1.2ch,
     - The EAR Direct Speakers renderer ([[ITU-2127-0]]) can be used, for example, to first render the input audio to 7.1.4ch, followed by down-mixing from 7.1.4ch to 7.1.2ch. The height channels of 7.1.4ch are down-mixed to the height channels of 7.1.2ch as follows:
 		\[ \text{Ltf2} = \text{Ltf4} + 0.707 \times \text{Ltb} \]
 		\[ \text{Rtf2} = \text{Rtf4} + 0.707 \times \text{Rtb} \]
 - Else if the playback layout is 3.1.2ch,
-    - If the input layout has height channels, the static down-mix matrices specified in [[#processing-downmixmatrix-static]] are used.
+    - If the input layout has height channels, 
+    	- If the input layout is [=22.2ch=], the EAR Direct Speakers renderer ([[ITU-2127-0]]) can be used, for example, to first render the input audio to 7.1.4ch, followed by down-mixing from 7.1.4ch to 3.1.2ch by using the down-mix matrix specified in [[#processing-downmixmatrix-static]].
+    	- Else, the static down-mix matrices specified in [[#processing-downmixmatrix-static]] are used.
     - Else if the surround channels (x) of the input layout > 3, the static down-mix matrices specified in [[#processing-downmixmatrix-static]] after inserting empty height channels into the input audio are used.
     - Else, empty channels are padded to the input audio relevant to the input layout to make 3.1.2ch. In that case, Mono is regarded as a center channel.
 
@@ -2403,6 +2560,7 @@ This section provides guidelines about the renderer to use, given a scene-based 
 - The output layout of the IA renderer is set to the playback layout.
 - The IA renderer used can be selected according to the following rules:
     - If the playback layout complies with the loudspeaker layouts supported by [[!ITU-2051-3]], the EAR HOA renderer ([[ITU-2127-0]]) can be used.
+    - Else, if the playback layout is 9.1.6ch, the EAR HOA renderer ([[ITU-2127-0]]) can be used, for example, to first render the input audio to [=22.2ch=], followed by down-mixing from [=22.2ch=] to [=9.1.6ch=] by using the down-mix matrix specified in [[#processing-downmixmatrix-static]].
     - Else, if there is an implementation-specific renderer, use it.
     - Else, the EAR HOA renderer can be used to render to the next highest [[!ITU-2051-3]] layout compared to the playback layout, and then down-mix using an implementation-specific renderer or use the static down-mix matrices specified in [[#processing-downmixmatrix-static]] if available.
 
@@ -2540,7 +2698,7 @@ This specification includes preferred dynamic down-mixing matrices generated by 
 
 ### Static Down-mix Matrix ### {#processing-downmixmatrix-static}
 
-This section provides includes preferred static down-mix matrices to render to 3.1.2ch from 5.1.2ch, 5.1.4ch, 7.1.2ch, and 7.1.4ch.
+This section provides includes preferred static down-mix matrices to render to 3.1.2ch from 5.1.2ch, 5.1.4ch, 7.1.2ch, and 7.1.4ch and to 9.1.6ch from 22.2ch.
 
 Implementations can use a limiter defined in [[#processing-post-limiter]] to preserve the energy of audio signals instead of using normalization factors.
 
@@ -2680,12 +2838,84 @@ The 3.1.2ch down-mix matrix for 7.1.4ch is given below, where \(p = 0.707\).
 	\text{Rss} \\
 	\text{Lrs} \\
 	\text{Rrs} \\
-	\text{Ltf2} \\
-	\text{Rtf2} \\
+	\text{Ltf4} \\
+	\text{Rtf4} \\
+	\text{Ltb} \\
+	\text{Rtb} \\
 	\text{LFE}
 \end{bmatrix}
 \]
 
+The 9.1.6ch down-mix matrix for 22.2ch is given below, where \(p = 0.707\) and \(q = 0.5\). This down-mix matrix is generated based on Section 8.1 and Table 16 of [[!ITU-2127-0]].
+
+\[
+\begin{bmatrix}
+	\text{FLc} \\
+	\text{FC} \\
+	\text{FRc} \\
+	\text{FL} \\
+	\text{FR} \\
+	\text{SiL} \\
+	\text{SiR} \\
+	\text{BL} \\
+	\text{BR} \\
+	\text{TpFL} \\
+	\text{TpFR} \\
+	\text{TpSiL} \\
+	\text{TpSiR} \\
+	\text{TpBL} \\
+	\text{TpBR} \\
+	\text{LFE1}
+\end{bmatrix}
+=
+\begin{bmatrix}
+	1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\
+	0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 0 & 0 \\
+	0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
+	0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+	0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+	0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+	0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+	0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & p & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+	0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & p & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+	0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & q & 0 & 0 & 0 & 0 & 0 \\
+	0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & q & 0 & 0 & 0 & 0 & 0 \\
+	0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+	0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+	0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & q & p & 0 & 0 & 0 & 0 \\
+	0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & q & p & 0 & 0 & 0 & 0 \\
+	0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & p & 0 & 0 & 0 & 0 & 0 & 0 & 0 & p \\
+\end{bmatrix}
+\times
+\begin{bmatrix}
+	\text{FLc} \\
+	\text{FC} \\
+	\text{FRc} \\
+	\text{FL} \\
+	\text{FR} \\
+	\text{SiL} \\
+	\text{SiR} \\
+	\text{BL} \\
+	\text{BR} \\
+	\text{TpFL} \\
+	\text{TpFR} \\
+	\text{TpSiL} \\
+	\text{TpSiR} \\
+	\text{TpBL} \\
+	\text{TpBR} \\
+	\text{LFE1} \\
+	\text{BC} \\
+	\text{TpFC} \\
+	\text{TpC} \\
+	\text{TpBC} \\
+	\text{BtFL} \\
+	\text{BtFC} \\
+	\text{BtFR} \\
+  \text{LFE2}
+\end{bmatrix}
+\]
+
+Where BC: Back Centre, TpFC: Top Front Centre, TpC: Top Centre, TpBC: Top Back Centre, BtFL: Bottom Front Left, BtFC: Bottom Front Centre, BtFR: Bottom Front Right, LFE2: Low-Frequency Effects-2
 
 # Convention # {#convention}
 
@@ -2699,7 +2929,7 @@ All syntax elements conform to the [=Syntactic Description Language=] specified 
  
  <b>leb128()</b> indicates the type of an unsigned integer. To encode the following unsigned integer <b>syntaxName</b>, it first represents the integer in binary with an N-bit representation, where N is a multiple of 7. Then break the integer up into groups of 7 bits. Output one encoded byte for each 7 bits group, from least significant to most significant group. Each byte will have the group in its 7 least significant bits. Set the most significant bit on each byte except the last byte.
 
- <b>syntaxName</b> is an unsigned integer which is encoded by <b>leb128()</b>. The size of the unsigned integer to be encoded is limited to 32 bits. In other words, the value returned from the <b>leb128()</b> parsing process is less than or equal to \(2^{32} - 1\).
+ <b>syntaxName</b> is an unsigned integer which is encoded by <b>leb128()</b>. The size of the unsigned integer to be encoded is limited to 32 bits. In other words, the value returned from the <b>leb128()</b> parsing process is less than or equal to \(2^{32} - 1\). After encoding by <b>leb128()</b>, its maximum size is limited to 8 bytes.
 
  NOTE: There are multiple ways of encoding the same value depending on how many leading zero bits are encoded. There is no requirement that this syntax descriptor uses the most compressed representation. This can be useful for encoder implementations by allowing a fixed amount of space to be filled in later when the value becomes known.
   
