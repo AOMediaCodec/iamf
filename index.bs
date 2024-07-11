@@ -326,7 +326,7 @@ This specification defines a model for representing [=Immersive Audio=] contents
 <center><img src="images/decoding_flow_cropped.svg" width="800"></center>
 <center><figcaption>Processing flow to decode, reconstruct, render, and mix the 3D audio signals for immersive audio playback.</figcaption></center>
 
-The model comprises a number of coded [=Audio Substream=]s and the metadata that describes how to decode, render and mix the [=Audio Substream=]s for playback. The model itself is codec-agnostic; any supported audio codec may be used to code the [=Audio Substream=]s.
+The model comprises a number of coded [=Audio Substream=]s and the metadata that describes how to decode, render and mix the [=Audio Substream=]s for playback. The model itself is codec-agnostic; any supported audio codec MAY be used to code the [=Audio Substream=]s.
 
 The model includes one or more [=Audio Element=]s, each of which consists of one or more [=Audio Substream=]s. The [=Audio Substream=]s that make up an [=Audio Element=] are grouped into one or more [=Channel Group=]s. The model further includes [=Mix Presentation=]s and [=Parameter Substream=]s.
 
@@ -336,7 +336,7 @@ The term channel means a component of Scene-based audio, a component of Object-b
 
 The term <dfn noexport>Immersive Audio</dfn> (IA) means the combination of [=3D audio signal=]s recreating a sound experience close to that of a natural environment.
 
-The term <dfn noexport>Audio Substream</dfn> means a sequence of audio samples, which may be encoded with any compatible audio codec.
+The term <dfn noexport>Audio Substream</dfn> means a sequence of audio samples, which MAY be encoded with any compatible audio codec.
 
 The term <dfn noexport>Channel Group</dfn> means a set of [=Audio Substream=](s) which is(are) able to provide a spatial resolution of audio contents by itself or which is(are) able to provide an enhanced spatial resolution of audio contents by combining with the preceding [=Channel Group=]s.
 
@@ -344,7 +344,7 @@ The term <dfn noexport>Audio Element</dfn> means a [=3D audio signal=], and is c
 
 The term <dfn noexport>Mix Presentation</dfn> means a series of processes to present [=Immersive Audio=] contents to end-users by using [=Audio Element=](s). It contains metadata that describes how the [=Audio Element=](s) is(are) rendered and mixed together for playback through physical loudspeakers or headphones, as well as loudness information.
 
-The term <dfn noexport>Parameter Substream</dfn> means a sequence of parameter values that are associated with the algorithms used for reconstructing, rendering, and mixing. It is applied to its associated [=Audio Element=] or [=Mix Presentation=]. [=Parameter Substream=]s may change their values over time and may further be animated; for example, any changes in values may be smoothed over some time duration. As such, they may be viewed as a 1D signal with different metadata specified for different time durations.
+The term <dfn noexport>Parameter Substream</dfn> means a sequence of parameter values that are associated with the algorithms used for reconstructing, rendering, and mixing. It is applied to its associated [=Audio Element=] or [=Mix Presentation=]. [=Parameter Substream=]s MAY change their values over time and MAY further be animated; for example, any changes in values MAY be smoothed over some time duration. As such, they MAY be viewed as a 1D signal with different metadata specified for different time durations.
 
 The term <dfn noexport>Rendered Mix Presentation</dfn> means a [=3D audio signal=] after the [=Audio Element=](s) defined in a [=Mix Presentation=] is(are) rendered and mixed together for playback through physical loudspeakers or headphones.
 
@@ -368,7 +368,7 @@ For a given input [=3D audio signal=],
 
 An IAMF generation processing including the Pre-Processor, the [=Channel Group=](s), the Codec Encoder, and the OBU Packetizer are defined in [[#iamfgeneration]]. The [=IA Sequence=] is defined in [[#standalone-ia-sequence]]. An IAMF processing including the OBU Parser, the Codec Decoder, the Element Reconstructor, the Renderer, the Mixer, and the Post-Processor are defined in [[#processing]].
 
-Although not shown in the figure above, the [=IA Sequence=] may be encapsulated by a file packager, such as the ISO-BMFF Encapsulation, to output an IAMF file (ISO-BMFF file). Then, a file parser, such as the ISO-BMFF Parser, decapsulates it to output the [=IA Sequence=]. The ISO-BMFF Encapsulation, IAMF file (ISO-BMFF file), and ISO-BMFF Parser are defined in [[#isobmff]].
+Although not shown in the figure above, the [=IA Sequence=] MAY be encapsulated by a file packager, such as the ISO-BMFF Encapsulation, to output an IAMF file (ISO-BMFF file). Then, a file parser, such as the ISO-BMFF Parser, decapsulates it to output the [=IA Sequence=]. The ISO-BMFF Encapsulation, IAMF file (ISO-BMFF file), and ISO-BMFF Parser are defined in [[#isobmff]].
 
 ## Bitstream Structure ## {#bitstream}
 
@@ -398,13 +398,13 @@ The normative definitions for an [=IA Sequence=] are defined in [[#standalone-ia
 
 - The [=Audio Frame OBU=] provides the coded audio frame for an [=Audio Substream=]. Each frame has an implied start timestamp and an explicitly defined duration. A coded [=Audio Substream=] is represented as a sequence of [=Audio Frame OBU=]s with the same identifier, in time order.
 - The [=Parameter Block OBU=] provides the parameter values in a block for a [=Parameter Substream=]. Each block has an implied start timestamp and an explicitly defined duration. A time-varying [=Parameter Substream=] is represented as a sequence of parameter values in [=Parameter Block OBU=]s with the same identifier, in time order.
-- The [=Temporal Delimiter OBU=] identifies the [=Temporal Unit=]s. It may or may not be present in [=IA Sequence=]. If present, the first OBU of every [=Temporal Unit=] is the [=Temporal Delimiter OBU=].
+- The [=Temporal Delimiter OBU=] identifies the [=Temporal Unit=]s. It MAY or MAY NOT be present in [=IA Sequence=]. If present, the first OBU of every [=Temporal Unit=] is the [=Temporal Delimiter OBU=].
 
 ## Timing Model ## {#timingmodel}
 
 A coded [=Audio Substream=] is made of consecutive [=Audio Frame OBU=]s. Each [=Audio Frame OBU=] is made of audio samples at a given sample rate. The decode duration of an [=Audio Frame OBU=] is the number of audio samples divided by the sample rate. The presentation duration of an [=Audio Frame OBU=] is the number of audio samples remaining after trimming divided by the sample rate. The decode start time (respectively presentation start time) of an [=Audio Frame OBU=] is the sum of the decode durations (respectively presentation durations) of previous [=Audio Frame OBU=]s in the IA Sequence, or 0 otherwise. The decode duration (respectively presentation duration) of a coded [=Audio Substream=] is the sum of the decode durations (respectively presentation durations) of all its [=Audio Frame OBU=]s. The decode start time of an [=Audio Substream=] is the decode start time of its first [=Audio Frame OBU=]. The presentation start time of an [=Audio Substream=] is the presentation start time of its first [=Audio Frame OBU=] which is not entirely trimmed.
 
-A [=Parameter Substream=] is made of consecutive [=Parameter Block OBU=]s. Each [=Parameter Block OBU=] is made of parameter values at a given sample rate. The decode duration of a [=Parameter Block OBU=] is the number of parameter values divided by the sample rate. The decode start time of a [=Parameter Block OBU=] is the sum of the decode duration of previous [=Parameter Block OBU=]s if any, 0 otherwise. The decode duration of a [=Parameter Substream=] is the sum of all its [=Parameter Block OBU=]s' decode durations. The start time of a [=Parameter Substream=] is the decode start time of its first [=Parameter Block OBU=]. When all parameter values in a [=Parameter Substream=] are constant, no [=Parameter Block OBU=]s may be present in the [=IA Sequence=].
+A [=Parameter Substream=] is made of consecutive [=Parameter Block OBU=]s. Each [=Parameter Block OBU=] is made of parameter values at a given sample rate. The decode duration of a [=Parameter Block OBU=] is the number of parameter values divided by the sample rate. The decode start time of a [=Parameter Block OBU=] is the sum of the decode duration of previous [=Parameter Block OBU=]s if any, 0 otherwise. The decode duration of a [=Parameter Substream=] is the sum of all its [=Parameter Block OBU=]s' decode durations. The start time of a [=Parameter Substream=] is the decode start time of its first [=Parameter Block OBU=]. When all parameter values in a [=Parameter Substream=] are constant, no [=Parameter Block OBU=]s MAY be present in the [=IA Sequence=].
 
 Within an [=Audio Element=], the presentation start times of all [=Audio Substream=]s coincide and is the presentation start time of the [=Audio Element=]. All [=Audio Substream=]s have the same presentation duration which is the presentation duration of the [=Audio Element=].
 - The decode start times of all coded [=Audio Substream=]s and all [=Parameter Substream=]s coincide and is the decode start time of the [=Audio Element=]. 
@@ -421,7 +421,7 @@ The figure below shows an example of the Timing Model in terms of the decode sta
 <center><img src="images/IAMF Timing Model.png" style="width:100%; height:auto;"></center>
 <center><figcaption>An example of the IAMF Timing Model. AFO: [=Audio Frame OBU=], PBO: [=Parameter Block OBU=], \(\text{PT}x\): time \(x\) (ms) on the presentation layer's timeline, \(\text{DT}y\): time \(y\) (ms) on the decoding layer's timeline.</figcaption></center>
 
-NOTE: For a given decoded [=Audio Substream=] (before trimming) and its associated [=Parameter Substream=](s), a decoder MAY apply trimming in 1 of 2 ways:
+NOTE: For a given decoded [=Audio Substream=] (before trimming) and its associated [=Parameter Substream=](s), a decoder may apply trimming in 1 of 2 ways:
 <br/>
 1) The decoder processes the [=Audio Substream=] using the [=Parameter Substream=](s), and then trims the processed audio samples.
 <br/>
@@ -556,7 +556,7 @@ NOTE: A future version of the specification may use this flag to specify an exte
 
 Paresers SHOULD ignore <dfn noexport>Reserved OBU</dfn>s.
 
-NOTE: Future versions of the specification MAY define syntax and semantics for an [=obu_type=] value, making it no longer a [=Reserved OBU=] for those parsers compliant with these future versions.
+NOTE: Future versions of the specification may define syntax and semantics for an [=obu_type=] value, making it no longer a [=Reserved OBU=] for those parsers compliant with these future versions.
 
 ## IA Sequence Header OBU Syntax and Semantics ## {#obu-iasequenceheader}
 
@@ -639,7 +639,7 @@ NOTE: <code>ipcm</code> should not be confused with <code>lpcm</code>, which is 
 
 <dfn noexport>num_samples_per_frame</dfn> indicates the frame length, in samples, of the [=audio_frame=] provided in the audio_frame_obu. It SHALL NOT be set to zero. If the [=decoder_config=] structure for a given codec specifies a value for the frame length, the two values SHALL be equal.
 
-<dfn noexport>audio_roll_distance</dfn> indicates how many audio frames prior to the current audio frame need to be decoded (and the decoded samples discarded) to set the decoder in a state that will produce the correct decoded audio signal. It SHALL always be a negative value or zero. For some audio codecs, even if an audio frame can be decoded independently, the decoded signal after decoding only that frame may not represent a correct, decoded audio signal, even ignoring compression artifacts. This can be due to overlap transforms. While potentially acceptable when starting to decode an [=Audio Substream=], it may be problematic when automatically switching between similar [=Audio Substream=]s of different quality and/or bitrate. 
+<dfn noexport>audio_roll_distance</dfn> indicates how many audio frames prior to the current audio frame need to be decoded (and the decoded samples discarded) to set the decoder in a state that will produce the correct decoded audio signal. It SHALL always be a negative value or zero. For some audio codecs, even if an audio frame can be decoded independently, the decoded signal after decoding only that frame MAY not represent a correct, decoded audio signal, even ignoring compression artifacts. This can be due to overlap transforms. While potentially acceptable when starting to decode an [=Audio Substream=], it MAY be problematic when automatically switching between similar [=Audio Substream=]s of different quality and/or bitrate. 
 - It SHALL be set to \(-R\) when [=codec_id=] is set to <code>Opus</code>, where
 	\[R = \left\lceil{\frac{3840}{\text{num_samples_per_frame}}}\right\rceil.\]
 - It SHALL be set to -1 when [=codec_id=] is set to <code>mp4a</code>.
@@ -1078,7 +1078,7 @@ Where FLc: Front Left Centre, FC: Front Centre, FRc: Front Right Centre, FL: Fro
 
 For a given input [=3D audio signal=] with an expanded channel layout defined in [=expanded_loudspeaker_layout=], [=num_layers=] SHALL be set to 1 (i.e., it is a non-scalable channel audio element). Except [=9.1.6ch=] [=Audio Element=], it is RECOMMENDED to use such an [=Audio Element=] as an auxiliary [=Audio Element=] to be mixed with a primary [=Audio Element=] (e.g., TOA or 7.1.4ch) within a [=Mix Presentation=]. If parsers encounter a [=loudspeaker_layout=] = 15 for any layer other than the first layer, they SHOULD skip the [=channel_audio_layer_config=] for that layer and all subsequent layers.
 
-The following channel layouts may be indicated using an existing [=loudspeaker_layout=] or [=expanded_loudspeaker_layout=].  The stereo pair FLc/FRc is indicated using Stereo (L/R), the stereo pair BL/BR is indicated using Stereo-RS (Lrs/Rrs), the stereo pair TpFL/TpFR is indicated using Stereo-TF (Ltf/Rtf), the stereo pair TpBL/TpBR is indicated using Stereo-TB (Ltb/Rtb), and FLc/FC/FRc is indicated using 3.0ch (L/C/R).
+The following channel layouts MAY be indicated using an existing [=loudspeaker_layout=] or [=expanded_loudspeaker_layout=].  The stereo pair FLc/FRc is indicated using Stereo (L/R), the stereo pair BL/BR is indicated using Stereo-RS (Lrs/Rrs), the stereo pair TpFL/TpFR is indicated using Stereo-TF (Ltf/Rtf), the stereo pair TpBL/TpBR is indicated using Stereo-TB (Ltb/Rtb), and FLc/FC/FRc is indicated using 3.0ch (L/C/R).
 
 ### Scalable Channel Group and Layout ### {#scalalechannelaudio-channelgroupandlayout}
 
@@ -1840,7 +1840,7 @@ The variable <b>audio_substream_id_in_bitstream</b> does not exist in an [=IA Se
 
 <dfn noexport>explicit_audio_substream_id</dfn> indicates the [=audio_substream/audio_substream_id=] of this frame. The value SHALL be greater than 17. When this field is not present, [=audio_substream/audio_substream_id=] is implicit and is defined as a value from 0 to 17 for OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID17, respectively.
 
-NOTE: The first 18 [=Audio Substream=]s in an [=IA Sequence=] MAY use the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID17, which have predefined [=audio_substream/audio_substream_id=]s associated with them. This reduces bitrate by avoiding the extra [=explicit_audio_substream_id=] field in the bitstream.
+NOTE: The first 18 [=Audio Substream=]s in an [=IA Sequence=] may use the OBU types OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID17, which have predefined [=audio_substream/audio_substream_id=]s associated with them. This reduces bitrate by avoiding the extra [=explicit_audio_substream_id=] field in the bitstream.
 
 <dfn noexport>coded_frame_size</dfn> is the size of [=audio_frame=] in bytes.
 
@@ -2134,7 +2134,7 @@ Parsers SHALL ignore these two fields.
 
 <b>Semantics</b>
 
-<dfn noexport>ia_configuration_box</dfn> is an instance of the IAConfigurationBox() class, which provides the configuration of the [=IA Sequence=]. The position of the instance SHALL comply with the rule specified in [[!ISO-BMFF]] for [=AudioSampleEntry=]. In other words, the instance SHALL be present after the [=samplerate=] field of [=AudioSampleEntry=]. When the instance is present with another optional box such as the BitRateBox() ('btrt'), their exact ordering is not defined.
+<dfn noexport>ia_configuration_box</dfn> is an instance of the IAConfigurationBox() class, which provides the configuration of the [=IA Sequence=]. The position of the instance SHALL comply with the rule specified in [[!ISO-BMFF]] for [=AudioSampleEntry=]. In other words, the instance SHALL be present after the [=samplerate=] field of [=AudioSampleEntry=]. When the instance is present with another OPTIONAL box such as the BitRateBox() ('btrt'), their exact ordering is not defined.
 
 ### IA Configuration Box ### {#iaconfigurationbox-section}
 
@@ -2286,7 +2286,7 @@ An [=IA Sequence=] SHALL be decoded and processed to output an [=Immersive Audio
 8. Post-processing the output mix to perform loudness normalization and peak limiting.
     - Details are provided in [[#processing-post]].
 
-NOTE: The IA decoder MAY choose to lazily parse OBUs to avoid unnecessarily parsing OBUs that are not used by the selected [=Mix Presentation=].
+NOTE: The IA decoder may choose to lazily parse OBUs to avoid unnecessarily parsing OBUs that are not used by the selected [=Mix Presentation=].
 
 The figure below depicts an example IA decoder architecture with modules that perform the steps above.
 
@@ -2935,7 +2935,7 @@ All syntax elements conform to the [=Syntactic Description Language=] specified 
   
  <b>string</b> <b>syntaxName</b>
 
-<b>string</b> indicates a null-terminated (i.e., ending at the first byte set to 0x00), UTF-8 encoded as defined in [[!RFC-3629]] and whose length SHALL be limited to 128 bytes. 
+<b>string</b> indicates a null-terminated (i.e., ending at the first byte set to 0x00), UTF-8 encoded as defined in [[!RFC-3629]] and whose length is limited to 128 bytes. 
  
 <b>syntaxName</b> is a human readable label.
 
