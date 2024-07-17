@@ -326,7 +326,7 @@ This specification defines a model for representing [=Immersive Audio=] contents
 <center><img src="images/decoding_flow_cropped.svg" width="800"></center>
 <center><figcaption>Processing flow to decode, reconstruct, render, and mix the 3D audio signals for immersive audio playback.</figcaption></center>
 
-The model comprises a number of coded [=Audio Substream=]s and the metadata that describes how to decode, render and mix the [=Audio Substream=]s for playback. The model itself is codec-agnostic; any supported audio codec MAY be used to code the [=Audio Substream=]s.
+The model comprises a number of coded [=Audio Substream=]s and the metadata that describes how to decode, render, and mix the [=Audio Substream=]s for playback. The model itself is codec-agnostic; any supported audio codec MAY be used to code the [=Audio Substream=]s.
 
 The model includes one or more [=Audio Element=]s, each of which consists of one or more [=Audio Substream=]s. The [=Audio Substream=]s that make up an [=Audio Element=] are grouped into one or more [=Channel Group=]s. The model further includes [=Mix Presentation=]s and [=Parameter Substream=]s.
 
@@ -406,8 +406,8 @@ A coded [=Audio Substream=] is made of consecutive [=Audio Frame OBU=]s. Each [=
 
 A [=Parameter Substream=] is made of consecutive [=Parameter Block OBU=]s. Each [=Parameter Block OBU=] is made of parameter values at a given sample rate. The decode duration of a [=Parameter Block OBU=] is the number of parameter values divided by the sample rate. The decode start time of a [=Parameter Block OBU=] is the sum of the decode duration of previous [=Parameter Block OBU=]s if any, 0 otherwise. The decode duration of a [=Parameter Substream=] is the sum of all its [=Parameter Block OBU=]s' decode durations. The start time of a [=Parameter Substream=] is the decode start time of its first [=Parameter Block OBU=]. When all parameter values in a [=Parameter Substream=] are constant, no [=Parameter Block OBU=]s MAY be present in the [=IA Sequence=].
 
-Within an [=Audio Element=], the presentation start times of all [=Audio Substream=]s coincide and is the presentation start time of the [=Audio Element=]. All [=Audio Substream=]s have the same presentation duration which is the presentation duration of the [=Audio Element=].
-- The decode start times of all coded [=Audio Substream=]s and all [=Parameter Substream=]s coincide and is the decode start time of the [=Audio Element=]. 
+Within an [=Audio Element=], the presentation start times of all [=Audio Substream=]s coincide and are the presentation start time of the [=Audio Element=]. All [=Audio Substream=]s have the same presentation duration which is the presentation duration of the [=Audio Element=].
+- The decode start times of all coded [=Audio Substream=]s and all [=Parameter Substream=]s coincide and are the decode start time of the [=Audio Element=]. 
 - All coded [=Audio Substream=]s and all [=Parameter Substream=]s have the same decode duration which is the decode duration of the [=Audio Element=]. 
 
 Within a [=Mix Presentation=], the presentation start time of all [=Audio Element=]s coincide and all [=Audio Element=]s have the same duration defining the duration of the [=Mix Presentation=].
@@ -622,7 +622,7 @@ class CodecConfig() {
 
 <dfn noexport for="codec_config_obu">codec_config_id</dfn> defines an identifier for a codec configuration. Within an [=IA Sequence=], there SHALL be one unique [=codec_config_obu/codec_config_id=] per codec. There SHALL be exactly one [=Codec Config OBU=] with a given identifier in a set of [=Descriptors=]. [=Audio Element=]s use this identifier to indicate that its corresponding [=Audio Substream=]s are coded with this codec configuration.
 
-<dfn noexport>codec_config</dfn> is an instance of the [=CodecConfig()=] class, which provides codec-specific information for seting up the decoder.
+<dfn noexport>codec_config</dfn> is an instance of the [=CodecConfig()=] class, which provides codec-specific information for setting up the decoder.
 
 <dfn noexport>codec_id</dfn> indicates a ‘four-character code’ (4CC) to identify the codec used to generate the coded [=Audio Substream=]s. This specification supports the following four [=codec_id=] values defined below:
 
@@ -927,7 +927,7 @@ class ChannelAudioLayerConfig(i) {
 
 - If [=loudspeaker_layout=] is set to Binaural, this field SHALL be set to 1.
 
-<dfn noexport>channel_audio_layer_config</dfn> is an instance of the [=ChannelAudioLayerConfig()=] class, which provides the i-th [=Channel Group=]'s configuration, where i is the layer index provided as input argument to this instance of the [=ChannelAudioLayerConfig()=] class.
+<dfn noexport>channel_audio_layer_config</dfn> is an instance of the [=ChannelAudioLayerConfig()=] class, which provides the i-th [=Channel Group=]'s configuration, where i is the layer index provided as an input argument to this instance of the [=ChannelAudioLayerConfig()=] class.
 
 <dfn noexport>loudspeaker_layout</dfn> indicates the channel layout to be reconstructed from the precedent [=Channel Group=]s and current [=Channel Group=]. If parsers do not recognize a [=loudspeaker_layout=] for a particular layer, they SHOULD skip the [=channel_audio_layer_config=] for that layer and all subsequent layers.
 
@@ -1726,7 +1726,7 @@ class ReconGainInfoParameterData() {
 <dfn noexport>recon_gain_flags</dfn> is a bitmask that indicates which channels [=recon_gain=] is applied to, as shown in the table below.
 
 <pre class = "def">
-Byte postion : Bit position : Assigned Channel Name
+Byte position: Bit position : Assigned Channel Name
              :   b0 (LSB)   : Left channel
              :      b1      : Centre channel
  LSB 7 bits  :      b2      : Right channel
@@ -1888,7 +1888,7 @@ The sample rate used for computing offsets SHALL be [=sample_rate=].
 
 # Profiles # {#profiles}
 
-The IA Profiles define a set of capabilities that are REQUIRED to parse, decode and process the corresponding [=IA Sequence=].
+The IA Profiles define a set of capabilities that are REQUIRED to parse, decode, and process the corresponding [=IA Sequence=].
 
 NOTE: In this version of the specification, profiles impose constraints on how many codecs can be used in an [=IA Sequence=] but do not impose constraints on the actual codec used. In particular, this means that if a future version of the specification (or if a derived specification) defines how to use a new codec, the profiles defined in this specification could be used. Derived specifications may constrain the actual codec. The [[#codecsparameter|codecs parameter]] may also be used in content negotiation phases to ensure that an [=IA Sequence=] is supported by a device.
 
@@ -2031,7 +2031,7 @@ In this version of the specification, <dfn noexport>IA Track</dfn> means the tra
 
 The result of encapsulating an [=IA Sequence=] into an [[!ISO-BMFF]] file is as follows:
 
-- If there are audio samples to be trimmed at the start or at the end, the 'edts' and 'elst' boxes SHALL be present to reflect the trimming status.
+- If there are audio samples to be trimmed at the start or the end, the 'edts' and 'elst' boxes SHALL be present to reflect the trimming status.
 - Sample Entry
 	- An [=IA Sample=] is associated with only one sample entry, and the [=configOBUs=] in that sample entry SHALL contain the [=Descriptors=] required to process the [=IA Sample=]. If a different set of [=Descriptors=] is needed, a new sample entry SHALL be defined.
 	
@@ -2224,7 +2224,7 @@ An [=IA Sequence=] SHALL be decoded and processed to output an [=Immersive Audio
 
 NOTE: The IA decoder may choose to lazily parse OBUs to avoid unnecessarily parsing OBUs that are not used by the selected [=Mix Presentation=].
 
-The figure below depicts an example IA decoder architecture with modules that perform the steps above.
+The figure below depicts an example of IA decoder architecture with modules that perform the steps above.
 
 <center><img src="images/IA Decoder Configuration.png" style="width:100%; height:auto;"></center>
 <center><figcaption>IA Decoder Configuration. AE: Audio Element, AS: Audio Substream.</figcaption></center>
@@ -2234,7 +2234,7 @@ The figure below depicts an example IA decoder architecture with modules that pe
 - The Audio Element Renderer reconstructs the [=3D audio signal=] from decoded channels of Codec Decoders according to [=Audio Element=] type (specified [=Audio Element OBU=]), and renders the audio channels to the playback layout.
 - The Synchronizer synchronizes all rendered and individually processed [=Audio Element=]s.
 - The Mixer sums the synchronized [=Audio Element=]s and applies further mixing parameters.
-- Then, Post-Processor outputs the [=Immersive Audio=] for playback after performs loudness normalization and peak-limiting.
+- Then, Post-Processor outputs the [=Immersive Audio=] for playback after performing loudness normalization and peak-limiting.
 
 ## Ambisonics Decoding and Reconstruction ## {#processing-ambisonics}
 
@@ -3112,7 +3112,7 @@ Let's define the following:
 
 If \(10 \times \log_{10}(\frac{O_k}{L_{\text{max}}^2})\) is less than the first threshold value (-80dB is preferred), Recon_Gain(k, i) = 0. Where, \(L_{\text{max}} = 32767\) for 16 bits.
 
-If \(10 \times \log_{10}(\frac{O_k}{M_k})\) is less than the second threshold value (-6dB is preferred), Recon_Gain(k, i) is set to the value which makes \(O_k = (\text{Recon_Gain}(k, 1))^2 \times D_k\). Otherwise, Recon_Gain(k, i) = 1. The actual value (i.e., [=recon_gain=]) to be delivered is \( \left\lfloor{255 \times \text{Recon_Gain}}\right\rfloor \).
+If \(10 \times \log_{10}(\frac{O_k}{M_k})\) is less than the second threshold value (-6dB is preferred), Recon_Gain(k, i) is set to the value which makes \(O_k = (\text{Recon_Gain}(k, i))^2 \times D_k\). Otherwise, Recon_Gain(k, i) = 1. The actual value (i.e., [=recon_gain=]) to be delivered is \( \left\lfloor{255 \times \text{Recon_Gain}}\right\rfloor \).
 
 For example, if we assume that CL #i = 7.1.4ch and CL #i-1 = 5.1.2ch, then the de-mixed channels are D_Lrs7, D_Rrs7, D_Ltb4 and D_Rtb4.
 - D_Lrs7 and D_Rrs7 are de-mixed from Ls5 and Rs5 in the (i-1)-th [=Channel Group=] by using Lss7 and Rss7 in the i-th [=Channel Group=] and its relevant demixing parameters (i.e., \(\alpha(k)\) and \(\beta(k)\)) , respectively.
