@@ -509,7 +509,7 @@ obu_type: Name of obu_type
    4    : OBU_IA_Temporal_Delimiter
    5    : OBU_IA_Audio_Frame
   6~23  : OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID17
- 24~30  : Reserved
+ 24~30  : Reserved for future use
    31   : OBU_IA_Sequence_Header
 </pre>
 
@@ -588,7 +588,7 @@ The mappings below are applied for both [=primary_profile=] and [=additional_pro
 - 0: Simple Profile
 - 1: Base Profile
 - 2: Base-Enhanced Profile
-- 3~255: Reserved
+- 3~255: Reserved for future profiles
 
 <dfn noexport>additional_profile</dfn> indicates an additional profile that this [=IA Sequence=] complies with. If an [=IA Sequence=] only complies with the [=primary_profile=], this field SHALL be set to the same value as [=primary_profile=].
 
@@ -662,7 +662,7 @@ Additionally, the following parameter definitions are used in the [=Audio Elemen
 class AudioElementOBU() {
   leb128() audio_element_id;
   unsigned int (3) audio_element_type;
-  unsigned int (5) reserved;
+  unsigned int (5) reserved_for_future_use;
   
   leb128() codec_config_id;  
 
@@ -706,7 +706,7 @@ class DemixingParamDefinition() extends ParamDefinition() {
 ```
 class DefaultDemixingInfoParameterData() extends DemixingInfoParameterData() {
   unsigned int (4) default_w;
-  unsigned int (4) reserved;
+  unsigned int (4) reserved_for_future_use;
 }
 ```
 
@@ -726,7 +726,7 @@ class ReconGainParamDefinition() extends ParamDefinition() {
 audio_element_type: The type of audio representation.
    0    : CHANNEL_BASED
    1    : SCENE_BASED
-  2~7   : Reserved
+  2~7   : Reserved for future use
 </pre>
 
 <dfn noexport for="audio_element_obu">codec_config_id</dfn> indicates the identifier for the codec configuration which this [=Audio Element=] refers to. Parsers SHOULD ignore [=Audio Element OBU=]s with a [=audio_element_obu/codec_config_id=] identifying a [=codec_id=] that they don't support.
@@ -822,7 +822,7 @@ The mapping of [=default_w=] to [=w(k)|\(w(k)\)=] SHOULD be as follows:
     8      :  0.4609
     9      :  0.4821
     10     :  0.5
- 11 ~ 15   :  reserved
+ 11 ~ 15   :  Reserved for future use
 </pre>
 
 A default recon gain value of 0 dB is implied when there are no [=Parameter Block OBU=]s (with the same [=ParamDefinition/parameter_id=] defined in this [=ReconGainParamDefinition()=]) provided.
@@ -838,7 +838,7 @@ abstract class ParamDefinition() {
   leb128() parameter_id;
   leb128() parameter_rate;
   unsigned int (1) param_definition_mode;
-  unsigned int (7) reserved;
+  unsigned int (7) reserved_for_future_use;
   if (param_definition_mode == 0) {
     leb128() duration;
     leb128() constant_subblock_duration;
@@ -898,7 +898,7 @@ This section specifies the syntax structures of the [=ScalableChannelLayoutConfi
 ```
 class ScalableChannelLayoutConfig() {
   unsigned int (3) num_layers;
-  unsigned int (5) reserved;
+  unsigned int (5) reserved_for_future_use;
   for (i = 1; i <= num_layers; i++) {
     ChannelAudioLayerConfig channel_audio_layer_config(i);
   }
@@ -908,12 +908,12 @@ class ChannelAudioLayerConfig(i) {
   unsigned int (4) loudspeaker_layout(i);
   unsigned int (1) output_gain_is_present_flag(i);
   unsigned int (1) recon_gain_is_present_flag(i);
-  unsigned int (2) reserved;
+  unsigned int (2) reserved_for_future_use;
   unsigned int (8) substream_count(i);
   unsigned int (8) coupled_substream_count(i);
   if (output_gain_is_present_flag(i) == 1) {
     unsigned int (6) output_gain_flags(i);
-    unsigned int (2) reserved;
+    unsigned int (2) reserved_for_future_use;
     signed int (16) output_gain(i);
   }
   if (i == 1 && [=loudspeaker_layout=] == 15)
@@ -968,7 +968,7 @@ In this version of the specification, [=loudspeaker_layout=] indicates one of th
   <td>9</td><td>Binaural</td><td>L/R</td><td></td>
 </tr>
 <tr>
-  <td>10 ~ 14</td><td>Reserved</td><td></td><td></td>
+  <td>10 ~ 14</td><td>Reserved for future use</td><td></td><td></td>
 </tr>
 <tr>
   <td>15</td><td>Expanded channel layouts</td><td></td><td>Loudspeaker configurations defined in the [=expanded_loudspeaker_layout=] field</td>
@@ -1067,7 +1067,7 @@ In this version of the specification, [=expanded_loudspeaker_layout=] indicates 
   <td>12</td><td>Top-6ch</td><td>TpFL/TpFR/TpSiL/TpSiR/TpBL/TpBR</td><td>The top 6 channels (TpFL/TpFR/TpSiL/TpSiR/TpBL/TpBR) of [=9.1.6ch=]</td>
 </tr>
 <tr>
-  <td>13 ~ 255</td><td>Reserved</td><td></td><td></td>
+  <td>13 ~ 255</td><td>Reserved for future use</td><td></td><td></td>
 </tr>
 
 </table>
@@ -1321,7 +1321,7 @@ During playback, an [=Audio Element=] SHOULD be rendered using a pre-defined ren
 ```
 class RenderingConfig() {
   unsigned int (2) headphones_rendering_mode;
-  unsigned int (6) reserved;
+  unsigned int (6) reserved_for_future_use;
   leb128() rendering_config_extension_size;
   unsigned int (8 x rendering_config_extension_size) rendering_config_extension_bytes;
 }
@@ -1333,11 +1333,11 @@ class RenderingConfig() {
 
 - 0: Indicates that the input [=Audio Element=] SHALL be rendered to [=loudspeaker_layout=] = Stereo. 
 - 1: Indicates that the input [=Audio Element=] SHALL be rendered with a binaural renderer.
-- 2~3: Reserved.
+- 2~3: Reserved for future use.
 
 Parsers encountering a reserved value of [=headphones_rendering_mode=] SHALL ignore the [=Mix Presentation OBU=] that contains this [=rendering_config=].
 
-<dfn noexport>reserved</dfn> SHALL be ignored by the parser.
+<dfn noexport>reserved_for_future_use</dfn> SHALL be ignored by the parser. It is for future use.
 
 <dfn noexport>rendering_config_extension_size</dfn> indicates the size in bytes of [=rendering_config_extension_bytes=].
 
@@ -1374,10 +1374,10 @@ class Layout() {
   
   if (layout_type == LOUDSPEAKERS_SS_CONVENTION) {
     unsigned int (4) sound_system;
-    unsigned int (2) reserved;
+    unsigned int (2) reserved_for_future_use;
   }
   else if (layout_type == BINAURAL or RESERVED) {
-    unsigned int (6) reserved;
+    unsigned int (6) reserved_for_future_use;
   }
 }
 ```
@@ -1393,7 +1393,7 @@ layout_type : Layout type
      3      : BINAURAL
 </pre>
 
-- A value of 0 or 1 is reserved.
+- A value of 0 or 1 is reserved for future use.
 - A value of 2 indicates that the layout is defined using the sound system convention of [[!ITU-2051-3]].
 - A value of 3 indicates that the layout is binaural.
 
@@ -1414,7 +1414,7 @@ layout_type : Layout type
  - 11: It indicates the same loudspeaker configuration as [=loudspeaker_layout=] = 8 (i.e., 3.1.2ch)
  - 12: It indicates Mono
  - 13: It indicates the same loudspeaker configuration as [=expanded_loudspeaker_layout=] = 8 (i.e., 9.1.6ch)
- - 14 ~ 15: Reserved
+ - 14 ~ 15: Reserved for future use
 
 When a value for [=layout_type=] or [=sound_system=] is not supported, parsers SHOULD ignore this [=Layout()=] and any associated [=LoudnessInfo()=].
 
@@ -1457,9 +1457,9 @@ class LoudnessInfo() {
 
 <pre class = "def">
  Bit       : Type of information provided
-  0 (LSB)  : True peak
-  1        : Anchored Loudness (one or more)
- 2~7 (MSB) : Reserved
+  0 (LSB)  : True_Peak
+  1        : Anchored_Loudness (one or more)
+ 2~7 (MSB) : Reserved for future use
 </pre>
 
 When a bitmask for an unsupported value of [=info_type=] is set, parsers SHOULD ignore all bytes from the first byte of the syntaxes defined by the bitmask to the last byte of the OBU.
@@ -1476,7 +1476,7 @@ When a bitmask for an unsupported value of [=info_type=] is set, parsers SHOULD 
    0   : Unknown
    1   : Dialogue
    2   : Album
- 3~255 : Reserved
+ 3~255 : Reserved for future use
 </pre>
 
 There SHALL be no duplicate values of [=anchor_element=] within one [=LoudnessInfo()=]. When an unsupported value of [=anchor_element=] is set, parsers MAY treat it as Unknown.
@@ -1677,7 +1677,7 @@ The <dfn noexport>DemixingInfoParameterData()</dfn> class provides the demixing 
 ```
 class DemixingInfoParameterData() {
   unsigned int (3) dmixp_mode;
-  unsigned int (5) reserved;
+  unsigned int (5) reserved_for_future_use;
 }
 ```
 
@@ -1685,14 +1685,14 @@ class DemixingInfoParameterData() {
 
 <dfn noexport>dmixp_mode</dfn> indicates one of the pre-defined combinations of five demixing parameters.
 
-- 0: mode1, \(\left( \alpha, \beta, \gamma, \delta, \text{w_idx_offset} \right) = \left(1, 1, 0.707, 0.707, -1\right) \)
-- 1: mode2, \(\left( \alpha, \beta, \gamma, \delta, \text{w_idx_offset} \right) = \left(0.707, 0.707, 0.707, 0.707, -1\right) \)
-- 2: mode3, \(\left( \alpha, \beta, \gamma, \delta, \text{w_idx_offset} \right) = \left(1, 0.866, 0.866, 0.866, -1\right) \)
-- 3: reserved
-- 4: mode1, \(\left( \alpha, \beta, \gamma, \delta, \text{w_idx_offset} \right) = \left(1, 1, 0.707, 0.707, 1\right) \)
-- 5: mode2, \(\left( \alpha, \beta, \gamma, \delta, \text{w_idx_offset} \right) = \left(0.707, 0.707, 0.707, 0.707, 1\right) \)
-- 6: mode3, \(\left( \alpha, \beta, \gamma, \delta, \text{w_idx_offset} \right) = \left(1, 0.866, 0.866, 0.866, 1\right) \)
-- 7: reserved
+- 0: Mode1, \(\left( \alpha, \beta, \gamma, \delta, \text{w_idx_offset} \right) = \left(1, 1, 0.707, 0.707, -1\right) \)
+- 1: Mode2, \(\left( \alpha, \beta, \gamma, \delta, \text{w_idx_offset} \right) = \left(0.707, 0.707, 0.707, 0.707, -1\right) \)
+- 2: Mode3, \(\left( \alpha, \beta, \gamma, \delta, \text{w_idx_offset} \right) = \left(1, 0.866, 0.866, 0.866, -1\right) \)
+- 3: Reserved for future use
+- 4: Mode1, \(\left( \alpha, \beta, \gamma, \delta, \text{w_idx_offset} \right) = \left(1, 1, 0.707, 0.707, 1\right) \)
+- 5: Mode2, \(\left( \alpha, \beta, \gamma, \delta, \text{w_idx_offset} \right) = \left(0.707, 0.707, 0.707, 0.707, 1\right) \)
+- 6: Mode3, \(\left( \alpha, \beta, \gamma, \delta, \text{w_idx_offset} \right) = \left(1, 0.866, 0.866, 0.866, 1\right) \)
+- 7: Reserved for future use
 
 \(\alpha\) and \(\beta\) are gain values used for the [=S7to5 encoder=], \(\gamma\) for the [=T4to2 encoder=], \(\delta\) for the [=S5to3 encoder=] and <dfn noexport>w_idx_offset</dfn> is the offset used to generate a gain value [=w(k)|\(w(k)\)=] used for [=T2toTF2 encoder=].
 
