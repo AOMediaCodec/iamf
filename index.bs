@@ -2382,8 +2382,8 @@ Recon gain is REQUIRED only for [=num_layers=] > 1 and when [=codec_id=] is set 
 	- \(\text{sample}(k, i) = \text{sample}(k, i) \times \text{smoothed_recon_gain}(k, i)\), where \(k\) is the frame index and \(i\) is the sample index of the frame.
 	- \(\text{smoothed_recon_gain}(k) = \text{MA_gain}(k - 1) \times \text{e_window} + \text{MA_gain} \times \text{s_window}\).
 	- \(\text{MA_gain}(k) = \frac{2}{N + 1} \times \frac{\text{recon_gain}(k)}{255} + \left( 1 - \frac{2}{N + 1} \right) \times \text{MA_gain}(k - 1)\), where \(\text{MA_gain}(0) = 1\).
-	- \(\text{e_window}[0:\text{olen}] = \text{hanning}[\text{olen}: ]\), \(\text{e_window}[\text{olen}:\text{flen}] = 0\).
-	- \(\text{s_window}[0:\text{olen}] = \text{hanning}[ :\text{olen}]\), \(\text{s_window}[\text{olen}:\text{flen}] = 1\).
+	- \(\text{e_window}[0:\text{olen}] = \text{hanning}[\text{olen}:\text{ }]\), \(\text{e_window}[\text{olen}:\text{flen}] = 0\).
+	- \(\text{s_window}[0:\text{olen}] = \text{hanning}[\text{ }:\text{olen}]\), \(\text{s_window}[\text{olen}:\text{flen}] = 1\).
 	- \(\text{hanning}(n) = 0.5 - 0.5 \cos \left( \frac{2 \pi n}{2 \times \text{olen} - 1}  \right) \), \(0 \le n \le (2 \times \text{olen} - 1)\).
 	- Where \(\text{flen}\) is the frame size and \(\text{olen}\) is the overlap size.
 	- The value \(N = 7\) is RECOMMENDED.
