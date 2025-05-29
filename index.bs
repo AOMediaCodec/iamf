@@ -1004,8 +1004,8 @@ NOTE: This specification allows down-mixing mechanisms (e.g., as specified in [[
 <dfn noexport>coupled_substream_count</dfn> specifies the number of referenced [=Audio Substream=]s, each of which is coded as coupled stereo channels.
 
 Each pair of [=Coupled stereo channels|coupled stereo channels=] in the same [=Channel Group=] SHALL be coded in stereo mode to generate one single coded [=Audio Substream=], also referred to as a <dfn noexport>coupled substream</dfn>. Each [=Non-coupled channels|non-coupled channel=] in the same [=Channel Group=] SHALL be coded in mono mode to generate one single coded [=Audio Substream=], also known as a <dfn noexport>non-coupled substream</dfn>.
-- <dfn noexport>Coupled stereo channels</dfn>: L/R, Ls/Rs, Lss/Rss, Lrs/Rrs, Ltf/Rtf, Ltb/Rtb, FLc/FRc, FL/FR, SiL/SiR, BL/BR, TpFL/TpFR, TpSiL/TpSiR, TpBL/TpBR 
-- <dfn noexport>Non-coupled channels</dfn>: C, LFE, L, FC, LFE1
+- <dfn noexport>Coupled stereo channels</dfn>: L/R, Ls/Rs, Lss/Rss, Lrs/Rrs, Ltf/Rtf, Ltb/Rtb, FLc/FRc, FL/FR, SiL/SiR, BL/BR, TpFL/TpFR, TpSiL/TpSiR, TpBL/TpBR, BtFL/BtFR, BtBL/BtBR 
+- <dfn noexport>Non-coupled channels</dfn>: C, FC, BC, TpFC, TpC, TpBC, BtFC,LFE, LFE1, LFE2, L
 
 The order of the [=Audio Substream=]s in each [=Channel Group=] is specified in [[#scalablechannelaudio-orderingofaudiosubstreamidentifiers]].
 
@@ -1071,15 +1071,40 @@ In this version of the specification, [=expanded_loudspeaker_layout=] indicates 
 	<td>12</td><td>Top-6ch</td><td>TpFL/TpFR/TpSiL/TpSiR/TpBL/TpBR</td><td>The top 6 channels (TpFL/TpFR/TpSiL/TpSiR/TpBL/TpBR) of [=9.1.6ch=]</td>
 </tr>
 <tr>
-	<td>13 ~ 255</td><td>Reserved for future use</td><td></td><td></td>
+	<td>13</td><td><dfn noexport>10.2.9.3ch</dfn></td><td>[=Loudspeaker location ordering of 10.2.9.3ch=]</td><td>[=Loudspeaker configuration for Sound System H (9+10+3)=] of [[ITU-2051-3]]</td>
+</tr>
+<tr>
+	<td>14</td><td>LFE-Pair</td><td>LFE1/LFE2</td><td>The low-frequency effects subset (LFE1/LFE2) of [=10.2.9.3ch=]</td>
+</tr>
+<tr>
+	<td>15</td><td>Bottom-3ch</td><td>BtFL/BtFC/BtFR</td><td>The bottom 3 channels (BtFL/BtFC/BtFR) of [=10.2.9.3ch=]</td>
+</tr>
+<tr>
+	<td>16</td><td><dfn noexport>7.1.5.4ch</dfn></td><td>[=Loudspeaker location ordering of 7.1.5.4ch=]</td><td>Loudspeaker configuration with the top and the bottom speakers added to [=Loudspeaker configuration for Sound System J (4+7+0)=] of [[!ITU-2051-3]]</td>
+</tr>
+<tr>
+	<td>17</td><td>Bottom-4ch</td><td>BtFL/BtFR/BtBL/BtBR</td><td>The bottom 4 channels (BtFL/BtFR/BtBL/BtBR) of [=7.1.5.4ch=]</td>
+</tr>
+<tr>
+	<td>18</td><td>Top-1ch</td><td>TpC</td><td>The top subset (TpC) of [=7.1.5.4ch=]</td>
+</tr>
+<tr>
+	<td>19</td><td>Top-5ch</td><td>Ltf/Rtf/TpC/Ltb/Rtb</td><td>The top 5 channels (Ltf/Rtf/TpC/Ltb/Rtb) of [=7.1.5.4ch=]</td>
+</tr>
+<tr>
+	<td>20 ~ 255</td><td>Reserved for future use</td><td></td><td></td>
 </tr>
 </table>
 
-<dfn noexport>Loudspeaker location ordering of 9.1.6ch</dfn>: FLc/FC/FRc/FL/FR/SiL/SiR/BL/BR/TpFL/TpFR/TpSiL/TpSiR/TpBL/TpBR/LFE1
+<dfn noexport>Loudspeaker location ordering of 9.1.6ch</dfn>: FLc/FC/FRc/FL/FR/SiL/SiR/BL/BR/TpFL/TpFR/TpSiL/TpSiR/TpBL/TpBR/LFE1.
 
-Where FLc: Front Left Centre, FC: Front Centre, FRc: Front Right Centre, FL: Front Left, FR: Front Right, SiL: Side Left, SiR: Side Right, BL: Back Left, BR: Back Right, TpFL: Top Front Left, TpFR: Top Front Right, TpSiL: Top Side Left, TpSiR: Top Side Right, TpBL: Top Back Left, TpBR: Top Back Right, LFE1: Low-Frequency Effects-1
+<dfn noexport>Loudspeaker location ordering of 10.2.9.3ch</dfn>: FLc/FC/FRc/FL/FR/SiL/SiR/BL/BC/BR/TpFL/TpFC/TpFR/TpSiL/TpC/TpSiR/TpBL/TpBC/TpBR/BtFL/BtFC/BtFR/LFE1/LFE2.
 
-For a given input [=3D audio signal=] with an expanded channel layout defined in [=expanded_loudspeaker_layout=], [=num_layers=] SHALL be set to 1 (i.e., it is a non-scalable channel audio element). Except [=9.1.6ch=] [=Audio Element=], it is RECOMMENDED to use such an [=Audio Element=] as an auxiliary [=Audio Element=] to be mixed with a primary [=Audio Element=] (e.g., TOA or 7.1.4ch) within a [=Mix Presentation=]. If parsers encounter a [=loudspeaker_layout=] = 15 for any layer other than the first layer, they SHOULD skip the [=channel_audio_layer_config=] for that layer and all subsequent layers.
+<dfn noexport>Loudspeaker location ordering of 7.1.5.4ch</dfn>: L/C/R/Lss/Rss/Lrs/Rrs/Ltf/Rtf/TpC/Ltb/BtFL/BtFR/BtBL/BtBR/LFE.
+
+Where FLc: Front Left Centre, FC: Front Centre, FRc: Front Right Centre, FL: Front Left, FR: Front Right, SiL: Side Left, SiR: Side Right, BL: Back Left, BC: Back Centre, BR: Back Right, TpFL: Top Front Left, TpFC: Top Front Cetnre, TpFR: Top Front Right, TpSiL: Top Side Left, TpC: Top Centre, TpSiR: Top Side Right, TpBL: Top Back Left, TpBC: Top Back Centre, TpBR: Top Back Right, BtFL: Bottom Front Left, BtFC: Bottom Front Centre, BtFR: Bottom Front Right, LFE1: Low-Frequency Effects-1, LFE2: Low-Frequency Effects-2, L: Left, C: Centre, R: Right, Lss: Left Side Surround, Rss: Right Side Surround, Lrs: Left Rear Surround, Rrs: Right Rear Surround, Ltf: Left Top Front, Rtf: Right Top Front, Ltb: Left Top Back, Rtb: Right Top Back, BtBL: Bottom Back Left, BtBR: Bottom Back Right, LFE: Low-Frequency Effects
+
+For a given input [=3D audio signal=] with an expanded channel layout defined in [=expanded_loudspeaker_layout=], [=num_layers=] SHALL be set to 1 (i.e., it is a non-scalable channel audio element). Except [=9.1.6ch=], [=10.2.9.3ch=], and [=7.1.5.4ch=] [=Audio Element=]s, it is RECOMMENDED to use such an [=Audio Element=] as an auxiliary [=Audio Element=] to be mixed with a primary [=Audio Element=] (e.g., TOA or 7.1.4ch) within a [=Mix Presentation=]. If parsers encounter a [=loudspeaker_layout=] = 15 for any layer other than the first layer, they SHOULD skip the [=channel_audio_layer_config=] for that layer and all subsequent layers.
 
 The following channel layouts MAY be indicated using an existing [=loudspeaker_layout=] or [=expanded_loudspeaker_layout=].  The stereo pair FLc/FRc is indicated using Stereo (L/R), the stereo pair BL/BR is indicated using Stereo-RS (Lrs/Rrs), the stereo pair TpFL/TpFR is indicated using Stereo-TF (Ltf/Rtf), the stereo pair TpBL/TpBR is indicated using Stereo-TB (Ltb/Rtb), and FLc/FC/FRc is indicated using 3.0ch (L/C/R).
 
@@ -1160,11 +1185,20 @@ Then, the i-th [=audio_element_obu/audio_substream_id=] maps to a [=Channel Grou
 
 The order of the [=Audio Substream=]s in each [=Channel Group=] (i.e., the semantics of \(n_c\)) SHALL be as follows:
 - [=Coupled substream=]s come first and are followed by [=non-coupled substream=]s.
-- The [=coupled substream=]s for the surround channels come first and are followed by the [=coupled substream=]s for the top channels.
-- The [=coupled substream=]s for the front channels come first and are followed by the [=coupled substream=]s for the side, rear and back channels.
-- The [=coupled substream=]s for the side channels come first and are followed by the [=coupled substream=]s for the rear channels.
-- The Centre (or Front Centre) channel comes first and is followed by the LFE (or LFE1) channel, and then the L channel.
+- The [=coupled substream=]s for the surround channels come first and are followed by the [=coupled substream=]s for the top channels, and then the bottom channels.
+- The [=coupled substream=]s for the front channels come first and are followed by the [=coupled substream=]s for the side and rear (or back) channels.
+- The [=coupled substream=]s for the side channels come first and are followed by the [=coupled substream=]s for the rear (or back) channels.
+- The Centre channels comes first and is followed by the LFE (or LFE1, LFE2 in that order) channels, and then the L channel.
+- The Centre channels for the surround channels come first and are followed by the Centre channels for the top channels, and then the bottom channels.
+- The Centre channel for the front channel comes first and is followed by the Centre channels for the side (or middle) and back channels.
+- The Centre channel for the side (or middle) channel comes first and is followed by the Centre channel for the back channels.
 
+Examples for substream orders:
+- [=10.2.9.3ch=]: [=substream_count=] = 16 and [=coupled_substream_count=] 8.
+	- (FLc/FRc)/(FL/FR)/(SiL/SiR)/(BL/BR)/(TpFL/TpFR)/(TpSiL/TpSiR)(TpBL/TpBR)(BtFL/BtFR)/FC/BC/TpFC/TpC/TpBC/BtFC/LFE1/LFE2.
+- [=7.1.5.4ch=]: [=substream_count=] = 10 and [=coupled_substream_count=] 7.
+	- (L/R)/(Lss/Rss)/(Lrs/Rrs)/(Ltf/Rtf)/(Ltb/Rtb)/(BtFL/BtFR)/(BtBL/BtBR)/C/TpC/LFE.
+	
 ### Ambisonics Config Syntax and Semantics ### {#syntax-ambisonics-config}
 
 The <dfn noexport>AmbisonicsConfig()</dfn> class provides the configuration for a given Ambisonics representation. This section specifies the syntax structure of the [=AmbisonicsConfig()=] class.
@@ -1402,23 +1436,24 @@ layout_type : Layout type
 - A value of 3 indicates that the layout is binaural.
 
 
-<dfn noexport>sound_system</dfn> specifies one of the sound systems A to J as specified in [[!ITU-2051-3]], 7.1.2ch, 3.1.2ch, Mono, or 9.1.6ch.
+<dfn noexport>sound_system</dfn> specifies one of the sound systems A to J as specified in [[!ITU-2051-3]], 7.1.2ch, 3.1.2ch, Mono, [=9.1.6ch=], or [=7.1.5.4ch=].
 
-	- 0: It indicates [=Loudspeaker configuration for Sound System A (0+2+0)=]
-	- 1: It indicates [=Loudspeaker configuration for Sound System B (0+5+0)=]
-	- 2: It indicates [=Loudspeaker configuration for Sound System C (2+5+0)=]
-	- 3: It indicates [=Loudspeaker configuration for Sound System D (4+5+0)=]
-	- 4: It indicates [=Loudspeaker configuration for Sound System E (4+5+1)=]
-	- 5: It indicates [=Loudspeaker configuration for Sound System F (3+7+0)=]
-	- 6: It indicates [=Loudspeaker configuration for Sound System G (4+9+0)=]
-	- 7: It indicates [=Loudspeaker configuration for Sound System H (9+10+3)=]
-	- 8: It indicates [=Loudspeaker configuration for Sound System I (0+7+0)=]
-	- 9: It indicates [=Loudspeaker configuration for Sound System J (4+7+0)=]
-	- 10: It indicates the same loudspeaker configuration as [=loudspeaker_layout=] = 6 (i.e., 7.1.2ch)
-	- 11: It indicates the same loudspeaker configuration as [=loudspeaker_layout=] = 8 (i.e., 3.1.2ch)
-	- 12: It indicates Mono
-	- 13: It indicates the same loudspeaker configuration as [=expanded_loudspeaker_layout=] = 8 (i.e., 9.1.6ch)
-	- 14 ~ 15: Reserved for future use
+- 0: It indicates [=Loudspeaker configuration for Sound System A (0+2+0)=]
+- 1: It indicates [=Loudspeaker configuration for Sound System B (0+5+0)=]
+- 2: It indicates [=Loudspeaker configuration for Sound System C (2+5+0)=]
+- 3: It indicates [=Loudspeaker configuration for Sound System D (4+5+0)=]
+- 4: It indicates [=Loudspeaker configuration for Sound System E (4+5+1)=]
+- 5: It indicates [=Loudspeaker configuration for Sound System F (3+7+0)=]
+- 6: It indicates [=Loudspeaker configuration for Sound System G (4+9+0)=]
+- 7: It indicates [=Loudspeaker configuration for Sound System H (9+10+3)=]
+- 8: It indicates [=Loudspeaker configuration for Sound System I (0+7+0)=]
+- 9: It indicates [=Loudspeaker configuration for Sound System J (4+7+0)=]
+- 10: It indicates the same loudspeaker configuration as [=loudspeaker_layout=] = 6 (i.e., 7.1.2ch)
+- 11: It indicates the same loudspeaker configuration as [=loudspeaker_layout=] = 8 (i.e., 3.1.2ch)
+- 12: It indicates Mono
+- 13: It indicates the same loudspeaker configuration as [=expanded_loudspeaker_layout=] = 8 (i.e., 9.1.6ch)
+- 14: It indicates the same loudspeaker configuration as [=expanded_loudspeaker_layout=] = 16 (i.e., 7.1.5.4ch)
+- 15: Reserved for future use
 
 When a value for [=layout_type=] or [=sound_system=] is not supported, parsers SHOULD ignore this [=Layout()=] and any associated [=LoudnessInfo()=].
 
