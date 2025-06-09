@@ -88,6 +88,9 @@ url: https://tools.ietf.org/html/rfc6716#; spec: RFC-6716; type: dfn;
 url: https://www.itu.int/rec/R-REC-BS.1770#; spec: ITU-1770-4; type: dfn;
 	text: LKFS
 
+url: https://www.itu.int/rec/R-REC-BS.2076#; spec: ITU-2076-2; type: dfn;
+	text: Polar coordinates axes for Objects
+
 url: https://www.itu.int/rec/R-REC-BS.2051#; spec: ITU-2051-3; type: dfn;
 	text: Loudspeaker configuration for Sound System A (0+2+0)
 	text: Loudspeaker configuration for Sound System B (0+5+0)
@@ -683,7 +686,7 @@ class AudioElementOBU() {
 		else if (param_definition_type == PARAMETER_DEFINITION_RECON_GAIN) {
 			ReconGainParamDefinition recon_gain_info;
 		}
-		else if (param_definition_type > 2) {
+		else if (param_definition_type > 3) {
 			leb128() param_definition_size;
 			unsigned int (8 x param_definition_size) param_definition_bytes;
 		}
@@ -744,16 +747,19 @@ audio_element_type : The type of audio representation.
 
 <dfn noexport for="audio_element_obu">audio_substream_id</dfn> indicates the identifier for an [=Audio Substream=] which this [=Audio Element=] refers to. When [=audio_element_type=] is CHANNEL_BASED, the ordering of [=audio_element_obu/audio_substream_id=]s within this loop SHALL comply with [[#scalablechannelaudio-orderingofaudiosubstreamidentifiers]].
 
-<dfn noexport>num_parameters</dfn> specifies the number of [=Parameter Substream=]s that are used by the algorithms specified in this [=Audio Element=].
+<dfn noexport for="audio_element_obu">num_parameters</dfn> specifies the number of [=Parameter Substream=]s that are used by the algorithms specified in this [=Audio Element=].
 - When [=audio_element_type=] = 0, this field SHALL be set to 0, 1, or 2.
 - When [=audio_element_type=] = 1 or 2, this field SHALL be set to 0.
-- Parsers SHALL support any value of [=num_parameters=].
+- Parsers SHALL support any value of [=audio_element_obu/num_parameters=].
 
-NOTE: For a given [=audio_element_type=], a future version of the specification may define a new [=Parameter Substream=] which may be ignored by IA decoders compliant with this version of the specification. In that case, a new [=param_definition_type=] will be defined in a future version of [=Audio Element OBU=].
+NOTE: For a given [=audio_element_type=], a future version of the specification may define a new [=Parameter Substream=] which may be ignored by IA decoders compliant with this version of the specification. In that case, a new [=audio_element_obu/param_definition_type=] will be defined in a future version of [=Audio Element OBU=].
 
-<dfn noexport>param_definition_type</dfn> specifies the type of the parameter definition. The parameter definition types are listed in the table below, along with their associated parameter definitions.
+<dfn noexport for="audio_element_obu">param_definition_type</dfn> specifies the type of the parameter definition. Supported values are defined in the [=Parameter Definition Types=] table along with their associated parameter definitions.
 
 <table class = "def">
+<tr>
+	<th colspan="3"><dfn noexport>Parameter Definition Types</dfn></th>
+</tr>
 <tr>
 	<th>param_definition_type</th><th>Parameter definition type</th><th>Parameter definition</th>
 </tr>
@@ -766,16 +772,21 @@ NOTE: For a given [=audio_element_type=], a future version of the specification 
 <tr>
 	<td>2</td><td>PARAMETER_DEFINITION_RECON_GAIN</td><td>[=ReconGainParamDefinition()=]</td>
 </tr>
+<tr>
+	<td>3</td><td>PARAMETER_DEFINITION_SINGLE_POSITION</td><td>[=SinglePositionParamDefinition()=]</td>
+</tr>
 </table>
 
-- The type PARAMETER_DEFINITION_MIX_GAIN SHALL NOT be present in [=Audio Element OBU=].
+- The following types SHALL NOT be present in an [=Audio Element OBU=]:
+	- PARAMETER_DEFINITION_MIX_GAIN
+	- PARAMETER_DEFINITION_SINGLE_POSITION
 - The type SHALL NOT be duplicated in one [=Audio Element OBU=].
 - When [=codec_id=] = <code>fLaC</code> or <code>ipcm</code>, the type PARAMETER_DEFINITION_RECON_GAIN SHALL NOT be present.
 - When [=num_layers=] > 1, the type PARAMETER_DEFINITION_RECON_GAIN SHALL be present.
 - When the [=loudspeaker_layout=] = 15 or the [=loudspeaker_layout=] of the (non-)scalable channel audio (i.e., [=num_layers=] = 1) is less than or equal to 3.1.2ch (i.e., Mono, Stereo, or 3.1.2ch), the type PARAMETER_DEFINITION_DEMIXING SHALL NOT be present.
 - When the highest [=loudspeaker_layout=] of the scalable channel audio (i.e., [=num_layers=] > 1) is greater than 3.1.2ch, both PARAMETER_DEFINITION_DEMIXING and PARAMETER_DEFINITION_RECON_GAIN types SHALL be present.
 - When [=num_layers=] = 1 and [=loudspeaker_layout=] is greater than 3.1.2ch (i.e., 5.1.2ch, 5.1.4ch, 7.1.2ch, or 7.1.4ch), the type PARAMETER_DEFINITION_DEMIXING MAY be present.
-- An OBU parser SHALL be able to parse [=param_definition_type=] = P (where P > 2) and [=param_definition_size=]. The OBU parser SHOULD ignore the bytes indicated by [=param_definition_size=] that it does not recognize.
+- An OBU parser SHALL be able to parse [=audio_element_obu/param_definition_type=] = P (where P > 3) and [=param_definition_size=]. The OBU parser SHOULD ignore the bytes indicated by [=param_definition_size=] that it does not recognize.
 
 <dfn noexport>demixing_info</dfn> is an instance of the [=DemixingParamDefinition()=] class, which provides the parameter definition for the demixing information, which is used to reconstruct a scalable channel audio representation. The corresponding parameter data to be provided in [=Parameter Block OBU=]s with the same [=parameter_block_obu/parameter_id=] is specified in the [=DemixingInfoParameterData()=] class.
 
@@ -799,7 +810,7 @@ In this parameter definition,
 
 <dfn noexport>param_definition_size</dfn> indicates the size in bytes of [=param_definition_bytes=].
 
-<dfn noexport>param_definition_bytes</dfn> represents reserved bytes for future use when new [=param_definition_type=] values are defined. Parsers SHOULD ignore these bytes when they don't understand the parameter definition.
+<dfn noexport>param_definition_bytes</dfn> represents reserved bytes for future use when new [=audio_element_obu/param_definition_type=] values are defined. Parsers SHOULD ignore these bytes when they don't understand the parameter definition.
 
 <dfn noexport>scalable_channel_layout_config</dfn> is an instance of the [=ScalableChannelLayoutConfig()=] class, which provides the metadata required for combining the [=Audio Substream=]s referred to here in order to reconstruct a scalable channel layout.
 
@@ -1356,7 +1367,16 @@ class RenderingConfig() {
 	unsigned int (2) headphones_rendering_mode;
 	unsigned int (6) reserved_for_future_use;
 	leb128() rendering_config_extension_size;
-	unsigned int (8 x rendering_config_extension_size) rendering_config_extension_bytes;
+
+	unsigned int (8) num_parameters;
+	for (i = 0; i < num_parameters; i++) {
+		unsigned int (8) param_definition_type;
+		if (param_definition_type == PARAMETER_DEFINITION_SINGLE_POSITION) {
+			SinglePositionParamDefinition single_position;
+		}
+	}
+
+	unsigned int (8 x (rendering_config_extension_size - N)) rendering_config_extension_bytes;
 }
 ```
 
@@ -1372,9 +1392,47 @@ Parsers encountering a reserved value of [=headphones_rendering_mode=] SHALL ign
 
 <dfn noexport>reserved_for_future_use</dfn> SHALL be ignored by the parser. It is for future use.
 
-<dfn noexport>rendering_config_extension_size</dfn> indicates the size in bytes of [=rendering_config_extension_bytes=].
+<dfn noexport>rendering_config_extension_size</dfn> indicates the size in bytes of the syntaxes immediately following this field up to and including [=rendering_config_extension_bytes=].
 
-<dfn noexport>rendering_config_extension_bytes</dfn> represents reserved bytes for future use. Parsers that don't understand these bytes SHOULD ignore them.
+<dfn noexport for="rendering_config">num_parameters</dfn> specifies the number of [=Parameter Substream=]s that are used to render the referenced [=Audio Element=].
+
+<dfn noexport for="rendering_config">param_definition_type</dfn> specifies the type of the parameter definition. Supported types are defined in the [=Parameter Definition Types=] table along with their associated parameter definitions.
+
+- The type SHALL NOT be duplicated in one [=RenderingConfig()=].
+- The PARAMETER_DEFINITION_SINGLE_POSITION type SHALL be present only when the referenced [=Audio Element=] has [=audio_element_type=] = OBJECT_BASED and [=num_objects=] = 1.
+- The following types SHALL NOT be present in [=RenderingConfig()=]:
+	- PARAMETER_DEFINITION_MIX_GAIN
+	- PARAMETER_DEFINITION_DEMIXING
+	- PARAMETER_DEFINITION_RECON_GAIN
+
+<dfn noexport>single_position</dfn> is an instance of the [=SinglePositionParamDefinition()=] class. It provides the parameter definition for the position that is used when rendering an [=Audio Element=] with one object.
+
+<dfn noexport>rendering_config_extension_bytes</dfn> represents reserved bytes for future use. The value of N SHALL be the size of the syntaxes immediately following [=rendering_config_extension_size=] up until, but not including, [=rendering_config_extension_bytes=]. Parsers that don't understand these bytes SHOULD ignore them.
+
+### Single Position Parameter Definition Syntax and Semantics ### {#syntax-single-position-parameter-definition}
+
+The <dfn noexport>SinglePositionParamDefinition()</dfn> class provides the parameter definition for an object's position.
+
+This section specifies the syntax structures of the [=SinglePositionParamDefinition()=] class.
+
+<b>Syntax</b>
+
+```
+class SinglePositionParamDefinition() extends ParamDefinition() {
+	signed int (9) default_azimuth;
+	signed int (8) default_elevation;
+	unsigned int (3) default_distance;
+	unsigned int (4) reserved_for_future_use;
+}
+```
+
+<b>Semantics</b>
+
+<dfn noexport>default_azimuth</dfn> specifies the default angle in the horizontal plane when there are no [=Parameter Block OBU=]s with the same [=parameter_block_obu/parameter_id=] provided. This value is provided in degrees, where 0 degrees is straight ahead and positive angles are going left (or anti-clockwise) when viewed from above, following the [=Polar coordinates axes for Objects=] in [[!ITU-2076-2]].
+
+<dfn noexport>default_elevation</dfn> specifies the default angle in the vertical plane when there are no [=Parameter Block OBU=]s with the same [=parameter_block_obu/parameter_id=] provided. This value is provided in degrees, where 0 degrees is horizontally ahead and positive angles are going up, following the [=Polar coordinates axes for Objects=] in [[!ITU-2076-2]].
+
+<dfn noexport>default_distance</dfn> specifies the default distance, when there are no [=Parameter Block OBU=]s with the same [=parameter_block_obu/parameter_id=] provided. The value is expressed as a normalized distance from the origin in the range [0.0, 1.0], where 1.0 is on the surface of the unit sphere.
 
 
 ### Mix Gain Parameter Definition Syntax and Semantics ### {#syntax-mixgain-parameter-definition}
@@ -1613,11 +1671,13 @@ class ParameterBlockOBU() {
 
 <dfn noexport for="parameter_block_obu">parameter_id</dfn> indicates the identifier for a [=Parameter Substream=] which this [=Parameter Block OBU=] refers to. If no [=Audio Element OBU=]s or [=Mix Presentation OBU=]s refer to this [=parameter_block_obu/parameter_id=], parsers SHOULD ignore [=Parameter Block OBU=]s with this identifier.
 
-<dfn noexport>get_param_definition()</dfn> is a run-time function to get the [=param_definition_type=] and [=param_definition_mode=] from the [=Audio Element OBU=] or [=Mix Presentation OBU=] that references this [=parameter_block_obu/parameter_id=].
+<dfn noexport>get_param_definition()</dfn> is a run-time function to get the parameter definition type and [=param_definition_mode=] from the [=Audio Element OBU=] or [=Mix Presentation OBU=] (including [=RenderingConfig()=]) that references this [=parameter_block_obu/parameter_id=].
+
+Supported parameter definition types are defined in the [=Parameter Definition Types=] table.
 
 If [=param_definition_mode=] = 0, this function additionally gets the following fields from the same [=Audio Element OBU=] or [=Mix Presentation OBU=]: [=ParamDefinition/duration=], [=ParamDefinition/num_subblocks=], [=ParamDefinition/constant_subblock_duration=], and [=ParamDefinition/subblock_duration=].
 
-Parsers SHOULD ignore the [=Parameter Block OBU=] with a [=param_definition_type=] that they don't recognize. 
+Parsers SHOULD ignore the [=Parameter Block OBU=] with a parameter definition type that they don't recognize.
 
 <dfn noexport for="parameter_block_obu">duration</dfn> specifies the duration for which this parameter block is valid and applicable. It SHALL NOT be set to 0.
 
