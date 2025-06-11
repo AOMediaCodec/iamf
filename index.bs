@@ -666,14 +666,14 @@ class AudioElementOBU() {
 	leb128() audio_element_id;
 	unsigned int (3) audio_element_type;
 	unsigned int (5) reserved_for_future_use;
-  
+
 	leb128() codec_config_id;  
 
 	leb128() num_substreams;
 	for (i = 0; i < num_substreams; i++) {
 		leb128() audio_substream_id;
 	}
-  
+
 	leb128() num_parameters;
 	for (i = 0; i < num_parameters; i++) {
 		leb128() param_definition_type;
@@ -1375,7 +1375,7 @@ The <dfn noexport>Layout()</dfn> class specifies either a binaural system or a s
 ```
 class Layout() {
 	unsigned int (2) layout_type;
-  
+
 	if (layout_type == LOUDSPEAKERS_SS_CONVENTION) {
 		unsigned int (4) sound_system;
 		unsigned int (2) reserved_for_future_use;
@@ -1542,12 +1542,12 @@ The metadata specified in this OBU is used in conjunction with a corresponding p
 ```
 class ParameterBlockOBU() {
 	leb128() parameter_id;
-  
+
 	(param_definition_type, param_definition_mode, 
 	duration, num_subblocks, constant_subblock_duration, 
 	subblock_duration) 
 		= get_param_definition(parameter_id);
-  
+
 	if (param_definition_mode) {
 		leb128() duration;
 		leb128() constant_subblock_duration;
