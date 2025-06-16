@@ -101,21 +101,23 @@ url: https://www.itu.int/rec/R-REC-BS.2051#; spec: ITU-2051-3; type: dfn;
 	text: Loudspeaker configuration for Sound System J (4+7+0)
 	text: SP Label
 
-url: https://xiph.org/flac/format.html; spec: FLAC; type: dfn;
-	text: METADATA_BLOCK
-	text: METADATA_BLOCK_STREAMINFO
-	text: FRAME
-	text: FRAME_HEADER
+url: https://tools.ietf.org/html/rfc9639#; spec: RFC-9639; type: dfn;
+	text: Metadata Block
+	text: Streaminfo
+	text: Frame
+	text: Frame Header
 	text: minimum block size
 	text: maximum block size
 	text: minimum frame size
 	text: maximum frame size
-	text: number of channels
-	text: MD5 signature
-	text: Block size in inter-channel samples
 	text: Sample rate
-	text: Channel assignment
-	text: Sample size in bits
+	text: (number of channels) - 1
+	text: bits per sample
+	text: MD5 checksum
+	text: Block Size Bits
+	text: Sample Rate Bits
+	text: Channels Bits
+	text: Bit Depth Bits
 
 url: https://www.iso.org/standard/77752.html#; spec: MP4-PCM; type: dfn;
 	text: format_flags
@@ -194,11 +196,11 @@ url: https://www.iso.org/standard/84637.html#; spec: CENC; type: dfn;
 		"publisher": "ISO",
 		"href": "https://www.loc.gov/standards/iso639-2/php/code_list.php"
 	},
-	"FLAC": {
-		"title": "Free Lossless Audio Codec",
-		"status": "Best Practice",
-		"publisher": "xiph.org",
-		"href": "https://xiph.org/flac/format.html"
+	"RFC-9639": {
+		"title": "Free Lossless Audio Codec (FLAC)",
+		"status": "Standard",
+		"publisher": "IETF",
+		"href": "https://tools.ietf.org/html/rfc9639"
 	},
 	"AV1-Spec": {
 		"title": "AV1 Bitstream & Decoding Process Specification",
@@ -631,7 +633,7 @@ class CodecConfig() {
 
 - <code>Opus</code>: All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL comply with the [[!RFC-6716]] specification and the [=decoder_config=] structure SHALL comply with the constraints given in [[#opus-specific]].
 - <code>mp4a</code>: All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL comply with the [[!AAC]] specification and the [=decoder_config=] structure SHALL comply with the constraints given in [[#aac-lc-specific]].
-- <code>fLaC</code>: All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL comply with the [[!FLAC]] specification and the [=decoder_config=] structure SHALL comply with the constraints given in [[#flac-specific]].
+- <code>fLaC</code>: All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL comply with the [[!RFC-9639]] specification and the [=decoder_config=] structure SHALL comply with the constraints given in [[#flac-specific]].
 - <code>ipcm</code>: All coded [=Audio Substream=]s referred to by all [=Audio Element=]s with this codec configuration SHALL contain linear PCM (LPCM) audio samples and the [=decoder_config=] structure SHALL comply with the constraints given in [[#lpcm-specific]].
 
 Parsers SHOULD ignore [=Codec Config OBU=]s with a [=codec_id=] that they don't support.
@@ -1883,21 +1885,21 @@ The sample rate used for computing offsets SHALL be the rate indicated by the [=
 
 [=codec_id=] SHALL be <code>fLaC</code>, the FLAC stream marker in ASCII, meaning byte 0 of the stream is 0x66, followed by 0x4C 0x61 0x43.
 
-The [=DecoderConfig()=] class for FLAC is the [=METADATA_BLOCK=]s of [[!FLAC]] for mono or stereo channels. The [=METADATA_BLOCK_STREAMINFO=] has the following constraints:
+The [=DecoderConfig()=] class for FLAC is the [=Metadata Block=]s of [[!RFC-9639]] for mono or stereo channels. The [=Streaminfo=] has the following constraints:
 - [=minimum block size=] SHALL be set to [=num_samples_per_frame=].
 - [=maximum block size=] SHALL be set to [=num_samples_per_frame=].
 - [=minimum frame size=] SHOULD be set to 0.
 - [=maximum frame size=] SHOULD be set to 0.
-- [=number of channels=] SHALL be set to 1. [=number of channels=] can be ignored because the real value can be determined from the [=Audio Element OBU=] and from the [=Frame_Header=].
-- [=MD5 signature=] SHOULD be set to 0.
+- [=(number of channels) - 1=] SHALL be set to 1. [=(number of channels) - 1=] can be ignored because the real value can be determined from the [=Audio Element OBU=] and from the [=Frame Header=].
+- [=MD5 checksum=] SHOULD be set to 0.
 
-The format of [=audio_frame=] is [=FRAME=] of [[!FLAC]] which contains only one single frame of mono or stereo channels with the following constraints.
-- [=Block size in inter-channel samples=] in the [=FRAME_HEADER=] SHALL be set to [=num_samples_per_frame=].
-- [=Sample rate=] in the [=FRAME_HEADER=] SHALL indicate the same sample rate defined in the [=METADATA_BLOCK_STREAMINFO=].
-- [=Channel assignment=] in the [=FRAME_HEADER=] SHALL be set to 0 or 1 to indicate that the [=FRAME=] contains mono channel or stereo channels, respectively.
-- [=Sample size in bits=] in the [=FRAME_HEADER=] SHALL indicate the same sample size defined in the [=METADATA_BLOCK_STREAMINFO=]. 
+The format of [=audio_frame=] is [=Frame=] of [[!RFC-9639]] which contains only one single frame of mono or stereo channels with the following constraints.
+- [=Block Size Bits=] in the [=Frame Header=] SHALL be set to [=num_samples_per_frame=].
+- [=Sample Rate Bits=] in the [=Frame Header=] SHALL indicate the same sample rate defined in the [=Streaminfo=].
+- [=Channel Bits=] in the [=Frame Header=] SHALL be set to 0 or 1 to indicate that the [=FRAME=] contains mono channel or stereo channels, respectively.
+- [=Bit Depth Bits=] in the [=Frame Header=] SHALL indicate the same [=bits per sample=] defined in the [=Streaminfo=]. 
 
-The sample rate used for computing offsets SHALL be the sampling rate indicated in the [=METADATA_BLOCK=].
+The sample rate used for computing offsets SHALL be the sampling rate indicated in the [=Metadata Block=].
 
 ### LPCM Specific ### {#lpcm-specific}
 
