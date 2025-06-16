@@ -695,14 +695,12 @@ class AudioElementOBU() {
 	else if (audio_element_type == SCENE_BASED) {
 		AmbisonicsConfig ambisonics_config;
 	} 
+	else if (audio_element_type == OBJECT_BASED) {
+		ObjectsConfig objects_config;
+	}
 	else {
 		leb128() audio_element_config_size;
-		if (audio_element_type == OBJECT_BASED) {
-			ObjectsConfig objects_config;
-		}
-		else {
-			unsigned int (8 x audio_element_config_size) audio_element_config_bytes;
-		}
+		unsigned int (8 x audio_element_config_size) audio_element_config_bytes;
 	}
 }
 ```
@@ -803,20 +801,15 @@ In this parameter definition,
 
 <dfn noexport>param_definition_bytes</dfn> represents reserved bytes for future use when new [=param_definition_type=] values are defined. Parsers SHOULD ignore these bytes when they don't understand the parameter definition.
 
-
 <dfn noexport>scalable_channel_layout_config</dfn> is an instance of the [=ScalableChannelLayoutConfig()=] class, which provides the metadata required for combining the [=Audio Substream=]s referred to here in order to reconstruct a scalable channel layout.
 
 <dfn noexport>ambisonics_config</dfn> is an instance of the [=AmbisonicsConfig()=] class, which provides the metadata required for combining the [=Audio Substream=]s referred to here in order to reconstruct an Ambisonics layout.
 
-<dfn noexport>audio_element_config_size</dfn> indicates the size in bytes of the syntaxes in the <code>if-else</code> code block immediately following this field.
-
-- When [=audio_element_type=] is OBJECT_BASED, this is the size in bytes of [=objects_config=].
-- Otherwise, it is the size in bytes of [=audio_element_config_bytes=].
-
 <dfn noexport>objects_config</dfn> is an instance of the [=ObjectsConfig()=] class, which provides the metadata required to reconstruct one or more objects from the referenced [=Audio Substream=].
 
-<dfn noexport>audio_element_config_bytes</dfn> represents reserved bytes for future use when new [=audio_element_type=] values are defined. Parsers SHOULD ignore these bytes when they don't recognize a particular configuration.
+<dfn noexport>audio_element_config_size</dfn> indicates the size in bytes of [=audio_element_config_bytes=].
 
+<dfn noexport>audio_element_config_bytes</dfn> represents reserved bytes for future use when new [=audio_element_type=] values are defined. Parsers SHOULD ignore these bytes when they don't recognize a particular configuration.
 
 <dfn noexport>default_demixing_info_parameter_data</dfn> is an instance of the [=DefaultDemixingInfoParameterData()=] class, which provides the default demixing parameter data to apply to all audio samples when there are no [=Parameter Block OBU=]s (with the same [=ParamDefinition/parameter_id=] defined in this [=DemixingParamDefinition()=]) provided.
 - In this class, [=w_idx_offset=] in [=demixing_info_parameter_data=] SHALL be ignored.
@@ -1245,12 +1238,15 @@ The <dfn noexport>ObjectsConfig()</dfn> class provides the configuration for an 
 
 ```
 class ObjectsConfig() {
+	leb128() objects_config_size;
 	unsigned int (8) num_objects;
-	unsigned int (8 x (audio_element_config_size - 1)) objects_config_extension_bytes;
+	unsigned int (8 x (objects_config_size - 1)) objects_config_extension_bytes;
 }
 ```
 
 <b>Semantics</b>
+
+<dfn noexport>objects_config_size</dfn> indicates the size in bytes of the syntaxes immediately following this field  up to and including [=objects_config_extension_bytes=]. Parsers SHOULD ignore bytes past the [=ObjectsConfig()=] syntax that they recognize.
 
 <dfn noexport>num_objects</dfn> specifies the number of objects that the referenced [=Audio Substream=] provides the audio for. It SHALL NOT be set to 0.
 
