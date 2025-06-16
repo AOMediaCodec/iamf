@@ -1246,8 +1246,7 @@ The <dfn noexport>ObjectsConfig()</dfn> class provides the configuration for an 
 ```
 class ObjectsConfig() {
 	unsigned int (8) num_objects;
-	leb128() objects_config_extension_size;
-	unsigned int (8 x objects_config_extension_size) objects_config_extension_bytes;
+	unsigned int (8 x (audio_element_config_size - 1)) objects_config_extension_bytes;
 }
 ```
 
@@ -1258,8 +1257,6 @@ class ObjectsConfig() {
 - When [=num_objects=] = 1, the [=Audio Substream=] has one channel of audio, which SHALL be coded in mono mode.
 
 - When [=num_objects=] = 2, the [=Audio Substream=] has two channels of audio, one for each object, which SHALL be coded in stereo mode.
-
-<dfn noexport>objects_config_extension_size</dfn> indicates the size in bytes of [=objects_config_extension_bytes=].
 
 <dfn noexport>objects_config_extension_byte</dfn> represents reserved bytes for future use. Parsers that don't understand these bytes SHOULD ignore them.
 
