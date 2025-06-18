@@ -697,6 +697,9 @@ class AudioElementOBU() {
 	else if (audio_element_type == SCENE_BASED) {
 		AmbisonicsConfig ambisonics_config;
 	} 
+	else if (audio_element_type == OBJECT_BASED) {
+		ObjectsConfig objects_config;
+	}
 	else {
 		leb128() audio_element_config_size;
 		unsigned int (8 x audio_element_config_size) audio_element_config_bytes;
@@ -730,10 +733,11 @@ class ReconGainParamDefinition() extends ParamDefinition() {
 <dfn noexport>audio_element_type</dfn> specifies the audio representation of this [=Audio Element=], which is constructed from one or more [=Audio Substream=]s. Parsers SHOULD ignore [=Audio Element OBU=]s with an [=audio_element_type=] that they do not recognize.
 
 <pre class = "def">
-audio_element_type: The type of audio representation.
-	0    : CHANNEL_BASED
-	1    : SCENE_BASED
-	2~7   : Reserved for future use
+audio_element_type : The type of audio representation.
+	0   : CHANNEL_BASED
+	1   : SCENE_BASED
+	2   : OBJECT_BASED
+	3~7 : Reserved for future use
 </pre>
 
 <dfn noexport for="audio_element_obu">codec_config_id</dfn> indicates the identifier for the codec configuration which this [=Audio Element=] refers to. Parsers SHOULD ignore [=Audio Element OBU=]s with a [=audio_element_obu/codec_config_id=] identifying a [=codec_id=] that they don't support.
@@ -744,7 +748,7 @@ audio_element_type: The type of audio representation.
 
 <dfn noexport>num_parameters</dfn> specifies the number of [=Parameter Substream=]s that are used by the algorithms specified in this [=Audio Element=].
 - When [=audio_element_type=] = 0, this field SHALL be set to 0, 1, or 2.
-- When [=audio_element_type=] = 1, this field SHALL be set to 0.
+- When [=audio_element_type=] = 1 or 2, this field SHALL be set to 0.
 - Parsers SHALL support any value of [=num_parameters=].
 
 NOTE: For a given [=audio_element_type=], a future version of the specification may define a new [=Parameter Substream=] which may be ignored by IA decoders compliant with this version of the specification. In that case, a new [=param_definition_type=] will be defined in a future version of [=Audio Element OBU=].
@@ -799,15 +803,15 @@ In this parameter definition,
 
 <dfn noexport>param_definition_bytes</dfn> represents reserved bytes for future use when new [=param_definition_type=] values are defined. Parsers SHOULD ignore these bytes when they don't understand the parameter definition.
 
-
 <dfn noexport>scalable_channel_layout_config</dfn> is an instance of the [=ScalableChannelLayoutConfig()=] class, which provides the metadata required for combining the [=Audio Substream=]s referred to here in order to reconstruct a scalable channel layout.
 
 <dfn noexport>ambisonics_config</dfn> is an instance of the [=AmbisonicsConfig()=] class, which provides the metadata required for combining the [=Audio Substream=]s referred to here in order to reconstruct an Ambisonics layout.
 
+<dfn noexport>objects_config</dfn> is an instance of the [=ObjectsConfig()=] class, which provides the metadata required to reconstruct one or more objects from the referenced [=Audio Substream=].
+
 <dfn noexport>audio_element_config_size</dfn> indicates the size in bytes of [=audio_element_config_bytes=].
 
 <dfn noexport>audio_element_config_bytes</dfn> represents reserved bytes for future use when new [=audio_element_type=] values are defined. Parsers SHOULD ignore these bytes when they don't recognize a particular configuration.
-
 
 <dfn noexport>default_demixing_info_parameter_data</dfn> is an instance of the [=DefaultDemixingInfoParameterData()=] class, which provides the default demixing parameter data to apply to all audio samples when there are no [=Parameter Block OBU=]s (with the same [=ParamDefinition/parameter_id=] defined in this [=DemixingParamDefinition()=]) provided.
 - In this class, [=w_idx_offset=] in [=demixing_info_parameter_data=] SHALL be ignored.
@@ -1262,6 +1266,31 @@ If [=ambisonics_mode=] is equal to PROJECTION, this indicates that the Ambisonic
 
 A scene-based [=Audio Element=] has only one [=Channel Group=], which includes all [=Audio Substream=]s that it refers to. The order of the [=Audio Substream=]s in the [=Channel Group=] SHALL conform to [[RFC-8486]].
 
+### Objects Config Syntax and Semantics ### {#syntax-objects-config}
+
+The <dfn noexport>ObjectsConfig()</dfn> class provides the configuration for an object-based [=Audio Element=]. This section specifies the syntax structure of the [=ObjectsConfig()=] class.
+
+<b>Syntax</b>
+
+```
+class ObjectsConfig() {
+	leb128() objects_config_size;
+	unsigned int (8) num_objects;
+	unsigned int (8 x (objects_config_size - 1)) objects_config_extension_bytes;
+}
+```
+
+<b>Semantics</b>
+
+<dfn noexport>objects_config_size</dfn> indicates the size in bytes of the syntaxes immediately following this field  up to and including [=objects_config_extension_bytes=]. Parsers SHOULD ignore bytes past the [=ObjectsConfig()=] syntax that they recognize.
+
+<dfn noexport>num_objects</dfn> specifies the number of objects that the referenced [=Audio Substream=] provides the audio for. It SHALL NOT be set to 0.
+
+- When [=num_objects=] = 1, the [=Audio Substream=] has one channel of audio, which SHALL be coded in mono mode.
+
+- When [=num_objects=] = 2, the [=Audio Substream=] has two channels of audio, one for each object, which SHALL be coded in stereo mode.
+
+<dfn noexport>objects_config_extension_byte</dfn> represents reserved bytes for future use. Parsers that don't understand these bytes SHOULD ignore them.
 
 ## Mix Presentation OBU Syntax and Semantics ## {#obu-mixpresentation}
 
