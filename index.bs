@@ -490,7 +490,7 @@ class OBUHeader() {
 	unsigned int (1) obu_extension_flag;
 	leb128() obu_size;
 
-	if (obu_trimming_status_flag) {
+	if ((obu_type > 4 && obu_type < 24) && obu_trimming_status_flag) {
 		leb128() num_samples_to_trim_at_end;
 		leb128() num_samples_to_trim_at_start;
 	}
@@ -528,8 +528,7 @@ It SHALL always be set to 0 for the following [=obu_type=] values:
 
 If a decoder encounters an OBU with [=obu_redundant_copy=] = 1, and it has also received the previous non-redundant OBU, it MAY ignore the redundant OBU. If the decoder has not received the previous non-redundant OBU, it SHALL treat the redundant copy as a non-redundant OBU and process the OBU accordingly.
 
-<dfn noexport>obu_trimming_status_flag</dfn> indicates whether this OBU has audio samples to be trimmed. It SHALL be set to 0 or 1 if the [=obu_type=] is set to OBU_IA_Audio_Frame or OBU_IA_Audio_Frame_ID0 to OBU_IA_Audio_Frame_ID17. Otherwise, it SHALL be set to 0.
-
+<dfn noexport>obu_trimming_status_flag</dfn> indicates whether this OBU has audio samples to be trimmed.
 For a given coded [=Audio Substream=], 
 - If an [=Audio Frame OBU=] has its [=num_samples_to_trim_at_start=] field set to a non-zero value N, the decoder SHALL discard the first N audio samples.
 - If an [=Audio Frame OBU=] has its [=num_samples_to_trim_at_end=] field set to a non-zero value N, the decoder SHALL discard the last N audio samples.
