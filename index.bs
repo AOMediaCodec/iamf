@@ -687,7 +687,7 @@ class AudioElementOBU() {
 		else if (param_definition_type == PARAMETER_DEFINITION_RECON_GAIN) {
 			ReconGainParamDefinition recon_gain_info;
 		}
-		else if (param_definition_type > 3) {
+		else if (param_definition_type > 4) {
 			leb128() param_definition_size;
 			unsigned int (8 x param_definition_size) param_definition_bytes;
 		}
@@ -776,18 +776,22 @@ NOTE: For a given [=audio_element_type=], a future version of the specification 
 <tr>
 	<td>3</td><td>PARAMETER_DEFINITION_SINGLE_POSITION</td><td>[=SinglePositionParamDefinition()=]</td>
 </tr>
+<tr>
+	<td>4</td><td>PARAMETER_DEFINITION_DUAL_POSITION</td><td>[=DualPositionParamDefinition()=]</td>
+</tr>
 </table>
 
 - The following types SHALL NOT be present in an [=Audio Element OBU=]:
 	- PARAMETER_DEFINITION_MIX_GAIN
 	- PARAMETER_DEFINITION_SINGLE_POSITION
+	- PARAMETER_DEFINITION_DUAL_POSITION
 - The type SHALL NOT be duplicated in one [=Audio Element OBU=].
 - When [=codec_id=] = <code>fLaC</code> or <code>ipcm</code>, the type PARAMETER_DEFINITION_RECON_GAIN SHALL NOT be present.
 - When [=num_layers=] > 1, the type PARAMETER_DEFINITION_RECON_GAIN SHALL be present.
 - When the [=loudspeaker_layout=] = 15 or the [=loudspeaker_layout=] of the (non-)scalable channel audio (i.e., [=num_layers=] = 1) is less than or equal to 3.1.2ch (i.e., Mono, Stereo, or 3.1.2ch), the type PARAMETER_DEFINITION_DEMIXING SHALL NOT be present.
 - When the highest [=loudspeaker_layout=] of the scalable channel audio (i.e., [=num_layers=] > 1) is greater than 3.1.2ch, both PARAMETER_DEFINITION_DEMIXING and PARAMETER_DEFINITION_RECON_GAIN types SHALL be present.
 - When [=num_layers=] = 1 and [=loudspeaker_layout=] is greater than 3.1.2ch (i.e., 5.1.2ch, 5.1.4ch, 7.1.2ch, or 7.1.4ch), the type PARAMETER_DEFINITION_DEMIXING MAY be present.
-- An OBU parser SHALL be able to parse [=audio_element_obu/param_definition_type=] = P (where P > 3) and [=param_definition_size=]. The OBU parser SHOULD ignore the bytes indicated by [=param_definition_size=] that it does not recognize.
+- An OBU parser SHALL be able to parse [=audio_element_obu/param_definition_type=] = P (where P > 4) and [=param_definition_size=]. The OBU parser SHOULD ignore the bytes indicated by [=param_definition_size=] that it does not recognize.
 
 <dfn noexport>demixing_info</dfn> is an instance of the [=DemixingParamDefinition()=] class, which provides the parameter definition for the demixing information, which is used to reconstruct a scalable channel audio representation. The corresponding parameter data to be provided in [=Parameter Block OBU=]s with the same [=parameter_block_obu/parameter_id=] is specified in the [=DemixingInfoParameterData()=] class.
 
@@ -1408,6 +1412,8 @@ class RenderingConfig() {
 		leb128() param_definition_type;
 		if (param_definition_type == PARAMETER_DEFINITION_SINGLE_POSITION) {
 			SinglePositionParamDefinition single_position;
+		} else if (param_definition_type == PARAMETER_DEFINITION_DUAL_POSITION) {
+			DualPositionParamDefinition dual_position;
 		}
 		else {
 			leb128() rendering_config_params_extension_size;
@@ -1439,12 +1445,15 @@ Parsers encountering a reserved value of [=headphones_rendering_mode=] SHALL ign
 
 - The type SHALL NOT be duplicated in one [=RenderingConfig()=].
 - The PARAMETER_DEFINITION_SINGLE_POSITION type SHALL be present only when the referenced [=Audio Element=] has [=audio_element_type=] = OBJECT_BASED and [=num_objects=] = 1.
+- The PARAMETER_DEFINITION_DUAL_POSITION type SHALL be present only when the referenced [=Audio Element=] has [=audio_element_type=] = OBJECT_BASED and [=num_objects=] = 2.
 - The following types SHALL NOT be present in [=RenderingConfig()=]:
 	- PARAMETER_DEFINITION_MIX_GAIN
 	- PARAMETER_DEFINITION_DEMIXING
 	- PARAMETER_DEFINITION_RECON_GAIN
 
 <dfn noexport>single_position</dfn> is an instance of the [=SinglePositionParamDefinition()=] class. It provides the parameter definition for the position that is used when rendering an [=Audio Element=] with one object. The corresponding parameter data to be provided in [=Parameter Block OBU=]s with the same [=parameter_block_obu/parameter_id=] is specified in the [=SinglePositionParameterData()=] class.
+
+<dfn noexport>dual_position</dfn> is an instance of the [=DualPositionParamDefinition()=] class. It provides the parameter definition for the position that is used when rendering an [=Audio Element=] with two objects. The corresponding parameter data to be provided in [=Parameter Block OBU=]s with the same [=parameter_block_obu/parameter_id=] is specified in the [=DualPositionParameterData()=] class.
 
 <dfn noexport>rendering_config_params_extension_size</dfn> indicates the size in bytes of [=rendering_config_params_extension_bytes=].
 
@@ -1484,6 +1493,40 @@ where 0 degrees is straight ahead and positive angles are going left (or anti-cl
 where 0 degrees is horizontally ahead and positive angles are going up, following the [=Polar coordinates axes for Objects=] in [[!ITU-2076-2]].
 
 <dfn noexport>default_distance</dfn> specifies the default distance, when there are no [=Parameter Block OBU=]s with the same [=parameter_block_obu/parameter_id=] provided. The value is expressed as a normalized distance from the origin in the range [0.0, 1.0], where 1.0 is on the surface of the unit sphere.
+
+### Dual Position Parameter Definition Syntax and Semantics ### {#syntax-dual-position-parameter-definition}
+
+The <dfn noexport>DualPositionParamDefinition()</dfn> class provides the parameter definition for two objects' positions.
+
+This section specifies the syntax structures of the [=DualPositionParamDefinition()=] class.
+
+<b>Syntax</b>
+
+```
+class DualPositionParamDefinition() extends ParamDefinition() {
+	signed int (9) default_first_azimuth;
+	signed int (8) default_first_elevation;
+	unsigned int (3) default_first_distance;
+
+	signed int (9) default_second_azimuth;
+	signed int (8) default_second_elevation;
+	unsigned int (3) default_second_distance;
+}
+```
+
+<b>Semantics</b>
+
+<dfn noexport>default_first_azimuth</dfn> is the same as [=default_azimuth=] in [=SinglePositionParamDefinition()=] except that this applies to the first object in the referenced [=Audio Substream=].
+
+<dfn noexport>default_first_elevation</dfn> is the same as [=default_elevation=] in [=SinglePositionParamDefinition()=] except that this applies to the first object in the referenced [=Audio Substream=].
+
+<dfn noexport>default_first_distance</dfn> is the same as [=default_distance=] in [=SinglePositionParamDefinition()=] except that this applies to the first object in the referenced [=Audio Substream=].
+
+<dfn noexport>default_second_azimuth</dfn> is the same as [=default_azimuth=] in [=SinglePositionParamDefinition()=] except that this applies to the second object in the referenced [=Audio Substream=].
+
+<dfn noexport>default_second_elevation</dfn> is the same as [=default_elevation=] in [=SinglePositionParamDefinition()=] except that this applies to the second object in the referenced [=Audio Substream=].
+
+<dfn noexport>default_second_distance</dfn> is the same as [=default_distance=] in [=SinglePositionParamDefinition()=] except that this applies to the second object in the referenced [=Audio Substream=].
 
 
 ### Mix Gain Parameter Definition Syntax and Semantics ### {#syntax-mixgain-parameter-definition}
@@ -1714,6 +1757,9 @@ class ParameterBlockOBU() {
 		else if (param_definition_type == PARAMETER_DEFINITION_SINGLE_POSITION) {
 			SinglePositionParameterData single_position_parameter_data;
 		}
+		else if (param_definition_type == PARAMETER_DEFINITION_DUAL_POSITION) {
+			DualPositionParameterData dual_position_parameter_data;
+		}
 		else {
 			leb128() parameter_data_size;
 			unsigned int (8 x parameter_data_size) parameter_data_bytes;
@@ -1755,6 +1801,8 @@ The values of [=parameter_block_obu/duration=], [=parameter_block_obu/constant_s
 <dfn noexport>recon_gain_info_parameter_data</dfn> is an instance of the [=ReconGainInfoParameterData()=] class, which provides the parameter values to apply in this parameter block.
 
 <dfn noexport>single_position_parameter_data</dfn> is an instance of the [=SinglePositionParameterData()=] class, which provides the parameter values to apply in this parameter block.
+
+<dfn noexport>dual_position_parameter_data</dfn> is an instance of the [=DualPositionParameterData()=] class, which provides the parameter values to apply in this parameter block.
 
 <dfn noexport>parameter_data_size</dfn> indicates the size in bytes of [=parameter_data_bytes=].
 
@@ -1952,6 +2000,46 @@ where 0 degrees is horizontally ahead and positive angles are going up, followin
 	<td>BEZIER</td><td>4</td>
 </tr>
 </table>
+
+
+### Dual Position Parameter Data Syntax and Semantics ### {#syntax-dual-position-param}
+
+The <dfn noexport>DualPositionParameterData()</dfn> class provides the position parameter data to be used when rendering an object-based [=Audio Element=] with two objects. This section specifies the syntax structure of the [=DualPositionParameterData()=] class.
+
+<b>Syntax</b>
+
+```
+class DualPositionParameterData() {
+	leb128() dual_position_parameter_data_size;
+	leb128() animation_type;
+
+	AnimatedParameterData<signed int (9)> first_azimuth;
+	AnimatedParameterData<signed int (8)> first_elevation;
+	AnimatedParameterData<unsigned int (3)> first_distance;
+
+	AnimatedParameterData<signed int (9)> second_azimuth;
+	AnimatedParameterData<signed int (8)> second_elevation;
+	AnimatedParameterData<unsigned int (3)> second_distance;
+}
+```
+
+<b>Semantics</b>
+
+<dfn noexport>dual_position_parameter_data_size</dfn> indicates the size in bytes of [=DualPositionParameterData()=] immediately following this field. Parsers SHOULD ignore bytes past the [=DualPositionParameterData()=] syntax that they recognize.
+
+<dfn noexport for="dual_position_param_data">animation_type</dfn> specifies the type of animation applied to the parameter values. Supported values are defined in the [=Animation Types=] table. When an unknown value of [=dual_position_param_data/animation_type=] is used, parsers SHOULD ignore the [=Parameter Block OBU=] that contains this [=dual_position_parameter_data=].
+
+<dfn noexport>first_azimuth</dfn> is the same as [=azimuth=] in [=SinglePositionParameterData()=] except that this applies to the first object in the referenced [=Audio Substream=].
+
+<dfn noexport>first_elevation</dfn> is the same as [=elevation=] in [=SinglePositionParameterData()=] except that this applies to the first object in the referenced [=Audio Substream=].
+
+<dfn noexport>first_distance</dfn> is the same as [=distance=] in [=SinglePositionParameterData()=] except that this applies to the first object in the referenced [=Audio Substream=].
+
+<dfn noexport>second_azimuth</dfn> is the same as [=azimuth=] in [=SinglePositionParameterData()=] except that this applies to the second object in the referenced [=Audio Substream=].
+
+<dfn noexport>second_elevation</dfn> is the same as [=elevation=] in [=SinglePositionParameterData()=] except that this applies to the second object in the referenced [=Audio Substream=].
+
+<dfn noexport>second_distance</dfn> is the same as [=distance=] in [=SinglePositionParameterData()=] except that this applies to the second object in the referenced [=Audio Substream=].
 
 
 ## Audio Frame OBU Syntax and Semantics ## {#obu-audioframe}
