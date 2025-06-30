@@ -687,7 +687,7 @@ class AudioElementOBU() {
 		else if (param_definition_type == PARAMETER_DEFINITION_RECON_GAIN) {
 			ReconGainParamDefinition recon_gain_info;
 		}
-		else if (param_definition_type > 3) {
+		else if (param_definition_type > 4) {
 			leb128() param_definition_size;
 			unsigned int (8 x param_definition_size) param_definition_bytes;
 		}
@@ -757,37 +757,16 @@ NOTE: For a given [=audio_element_type=], a future version of the specification 
 
 <dfn noexport for="audio_element_obu">param_definition_type</dfn> specifies the type of the parameter definition. Supported values are defined in the [=Parameter Definition Types=] table along with their associated parameter definitions.
 
-<table class = "def">
-<tr>
-	<th colspan="3"><dfn noexport>Parameter Definition Types</dfn></th>
-</tr>
-<tr>
-	<th>param_definition_type</th><th>Parameter definition type</th><th>Parameter definition</th>
-</tr>
-<tr>
-	<td>0</td><td>PARAMETER_DEFINITION_MIX_GAIN</td><td>[=MixGainParamDefinition()=]</td>
-</tr>
-<tr>
-	<td>1</td><td>PARAMETER_DEFINITION_DEMIXING</td><td>[=DemixingParamDefinition()=]</td>
-</tr>
-<tr>
-	<td>2</td><td>PARAMETER_DEFINITION_RECON_GAIN</td><td>[=ReconGainParamDefinition()=]</td>
-</tr>
-<tr>
-	<td>3</td><td>PARAMETER_DEFINITION_SINGLE_POSITION</td><td>[=SinglePositionParamDefinition()=]</td>
-</tr>
-</table>
-
-- The following types SHALL NOT be present in an [=Audio Element OBU=]:
-	- PARAMETER_DEFINITION_MIX_GAIN
-	- PARAMETER_DEFINITION_SINGLE_POSITION
+- Only the following types from the [=Parameter Definition Types=] table MAY be present in an [=Audio Element OBU=]. Other types from that table SHALL NOT be present in an [=Audio Element OBU=].
+	- PARAMETER_DEFINITION_DEMIXING
+	- PARAMETER_DEFINITION_RECON_GAIN
 - The type SHALL NOT be duplicated in one [=Audio Element OBU=].
 - When [=codec_id=] = <code>fLaC</code> or <code>ipcm</code>, the type PARAMETER_DEFINITION_RECON_GAIN SHALL NOT be present.
 - When [=num_layers=] > 1, the type PARAMETER_DEFINITION_RECON_GAIN SHALL be present.
 - When the [=loudspeaker_layout=] = 15 or the [=loudspeaker_layout=] of the (non-)scalable channel audio (i.e., [=num_layers=] = 1) is less than or equal to 3.1.2ch (i.e., Mono, Stereo, or 3.1.2ch), the type PARAMETER_DEFINITION_DEMIXING SHALL NOT be present.
 - When the highest [=loudspeaker_layout=] of the scalable channel audio (i.e., [=num_layers=] > 1) is greater than 3.1.2ch, both PARAMETER_DEFINITION_DEMIXING and PARAMETER_DEFINITION_RECON_GAIN types SHALL be present.
 - When [=num_layers=] = 1 and [=loudspeaker_layout=] is greater than 3.1.2ch (i.e., 5.1.2ch, 5.1.4ch, 7.1.2ch, or 7.1.4ch), the type PARAMETER_DEFINITION_DEMIXING MAY be present.
-- An OBU parser SHALL be able to parse [=audio_element_obu/param_definition_type=] = P (where P > 3) and [=param_definition_size=]. The OBU parser SHOULD ignore the bytes indicated by [=param_definition_size=] that it does not recognize.
+- An OBU parser SHALL be able to parse [=audio_element_obu/param_definition_type=] = P (where P > 4) and [=param_definition_size=]. The OBU parser SHOULD ignore the bytes indicated by [=param_definition_size=] that it does not recognize.
 
 <dfn noexport>demixing_info</dfn> is an instance of the [=DemixingParamDefinition()=] class, which provides the parameter definition for the demixing information, which is used to reconstruct a scalable channel audio representation. The corresponding parameter data to be provided in [=Parameter Block OBU=]s with the same [=parameter_block_obu/parameter_id=] is specified in the [=DemixingInfoParameterData()=] class.
 
@@ -847,64 +826,6 @@ The mapping of [=default_w=] to [=w(k)|\(w(k)\)=] SHOULD be as follows:
 </pre>
 
 A default recon gain value of 0 dB is implied when there are no [=Parameter Block OBU=]s (with the same [=ParamDefinition/parameter_id=] defined in this [=ReconGainParamDefinition()=]) provided.
-
-### Parameter Definition Syntax and Semantics ### {#parameter-definition}
-
-Parameter definition classes inherit from the abstract <dfn noexport>ParamDefinition()</dfn> class.
-
-<b>Syntax</b>
-
-```
-abstract class ParamDefinition() {
-	leb128() parameter_id;
-	leb128() parameter_rate;
-	unsigned int (1) param_definition_mode;
-	unsigned int (7) reserved_for_future_use;
-	if (param_definition_mode == 0) {
-		leb128() duration;
-		leb128() constant_subblock_duration;
-		if (constant_subblock_duration == 0) {
-			leb128() num_subblocks;
-			for (i = 0; i< num_subblocks; i++) {
-				leb128() subblock_duration;
-			}
-		}
-	}
-}
-```
-
-<b>Semantics</b>
-
-<dfn noexport for="ParamDefinition">parameter_id</dfn> indicates the identifier for the [=Parameter Substream=] which this parameter definition refers to. There SHALL be one unique [=ParamDefinition/parameter_id=] per [=Parameter Substream=].
-
-<dfn noexport>parameter_rate</dfn> specifies the rate used by this [=Parameter Substream=], expressed as ticks per second. Time-related fields associated with this [=Parameter Substream=], such as durations, SHALL be expressed in the number of ticks.
-- The parameter rate SHALL be a value such that the number of ticks per frame, computed as
-	\[\frac{\text{parameter_rate} \times \text{num_samples_per_frame}}{\text{Audio Element sample rate}},\]
-	is a non-zero integer.
-
-<dfn noexport>param_definition_mode</dfn> indicates whether this parameter definition specifies the [=ParamDefinition/duration=], [=ParamDefinition/num_subblocks=], [=ParamDefinition/constant_subblock_duration=] and [=ParamDefinition/subblock_duration=] fields for the parameter blocks with the same [=parameter_block_obu/parameter_id=].
-
-- When this field is set to 0, all of the [=ParamDefinition/duration=], [=ParamDefinition/num_subblocks=], [=ParamDefinition/constant_subblock_duration=], and [=ParamDefinition/subblock_duration=] fields SHALL be specified in this parameter definition. None of the parameter blocks with the same [=parameter_block_obu/parameter_id=] SHALL specify these same fields.
-
-- When this field is set to 1, none of the [=ParamDefinition/duration=], [=ParamDefinition/num_subblocks=], [=ParamDefinition/constant_subblock_duration=], and [=ParamDefinition/subblock_duration=] fields SHALL be specified in this parameter definition. Instead, each parameter block with the same [=parameter_block_obu/parameter_id=] SHALL specify these same fields.
-
-<dfn noexport for="ParamDefinition">duration</dfn> specifies the duration for which each parameter block with the same [=parameter_block_obu/parameter_id=] is valid and applicable. It SHALL NOT be set to 0.
-
-<dfn noexport for="ParamDefinition">constant_subblock_duration</dfn> specifies the duration of each subblock, in the case where all subblocks except the last subblock have equal durations. If all subblocks except the last subblock do not have equal durations, the value of [=ParamDefinition/constant_subblock_duration=] SHALL be set to 0.
-
-When [=ParamDefinition/constant_subblock_duration=] is not equal to 0,
-- [=ParamDefinition/num_subblocks=] is implicitly calculated as
-	\[ \text{num_subblocks} = \left\lceil{ \frac{\text{duration}}{\text{constant_subblock_duration}}}\right\rceil. \]
-- If \(\textrm{num_subblocks} \times \text{constant_subblock_duration} > \text{duration}\), the actual duration of the last subblock SHALL be
-			\[ \text{duration} - \left( \text{num_subblocks} - 1 \right) \times \text{constant_subblock_duration}. \]
-
-When [=ParamDefinition/constant_subblock_duration=] is equal to 0, the summation of all [=ParamDefinition/subblock_duration=] in this parameter block SHALL be equal to [=ParamDefinition/duration=].
-
-<dfn noexport for="ParamDefinition">num_subblocks</dfn> specifies the number of different sets of parameter values specified in each parameter block with the same [=parameter_block_obu/parameter_id=], where each set describes a different subblock of the timeline, contiguously.
-
-<dfn noexport for="ParamDefinition">subblock_duration</dfn> specifies the duration for the given subblock. It SHALL NOT be set to 0.
-
-The values for [=ParamDefinition/duration=], [=ParamDefinition/constant_subblock_duration=], and [=ParamDefinition/subblock_duration=] SHALL be expressed as the number of ticks at the [=parameter_rate=] specified in the corresponding parameter definition.
 
 ### Scalable Channel Layout Config Syntax and Semantics ### {#syntax-scalable-channel-layout-config}
 
@@ -1408,6 +1329,8 @@ class RenderingConfig() {
 		leb128() param_definition_type;
 		if (param_definition_type == PARAMETER_DEFINITION_SINGLE_POSITION) {
 			SinglePositionParamDefinition single_position;
+		} else if (param_definition_type == PARAMETER_DEFINITION_DUAL_POSITION) {
+			DualPositionParamDefinition dual_position;
 		}
 		else {
 			leb128() rendering_config_params_extension_size;
@@ -1437,14 +1360,16 @@ Parsers encountering a reserved value of [=headphones_rendering_mode=] SHALL ign
 
 <dfn noexport for="rendering_config">param_definition_type</dfn> specifies the type of the parameter definition. Supported types are defined in the [=Parameter Definition Types=] table along with their associated parameter definitions.
 
+- Only the following types from the [=Parameter Definition Types=] table MAY be present in a [=RenderingConfig()=]. All other types from that table SHALL NOT be present in a [=RenderingConfig()=].
+	- PARAMETER_DEFINITION_SINGLE_POSITION
+	- PARAMETER_DEFINITION_DUAL_POSITION
 - The type SHALL NOT be duplicated in one [=RenderingConfig()=].
 - The PARAMETER_DEFINITION_SINGLE_POSITION type SHALL be present only when the referenced [=Audio Element=] has [=audio_element_type=] = OBJECT_BASED and [=num_objects=] = 1.
-- The following types SHALL NOT be present in [=RenderingConfig()=]:
-	- PARAMETER_DEFINITION_MIX_GAIN
-	- PARAMETER_DEFINITION_DEMIXING
-	- PARAMETER_DEFINITION_RECON_GAIN
+- The PARAMETER_DEFINITION_DUAL_POSITION type SHALL be present only when the referenced [=Audio Element=] has [=audio_element_type=] = OBJECT_BASED and [=num_objects=] = 2.
 
 <dfn noexport>single_position</dfn> is an instance of the [=SinglePositionParamDefinition()=] class. It provides the parameter definition for the position that is used when rendering an [=Audio Element=] with one object. The corresponding parameter data to be provided in [=Parameter Block OBU=]s with the same [=parameter_block_obu/parameter_id=] is specified in the [=SinglePositionParameterData()=] class.
+
+<dfn noexport>dual_position</dfn> is an instance of the [=DualPositionParamDefinition()=] class. It provides the parameter definition for the position that is used when rendering an [=Audio Element=] with two objects. The corresponding parameter data to be provided in [=Parameter Block OBU=]s with the same [=parameter_block_obu/parameter_id=] is specified in the [=DualPositionParameterData()=] class.
 
 <dfn noexport>rendering_config_params_extension_size</dfn> indicates the size in bytes of [=rendering_config_params_extension_bytes=].
 
@@ -1484,6 +1409,40 @@ where 0 degrees is straight ahead and positive angles are going left (or anti-cl
 where 0 degrees is horizontally ahead and positive angles are going up, following the [=Polar coordinates axes for Objects=] in [[!ITU-2076-2]].
 
 <dfn noexport>default_distance</dfn> specifies the default distance, when there are no [=Parameter Block OBU=]s with the same [=parameter_block_obu/parameter_id=] provided. The value is expressed as a normalized distance from the origin in the range [0.0, 1.0], where 1.0 is on the surface of the unit sphere.
+
+### Dual Position Parameter Definition Syntax and Semantics ### {#syntax-dual-position-parameter-definition}
+
+The <dfn noexport>DualPositionParamDefinition()</dfn> class provides the parameter definition for two objects' positions.
+
+This section specifies the syntax structures of the [=DualPositionParamDefinition()=] class.
+
+<b>Syntax</b>
+
+```
+class DualPositionParamDefinition() extends ParamDefinition() {
+	signed int (9) default_first_azimuth;
+	signed int (8) default_first_elevation;
+	unsigned int (3) default_first_distance;
+
+	signed int (9) default_second_azimuth;
+	signed int (8) default_second_elevation;
+	unsigned int (3) default_second_distance;
+}
+```
+
+<b>Semantics</b>
+
+<dfn noexport>default_first_azimuth</dfn> is the same as [=default_azimuth=] in [=SinglePositionParamDefinition()=] except that this applies to the first object in the referenced [=Audio Substream=].
+
+<dfn noexport>default_first_elevation</dfn> is the same as [=default_elevation=] in [=SinglePositionParamDefinition()=] except that this applies to the first object in the referenced [=Audio Substream=].
+
+<dfn noexport>default_first_distance</dfn> is the same as [=default_distance=] in [=SinglePositionParamDefinition()=] except that this applies to the first object in the referenced [=Audio Substream=].
+
+<dfn noexport>default_second_azimuth</dfn> is the same as [=default_azimuth=] in [=SinglePositionParamDefinition()=] except that this applies to the second object in the referenced [=Audio Substream=].
+
+<dfn noexport>default_second_elevation</dfn> is the same as [=default_elevation=] in [=SinglePositionParamDefinition()=] except that this applies to the second object in the referenced [=Audio Substream=].
+
+<dfn noexport>default_second_distance</dfn> is the same as [=default_distance=] in [=SinglePositionParamDefinition()=] except that this applies to the second object in the referenced [=Audio Substream=].
 
 
 ### Mix Gain Parameter Definition Syntax and Semantics ### {#syntax-mixgain-parameter-definition}
@@ -1670,6 +1629,91 @@ content_language    : Language of the audio content in this Mix Presentation.
 
 NOTE: The language indicated by [=tag_name=] = "content_language" is different from [=annotations_language=]. The former indicates the language of the audio content in the associated [=Audio Element=]s, while the latter indicates the language of the [=Mix Presentation=] annotations.
 
+## Parameter Definition Types, Syntax and Semantics ## {#parameter-definition}
+
+Parameter definition classes inherit from the abstract <dfn noexport>ParamDefinition()</dfn> class, defined below.
+
+Supported parameter definition types are listed in the table below along with their associated parameter definition classes.
+
+<table class = "def">
+<tr>
+	<th colspan="3"><dfn noexport>Parameter Definition Types</dfn></th>
+</tr>
+<tr>
+	<th>param_definition_type</th><th>Parameter definition type</th><th>Parameter definition</th>
+</tr>
+<tr>
+	<td>0</td><td>PARAMETER_DEFINITION_MIX_GAIN</td><td>[=MixGainParamDefinition()=]</td>
+</tr>
+<tr>
+	<td>1</td><td>PARAMETER_DEFINITION_DEMIXING</td><td>[=DemixingParamDefinition()=]</td>
+</tr>
+<tr>
+	<td>2</td><td>PARAMETER_DEFINITION_RECON_GAIN</td><td>[=ReconGainParamDefinition()=]</td>
+</tr>
+<tr>
+	<td>3</td><td>PARAMETER_DEFINITION_SINGLE_POSITION</td><td>[=SinglePositionParamDefinition()=]</td>
+</tr>
+<tr>
+	<td>4</td><td>PARAMETER_DEFINITION_DUAL_POSITION</td><td>[=DualPositionParamDefinition()=]</td>
+</tr>
+</table>
+
+
+<b>Syntax</b>
+
+```
+abstract class ParamDefinition() {
+	leb128() parameter_id;
+	leb128() parameter_rate;
+	unsigned int (1) param_definition_mode;
+	unsigned int (7) reserved_for_future_use;
+	if (param_definition_mode == 0) {
+		leb128() duration;
+		leb128() constant_subblock_duration;
+		if (constant_subblock_duration == 0) {
+			leb128() num_subblocks;
+			for (i = 0; i< num_subblocks; i++) {
+				leb128() subblock_duration;
+			}
+		}
+	}
+}
+```
+
+<b>Semantics</b>
+
+<dfn noexport for="ParamDefinition">parameter_id</dfn> indicates the identifier for the [=Parameter Substream=] which this parameter definition refers to. There SHALL be one unique [=ParamDefinition/parameter_id=] per [=Parameter Substream=].
+
+<dfn noexport>parameter_rate</dfn> specifies the rate used by this [=Parameter Substream=], expressed as ticks per second. Time-related fields associated with this [=Parameter Substream=], such as durations, SHALL be expressed in the number of ticks.
+- The parameter rate SHALL be a value such that the number of ticks per frame, computed as
+	\[\frac{\text{parameter_rate} \times \text{num_samples_per_frame}}{\text{Audio Element sample rate}},\]
+	is a non-zero integer.
+
+<dfn noexport>param_definition_mode</dfn> indicates whether this parameter definition specifies the [=ParamDefinition/duration=], [=ParamDefinition/num_subblocks=], [=ParamDefinition/constant_subblock_duration=] and [=ParamDefinition/subblock_duration=] fields for the parameter blocks with the same [=parameter_block_obu/parameter_id=].
+
+- When this field is set to 0, all of the [=ParamDefinition/duration=], [=ParamDefinition/num_subblocks=], [=ParamDefinition/constant_subblock_duration=], and [=ParamDefinition/subblock_duration=] fields SHALL be specified in this parameter definition. None of the parameter blocks with the same [=parameter_block_obu/parameter_id=] SHALL specify these same fields.
+
+- When this field is set to 1, none of the [=ParamDefinition/duration=], [=ParamDefinition/num_subblocks=], [=ParamDefinition/constant_subblock_duration=], and [=ParamDefinition/subblock_duration=] fields SHALL be specified in this parameter definition. Instead, each parameter block with the same [=parameter_block_obu/parameter_id=] SHALL specify these same fields.
+
+<dfn noexport for="ParamDefinition">duration</dfn> specifies the duration for which each parameter block with the same [=parameter_block_obu/parameter_id=] is valid and applicable. It SHALL NOT be set to 0.
+
+<dfn noexport for="ParamDefinition">constant_subblock_duration</dfn> specifies the duration of each subblock, in the case where all subblocks except the last subblock have equal durations. If all subblocks except the last subblock do not have equal durations, the value of [=ParamDefinition/constant_subblock_duration=] SHALL be set to 0.
+
+When [=ParamDefinition/constant_subblock_duration=] is not equal to 0,
+- [=ParamDefinition/num_subblocks=] is implicitly calculated as
+	\[ \text{num_subblocks} = \left\lceil{ \frac{\text{duration}}{\text{constant_subblock_duration}}}\right\rceil. \]
+- If \(\textrm{num_subblocks} \times \text{constant_subblock_duration} > \text{duration}\), the actual duration of the last subblock SHALL be
+			\[ \text{duration} - \left( \text{num_subblocks} - 1 \right) \times \text{constant_subblock_duration}. \]
+
+When [=ParamDefinition/constant_subblock_duration=] is equal to 0, the summation of all [=ParamDefinition/subblock_duration=] in this parameter block SHALL be equal to [=ParamDefinition/duration=].
+
+<dfn noexport for="ParamDefinition">num_subblocks</dfn> specifies the number of different sets of parameter values specified in each parameter block with the same [=parameter_block_obu/parameter_id=], where each set describes a different subblock of the timeline, contiguously.
+
+<dfn noexport for="ParamDefinition">subblock_duration</dfn> specifies the duration for the given subblock. It SHALL NOT be set to 0.
+
+The values for [=ParamDefinition/duration=], [=ParamDefinition/constant_subblock_duration=], and [=ParamDefinition/subblock_duration=] SHALL be expressed as the number of ticks at the [=parameter_rate=] specified in the corresponding parameter definition.
+
 ## Parameter Block OBU Syntax and Semantics ## {#obu-parameterblock}
 
 The <dfn noexport>Parameter Block OBU</dfn> provides the parameter values in [=Parameter Substream=]s and information on how they are animated over the indicated duration. This section specifies the payload format of the [=Parameter Block OBU=].
@@ -1714,6 +1758,9 @@ class ParameterBlockOBU() {
 		else if (param_definition_type == PARAMETER_DEFINITION_SINGLE_POSITION) {
 			SinglePositionParameterData single_position_parameter_data;
 		}
+		else if (param_definition_type == PARAMETER_DEFINITION_DUAL_POSITION) {
+			DualPositionParameterData dual_position_parameter_data;
+		}
 		else {
 			leb128() parameter_data_size;
 			unsigned int (8 x parameter_data_size) parameter_data_bytes;
@@ -1755,6 +1802,8 @@ The values of [=parameter_block_obu/duration=], [=parameter_block_obu/constant_s
 <dfn noexport>recon_gain_info_parameter_data</dfn> is an instance of the [=ReconGainInfoParameterData()=] class, which provides the parameter values to apply in this parameter block.
 
 <dfn noexport>single_position_parameter_data</dfn> is an instance of the [=SinglePositionParameterData()=] class, which provides the parameter values to apply in this parameter block.
+
+<dfn noexport>dual_position_parameter_data</dfn> is an instance of the [=DualPositionParameterData()=] class, which provides the parameter values to apply in this parameter block.
 
 <dfn noexport>parameter_data_size</dfn> indicates the size in bytes of [=parameter_data_bytes=].
 
@@ -1952,6 +2001,46 @@ where 0 degrees is horizontally ahead and positive angles are going up, followin
 	<td>BEZIER</td><td>4</td>
 </tr>
 </table>
+
+
+### Dual Position Parameter Data Syntax and Semantics ### {#syntax-dual-position-param}
+
+The <dfn noexport>DualPositionParameterData()</dfn> class provides the position parameter data to be used when rendering an object-based [=Audio Element=] with two objects. This section specifies the syntax structure of the [=DualPositionParameterData()=] class.
+
+<b>Syntax</b>
+
+```
+class DualPositionParameterData() {
+	leb128() dual_position_parameter_data_size;
+	leb128() animation_type;
+
+	AnimatedParameterData<signed int (9)> first_azimuth;
+	AnimatedParameterData<signed int (8)> first_elevation;
+	AnimatedParameterData<unsigned int (3)> first_distance;
+
+	AnimatedParameterData<signed int (9)> second_azimuth;
+	AnimatedParameterData<signed int (8)> second_elevation;
+	AnimatedParameterData<unsigned int (3)> second_distance;
+}
+```
+
+<b>Semantics</b>
+
+<dfn noexport>dual_position_parameter_data_size</dfn> indicates the size in bytes of [=DualPositionParameterData()=] immediately following this field. Parsers SHOULD ignore bytes past the [=DualPositionParameterData()=] syntax that they recognize.
+
+<dfn noexport for="dual_position_param_data">animation_type</dfn> specifies the type of animation applied to the parameter values. Supported values are defined in the [=Animation Types=] table. When an unknown value of [=dual_position_param_data/animation_type=] is used, parsers SHOULD ignore the [=Parameter Block OBU=] that contains this [=dual_position_parameter_data=].
+
+<dfn noexport>first_azimuth</dfn> is the same as [=azimuth=] in [=SinglePositionParameterData()=] except that this applies to the first object in the referenced [=Audio Substream=].
+
+<dfn noexport>first_elevation</dfn> is the same as [=elevation=] in [=SinglePositionParameterData()=] except that this applies to the first object in the referenced [=Audio Substream=].
+
+<dfn noexport>first_distance</dfn> is the same as [=distance=] in [=SinglePositionParameterData()=] except that this applies to the first object in the referenced [=Audio Substream=].
+
+<dfn noexport>second_azimuth</dfn> is the same as [=azimuth=] in [=SinglePositionParameterData()=] except that this applies to the second object in the referenced [=Audio Substream=].
+
+<dfn noexport>second_elevation</dfn> is the same as [=elevation=] in [=SinglePositionParameterData()=] except that this applies to the second object in the referenced [=Audio Substream=].
+
+<dfn noexport>second_distance</dfn> is the same as [=distance=] in [=SinglePositionParameterData()=] except that this applies to the second object in the referenced [=Audio Substream=].
 
 
 ## Audio Frame OBU Syntax and Semantics ## {#obu-audioframe}
