@@ -1809,22 +1809,12 @@ The values of [=parameter_block_obu/duration=], [=parameter_block_obu/constant_s
 
 <dfn noexport>parameter_data_bytes</dfn> represents reserved bytes for future use when new syntaxes are defined. Parsers that don't understand these bytes SHOULD ignore them.
 
-### Mix Gain Parameter Data Syntax and Semantics ### {#syntax-mix-gain-param}
 
-The <dfn noexport>MixGainParameterData()</dfn> class provides the gain parameter data to be used when mixing [=Audio Element=]s. This section specifies the syntax structure of the [=MixGainParameterData()=] class.
+### Animated Parameter Data Syntax and Semantics ### {#syntax-animated-param}
 
-<b>Syntax</b>
+The <dfn noexport>AnimatedParameterData()</dfn> function template provides information which is required for animating a set of parameter values.
 
-```
-class MixGainParameterData() {
-	leb128() animation_type;
-	AnimatedParameterData<signed int (16)> param_data;
-}
-```
-
-<b>Semantics</b>
-
-<dfn noexport for="mix_gain_param_data">animation_type</dfn> specifies the type of animation applied to the parameter values. Supported values are defined in the [=Animation Types=] table. When an unknown value of [=mix_gain_param_data/animation_type=] is used, parsers SHOULD ignore the [=Parameter Block OBU=] that contains this [=mix_gain_parameter_data=].
+Supported animation types are listed in the table below and the method of applying the animation is described in [[#processing-animated-params]].
 
 <pre class = "def">
 <dfn noexport>Animation Types</dfn>
@@ -1834,9 +1824,9 @@ animation_type : Animation Type
 			2       : BEZIER
 </pre>
 
-<dfn noexport>param_data</dfn> uses the [=AnimatedParameterData()=] function template. Each of the values defined within this instance ([=start_point_value=], [=end_point_value=], and [=control_point_value=]) is expressed in dB. The values SHALL be applied to all channels in the rendered [=Audio Element=] and SHALL be applied as described in [[#processing-animated-params]]. They are stored as 16-bit, signed, two's complement fixed-point values with 8 fractional bits (i.e., Q7.8)([[Q-Format]]).
+This section specifies the syntax structure of the [=AnimatedParameterData()=] function template.
 
-The <dfn noexport>AnimatedParameterData()</dfn> function template provides information which is required for animating a set of parameter values. The syntax structure of the [=AnimatedParameterData()=] function template is specified below.
+<b>Syntax</b>
 
 ```
 template <class T>
@@ -1857,6 +1847,8 @@ class AnimatedParameterData(animation_type) {
 }
 ```
 
+<b>Semantics</b>
+
 <dfn noexport>start_point_value</dfn> specifies the parameter value that is applied at the start of the subblock.
 
 <dfn noexport>end_point_value</dfn> specifies the parameter value that is applied at the end of the subblock.
@@ -1865,7 +1857,25 @@ class AnimatedParameterData(animation_type) {
 
 <dfn noexport>control_point_relative_time</dfn> specifies the time of the middle control point of a quadratic Bezier curve, i.e., its x-axis value. This value is expressed as a fraction of the parameter subblock duration with valid values in the range of 0 and 1, inclusively. A value equal to 0 indicates that this animation implements a linear Bezier curve, in which case [=control_point_value=] SHALL be ignored by the IA parser. It is stored as an 8-bit, unsigned, fixed-point value with 8 fractional bits. That is, a 8-bit unsigned integer, that is implicitly multiplied by the scaling factor \(2^{−8}\).
 
-The method of applying the animation is described in [[#processing-animated-params]].
+
+### Mix Gain Parameter Data Syntax and Semantics ### {#syntax-mix-gain-param}
+
+The <dfn noexport>MixGainParameterData()</dfn> class provides the gain parameter data to be used when mixing [=Audio Element=]s. This section specifies the syntax structure of the [=MixGainParameterData()=] class.
+
+<b>Syntax</b>
+
+```
+class MixGainParameterData() {
+	leb128() animation_type;
+	AnimatedParameterData<signed int (16)> param_data;
+}
+```
+
+<b>Semantics</b>
+
+<dfn noexport for="mix_gain_param_data">animation_type</dfn> specifies the type of animation applied to the parameter values. Supported values are defined in the [=Animation Types=] table. When an unknown value of [=mix_gain_param_data/animation_type=] is used, parsers SHOULD ignore the [=Parameter Block OBU=] that contains this [=mix_gain_parameter_data=].
+
+<dfn noexport>param_data</dfn> uses the [=AnimatedParameterData()=] function template. Each of the values defined within this instance ([=start_point_value=], [=end_point_value=], and [=control_point_value=]) is expressed in dB. The values SHALL be applied to all channels in the rendered [=Audio Element=] and SHALL be applied as described in [[#processing-animated-params]]. They are stored as 16-bit, signed, two's complement fixed-point values with 8 fractional bits (i.e., Q7.8)([[Q-Format]]).
 
 ### Demixing Info Parameter Data Syntax and Semantics ### {#syntax-demixing-info}
 
