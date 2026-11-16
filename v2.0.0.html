@@ -1488,9 +1488,9 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version ea4009a02, updated Thu Sep 17 15:24:44 2026 -0700" name="generator">
-  <link href="https://aomediacodec.github.io/iamf" rel="canonical">
-  <meta content="551b23c7c90eb4e4a07ceb4b6466d0c16c209bcc" name="revision">
+  <meta content="Bikeshed version e0b165ae4, updated Mon Nov 2 15:16:49 2026 -0800" name="generator">
+  <link href="https://aomediacodec.github.io/iamf/v2.0.0.html" rel="canonical">
+  <meta content="e560eb2ab08fc39b572269dbee274dc7c314653c" name="revision">
   <meta content="dark light" name="color-scheme">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
@@ -1842,14 +1842,17 @@ figure.table figcaption:not(.no-marker)::before {
     height: auto;
     max-height: 500px;
     overflow: auto;
+    margin: 0;
     padding: 0.5em 0.75em;
     font: small Helvetica Neue, sans-serif, Droid Sans Fallback;
     background: var(--dfnpanel-bg);
     color: var(--dfnpanel-text);
     border: outset 0.2em;
     white-space: normal; /* in case it's moved into a pre */
+    inset: auto;
+    position-area: bottom span-right;
+    position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
 }
-.dfn-panel:not(.on) { display: none; }
 .dfn-panel * { margin: 0; padding: 0; text-indent: 0; }
 .dfn-panel > b { display: block; }
 .dfn-panel a { color: var(--dfnpanel-text); }
@@ -1869,6 +1872,9 @@ figure.table figcaption:not(.no-marker)::before {
 .dfn-panel.activated {
     display: inline-block;
     position: fixed;
+    position-area: none;
+    top: auto;
+    right: auto;
     left: 8px;
     bottom: 2em;
     margin: 0 auto;
@@ -1925,7 +1931,8 @@ figure.table figcaption:not(.no-marker)::before {
     opacity: 1;
 }
 
-.dfn-paneled[role="button"] { cursor: help; }
+.dfn-paneled { cursor: help; }
+.dfn-paneled > .dfn-panelbutton { all: unset; }
 
 .highlighted {
     animation: target-fade 3s;
@@ -2064,11 +2071,11 @@ dfn > a.self-link::before      { content: "#"; }
    <h1 class="no-ref p-name" id="title">Immersive Audio Model and Formats</h1>
    <h2 class="heading no-num no-ref no-toc p-name settled" id="subtitle"><span class="content">v2.0.0</span></h2>
    <h3 class="heading no-num no-ref no-toc settled" id="profile-and-date"><span class="content">Final Deliverable,
-    <time class="dt-updated" datetime="2026-08-24">24 August 2026</time></span></h3>
+    <time class="dt-updated" datetime="2026-08-10">10 August 2026</time></span></h3>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
-     <dd><a class="u-url" href="https://aomediacodec.github.io/iamf">https://aomediacodec.github.io/iamf</a>
+     <dd><a class="u-url" href="https://aomediacodec.github.io/iamf/v2.0.0.html">https://aomediacodec.github.io/iamf/v2.0.0.html</a>
      <dt>Previously approved version:
      <dd><a href="https://aomediacodec.github.io/iamf/v1.1.0.html">https://aomediacodec.github.io/iamf/v1.1.0.html</a>
      <dt>Latest approved version:
@@ -2462,7 +2469,7 @@ dfn > a.self-link::before      { content: "#"; }
    <p>This specification defines a model for representing <a data-link-type="dfn" href="#immersive-audio" id="ref-for-immersive-audio②">Immersive Audio</a> contents based on <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream">Audio Substream</a>s contributing to <a data-link-type="dfn" href="#audio-element" id="ref-for-audio-element①①">Audio Element</a>s meant to be rendered and mixed to form one or more presentations as depicted in the figure below.</p>
    <figure style="text-align:center;">
     
-	<img src="v2.0.0_images/decoding_flow_cropped.svg" width="800">
+	<img src="images/decoding_flow_cropped.svg" width="800">
 	
     <figcaption>Processing flow to decode, reconstruct, render, and mix the 3D audio signals for immersive audio playback.</figcaption>
    </figure>
@@ -2481,7 +2488,7 @@ dfn > a.self-link::before      { content: "#"; }
    <p>Based on the model, this specification defines the Immersive Audio Model and Formats (<dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="iamf">IAMF</dfn>) architecture as depicted in the figure below.</p>
    <figure style="text-align:center;">
     
-	<img height="1758" src="v2.0.0_images/Hypothetical IAMF Architecture_r1.png" style="width:100%; height:auto;" width="3326">
+	<img height="1758" src="images/Hypothetical IAMF Architecture_r1.png" style="width:100%; height:auto;" width="3326">
 	
     <figcaption>IAMF Architecture</figcaption>
    </figure>
@@ -2549,7 +2556,7 @@ dfn > a.self-link::before      { content: "#"; }
    <p>The figure below shows an example generating <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream②①">Audio Substream</a>s having the same presentation start time and duration from multiple audio sources having different start and/or end presentation times. Padding samples are inserted to fill up the gaps within each audio source so that all <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream②②">Audio Substream</a>s have the same presentation start time and duration.</p>
    <figure style="text-align:center;">
     
-	<img height="1719" src="v2.0.0_images/Audio Substream Generation.png" style="width:100%; height:auto;" width="4242">
+	<img height="1719" src="images/Audio Substream Generation.png" style="width:100%; height:auto;" width="4242">
 	
     <figcaption>An example of Audio Substream Generation. \(\text{PT}x\): time \(x\) (ms) on the presentation (or source) layer's timeline.</figcaption>
    </figure>
@@ -2567,7 +2574,7 @@ dfn > a.self-link::before      { content: "#"; }
    <p>The figure below shows an example of the Timing Model in terms of the decode start times and durations of the coded <a data-link-type="dfn" href="#audio-substream" id="ref-for-audio-substream②⑧">Audio Substream</a> and <a data-link-type="dfn" href="#parameter-substream" id="ref-for-parameter-substream①⑥">Parameter Substream</a>.</p>
    <figure style="text-align:center;">
     
-	<img height="2193" src="v2.0.0_images/IAMF Timing Model (Update).png" style="width:100%; height:auto;" width="4277">
+	<img height="2193" src="images/IAMF Timing Model (Update).png" style="width:100%; height:auto;" width="4277">
 	
     <figcaption>An example of the IAMF Timing Model. AFO: <a data-link-type="dfn" href="#audio-frame-obu" id="ref-for-audio-frame-obu①②">Audio Frame OBU</a>, PBO: <a data-link-type="dfn" href="#parameter-block-obu" id="ref-for-parameter-block-obu①③">Parameter Block OBU</a>, \(\text{PT}x\): time \(x\) (ms) on the presentation layer’s timeline, \(\text{DT}y\): time \(y\) (ms) on the decoding layer’s timeline.</figcaption>
    </figure>
@@ -3277,7 +3284,7 @@ class ChannelAudioLayerConfig(i) {
    </ul>
    <figure style="text-align:center;">
     
-	<img height="356" src="v2.0.0_images/Immersive Audio Sequence with scalable channel audio (before OBU packing).png" style="width:100%; height:auto;" width="1622">
+	<img height="356" src="images/Immersive Audio Sequence with scalable channel audio (before OBU packing).png" style="width:100%; height:auto;" width="1622">
 	
     <figcaption>Immersive Audio Sequence with scalable channel audio (before OBU packing). See <a href="#standalone">§ 5 Standalone IAMF Representation</a> for related details on OBU ordering within an IA Sequence.</figcaption>
    </figure>
@@ -3301,7 +3308,7 @@ class ChannelAudioLayerConfig(i) {
    <p>Scalable channel audio with <a data-link-type="dfn" href="#num_layers" id="ref-for-num_layers⑧">num_layers</a> \(> 1\) SHALL only allow down-mix paths that conform to the rules above, as depicted in the figure below.</p>
    <figure style="text-align:center;">
     
-	<img height="729" src="v2.0.0_images/Down-mix Path.png" style="width:90%; height:auto;" width="878">
+	<img height="729" src="images/Down-mix Path.png" style="width:90%; height:auto;" width="878">
 	
     <figcaption>IA Down-mix Path for scalable channel audio</figcaption>
    </figure>
@@ -4499,7 +4506,7 @@ class AnimatedParameterData(animation_type) {
    <p>\(\alpha\) and \(\beta\) are gain values used for the <a data-link-type="dfn" href="#s7to5-encoder" id="ref-for-s7to5-encoder">S7to5 encoder</a>, \(\gamma\) for the <a data-link-type="dfn" href="#t4to2-encoder" id="ref-for-t4to2-encoder">T4to2 encoder</a>, \(\delta\) for the <a data-link-type="dfn" href="#s5to3-encoder" id="ref-for-s5to3-encoder">S5to3 encoder</a> and <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="w_idx_offset">w_idx_offset</dfn> is the offset used to generate a gain value <a data-link-type="dfn" href="#w-k" id="ref-for-w-k③">\(w(k)\)</a> used for <a data-link-type="dfn" href="#t2totf2-encoder" id="ref-for-t2totf2-encoder">T2toTF2 encoder</a>.</p>
    <figure style="text-align:center;">
     
-	<img height="600" src="v2.0.0_images/Down-mix Mechanism.png" style="width:100%; height:auto;" width="1306">
+	<img height="600" src="images/Down-mix Mechanism.png" style="width:100%; height:auto;" width="1306">
 	
     <figcaption>IA Down-mix Mechanism</figcaption>
    </figure>
@@ -5210,7 +5217,7 @@ They SHALL be applied as described in <a href="#processing-animated-params">§�
    <p>The figure below shows one example of an <a data-link-type="dfn" href="#ia-sequence" id="ref-for-ia-sequence⑦①">IA Sequence</a> where the durations of every <a data-link-type="dfn" href="#parameter-block-obu" id="ref-for-parameter-block-obu⑤⑥">Parameter Block OBU</a>s are same as those of <a data-link-type="dfn" href="#audio-frame-obu" id="ref-for-audio-frame-obu③②">Audio Frame OBU</a>s, so that every <a data-link-type="dfn" href="#temporal-unit" id="ref-for-temporal-unit②③">Temporal Unit</a>s are key frames. Although not depicted in the figure, some (or all) <a data-link-type="dfn" href="#parameter-block-obu" id="ref-for-parameter-block-obu⑤⑦">Parameter Block OBU</a>s MAY be omitted if the parameter values are constant and equal to the corresponding default value defined in the associated parameter definition.</p>
    <figure style="text-align:center;">
     
-	<img height="975" src="v2.0.0_images/IA sequence.png" style="width:100%; height:auto;" width="3146">
+	<img height="975" src="images/IA sequence.png" style="width:100%; height:auto;" width="3146">
 	
     <figcaption>One Example of an Immersive Audio Sequence</figcaption>
    </figure>
@@ -8409,16 +8416,6 @@ let dfnPanelData = {
 
 document.addEventListener("DOMContentLoaded", ()=>{
     genAllDfnPanels();
-
-    document.body.addEventListener("click", (e) => {
-        // If not handled already, just hide all dfn panels.
-        hideAllDfnPanels();
-    });
-});
-
-window.addEventListener("resize", () => {
-    // Pin any visible dfn panel
-    queryAll(".dfn-panel.on, .dfn-panel.activated").forEach(el=>positionDfnPanel(el));
 });
 
 function genAllDfnPanels() {
@@ -8430,16 +8427,17 @@ function genAllDfnPanels() {
             continue;
         }
         dfn.panelData = panelData;
-        insertDfnPopupAction(dfn);
+        genDfnPanel(dfn, panelData);
     }
 }
 
 function genDfnPanel(dfn, { dfnID, url, dfnText, refSections, external }) {
-    const dfnPanel = mk.aside({
-        class: "dfn-panel on",
+    const dfnPanel = mk.dialog({
+        class: "dfn-panel",
         id: `infopanel-for-${dfnID}`,
+        popover: "hint",
         "data-for": dfnID,
-        "aria-labelled-by":`infopaneltitle-for-${dfnID}`,
+        "aria-labelledby": `infopaneltitle-for-${dfnID}`,
         },
         mk.span({id:`infopaneltitle-for-${dfnID}`, style:"display:none"},
             `Info about the '${dfnText}' ${external?"external":""} reference.`),
@@ -8471,106 +8469,34 @@ function genDfnPanel(dfn, { dfnID, url, dfnText, refSections, external }) {
         event.stopPropagation();
         refocusOnTarget(event);
     });
-    dfnPanel.addEventListener('keydown', (event) => {
-        if(event.keyCode == 27) { // Escape key
-            hideDfnPanel({dfnPanel});
-            event.stopPropagation();
-            event.preventDefault();
+
+    dfnPanel.addEventListener('toggle', event=>{
+        if(event.newState == "closed") {
+            unpinDfnPanel(dfnPanel);
         }
     });
 
     dfnPanel.dfn = dfn;
     dfn.dfnPanel = dfnPanel;
+    dfn.after(dfnPanel);
+    const button = mk.button(
+        {
+            class:"dfn-panelbutton",
+            "popovertarget":dfnPanel.id
+        },
+        ...dfn.childNodes
+    );
+    dfn.append(button);
     return dfnPanel;
-}
-
-
-
-function hideAllDfnPanels() {
-    // Delete the currently-active dfn panel.
-    queryAll(".dfn-panel").forEach(dfnPanel=>hideDfnPanel({dfnPanel}));
-}
-
-function showDfnPanel(dfn) {
-    hideAllDfnPanels(); // Only display one at a time.
-
-    dfn.setAttribute("aria-expanded", "true");
-
-    const dfnPanel = genDfnPanel(dfn, dfn.panelData);
-
-    // Give the dfn a unique tabindex, and then
-    // give all the tabbable panel bits successive indexes.
-    let tabIndex = 100;
-    dfn.tabIndex = tabIndex++;
-    const tabbable = dfnPanel.querySelectorAll(":is(a, button)");
-    for (const el of tabbable) {
-        el.tabIndex = tabIndex++;
-    }
-
-    append(document.body, dfnPanel);
-    positionDfnPanel(dfnPanel);
-}
-
-function positionDfnPanel(dfnPanel) {
-    const dfn = dfnPanel.dfn;
-    const dfnPos = getBounds(dfn);
-    dfnPanel.style.top = dfnPos.bottom + "px";
-    dfnPanel.style.left = dfnPos.left + "px";
-
-    const panelPos = dfnPanel.getBoundingClientRect();
-    const panelMargin = 8;
-    const maxRight = document.body.parentNode.clientWidth - panelMargin;
-    if (panelPos.right > maxRight) {
-        const overflowAmount = panelPos.right - maxRight;
-        const newLeft = Math.max(panelMargin, dfnPos.left - overflowAmount);
-        dfnPanel.style.left = newLeft + "px";
-    }
 }
 
 function pinDfnPanel(dfnPanel) {
     // Switch it to "activated" state, which pins it.
     dfnPanel.classList.add("activated");
-    dfnPanel.style.position = "fixed";
-    dfnPanel.style.left = null;
-    dfnPanel.style.top = null;
 }
 
-function hideDfnPanel({dfn, dfnPanel}) {
-    if(!dfnPanel) dfnPanel = dfn.dfnPanel;
-    if(!dfn) dfn = dfnPanel.dfn;
-    dfn.dfnPanel = undefined;
-    dfnPanel.dfn = undefined;
-    dfn.setAttribute("aria-expanded", "false");
-    dfn.tabIndex = undefined;
-    dfnPanel.remove()
-}
-
-function toggleDfnPanel(dfn) {
-    if(dfn.dfnPanel) {
-        hideDfnPanel(dfn);
-    } else {
-        showDfnPanel(dfn);
-    }
-}
-
-function insertDfnPopupAction(dfn) {
-    dfn.setAttribute('role', 'button');
-    dfn.setAttribute('aria-expanded', 'false')
-    dfn.tabIndex = 0;
-    dfn.classList.add('has-dfn-panel');
-    dfn.addEventListener('click', (event) => {
-        toggleDfnPanel(dfn);
-        event.stopPropagation();
-    });
-    dfn.addEventListener('keypress', (event) => {
-        const kc = event.keyCode;
-        // 32->Space, 13->Enter
-        if(kc == 32 || kc == 13) {
-            toggleDfnPanel(dfn);
-            event.stopPropagation();
-            event.preventDefault();
-        }
-    });
+function unpinDfnPanel(dfnPanel) {
+    dfnPanel.classList.remove("activated");
 }
 
 function refocusOnTarget(event) {
@@ -8580,21 +8506,6 @@ function refocusOnTarget(event) {
         // This is needed after browser scrolls to the destination.
         target.focus();
     });
-}
-
-// TODO: shared util
-// Returns the root-level absolute position {left and top} of element.
-function getBounds(el, relativeTo=document.body) {
-    const relativeRect = relativeTo.getBoundingClientRect();
-    const elRect = el.getBoundingClientRect();
-    const top = elRect.top - relativeRect.top;
-    const left = elRect.left - relativeRect.left;
-    return {
-        top,
-        left,
-        bottom: top + elRect.height,
-        right: left + elRect.width,
-    }
 }
 
 function scrollToTargetAndHighlight(event) {
